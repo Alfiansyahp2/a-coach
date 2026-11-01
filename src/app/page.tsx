@@ -188,21 +188,32 @@ async function DashboardTelemetry() {
                   key={act.id}
                   className="p-3 rounded-lg bg-[#161922] border border-[#232838] hover:border-[#384158] transition-colors flex items-center justify-between"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] uppercase font-mono px-1.5 py-0.5 rounded font-semibold ${act.sport_type.toLowerCase().includes('run')
-                          ? 'bg-[#D4FF00]/10 text-[#D4FF00]'
-                          : 'bg-[#00F0FF]/10 text-[#00F0FF]'
-                        }`}>
-                        {act.sport_type}
-                      </span>
-                      <h4 className="text-xs font-medium text-white truncate max-w-[200px] sm:max-w-xs">
-                        {act.name}
-                      </h4>
+                  <div className="flex items-center gap-3">
+                    {act.raw_summary_polyline && (
+                      <div className="w-10 h-10 rounded-lg bg-[#090A0F] border border-[#232838] flex items-center justify-center p-1 shrink-0 overflow-hidden group-hover:border-[#FC4C02]/50 transition-colors">
+                        <img
+                          src={act.raw_summary_polyline}
+                          alt="GPS Track"
+                          className="w-full h-full object-contain filter drop-shadow-[0_0_6px_rgba(252,76,2,0.5)]"
+                        />
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] uppercase font-mono px-1.5 py-0.5 rounded font-semibold ${act.sport_type.toLowerCase().includes('run')
+                            ? 'bg-[#D4FF00]/10 text-[#D4FF00]'
+                            : 'bg-[#00F0FF]/10 text-[#00F0FF]'
+                          }`}>
+                          {act.sport_type}
+                        </span>
+                        <h4 className="text-xs font-medium text-white truncate max-w-[200px] sm:max-w-xs">
+                          {act.name}
+                        </h4>
+                      </div>
+                      <p className="text-[11px] text-[#9BA3AF] font-mono">
+                        {formatDate(act.start_date)}
+                      </p>
                     </div>
-                    <p className="text-[11px] text-[#9BA3AF] font-mono">
-                      {formatDate(act.start_date)}
-                    </p>
                   </div>
 
                   <div className="text-right font-mono">

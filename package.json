@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "import:strava": "python scripts/process_strava_images.py && node scripts/seed_imported_activities.js"
   },
   "dependencies": {
     "dotenv": "^18.0.9",

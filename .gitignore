@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# strava user data & raw files
+/data/from_strava/*
+!/data/from_strava/.gitignore

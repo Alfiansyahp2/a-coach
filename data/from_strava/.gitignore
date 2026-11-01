@@ -1,0 +1,4 @@
+# Ignore all Strava activity exports, images, and raw data files
+*
+!.gitignore
+
