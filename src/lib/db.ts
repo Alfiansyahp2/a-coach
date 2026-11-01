@@ -521,6 +521,39 @@ export function normalizeActivityRow(row: any): Activity {
   };
 }
 
+
+export async function getActivityById(
+  id: string,
+  userId: string = DEFAULT_USER_ID
+): Promise<Activity | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM activities WHERE id = $1 AND user_id = $2',
+      [id, userId]
+    );
+    if (!res.rows[0]) return null;
+    return normalizeActivityRow(res.rows[0]);
+  }
+
+  const store = ensureLocalStore();
+  const act = store.activities.find((a) => a.id === id && a.user_id === userId);
+  return act ? normalizeActivityRow(act) : null;
+}
+
+
+export async function getAdjacentActivities(
+  currentId: string,
+  userId: string = DEFAULT_USER_ID
+): Promise<{ prev: Activity | null; next: Activity | null }> {
+  const all = await getActivities(userId);
+  const idx = all.findIndex((a) => a.id === currentId);
+  if (idx < 0) return { prev: null, next: null };
+  return {
+    prev: idx > 0 ? all[idx - 1] : null,
+    next: idx < all.length - 1 ? all[idx + 1] : null,
+  };
+}
+
 export async function getActivities(
   userId: string = DEFAULT_USER_ID,
   filters?: { sportType?: string; limit?: number; afterDate?: string }

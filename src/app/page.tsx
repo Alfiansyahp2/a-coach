@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import Link from "next/link";
 import { connection } from "next/server";
 import {
   getUser,
@@ -18,8 +19,10 @@ import {
   formatDate,
 } from "@/lib/formatters";
 import { StravaConnectCard } from "@/components/StravaConnectCard";
+import { ActivityFeed } from "@/components/ActivityFeed";
 import {
   Activity as ActivityIcon,
+  ChevronRight,
   Calendar,
   Database,
   Gauge,
@@ -33,7 +36,7 @@ async function DashboardTelemetry() {
   await connection();
   const [user, activities, workouts, goals, dbStatus] = await Promise.all([
     getUser(DEFAULT_USER_ID),
-    getActivities(DEFAULT_USER_ID, { limit: 5 }),
+    getActivities(DEFAULT_USER_ID, { limit: 50 }),
     getScheduledWorkouts(DEFAULT_USER_ID),
     getFitnessGoals(DEFAULT_USER_ID),
     getDatabaseStatus(),
@@ -165,70 +168,8 @@ async function DashboardTelemetry() {
 
       {/* Section 3: Activities & Workouts */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Ingested Activities */}
-        <div className="bg-[#12151D] border border-[#232838] rounded-xl p-5 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#232838]">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <ActivityIcon className="w-4 h-4 text-[#FC4C02]" />
-              Recent Ingested Activities
-            </h3>
-            <span className="text-xs font-mono text-[#9BA3AF]">
-              {activities.length} Recorded
-            </span>
-          </div>
-
-          {activities.length === 0 ? (
-            <div className="py-8 text-center text-xs text-[#5A6272] font-mono">
-              No activities synced yet. Complete the Strava handshake above to pull activities.
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {activities.map((act) => (
-                <div
-                  key={act.id}
-                  className="p-3 rounded-lg bg-[#161922] border border-[#232838] hover:border-[#384158] transition-colors flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    {act.raw_summary_polyline && (
-                      <div className="w-10 h-10 rounded-lg bg-[#090A0F] border border-[#232838] flex items-center justify-center p-1 shrink-0 overflow-hidden group-hover:border-[#FC4C02]/50 transition-colors">
-                        <img
-                          src={act.raw_summary_polyline}
-                          alt="GPS Track"
-                          className="w-full h-full object-contain filter drop-shadow-[0_0_6px_rgba(252,76,2,0.5)]"
-                        />
-                      </div>
-                    )}
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] uppercase font-mono px-1.5 py-0.5 rounded font-semibold ${act.sport_type.toLowerCase().includes('run')
-                            ? 'bg-[#D4FF00]/10 text-[#D4FF00]'
-                            : 'bg-[#00F0FF]/10 text-[#00F0FF]'
-                          }`}>
-                          {act.sport_type}
-                        </span>
-                        <h4 className="text-xs font-medium text-white truncate max-w-[200px] sm:max-w-xs">
-                          {act.name}
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-[#9BA3AF] font-mono">
-                        {formatDate(act.start_date)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right font-mono">
-                    <div className="text-xs font-bold font-tabular text-white">
-                      {formatDistance(act.distance_meters)}
-                    </div>
-                    <div className="text-[11px] text-[#9BA3AF] font-tabular">
-                      {speedMpsToPace(act.average_speed_mps)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Activity Feed with Filter & Search */}
+        <ActivityFeed activities={activities} />
 
         {/* Upcoming Scheduled Workouts */}
         <div className="bg-[#12151D] border border-[#232838] rounded-xl p-5 space-y-4">
