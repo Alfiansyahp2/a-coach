@@ -32,7 +32,9 @@ if (databaseUrl && databaseUrl.trim().length > 0) {
 }
 
 // Local File Store for fallback / instant development
-const DATA_DIR = path.join(process.cwd(), '.data');
+const isVercel = Boolean(process.env.VERCEL);
+const DATA_DIR = isVercel ? path.join('/tmp', '.data') : path.join(process.cwd(), '.data');
+let memoryStore: LocalStoreSchema | null = null;
 const DATA_FILE = path.join(DATA_DIR, 'store.json');
 
 interface LocalStoreSchema {
@@ -48,6 +50,7 @@ interface LocalStoreSchema {
 }
 
 function ensureLocalStore(): LocalStoreSchema {
+  if (memoryStore) return memoryStore;
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
@@ -326,10 +329,15 @@ function ensureLocalStore(): LocalStoreSchema {
 }
 
 function saveLocalStore(data: LocalStoreSchema) {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  memoryStore = data;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    // In serverless environments, in-memory store retains state
   }
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
 // =====================================================================

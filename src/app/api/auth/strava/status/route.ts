@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, connection } from 'next/server';
 import { getStravaConfig } from '@/lib/strava';
 import { DEFAULT_USER_ID, getStravaConnection } from '@/lib/db';
 
 export async function GET() {
+  await connection();
   try {
     const config = getStravaConfig();
 

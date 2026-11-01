@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import { connection } from "next/server";
 import {
   getUser,
   getActivities,
@@ -29,6 +30,7 @@ import {
 } from "lucide-react";
 
 async function DashboardTelemetry() {
+  await connection();
   const [user, activities, workouts, goals, dbStatus] = await Promise.all([
     getUser(DEFAULT_USER_ID),
     getActivities(DEFAULT_USER_ID, { limit: 5 }),
