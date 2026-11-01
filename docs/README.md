@@ -1,4 +1,5 @@
 # PERSONAL SPORTS TRAINING & PERFORMANCE PLATFORM
+
 ## MASTER PRODUCT, DESIGN & ENGINEERING DOCUMENTATION ECOSYSTEM
 
 ---
@@ -16,6 +17,7 @@
 This documentation ecosystem serves as the authoritative source of truth for the **Personal Sports Training & Performance Platform**. It governs all product discovery, engineering architecture, design systems, athletic domain logic, application security, and AI development rules.
 
 Every important technical statement in this knowledge base is categorized by verification status:
+
 * `CONFIRMED`: Verified from actual repository implementation or authoritative Strava API documentation.
 * `PROPOSED`: Architecturally planned and verified design for upcoming development phases.
 * `TBD`: Requires a future product or business decision.
@@ -25,7 +27,9 @@ Every important technical statement in this knowledge base is categorized by ver
 ## 📂 DOCUMENTATION DIRECTORY MAP
 
 ### [00. Foundation](./00-foundation/)
+
 Establishes the philosophical, strategic, and linguistic foundation of the platform.
+
 * [**PROJECT_VISION.md**](./00-foundation/PROJECT_VISION.md) — North star vision, core problem definition, and long-term direction.
 * [**PRODUCT_PRINCIPLES.md**](./00-foundation/PRODUCT_PRINCIPLES.md) — The 8 non-negotiable product tenets.
 * [**PRODUCT_SCOPE.md**](./00-foundation/PRODUCT_SCOPE.md) — Rigorous MVP vs Post-MVP boundary definitions.
@@ -36,7 +40,9 @@ Establishes the philosophical, strategic, and linguistic foundation of the platf
 ---
 
 ### [01. Product Requirements](./01-product/)
+
 Comprehensive product specifications, user personas, and functional requirements.
+
 * [**PRD.md**](./01-product/PRD.md) — Master Product Requirements Document.
 * [**USER_PERSONAS.md**](./01-product/USER_PERSONAS.md) — Detailed personas (Competitive Marathoner, Triathlete, Habitual Runner).
 * [**USER_JOURNEYS.md**](./01-product/USER_JOURNEYS.md) — End-to-end user journey sequence diagrams.
@@ -51,7 +57,9 @@ Comprehensive product specifications, user personas, and functional requirements
 ---
 
 ### [02. Design Governance — Anti-AI-Slop System](./02-design/)
+
 Uncompromising visual art direction designed to prevent generic, repetitive SaaS dashboard aesthetics.
+
 * [**ANTI_AI_SLOP.md**](./02-design/ANTI_AI_SLOP.md) — High-priority visual quality policy banning generic AI templates.
 * [**DESIGN_PHILOSOPHY.md**](./02-design/DESIGN_PHILOSOPHY.md) — The "Quiet Craftsman Coach" design personality.
 * [**VISUAL_DIRECTION.md**](./02-design/VISUAL_DIRECTION.md) — Comparative analysis of aesthetic directions (Obsidian Telemetry selected).
@@ -69,7 +77,9 @@ Uncompromising visual art direction designed to prevent generic, repetitive SaaS
 ---
 
 ### [03. Software Architecture](./03-architecture/)
+
 System design, C4 models, data lifecycles, and architecture decision records.
+
 * [**SYSTEM_ARCHITECTURE.md**](./03-architecture/SYSTEM_ARCHITECTURE.md) — C4 Level 1 Context and Level 2 Container diagrams.
 * [**TECH_STACK.md**](./03-architecture/TECH_STACK.md) — Technology matrix, library versions, and justifications.
 * [**PROJECT_STRUCTURE.md**](./03-architecture/PROJECT_STRUCTURE.md) — Repository tree and directory conventions.
@@ -88,7 +98,9 @@ System design, C4 models, data lifecycles, and architecture decision records.
 ---
 
 ### [04. Strava API v3 Integrations](./04-integrations/)
+
 Detailed specifications for integrating with the official Strava API v3.
+
 * [**STRAVA_INTEGRATION.md**](./04-integrations/STRAVA_INTEGRATION.md) — Integration objectives and capabilities.
 * [**STRAVA_OAUTH_FLOW.md**](./04-integrations/STRAVA_OAUTH_FLOW.md) — Sequence diagrams for authorization code exchange and revocation.
 * [**STRAVA_API_REFERENCE.md**](./04-integrations/STRAVA_API_REFERENCE.md) — Verified endpoint signatures, query parameters, and responses.
@@ -102,7 +114,9 @@ Detailed specifications for integrating with the official Strava API v3.
 ---
 
 ### [05. Sports Domain Logic & Algorithms](./05-domain-logic/)
+
 Endurance sports science, athletic metric mathematics, and AI grounding boundaries.
+
 * [**TRAINING_METHODOLOGY.md**](./05-domain-logic/TRAINING_METHODOLOGY.md) — Polarized 80/20 training and progressive overload science.
 * [**WORKOUT_CLASSIFICATION.md**](./05-domain-logic/WORKOUT_CLASSIFICATION.md) — Taxonomy for all 11 workout classifications.
 * [**TRAINING_PLAN_LOGIC.md**](./05-domain-logic/TRAINING_PLAN_LOGIC.md) — Weekly scheduling heuristics and status state transitions.
@@ -117,7 +131,9 @@ Endurance sports science, athletic metric mathematics, and AI grounding boundari
 ---
 
 ### [06. Application Security & Privacy](./06-security/)
+
 Security architecture, cryptographic protocols, and tenant isolation.
+
 * [**SECURITY_POLICY.md**](./06-security/SECURITY_POLICY.md) — Application security standards and defenses.
 * [**DATA_PRIVACY.md**](./06-security/DATA_PRIVACY.md) — Athlete data ownership and Strava privacy compliance.
 * [**TOKEN_MANAGEMENT.md**](./06-security/TOKEN_MANAGEMENT.md) — AES-256-GCM authenticated cipher implementation.
@@ -129,7 +145,9 @@ Security architecture, cryptographic protocols, and tenant isolation.
 ---
 
 ### [07. Quality & Engineering Standards](./07-quality/)
+
 Engineering excellence, code standards, test strategies, and performance budgets.
+
 * [**CODE_STANDARDS.md**](./07-quality/CODE_STANDARDS.md) — Strict TypeScript and file naming conventions.
 * [**CLEAN_CODE.md**](./07-quality/CLEAN_CODE.md) — Separation of concerns between UI, API, and Domain logic.
 * [**TESTING_STRATEGY.md**](./07-quality/TESTING_STRATEGY.md) — Unit, integration, and end-to-end testing matrix.
@@ -142,7 +160,9 @@ Engineering excellence, code standards, test strategies, and performance budgets
 ---
 
 ### [08. Development & AI Agent Governance](./08-development/)
+
 Development workflows, environment setup, and rules governing AI coding assistants.
+
 * [**DEVELOPMENT_WORKFLOW.md**](./08-development/DEVELOPMENT_WORKFLOW.md) — Feature planning to release cycle.
 * [**IMPLEMENTATION_PLAN.md**](./08-development/IMPLEMENTATION_PLAN.md) — Phased task breakdown and milestones.
 * [**CODING_AGENT_RULES.md**](./08-development/CODING_AGENT_RULES.md) — **15 Mandatory Rules for AI Coding Agents** to prevent drift, duplicate code, or hallucinated integrations.
@@ -154,7 +174,9 @@ Development workflows, environment setup, and rules governing AI coding assistan
 ---
 
 ### [09. Audits & Ledgers](./09-audit/)
+
 Reusable audit frameworks and technical debt tracking.
+
 * [**ARCHITECTURE_AUDIT.md**](./09-audit/ARCHITECTURE_AUDIT.md) — Module boundary and coupling review.
 * [**SECURITY_AUDIT.md**](./09-audit/SECURITY_AUDIT.md) — Token vulnerability and injection audits.
 * [**PERFORMANCE_AUDIT.md**](./09-audit/PERFORMANCE_AUDIT.md) — Build times, compilation, and bundle footprint audit.
@@ -165,7 +187,17 @@ Reusable audit frameworks and technical debt tracking.
 
 ---
 
+### [10. Changelog & Release Notes](./10-changelog/)
+
+Historical audit of system iterations, code evolution, and architectural changes.
+
+* [**2026-11-01_19-46-00_feat-core-foundation-schema-strava-oauth-and-domain-logic.md**](./10-changelog/2026-11-01_19-46-00_feat-core-foundation-schema-strava-oauth-and-domain-logic.md) — Comprehensive changelog: Database schema, AES-256-GCM crypto, Strava API v3 OAuth, matching engine, and domain logic.
+* [**CHANGELOG.md**](./10-changelog/CHANGELOG.md) — Master changelog register and release notes.
+
+---
+
 ## 🚀 GETTING STARTED
+
 1. Read [00-foundation/PROJECT_VISION.md](./00-foundation/PROJECT_VISION.md) to understand the core mission.
 2. Read [02-design/ANTI_AI_SLOP.md](./02-design/ANTI_AI_SLOP.md) before building or styling any UI component.
 3. Read [08-development/CODING_AGENT_RULES.md](./08-development/CODING_AGENT_RULES.md) if you are an AI coding assistant.
