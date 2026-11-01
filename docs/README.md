@@ -191,6 +191,7 @@ Reusable audit frameworks and technical debt tracking.
 
 Historical audit of system iterations, code evolution, and architectural changes.
 
+* [**2026-11-01_20-12-00_docs-enterprise-readme-and-database-seeding.md**](./10-changelog/2026-11-01_20-12-00_docs-enterprise-readme-and-database-seeding.md) — Enterprise README standardization, PostgreSQL seed script, and database configuration.
 * [**2026-11-01_19-46-00_feat-core-foundation-schema-strava-oauth-and-domain-logic.md**](./10-changelog/2026-11-01_19-46-00_feat-core-foundation-schema-strava-oauth-and-domain-logic.md) — Comprehensive changelog: Database schema, AES-256-GCM crypto, Strava API v3 OAuth, matching engine, and domain logic.
 * [**CHANGELOG.md**](./10-changelog/CHANGELOG.md) — Master changelog register and release notes.
 
