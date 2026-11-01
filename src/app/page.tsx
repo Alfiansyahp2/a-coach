@@ -213,8 +213,16 @@ async function DashboardTelemetry() {
           </div>
 
           {workouts.length === 0 ? (
-            <div className="py-8 text-center text-xs text-[#5A6272] font-mono">
-              No scheduled workouts found.
+            <div className="py-12 px-4 text-center border border-dashed border-[#232838] rounded-lg space-y-2.5">
+              <div className="w-10 h-10 rounded-full bg-[#161922] border border-[#232838] flex items-center justify-center mx-auto text-[#00F0FF]">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div className="text-xs font-semibold text-white">
+                Tidak Ada Jadwal Latihan Aktif
+              </div>
+              <p className="text-[11px] text-[#9BA3AF] font-mono max-w-xs mx-auto leading-relaxed">
+                Data jadwal dummy telah dihapus. Kalender siap untuk pembuatan sesi atau sinkronisasi rencana latihan baru.
+              </p>
             </div>
           ) : (
             <div className="space-y-2.5">
