@@ -74,19 +74,21 @@ export function formatElevation(meters: number): string {
   return `${Math.round(meters)} m`;
 }
 
-export function formatDate(dateStr: string): string {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
+  export function formatDate(dateVal: string | Date): string {
+    if (!dateVal) return '';
+    const d = typeof dateVal === 'string' ? new Date(dateVal) : dateVal;
+    if (isNaN(d.getTime())) return String(dateVal);
+    return d.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }
 
-export function formatDayOfWeek(dateStr: string): string {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { weekday: 'short' });
-}
+    export function formatDayOfWeek(dateVal: string | Date): string {
+      if (!dateVal) return '';
+      const d = typeof dateVal === 'string' ? new Date(dateVal) : dateVal;
+      if (isNaN(d.getTime())) return '';
+      return d.toLocaleDateString('en-US', { weekday: 'short' });
+    }

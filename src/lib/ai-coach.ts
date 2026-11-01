@@ -130,7 +130,16 @@ export function generateTrainingInsights(
   }
 
   // 4. RECOVERY BALANCE (Consecutive high-intensity workout check)
-  const sortedWorkouts = [...workouts].sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date));
+  const toDateString = (d: any) =>
+    d instanceof Date
+      ? d.toISOString().split('T')[0]
+      : typeof d === 'string'
+        ? d.split('T')[0]
+        : String(d || '');
+
+  const sortedWorkouts = [...workouts].sort((a, b) =>
+    toDateString(a.scheduled_date).localeCompare(toDateString(b.scheduled_date))
+  );
   let consecutiveHardDays = 0;
   for (let i = 0; i < sortedWorkouts.length - 1; i++) {
     const cur = sortedWorkouts[i];
@@ -139,8 +148,8 @@ export function generateTrainingInsights(
     const isCurHard = ['Interval Training', 'Tempo Run', 'Long Run'].includes(cur.workout_category);
     const isNxtHard = ['Interval Training', 'Tempo Run', 'Long Run'].includes(nxt.workout_category);
 
-    const d1 = new Date(cur.scheduled_date).getTime();
-    const d2 = new Date(nxt.scheduled_date).getTime();
+    const d1 = new Date(toDateString(cur.scheduled_date)).getTime();
+    const d2 = new Date(toDateString(nxt.scheduled_date)).getTime();
     const dayGap = Math.round((d2 - d1) / 86400000);
 
     if (isCurHard && isNxtHard && dayGap === 1) {
