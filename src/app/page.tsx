@@ -253,7 +253,7 @@ async function DashboardTelemetry() {
                       </span>
                     </div>
                     <p className="text-[11px] text-[#9BA3AF] font-mono">
-                      {wo.scheduled_date} • {wo.target_intensity || 'Standard'}
+                      {formatDate(wo.scheduled_date)} • {wo.target_intensity || 'Standard'}
                     </p>
                   </div>
 

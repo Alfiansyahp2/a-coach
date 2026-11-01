@@ -46,15 +46,16 @@ export function calculateMatchDeltas(
   activity: Activity,
   isManual: boolean = false
 ): Omit<WorkoutActivityMatch, 'id' | 'matched_at'> {
-  const targetDistance = workout.target_distance_meters || 0;
-  const actualDistance = activity.distance_meters || 0;
+  const targetDistance = Number(workout.target_distance_meters || 0);
+  const actualDistance = Number(activity.distance_meters || 0);
 
-  const targetDuration = workout.target_duration_seconds || 0;
-  const actualDuration = activity.moving_time_seconds || 0;
+  const targetDuration = Number(workout.target_duration_seconds || 0);
+  const actualDuration = Number(activity.moving_time_seconds || 0);
 
   // Actual pace in seconds per km
-  const actualPaceSeconds = activity.average_speed_mps > 0 ? Math.round(1000 / activity.average_speed_mps) : 0;
-  const targetPaceSeconds = workout.target_pace_seconds_per_km || 0;
+  const actualSpeed = Number(activity.average_speed_mps || 0);
+  const actualPaceSeconds = actualSpeed > 0 ? Math.round(1000 / actualSpeed) : 0;
+  const targetPaceSeconds = Number(workout.target_pace_seconds_per_km || 0);
 
   // Completion percentage
   let completionPercentage = 100;
@@ -91,15 +92,22 @@ export async function runAutoMatch(userId: string, activities: Activity[]): Prom
 
   let newMatchCount = 0;
 
+  const toDateStr = (val: any) =>
+    val instanceof Date
+      ? val.toISOString().split('T')[0]
+      : typeof val === 'string'
+      ? val.split('T')[0]
+      : String(val || '').split('T')[0];
+
   for (const activity of activities) {
     if (matchedActivityIds.has(activity.id)) continue;
 
-    const activityDateStr = activity.start_date.split('T')[0];
+    const activityDateStr = toDateStr(activity.start_date);
 
     // Find candidate workout on the same day that is not yet matched
     const candidate = workouts.find((w) => {
       if (matchedWorkoutIds.has(w.id)) return false;
-      if (w.scheduled_date !== activityDateStr) return false;
+      if (toDateStr(w.scheduled_date) !== activityDateStr) return false;
       return isSportCompatible(activity.sport_type, w.workout_category);
     });
 

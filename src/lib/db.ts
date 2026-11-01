@@ -472,6 +472,47 @@ export async function getStravaToken(connectionId: string): Promise<StravaToken 
   return store.strava_tokens.find((t) => t.connection_id === connectionId) || null;
 }
 
+export function normalizeActivityRow(row: any): Activity {
+  return {
+    id: String(row.id),
+    user_id: String(row.user_id),
+    strava_activity_id: Number(row.strava_activity_id),
+    name: String(row.name || ''),
+    sport_type: String(row.sport_type || 'Run'),
+    start_date:
+      row.start_date instanceof Date
+        ? row.start_date.toISOString()
+        : typeof row.start_date === 'string'
+        ? row.start_date
+        : String(row.start_date || ''),
+    distance_meters: Number(row.distance_meters || 0),
+    moving_time_seconds: Number(row.moving_time_seconds || 0),
+    elapsed_time_seconds: Number(row.elapsed_time_seconds || 0),
+    elevation_gain_meters: Number(row.elevation_gain_meters || 0),
+    average_speed_mps: Number(row.average_speed_mps || 0),
+    max_speed_mps: row.max_speed_mps != null ? Number(row.max_speed_mps) : undefined,
+    average_heartrate: row.average_heartrate != null ? Number(row.average_heartrate) : null,
+    max_heartrate: row.max_heartrate != null ? Number(row.max_heartrate) : null,
+    average_cadence: row.average_cadence != null ? Number(row.average_cadence) : null,
+    average_watts: row.average_watts != null ? Number(row.average_watts) : null,
+    calories: row.calories != null ? Number(row.calories) : null,
+    raw_summary_polyline: row.raw_summary_polyline || null,
+    description: row.description || null,
+    created_at:
+      row.created_at instanceof Date
+        ? row.created_at.toISOString()
+        : typeof row.created_at === 'string'
+        ? row.created_at
+        : String(row.created_at || ''),
+    updated_at:
+      row.updated_at instanceof Date
+        ? row.updated_at.toISOString()
+        : typeof row.updated_at === 'string'
+        ? row.updated_at
+        : String(row.updated_at || ''),
+  };
+}
+
 export async function getActivities(
   userId: string = DEFAULT_USER_ID,
   filters?: { sportType?: string; limit?: number; afterDate?: string }
@@ -494,7 +535,7 @@ export async function getActivities(
       query += ` LIMIT $${params.length}`;
     }
     const res = await pgPool.query(query, params);
-    return res.rows;
+    return res.rows.map(normalizeActivityRow);
   }
 
   const store = ensureLocalStore();
@@ -510,10 +551,17 @@ export async function getActivities(
   if (filters?.limit) {
     acts = acts.slice(0, filters.limit);
   }
-  return acts;
+  return acts.map(normalizeActivityRow);
 }
 
-export async function upsertActivity(activity: Omit<Activity, 'id' | 'created_at' | 'updated_at'>): Promise<Activity> {
+export interface UpsertActivityResult {
+  activity: Activity;
+  isCreated: boolean;
+}
+
+export async function upsertActivity(
+  activity: Omit<Activity, 'id' | 'created_at' | 'updated_at'>
+): Promise<UpsertActivityResult> {
   const now = new Date().toISOString();
   if (pgPool) {
     const query = `
@@ -541,7 +589,7 @@ export async function upsertActivity(activity: Omit<Activity, 'id' | 'created_at
         calories = EXCLUDED.calories,
         description = EXCLUDED.description,
         updated_at = NOW()
-      RETURNING *;
+      RETURNING *, (xmax = 0) AS is_created;
     `;
     const res = await pgPool.query(query, [
       activity.user_id,
@@ -563,11 +611,16 @@ export async function upsertActivity(activity: Omit<Activity, 'id' | 'created_at
       activity.raw_summary_polyline || null,
       activity.description || null,
     ]);
-    return res.rows[0];
+    const row = res.rows[0];
+    return {
+      activity: normalizeActivityRow(row),
+      isCreated: Boolean(row.is_created),
+    };
   }
 
   const store = ensureLocalStore();
   const existingIdx = store.activities.findIndex((a) => a.strava_activity_id === activity.strava_activity_id);
+  const isCreated = existingIdx < 0;
   const act: Activity = {
     ...activity,
     id: existingIdx >= 0 ? store.activities[existingIdx].id : crypto.randomUUID(),
@@ -581,7 +634,48 @@ export async function upsertActivity(activity: Omit<Activity, 'id' | 'created_at
     store.activities.push(act);
   }
   saveLocalStore(store);
-  return act;
+  return {
+    activity: normalizeActivityRow(act),
+    isCreated,
+  };
+}
+
+export async function getLatestActivityDate(userId: string = DEFAULT_USER_ID): Promise<string | null> {
+  if (pgPool) {
+    const res = await pgPool.query('SELECT MAX(start_date) as max_date FROM activities WHERE user_id = $1', [userId]);
+    const maxDate = res.rows[0]?.max_date;
+    if (!maxDate) return null;
+    return maxDate instanceof Date ? maxDate.toISOString() : String(maxDate);
+  }
+
+  const store = ensureLocalStore();
+  const acts = store.activities.filter((a) => a.user_id === userId);
+  if (acts.length === 0) return null;
+  const sorted = [...acts].sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+  return sorted[0].start_date;
+}
+
+export async function getLastSyncLog(userId: string = DEFAULT_USER_ID): Promise<SyncLog | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM sync_logs WHERE user_id = $1 ORDER BY started_at DESC LIMIT 1',
+      [userId]
+    );
+    if (!res.rows[0]) return null;
+    const row = res.rows[0];
+    return {
+      ...row,
+      activities_fetched: Number(row.activities_fetched || 0),
+      activities_created: Number(row.activities_created || 0),
+      activities_updated: Number(row.activities_updated || 0),
+      started_at: row.started_at instanceof Date ? row.started_at.toISOString() : String(row.started_at),
+      completed_at: row.completed_at instanceof Date ? row.completed_at.toISOString() : String(row.completed_at),
+    };
+  }
+
+  const store = ensureLocalStore();
+  const logs = store.sync_logs.filter((l) => l.user_id === userId);
+  return logs[0] || null;
 }
 
 export async function getScheduledWorkouts(
@@ -603,7 +697,15 @@ export async function getScheduledWorkouts(
     }
     query += ' ORDER BY scheduled_date ASC';
     const res = await pgPool.query(query, params);
-    return res.rows;
+    return res.rows.map((row) => ({
+      ...row,
+      scheduled_date:
+        row.scheduled_date instanceof Date
+          ? row.scheduled_date.toISOString().split('T')[0]
+          : typeof row.scheduled_date === 'string'
+          ? row.scheduled_date.split('T')[0]
+          : String(row.scheduled_date || ''),
+    }));
   }
 
   const store = ensureLocalStore();
@@ -643,7 +745,16 @@ export async function createScheduledWorkout(
       workout.description || null,
       workout.status || 'PLANNED',
     ]);
-    return res.rows[0];
+    const row = res.rows[0];
+    return {
+      ...row,
+      scheduled_date:
+        row.scheduled_date instanceof Date
+          ? row.scheduled_date.toISOString().split('T')[0]
+          : typeof row.scheduled_date === 'string'
+          ? row.scheduled_date.split('T')[0]
+          : String(row.scheduled_date || ''),
+    };
   }
 
   const store = ensureLocalStore();
@@ -721,7 +832,29 @@ export async function getWorkoutActivityMatches(userId: string = DEFAULT_USER_ID
       ORDER BY m.matched_at DESC;
     `;
     const res = await pgPool.query(query, [userId]);
-    return res.rows;
+    return res.rows.map((row) => ({
+      ...row,
+      completion_percentage: Number(row.completion_percentage || 0),
+      distance_delta_meters: Number(row.distance_delta_meters || 0),
+      duration_delta_seconds: Number(row.duration_delta_seconds || 0),
+      pace_delta_seconds_per_km: Number(row.pace_delta_seconds_per_km || 0),
+      matched_at:
+        row.matched_at instanceof Date
+          ? row.matched_at.toISOString()
+          : typeof row.matched_at === 'string'
+          ? row.matched_at
+          : String(row.matched_at || ''),
+      workout: row.workout
+        ? {
+            ...row.workout,
+            scheduled_date:
+              typeof row.workout.scheduled_date === 'string'
+                ? row.workout.scheduled_date.split('T')[0]
+                : String(row.workout.scheduled_date || ''),
+          }
+        : undefined,
+      activity: row.activity ? normalizeActivityRow(row.activity) : undefined,
+    }));
   }
 
   const store = ensureLocalStore();
@@ -787,7 +920,21 @@ export async function saveWorkoutActivityMatch(
 export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise<FitnessGoal[]> {
   if (pgPool) {
     const res = await pgPool.query('SELECT * FROM fitness_goals WHERE user_id = $1 ORDER BY target_date ASC', [userId]);
-    return res.rows;
+    return res.rows.map((row) => ({
+      ...row,
+      start_date:
+        row.start_date instanceof Date
+          ? row.start_date.toISOString().split('T')[0]
+          : typeof row.start_date === 'string'
+          ? row.start_date.split('T')[0]
+          : String(row.start_date || ''),
+      target_date:
+        row.target_date instanceof Date
+          ? row.target_date.toISOString().split('T')[0]
+          : typeof row.target_date === 'string'
+          ? row.target_date.split('T')[0]
+          : String(row.target_date || ''),
+    }));
   }
   const store = ensureLocalStore();
   return store.fitness_goals.filter((g) => g.user_id === userId);

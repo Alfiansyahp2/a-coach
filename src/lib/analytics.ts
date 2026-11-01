@@ -68,9 +68,17 @@ export function computeDashboardSummary(
   const currWeekStr = currentWeekStart.toISOString().split('T')[0];
   const nextWeekStr = new Date(currentWeekStart.getTime() + 7 * 86400000).toISOString().split('T')[0];
 
-  const thisWeekWorkouts = workouts.filter(
-    (w) => w.scheduled_date >= currWeekStr && w.scheduled_date < nextWeekStr && w.workout_category !== 'Rest Day'
-  );
+  const toDateString = (d: any) =>
+    d instanceof Date
+      ? d.toISOString().split('T')[0]
+      : typeof d === 'string'
+      ? d.split('T')[0]
+      : String(d || '');
+
+  const thisWeekWorkouts = workouts.filter((w) => {
+    const sDate = toDateString(w.scheduled_date);
+    return sDate >= currWeekStr && sDate < nextWeekStr && w.workout_category !== 'Rest Day';
+  });
   const completedWorkouts = thisWeekWorkouts.filter((w) => w.status === 'COMPLETED');
 
   const consistencyScore =
@@ -81,7 +89,7 @@ export function computeDashboardSummary(
   // Upcoming workouts (today onwards)
   const todayStr = now.toISOString().split('T')[0];
   const upcomingWorkouts = workouts
-    .filter((w) => w.scheduled_date >= todayStr)
+    .filter((w) => toDateString(w.scheduled_date) >= todayStr)
     .slice(0, 5);
 
   return {
