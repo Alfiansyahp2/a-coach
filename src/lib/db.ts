@@ -1,0 +1,891 @@
+import { Pool } from 'pg';
+import fs from 'fs';
+import path from 'path';
+import crypto from 'crypto';
+import {
+  User,
+  StravaConnection,
+  StravaToken,
+  Activity,
+  ScheduledWorkout,
+  WorkoutActivityMatch,
+  FitnessGoal,
+  PersonalRecord,
+  SyncLog,
+} from '@/types';
+
+// Detect whether PostgreSQL is enabled
+const databaseUrl = process.env.DATABASE_URL;
+let pgPool: Pool | null = null;
+
+if (databaseUrl && databaseUrl.trim().length > 0) {
+  try {
+    pgPool = new Pool({
+      connectionString: databaseUrl,
+      max: 10,
+      idleTimeoutMillis: 30000,
+    });
+  } catch (err) {
+    console.warn('Failed to initialize PostgreSQL pool, falling back to local store:', err);
+    pgPool = null;
+  }
+}
+
+// Local File Store for fallback / instant development
+const DATA_DIR = path.join(process.cwd(), '.data');
+const DATA_FILE = path.join(DATA_DIR, 'store.json');
+
+interface LocalStoreSchema {
+  users: User[];
+  strava_connections: StravaConnection[];
+  strava_tokens: StravaToken[];
+  activities: Activity[];
+  scheduled_workouts: ScheduledWorkout[];
+  workout_activity_matches: WorkoutActivityMatch[];
+  fitness_goals: FitnessGoal[];
+  personal_records: PersonalRecord[];
+  sync_logs: SyncLog[];
+}
+
+function ensureLocalStore(): LocalStoreSchema {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+
+  if (!fs.existsSync(DATA_FILE)) {
+    // Generate initial athlete data for immediate usability
+    const defaultUserId = '00000000-0000-0000-0000-000000000001';
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+
+    // Helper to get relative date
+    const getRelDate = (offsetDays: number) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() + offsetDays);
+      return d.toISOString().split('T')[0];
+    };
+
+    const initialStore: LocalStoreSchema = {
+      users: [
+        {
+          id: defaultUserId,
+          email: 'athlete@protraining.internal',
+          name: 'Apex Athlete',
+          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ],
+      strava_connections: [],
+      strava_tokens: [],
+      activities: [
+        {
+          id: 'act-001',
+          user_id: defaultUserId,
+          strava_activity_id: 11002001,
+          name: 'Morning Aerobic Threshold Run',
+          sport_type: 'Run',
+          start_date: `${getRelDate(-1)}T06:30:00Z`,
+          distance_meters: 10420,
+          moving_time_seconds: 3120, // 52 mins -> 4:59 min/km
+          elapsed_time_seconds: 3200,
+          elevation_gain_meters: 115,
+          average_speed_mps: 3.34, // ~4:59 min/km
+          max_speed_mps: 4.5,
+          average_heartrate: 154,
+          max_heartrate: 172,
+          average_cadence: 176,
+          average_watts: null,
+          calories: 780,
+          raw_summary_polyline: null,
+          description: 'Controlled cadence on rolling hills. Felt smooth.',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'act-002',
+          user_id: defaultUserId,
+          strava_activity_id: 11002002,
+          name: 'Easy Recovery Run',
+          sport_type: 'Run',
+          start_date: `${getRelDate(-3)}T07:15:00Z`,
+          distance_meters: 6200,
+          moving_time_seconds: 2100, // 35 mins -> 5:38 min/km
+          elapsed_time_seconds: 2150,
+          elevation_gain_meters: 42,
+          average_speed_mps: 2.95,
+          max_speed_mps: 3.8,
+          average_heartrate: 138,
+          max_heartrate: 149,
+          average_cadence: 172,
+          average_watts: null,
+          calories: 420,
+          description: 'Zone 2 recovery flush.',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'act-003',
+          user_id: defaultUserId,
+          strava_activity_id: 11002003,
+          name: 'Weekend Endurance Long Run',
+          sport_type: 'Run',
+          start_date: `${getRelDate(-6)}T06:00:00Z`,
+          distance_meters: 18500,
+          moving_time_seconds: 5735, // ~1h 35m -> 5:10 min/km
+          elapsed_time_seconds: 5900,
+          elevation_gain_meters: 210,
+          average_speed_mps: 3.22,
+          max_speed_mps: 4.2,
+          average_heartrate: 158,
+          max_heartrate: 176,
+          average_cadence: 174,
+          average_watts: null,
+          calories: 1420,
+          description: 'Long base building run. Hydrated every 5k.',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ],
+      scheduled_workouts: [
+        {
+          id: 'wo-001',
+          user_id: defaultUserId,
+          plan_id: null,
+          scheduled_date: getRelDate(-1),
+          workout_category: 'Tempo Run',
+          target_distance_meters: 10000,
+          target_duration_seconds: 3000, // 50 mins -> 5:00 min/km
+          target_pace_seconds_per_km: 300,
+          target_intensity: 'Threshold / Zone 4',
+          description: '2km warmup, 6km at 4:55-5:00, 2km cooldown',
+          status: 'COMPLETED',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'wo-002',
+          user_id: defaultUserId,
+          plan_id: null,
+          scheduled_date: getRelDate(0),
+          workout_category: 'Easy Run',
+          target_distance_meters: 7000,
+          target_duration_seconds: 2310, // 38m30s -> 5:30 min/km
+          target_pace_seconds_per_km: 330,
+          target_intensity: 'Zone 2 Aerobic',
+          description: 'Comfortable conversation pace. Focus on high cadence.',
+          status: 'PLANNED',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'wo-003',
+          user_id: defaultUserId,
+          plan_id: null,
+          scheduled_date: getRelDate(2),
+          workout_category: 'Interval Training',
+          target_distance_meters: 8000,
+          target_duration_seconds: 2400,
+          target_pace_seconds_per_km: 270, // 4:30 min/km intervals
+          target_intensity: 'VO2 Max / Zone 5',
+          description: '5 x 1000m repeats with 90s jog recovery',
+          status: 'PLANNED',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'wo-004',
+          user_id: defaultUserId,
+          plan_id: null,
+          scheduled_date: getRelDate(3),
+          workout_category: 'Rest Day',
+          target_distance_meters: 0,
+          target_duration_seconds: 0,
+          target_pace_seconds_per_km: null,
+          target_intensity: 'Active Recovery',
+          description: 'Foam rolling, mobility work, and complete muscle rest.',
+          status: 'PLANNED',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'wo-005',
+          user_id: defaultUserId,
+          plan_id: null,
+          scheduled_date: getRelDate(5),
+          workout_category: 'Long Run',
+          target_distance_meters: 21097,
+          target_duration_seconds: 6600, // 1h 50m
+          target_pace_seconds_per_km: 312, // 5:12 min/km
+          target_intensity: 'Aerobic Base',
+          description: 'Half marathon simulation run. Test nutrition at 7k and 14k.',
+          status: 'PLANNED',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ],
+      workout_activity_matches: [
+        {
+          id: 'match-001',
+          workout_id: 'wo-001',
+          activity_id: 'act-001',
+          is_manual_match: false,
+          completion_percentage: 104.2,
+          distance_delta_meters: 420,
+          duration_delta_seconds: 120,
+          pace_delta_seconds_per_km: -1, // 1 sec faster
+          matched_at: new Date().toISOString(),
+        },
+      ],
+      fitness_goals: [
+        {
+          id: 'goal-001',
+          user_id: defaultUserId,
+          title: 'Monthly Mileage Target (150 KM)',
+          goal_type: 'DISTANCE_MONTHLY',
+          target_value: 150000,
+          current_value: 84200,
+          start_date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`,
+          target_date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-28`,
+          is_achieved: false,
+          unit: 'km',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'goal-002',
+          user_id: defaultUserId,
+          title: 'Consistency: 4 Sessions / Week',
+          goal_type: 'FREQUENCY_WEEKLY',
+          target_value: 4,
+          current_value: 3,
+          start_date: todayStr,
+          target_date: getRelDate(7),
+          is_achieved: false,
+          unit: 'sessions',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ],
+      personal_records: [
+        {
+          id: 'pr-001',
+          user_id: defaultUserId,
+          activity_id: 'act-001',
+          category: '5K',
+          record_value: 1260, // 21:00
+          record_display: '21:00',
+          achieved_date: `${getRelDate(-15)}T08:00:00Z`,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'pr-002',
+          user_id: defaultUserId,
+          activity_id: 'act-001',
+          category: '10K',
+          record_value: 2685, // 44:45
+          record_display: '44:45',
+          achieved_date: `${getRelDate(-30)}T07:30:00Z`,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 'pr-003',
+          user_id: defaultUserId,
+          activity_id: 'act-003',
+          category: 'Longest Distance',
+          record_value: 21100, // 21.1 km
+          record_display: '21.10 km',
+          achieved_date: `${getRelDate(-45)}T06:00:00Z`,
+          created_at: new Date().toISOString(),
+        },
+      ],
+      sync_logs: [],
+    };
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify(initialStore, null, 2), 'utf8');
+    return initialStore;
+  }
+
+  const content = fs.readFileSync(DATA_FILE, 'utf8');
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    console.error('Error reading local store:', err);
+    return {
+      users: [],
+      strava_connections: [],
+      strava_tokens: [],
+      activities: [],
+      scheduled_workouts: [],
+      workout_activity_matches: [],
+      fitness_goals: [],
+      personal_records: [],
+      sync_logs: [],
+    };
+  }
+}
+
+function saveLocalStore(data: LocalStoreSchema) {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+}
+
+// =====================================================================
+// UNIFIED DATA LAYER API
+// =====================================================================
+
+export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+export async function getUser(userId: string = DEFAULT_USER_ID): Promise<User | null> {
+  if (pgPool) {
+    const res = await pgPool.query('SELECT * FROM users WHERE id = $1', [userId]);
+    return res.rows[0] || null;
+  }
+  const store = ensureLocalStore();
+  return store.users.find((u) => u.id === userId) || store.users[0] || null;
+}
+
+export async function getStravaConnection(userId: string = DEFAULT_USER_ID): Promise<StravaConnection | null> {
+  if (pgPool) {
+    const res = await pgPool.query('SELECT * FROM strava_connections WHERE user_id = $1 AND is_active = true', [userId]);
+    return res.rows[0] || null;
+  }
+  const store = ensureLocalStore();
+  return store.strava_connections.find((c) => c.user_id === userId && c.is_active) || null;
+}
+
+export async function saveStravaConnection(
+  userId: string,
+  athlete: { id: number; firstname?: string; lastname?: string; username?: string; profile?: string },
+  scopes: string[]
+): Promise<StravaConnection> {
+  const athleteName = [athlete.firstname, athlete.lastname].filter(Boolean).join(' ') || athlete.username || 'Strava Athlete';
+  const now = new Date().toISOString();
+
+  if (pgPool) {
+    const query = `
+      INSERT INTO strava_connections (user_id, strava_athlete_id, athlete_name, athlete_username, avatar_url, scopes, is_active, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, true, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET
+        strava_athlete_id = EXCLUDED.strava_athlete_id,
+        athlete_name = EXCLUDED.athlete_name,
+        athlete_username = EXCLUDED.athlete_username,
+        avatar_url = EXCLUDED.avatar_url,
+        scopes = EXCLUDED.scopes,
+        is_active = true,
+        updated_at = NOW()
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [userId, athlete.id, athleteName, athlete.username || null, athlete.profile || null, scopes]);
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const existingIdx = store.strava_connections.findIndex((c) => c.user_id === userId);
+  const conn: StravaConnection = {
+    id: existingIdx >= 0 ? store.strava_connections[existingIdx].id : crypto.randomUUID(),
+    user_id: userId,
+    strava_athlete_id: athlete.id,
+    athlete_name: athleteName,
+    athlete_username: athlete.username,
+    avatar_url: athlete.profile,
+    scopes,
+    is_active: true,
+    created_at: existingIdx >= 0 ? store.strava_connections[existingIdx].created_at : now,
+    updated_at: now,
+  };
+
+  if (existingIdx >= 0) {
+    store.strava_connections[existingIdx] = conn;
+  } else {
+    store.strava_connections.push(conn);
+  }
+  saveLocalStore(store);
+  return conn;
+}
+
+export async function disconnectStrava(userId: string = DEFAULT_USER_ID): Promise<void> {
+  if (pgPool) {
+    await pgPool.query('UPDATE strava_connections SET is_active = false WHERE user_id = $1', [userId]);
+    return;
+  }
+  const store = ensureLocalStore();
+  const conn = store.strava_connections.find((c) => c.user_id === userId);
+  if (conn) {
+    conn.is_active = false;
+    conn.updated_at = new Date().toISOString();
+    saveLocalStore(store);
+  }
+}
+
+export async function saveStravaTokens(
+  connectionId: string,
+  accessTokenEncrypted: string,
+  refreshTokenEncrypted: string,
+  expiresAt: string
+): Promise<StravaToken> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    const query = `
+      INSERT INTO strava_tokens (connection_id, access_token_encrypted, refresh_token_encrypted, expires_at, updated_at)
+      VALUES ($1, $2, $3, $4, NOW())
+      ON CONFLICT (connection_id) DO UPDATE SET
+        access_token_encrypted = EXCLUDED.access_token_encrypted,
+        refresh_token_encrypted = EXCLUDED.refresh_token_encrypted,
+        expires_at = EXCLUDED.expires_at,
+        updated_at = NOW()
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [connectionId, accessTokenEncrypted, refreshTokenEncrypted, expiresAt]);
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const existingIdx = store.strava_tokens.findIndex((t) => t.connection_id === connectionId);
+  const token: StravaToken = {
+    id: existingIdx >= 0 ? store.strava_tokens[existingIdx].id : crypto.randomUUID(),
+    connection_id: connectionId,
+    access_token_encrypted: accessTokenEncrypted,
+    refresh_token_encrypted: refreshTokenEncrypted,
+    expires_at: expiresAt,
+    created_at: existingIdx >= 0 ? store.strava_tokens[existingIdx].created_at : now,
+    updated_at: now,
+  };
+
+  if (existingIdx >= 0) {
+    store.strava_tokens[existingIdx] = token;
+  } else {
+    store.strava_tokens.push(token);
+  }
+  saveLocalStore(store);
+  return token;
+}
+
+export async function getStravaToken(connectionId: string): Promise<StravaToken | null> {
+  if (pgPool) {
+    const res = await pgPool.query('SELECT * FROM strava_tokens WHERE connection_id = $1', [connectionId]);
+    return res.rows[0] || null;
+  }
+  const store = ensureLocalStore();
+  return store.strava_tokens.find((t) => t.connection_id === connectionId) || null;
+}
+
+export async function getActivities(
+  userId: string = DEFAULT_USER_ID,
+  filters?: { sportType?: string; limit?: number; afterDate?: string }
+): Promise<Activity[]> {
+  if (pgPool) {
+    let query = 'SELECT * FROM activities WHERE user_id = $1';
+    const params: any[] = [userId];
+
+    if (filters?.sportType && filters.sportType !== 'All') {
+      params.push(filters.sportType);
+      query += ` AND sport_type = $${params.length}`;
+    }
+    if (filters?.afterDate) {
+      params.push(filters.afterDate);
+      query += ` AND start_date >= $${params.length}`;
+    }
+    query += ' ORDER BY start_date DESC';
+    if (filters?.limit) {
+      params.push(filters.limit);
+      query += ` LIMIT $${params.length}`;
+    }
+    const res = await pgPool.query(query, params);
+    return res.rows;
+  }
+
+  const store = ensureLocalStore();
+  let acts = store.activities.filter((a) => a.user_id === userId);
+  if (filters?.sportType && filters.sportType !== 'All') {
+    acts = acts.filter((a) => a.sport_type.toLowerCase() === filters.sportType?.toLowerCase());
+  }
+  if (filters?.afterDate) {
+    const target = new Date(filters.afterDate).getTime();
+    acts = acts.filter((a) => new Date(a.start_date).getTime() >= target);
+  }
+  acts.sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+  if (filters?.limit) {
+    acts = acts.slice(0, filters.limit);
+  }
+  return acts;
+}
+
+export async function upsertActivity(activity: Omit<Activity, 'id' | 'created_at' | 'updated_at'>): Promise<Activity> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    const query = `
+      INSERT INTO activities (
+        user_id, strava_activity_id, name, sport_type, start_date, distance_meters,
+        moving_time_seconds, elapsed_time_seconds, elevation_gain_meters, average_speed_mps,
+        max_speed_mps, average_heartrate, max_heartrate, average_cadence, average_watts,
+        calories, raw_summary_polyline, description, updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW())
+      ON CONFLICT (strava_activity_id) DO UPDATE SET
+        name = EXCLUDED.name,
+        sport_type = EXCLUDED.sport_type,
+        start_date = EXCLUDED.start_date,
+        distance_meters = EXCLUDED.distance_meters,
+        moving_time_seconds = EXCLUDED.moving_time_seconds,
+        elapsed_time_seconds = EXCLUDED.elapsed_time_seconds,
+        elevation_gain_meters = EXCLUDED.elevation_gain_meters,
+        average_speed_mps = EXCLUDED.average_speed_mps,
+        max_speed_mps = EXCLUDED.max_speed_mps,
+        average_heartrate = EXCLUDED.average_heartrate,
+        max_heartrate = EXCLUDED.max_heartrate,
+        average_cadence = EXCLUDED.average_cadence,
+        average_watts = EXCLUDED.average_watts,
+        calories = EXCLUDED.calories,
+        description = EXCLUDED.description,
+        updated_at = NOW()
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [
+      activity.user_id,
+      activity.strava_activity_id,
+      activity.name,
+      activity.sport_type,
+      activity.start_date,
+      activity.distance_meters,
+      activity.moving_time_seconds,
+      activity.elapsed_time_seconds,
+      activity.elevation_gain_meters,
+      activity.average_speed_mps,
+      activity.max_speed_mps || null,
+      activity.average_heartrate || null,
+      activity.max_heartrate || null,
+      activity.average_cadence || null,
+      activity.average_watts || null,
+      activity.calories || null,
+      activity.raw_summary_polyline || null,
+      activity.description || null,
+    ]);
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const existingIdx = store.activities.findIndex((a) => a.strava_activity_id === activity.strava_activity_id);
+  const act: Activity = {
+    ...activity,
+    id: existingIdx >= 0 ? store.activities[existingIdx].id : crypto.randomUUID(),
+    created_at: existingIdx >= 0 ? store.activities[existingIdx].created_at : now,
+    updated_at: now,
+  };
+
+  if (existingIdx >= 0) {
+    store.activities[existingIdx] = act;
+  } else {
+    store.activities.push(act);
+  }
+  saveLocalStore(store);
+  return act;
+}
+
+export async function getScheduledWorkouts(
+  userId: string = DEFAULT_USER_ID,
+  startDate?: string,
+  endDate?: string
+): Promise<ScheduledWorkout[]> {
+  if (pgPool) {
+    let query = 'SELECT * FROM scheduled_workouts WHERE user_id = $1';
+    const params: any[] = [userId];
+
+    if (startDate) {
+      params.push(startDate);
+      query += ` AND scheduled_date >= $${params.length}`;
+    }
+    if (endDate) {
+      params.push(endDate);
+      query += ` AND scheduled_date <= $${params.length}`;
+    }
+    query += ' ORDER BY scheduled_date ASC';
+    const res = await pgPool.query(query, params);
+    return res.rows;
+  }
+
+  const store = ensureLocalStore();
+  let workouts = store.scheduled_workouts.filter((w) => w.user_id === userId);
+  if (startDate) {
+    workouts = workouts.filter((w) => w.scheduled_date >= startDate);
+  }
+  if (endDate) {
+    workouts = workouts.filter((w) => w.scheduled_date <= endDate);
+  }
+  workouts.sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date));
+  return workouts;
+}
+
+export async function createScheduledWorkout(
+  workout: Omit<ScheduledWorkout, 'id' | 'created_at' | 'updated_at'>
+): Promise<ScheduledWorkout> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    const query = `
+      INSERT INTO scheduled_workouts (
+        user_id, plan_id, scheduled_date, workout_category, target_distance_meters,
+        target_duration_seconds, target_pace_seconds_per_km, target_intensity, description, status, updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [
+      workout.user_id,
+      workout.plan_id || null,
+      workout.scheduled_date,
+      workout.workout_category,
+      workout.target_distance_meters || null,
+      workout.target_duration_seconds || null,
+      workout.target_pace_seconds_per_km || null,
+      workout.target_intensity || null,
+      workout.description || null,
+      workout.status || 'PLANNED',
+    ]);
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const created: ScheduledWorkout = {
+    ...workout,
+    id: crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  };
+  store.scheduled_workouts.push(created);
+  saveLocalStore(store);
+  return created;
+}
+
+export async function updateScheduledWorkout(
+  id: string,
+  updates: Partial<ScheduledWorkout>
+): Promise<ScheduledWorkout | null> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    for (const [key, val] of Object.entries(updates)) {
+      if (['id', 'created_at', 'user_id'].includes(key)) continue;
+      fields.push(`${key} = $${idx++}`);
+      values.push(val);
+    }
+    fields.push(`updated_at = NOW()`);
+    values.push(id);
+
+    const query = `UPDATE scheduled_workouts SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`;
+    const res = await pgPool.query(query, values);
+    return res.rows[0] || null;
+  }
+
+  const store = ensureLocalStore();
+  const idx = store.scheduled_workouts.findIndex((w) => w.id === id);
+  if (idx < 0) return null;
+
+  store.scheduled_workouts[idx] = {
+    ...store.scheduled_workouts[idx],
+    ...updates,
+    updated_at: now,
+  };
+  saveLocalStore(store);
+  return store.scheduled_workouts[idx];
+}
+
+export async function deleteScheduledWorkout(id: string): Promise<boolean> {
+  if (pgPool) {
+    const res = await pgPool.query('DELETE FROM scheduled_workouts WHERE id = $1', [id]);
+    return (res.rowCount || 0) > 0;
+  }
+
+  const store = ensureLocalStore();
+  const initialLen = store.scheduled_workouts.length;
+  store.scheduled_workouts = store.scheduled_workouts.filter((w) => w.id !== id);
+  store.workout_activity_matches = store.workout_activity_matches.filter((m) => m.workout_id !== id);
+  saveLocalStore(store);
+  return store.scheduled_workouts.length < initialLen;
+}
+
+export async function getWorkoutActivityMatches(userId: string = DEFAULT_USER_ID): Promise<WorkoutActivityMatch[]> {
+  if (pgPool) {
+    const query = `
+      SELECT m.*, 
+        row_to_json(w.*) as workout,
+        row_to_json(a.*) as activity
+      FROM workout_activity_matches m
+      JOIN scheduled_workouts w ON m.workout_id = w.id
+      JOIN activities a ON m.activity_id = a.id
+      WHERE w.user_id = $1
+      ORDER BY m.matched_at DESC;
+    `;
+    const res = await pgPool.query(query, [userId]);
+    return res.rows;
+  }
+
+  const store = ensureLocalStore();
+  return store.workout_activity_matches
+    .map((m) => ({
+      ...m,
+      workout: store.scheduled_workouts.find((w) => w.id === m.workout_id),
+      activity: store.activities.find((a) => a.id === m.activity_id),
+    }))
+    .filter((m) => m.workout && m.workout.user_id === userId);
+}
+
+export async function saveWorkoutActivityMatch(
+  match: Omit<WorkoutActivityMatch, 'id' | 'matched_at'>
+): Promise<WorkoutActivityMatch> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    const query = `
+      INSERT INTO workout_activity_matches (
+        workout_id, activity_id, is_manual_match, completion_percentage,
+        distance_delta_meters, duration_delta_seconds, pace_delta_seconds_per_km, matched_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      ON CONFLICT (workout_id) DO UPDATE SET
+        activity_id = EXCLUDED.activity_id,
+        is_manual_match = EXCLUDED.is_manual_match,
+        completion_percentage = EXCLUDED.completion_percentage,
+        distance_delta_meters = EXCLUDED.distance_delta_meters,
+        duration_delta_seconds = EXCLUDED.duration_delta_seconds,
+        pace_delta_seconds_per_km = EXCLUDED.pace_delta_seconds_per_km,
+        matched_at = NOW()
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [
+      match.workout_id,
+      match.activity_id,
+      match.is_manual_match,
+      match.completion_percentage,
+      match.distance_delta_meters,
+      match.duration_delta_seconds,
+      match.pace_delta_seconds_per_km,
+    ]);
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const existingIdx = store.workout_activity_matches.findIndex((m) => m.workout_id === match.workout_id);
+  const record: WorkoutActivityMatch = {
+    ...match,
+    id: existingIdx >= 0 ? store.workout_activity_matches[existingIdx].id : crypto.randomUUID(),
+    matched_at: now,
+  };
+
+  if (existingIdx >= 0) {
+    store.workout_activity_matches[existingIdx] = record;
+  } else {
+    store.workout_activity_matches.push(record);
+  }
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise<FitnessGoal[]> {
+  if (pgPool) {
+    const res = await pgPool.query('SELECT * FROM fitness_goals WHERE user_id = $1 ORDER BY target_date ASC', [userId]);
+    return res.rows;
+  }
+  const store = ensureLocalStore();
+  return store.fitness_goals.filter((g) => g.user_id === userId);
+}
+
+export async function createFitnessGoal(goal: Omit<FitnessGoal, 'id' | 'created_at' | 'updated_at'>): Promise<FitnessGoal> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    const query = `
+      INSERT INTO fitness_goals (user_id, title, goal_type, target_value, current_value, start_date, target_date, is_achieved, unit, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [
+      goal.user_id,
+      goal.title,
+      goal.goal_type,
+      goal.target_value,
+      goal.current_value,
+      goal.start_date,
+      goal.target_date,
+      goal.is_achieved,
+      goal.unit,
+    ]);
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const created: FitnessGoal = {
+    ...goal,
+    id: crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  };
+  store.fitness_goals.push(created);
+  saveLocalStore(store);
+  return created;
+}
+
+export async function getPersonalRecords(userId: string = DEFAULT_USER_ID): Promise<PersonalRecord[]> {
+  if (pgPool) {
+    const res = await pgPool.query('SELECT * FROM personal_records WHERE user_id = $1 ORDER BY achieved_date DESC', [userId]);
+    return res.rows;
+  }
+  const store = ensureLocalStore();
+  return store.personal_records.filter((p) => p.user_id === userId);
+}
+
+export async function createSyncLog(log: Omit<SyncLog, 'id'>): Promise<SyncLog> {
+  if (pgPool) {
+    const query = `
+      INSERT INTO sync_logs (user_id, status, activities_fetched, activities_created, activities_updated, error_message, started_at, completed_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [
+      log.user_id,
+      log.status,
+      log.activities_fetched,
+      log.activities_created,
+      log.activities_updated,
+      log.error_message || null,
+      log.started_at,
+      log.completed_at,
+    ]);
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const record: SyncLog = {
+    ...log,
+    id: crypto.randomUUID(),
+  };
+  store.sync_logs.unshift(record);
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getDatabaseStatus(): Promise<{ type: 'PostgreSQL' | 'Local Store'; connected: boolean; info: string }> {
+  if (pgPool) {
+    try {
+      const res = await pgPool.query('SELECT NOW() as current_time');
+      return {
+        type: 'PostgreSQL',
+        connected: true,
+        info: `Connected to PostgreSQL (${res.rows[0].current_time})`,
+      };
+    } catch (err: any) {
+      return {
+        type: 'PostgreSQL',
+        connected: false,
+        info: `Connection error: ${err.message}`,
+      };
+    }
+  }
+  return {
+    type: 'Local Store',
+    connected: true,
+    info: 'Using file-backed atomic store (.data/store.json). Set DATABASE_URL to connect to PostgreSQL.',
+  };
+}
