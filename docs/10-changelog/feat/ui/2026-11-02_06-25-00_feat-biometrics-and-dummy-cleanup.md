@@ -32,3 +32,4 @@
 4. **Integrasi Antarmuka (UI)**:
    - **Dashboard Top Telemetry Bar** ([`src/app/page.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/app/page.tsx)): Badge biometrik menampilkan `68 bpm rest | 170 cm | 65 kg | BMI 22.5`.
    - **Halaman Detail Aktivitas** ([`src/app/activities/[id]/page.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/app/activities/%5Bid%5D/page.tsx)): Distribusi 5 zona HR dihitung berbasis resting HR 68 bpm, serta menampilkan massa atlet dan baseline HR istirahat pada kartu biometrik.
+

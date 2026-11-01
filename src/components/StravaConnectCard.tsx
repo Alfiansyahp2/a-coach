@@ -13,6 +13,8 @@ import {
   ArrowDownToLine,
   Clock,
   CheckCheck,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -43,6 +45,7 @@ export function StravaConnectCard() {
     latestActivityDate: string | null;
   } | null>(null);
   const [banner, setBanner] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   // Fetch current status and sync telemetry
   const fetchStatus = async () => {
@@ -159,7 +162,7 @@ export function StravaConnectCard() {
   };
 
   return (
-    <div className="w-full bg-[#12151D] border border-[#232838] rounded-xl p-6 shadow-2xl transition-all">
+    <div className="w-full bg-[#12151D] border border-[#232838] rounded-xl p-4 sm:p-5 shadow-xl transition-all">
       {/* Notification Banner */}
       {banner && (
         <div
@@ -184,72 +187,136 @@ export function StravaConnectCard() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between pb-5 border-b border-[#232838]">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/30 flex items-center justify-center text-[#FC4C02]">
-            <Activity className="w-5 h-5" />
+      <div className="flex items-center justify-between pb-3 border-b border-[#232838]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/30 flex items-center justify-center text-[#FC4C02] shrink-0">
+            <Activity className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-[#F0F2F5] tracking-tight">
-              Strava API v3 Integration
-            </h2>
-            <p className="text-xs text-[#9BA3AF]">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs sm:text-sm font-semibold text-[#F0F2F5] tracking-tight">
+                Strava API v3 Integration
+              </h2>
+              {!loading && (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium ${
+                  status?.isConnected
+                    ? "bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30"
+                    : status?.isConfigured
+                    ? "bg-[#9BA3AF]/10 text-[#9BA3AF] border border-[#9BA3AF]/30"
+                    : "bg-[#FF9500]/10 text-[#FF9500] border border-[#FF9500]/30"
+                }`}>
+                  {status?.isConnected ? (
+                    <>
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                      Active Link
+                    </>
+                  ) : status?.isConfigured ? (
+                    "Disconnected"
+                  ) : (
+                    "Config Required"
+                  )}
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-[#5A6272] hidden sm:block font-mono">
               OAuth 2.0 PKCE Handshake & Telemetry Bridge
             </p>
           </div>
         </div>
 
-        {/* State Badge */}
-        {!loading && (
-          <div className="flex items-center gap-2">
-            {status?.isConnected ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
-                Active Link
-              </span>
-            ) : status?.isConfigured ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#9BA3AF]/10 text-[#9BA3AF] border border-[#9BA3AF]/30">
-                Disconnected
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#FF9500]/10 text-[#FF9500] border border-[#FF9500]/30">
-                Config Required
-              </span>
-            )}
-          </div>
-        )}
+        {/* Right side controls */}
+        <div className="flex items-center gap-2">
+          {!status?.isConfigured && !loading && (
+            <button
+              onClick={() => setIsGuideOpen(!isGuideOpen)}
+              className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-[#9BA3AF] hover:text-white bg-[#161922] border border-[#232838] hover:border-[#FC4C02] transition-colors flex items-center gap-1"
+            >
+              <span>{isGuideOpen ? "Tutup Panduan" : "Panduan Setup"}</span>
+              {isGuideOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          )}
+
+          <button
+            onClick={fetchStatus}
+            disabled={loading}
+            title="Re-check configuration"
+            className="p-1.5 rounded-lg text-xs text-[#9BA3AF] hover:text-[#F0F2F5] bg-[#161922] border border-[#232838] hover:border-[#384158] transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#FC4C02]" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Body States */}
-      <div className="pt-5">
+      <div className="pt-3">
         {loading ? (
           <div className="flex items-center justify-center py-8 gap-3 text-sm text-[#9BA3AF]">
             <RefreshCw className="w-4 h-4 animate-spin text-[#FC4C02]" />
             <span>Checking Strava OAuth connection state...</span>
           </div>
         ) : !status?.isConfigured ? (
-          // State: Missing Credentials
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-[#1A1E28] border border-[#2B3245] space-y-2">
-              <div className="flex items-center gap-2 text-[#FF9500] text-sm font-medium">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>API Credentials Missing in .env.local</span>
+          // State: Missing Credentials (Compact & Collapsible)
+          <div className="space-y-2.5">
+            {!isGuideOpen ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-[#9BA3AF] py-0.5">
+                <div className="flex items-center gap-2 text-[#FF9500]">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>Kredensial Strava Developer belum terisi di <code className="font-mono text-[#D4FF00] text-[11px]">.env.local</code>.</span>
+                </div>
+                <button
+                  onClick={() => setIsGuideOpen(true)}
+                  className="inline-flex items-center gap-1 text-[11px] font-mono text-[#FC4C02] hover:text-[#ff6b2b] hover:underline shrink-0"
+                >
+                  <span>Lihat langkah konfigurasi</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
               </div>
-              <p className="text-xs text-[#9BA3AF] leading-relaxed">
-                To connect with Strava, register a developer application on the official Strava portal and populate your credentials:
-              </p>
-              <ol className="text-xs text-[#F0F2F5] space-y-1 pl-4 list-decimal marker:text-[#9BA3AF]">
-                <li>Visit <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer" className="text-[#FC4C02] underline hover:text-[#ff6b2b]">strava.com/settings/api <ExternalLink className="inline w-3 h-3 ml-0.5" /></a></li>
-                <li>Set <strong>Authorization Callback Domain</strong> to: <code className="bg-[#12151D] px-1.5 py-0.5 rounded text-[#D4FF00] font-mono">localhost:3000</code></li>
-                <li>Add <code className="text-[#00F0FF] font-mono">STRAVA_CLIENT_ID</code> and <code className="text-[#00F0FF] font-mono">STRAVA_CLIENT_SECRET</code> to your <code className="font-mono">.env.local</code></li>
-              </ol>
-            </div>
-            <button
-              onClick={fetchStatus}
-              className="text-xs text-[#9BA3AF] hover:text-[#F0F2F5] flex items-center gap-1.5 transition-colors font-medium"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Re-check Configuration
-            </button>
+            ) : (
+              <div className="p-3.5 rounded-lg bg-[#161922] border border-[#232838] space-y-2.5 text-xs">
+                <div className="flex items-center justify-between text-[#FF9500] font-medium pb-1.5 border-b border-[#232838]">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>Langkah Integrasi Strava Developer API</span>
+                  </div>
+                  <button
+                    onClick={() => setIsGuideOpen(false)}
+                    className="text-[11px] font-mono text-[#9BA3AF] hover:text-white flex items-center gap-0.5"
+                  >
+                    <span>Kecilkan</span>
+                    <ChevronUp className="w-3 h-3" />
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#9BA3AF] leading-relaxed">
+                  Untuk mengaktifkan sinkronisasi langsung, daftarkan aplikasi di portal pengembang Strava:
+                </p>
+                <ol className="text-[11px] text-[#F0F2F5] space-y-1.5 pl-4 list-decimal marker:text-[#9BA3AF]">
+                  <li>
+                    Buka portal pengembang Strava:{" "}
+                    <a
+                      href="https://www.strava.com/settings/api"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#FC4C02] underline hover:text-[#ff6b2b] font-medium"
+                    >
+                      strava.com/settings/api <ExternalLink className="inline w-3 h-3 ml-0.5" />
+                    </a>
+                  </li>
+                  <li>
+                    Atur <strong>Authorization Callback Domain</strong> menjadi:{" "}
+                    <code className="bg-[#090A0F] px-1.5 py-0.5 rounded text-[#D4FF00] font-mono border border-[#232838]">
+                      localhost:3000
+                    </code>
+                  </li>
+                  <li>
+                    Salin Client ID & Client Secret ke file <code className="font-mono text-[#00F0FF]">.env.local</code>:
+                    <div className="mt-1 p-2 rounded bg-[#090A0F] border border-[#232838] font-mono text-[10px] text-[#9BA3AF]">
+                      STRAVA_CLIENT_ID=&quot;your_client_id&quot;<br />
+                      STRAVA_CLIENT_SECRET=&quot;your_client_secret&quot;
+                    </div>
+                  </li>
+                </ol>
+              </div>
+            )}
           </div>
         ) : status?.isConnected && status.athlete ? (
           // State: Connected
