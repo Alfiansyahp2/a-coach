@@ -93,3 +93,4 @@ npm run build
   - `ƒ /api/auth/strava/disconnect` (Dynamic)
   - `○ /api/auth/strava/status` (Static)
   - `ƒ /api/strava/sync` (Dynamic)
+

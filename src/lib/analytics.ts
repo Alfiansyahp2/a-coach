@@ -18,7 +18,7 @@ export function computeDashboardSummary(
   workouts: ScheduledWorkout[]
 ): DashboardSummary {
   const now = new Date();
-  
+
   // Calculate Start of Current Week (Monday)
   const dayOfWeek = now.getDay(); // 0 is Sunday
   const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
@@ -72,8 +72,8 @@ export function computeDashboardSummary(
     d instanceof Date
       ? d.toISOString().split('T')[0]
       : typeof d === 'string'
-      ? d.split('T')[0]
-      : String(d || '');
+        ? d.split('T')[0]
+        : String(d || '');
 
   const thisWeekWorkouts = workouts.filter((w) => {
     const sDate = toDateString(w.scheduled_date);

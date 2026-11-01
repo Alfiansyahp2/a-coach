@@ -483,8 +483,8 @@ export function normalizeActivityRow(row: any): Activity {
       row.start_date instanceof Date
         ? row.start_date.toISOString()
         : typeof row.start_date === 'string'
-        ? row.start_date
-        : String(row.start_date || ''),
+          ? row.start_date
+          : String(row.start_date || ''),
     distance_meters: Number(row.distance_meters || 0),
     moving_time_seconds: Number(row.moving_time_seconds || 0),
     elapsed_time_seconds: Number(row.elapsed_time_seconds || 0),
@@ -502,14 +502,14 @@ export function normalizeActivityRow(row: any): Activity {
       row.created_at instanceof Date
         ? row.created_at.toISOString()
         : typeof row.created_at === 'string'
-        ? row.created_at
-        : String(row.created_at || ''),
+          ? row.created_at
+          : String(row.created_at || ''),
     updated_at:
       row.updated_at instanceof Date
         ? row.updated_at.toISOString()
         : typeof row.updated_at === 'string'
-        ? row.updated_at
-        : String(row.updated_at || ''),
+          ? row.updated_at
+          : String(row.updated_at || ''),
   };
 }
 
@@ -703,8 +703,8 @@ export async function getScheduledWorkouts(
         row.scheduled_date instanceof Date
           ? row.scheduled_date.toISOString().split('T')[0]
           : typeof row.scheduled_date === 'string'
-          ? row.scheduled_date.split('T')[0]
-          : String(row.scheduled_date || ''),
+            ? row.scheduled_date.split('T')[0]
+            : String(row.scheduled_date || ''),
     }));
   }
 
@@ -752,8 +752,8 @@ export async function createScheduledWorkout(
         row.scheduled_date instanceof Date
           ? row.scheduled_date.toISOString().split('T')[0]
           : typeof row.scheduled_date === 'string'
-          ? row.scheduled_date.split('T')[0]
-          : String(row.scheduled_date || ''),
+            ? row.scheduled_date.split('T')[0]
+            : String(row.scheduled_date || ''),
     };
   }
 
@@ -842,16 +842,16 @@ export async function getWorkoutActivityMatches(userId: string = DEFAULT_USER_ID
         row.matched_at instanceof Date
           ? row.matched_at.toISOString()
           : typeof row.matched_at === 'string'
-          ? row.matched_at
-          : String(row.matched_at || ''),
+            ? row.matched_at
+            : String(row.matched_at || ''),
       workout: row.workout
         ? {
-            ...row.workout,
-            scheduled_date:
-              typeof row.workout.scheduled_date === 'string'
-                ? row.workout.scheduled_date.split('T')[0]
-                : String(row.workout.scheduled_date || ''),
-          }
+          ...row.workout,
+          scheduled_date:
+            typeof row.workout.scheduled_date === 'string'
+              ? row.workout.scheduled_date.split('T')[0]
+              : String(row.workout.scheduled_date || ''),
+        }
         : undefined,
       activity: row.activity ? normalizeActivityRow(row.activity) : undefined,
     }));
@@ -926,14 +926,14 @@ export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise
         row.start_date instanceof Date
           ? row.start_date.toISOString().split('T')[0]
           : typeof row.start_date === 'string'
-          ? row.start_date.split('T')[0]
-          : String(row.start_date || ''),
+            ? row.start_date.split('T')[0]
+            : String(row.start_date || ''),
       target_date:
         row.target_date instanceof Date
           ? row.target_date.toISOString().split('T')[0]
           : typeof row.target_date === 'string'
-          ? row.target_date.split('T')[0]
-          : String(row.target_date || ''),
+            ? row.target_date.split('T')[0]
+            : String(row.target_date || ''),
     }));
   }
   const store = ensureLocalStore();

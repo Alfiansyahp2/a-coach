@@ -96,8 +96,8 @@ export async function runAutoMatch(userId: string, activities: Activity[]): Prom
     val instanceof Date
       ? val.toISOString().split('T')[0]
       : typeof val === 'string'
-      ? val.split('T')[0]
-      : String(val || '').split('T')[0];
+        ? val.split('T')[0]
+        : String(val || '').split('T')[0];
 
   for (const activity of activities) {
     if (matchedActivityIds.has(activity.id)) continue;

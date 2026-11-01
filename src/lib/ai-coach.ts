@@ -134,8 +134,8 @@ export function generateTrainingInsights(
     d instanceof Date
       ? d.toISOString().split('T')[0]
       : typeof d === 'string'
-      ? d.split('T')[0]
-      : String(d || '');
+        ? d.split('T')[0]
+        : String(d || '');
 
   const sortedWorkouts = [...workouts].sort((a, b) =>
     toDateString(a.scheduled_date).localeCompare(toDateString(b.scheduled_date))

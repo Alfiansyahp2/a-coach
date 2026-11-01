@@ -188,11 +188,10 @@ async function DashboardTelemetry() {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] uppercase font-mono px-1.5 py-0.5 rounded font-semibold ${
-                        act.sport_type.toLowerCase().includes('run')
+                      <span className={`text-[10px] uppercase font-mono px-1.5 py-0.5 rounded font-semibold ${act.sport_type.toLowerCase().includes('run')
                           ? 'bg-[#D4FF00]/10 text-[#D4FF00]'
                           : 'bg-[#00F0FF]/10 text-[#00F0FF]'
-                      }`}>
+                        }`}>
                         {act.sport_type}
                       </span>
                       <h4 className="text-xs font-medium text-white truncate max-w-[200px] sm:max-w-xs">
@@ -246,9 +245,8 @@ async function DashboardTelemetry() {
                       <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-[#1A1E28] text-[#9BA3AF] border border-[#2B3245]">
                         {wo.workout_category}
                       </span>
-                      <span className={`text-[10px] font-mono uppercase font-semibold ${
-                        wo.status === 'COMPLETED' ? 'text-[#10b981]' : 'text-[#FF9500]'
-                      }`}>
+                      <span className={`text-[10px] font-mono uppercase font-semibold ${wo.status === 'COMPLETED' ? 'text-[#10b981]' : 'text-[#FF9500]'
+                        }`}>
                         {wo.status}
                       </span>
                     </div>

@@ -163,11 +163,10 @@ export function StravaConnectCard() {
       {/* Notification Banner */}
       {banner && (
         <div
-          className={`mb-5 p-3.5 rounded-lg text-sm flex items-start gap-3 border ${
-            banner.type === "success"
+          className={`mb-5 p-3.5 rounded-lg text-sm flex items-start gap-3 border ${banner.type === "success"
               ? "bg-[#052e16] border-[#10b981]/40 text-[#4ade80]"
               : "bg-[#3f0713] border-[#f43f5e]/40 text-[#fda4af]"
-          }`}
+            }`}
         >
           {banner.type === "success" ? (
             <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#10b981]" />
@@ -372,11 +371,10 @@ export function StravaConnectCard() {
                       </span>
                     </span>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${
-                        syncTelemetry.lastSync.status === "SUCCESS"
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${syncTelemetry.lastSync.status === "SUCCESS"
                           ? "bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30"
                           : "bg-[#f43f5e]/15 text-[#f43f5e] border border-[#f43f5e]/30"
-                      }`}
+                        }`}
                     >
                       {syncTelemetry.lastSync.status}
                     </span>
