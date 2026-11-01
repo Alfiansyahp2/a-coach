@@ -12,6 +12,10 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     avatar_url TEXT,
+    weight_kg NUMERIC(5, 2) DEFAULT 65.0,
+    height_cm NUMERIC(5, 1) DEFAULT 170.0,
+    resting_heart_rate INTEGER DEFAULT 68,
+    max_heart_rate INTEGER DEFAULT 188,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );

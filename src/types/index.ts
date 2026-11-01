@@ -24,6 +24,10 @@ export interface User {
   email: string;
   name: string;
   avatar_url?: string;
+  weight_kg?: number;
+  height_cm?: number;
+  resting_heart_rate?: number;
+  max_heart_rate?: number;
   created_at: string;
   updated_at: string;
 }

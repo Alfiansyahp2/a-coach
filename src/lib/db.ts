@@ -75,81 +75,30 @@ function ensureLocalStore(): LocalStoreSchema {
           email: 'athlete@protraining.internal',
           name: 'Apex Athlete',
           avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+          weight_kg: 65.0,
+          height_cm: 170.0,
+          resting_heart_rate: 68,
+          max_heart_rate: 188,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
       ],
       strava_connections: [],
       strava_tokens: [],
-      activities: [
-        {
-          id: 'act-001',
-          user_id: defaultUserId,
-          strava_activity_id: 11002001,
-          name: 'Morning Aerobic Threshold Run',
-          sport_type: 'Run',
-          start_date: `${getRelDate(-1)}T06:30:00Z`,
-          distance_meters: 10420,
-          moving_time_seconds: 3120, // 52 mins -> 4:59 min/km
-          elapsed_time_seconds: 3200,
-          elevation_gain_meters: 115,
-          average_speed_mps: 3.34, // ~4:59 min/km
-          max_speed_mps: 4.5,
-          average_heartrate: 154,
-          max_heartrate: 172,
-          average_cadence: 176,
-          average_watts: null,
-          calories: 780,
-          raw_summary_polyline: null,
-          description: 'Controlled cadence on rolling hills. Felt smooth.',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'act-002',
-          user_id: defaultUserId,
-          strava_activity_id: 11002002,
-          name: 'Easy Recovery Run',
-          sport_type: 'Run',
-          start_date: `${getRelDate(-3)}T07:15:00Z`,
-          distance_meters: 6200,
-          moving_time_seconds: 2100, // 35 mins -> 5:38 min/km
-          elapsed_time_seconds: 2150,
-          elevation_gain_meters: 42,
-          average_speed_mps: 2.95,
-          max_speed_mps: 3.8,
-          average_heartrate: 138,
-          max_heartrate: 149,
-          average_cadence: 172,
-          average_watts: null,
-          calories: 420,
-          description: 'Zone 2 recovery flush.',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'act-003',
-          user_id: defaultUserId,
-          strava_activity_id: 11002003,
-          name: 'Weekend Endurance Long Run',
-          sport_type: 'Run',
-          start_date: `${getRelDate(-6)}T06:00:00Z`,
-          distance_meters: 18500,
-          moving_time_seconds: 5735, // ~1h 35m -> 5:10 min/km
-          elapsed_time_seconds: 5900,
-          elevation_gain_meters: 210,
-          average_speed_mps: 3.22,
-          max_speed_mps: 4.2,
-          average_heartrate: 158,
-          max_heartrate: 176,
-          average_cadence: 174,
-          average_watts: null,
-          calories: 1420,
-          description: 'Long base building run. Hydrated every 5k.',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ],
+      activities: (() => {
+        try {
+          const importedPath = path.join(process.cwd(), 'data', 'imported_activities.json');
+          if (fs.existsSync(importedPath)) {
+            const raw = JSON.parse(fs.readFileSync(importedPath, 'utf8'));
+            return raw.map((a: any, idx: number) => ({
+              ...a,
+              id: a.id || `act-imported-${idx + 1}`,
+              user_id: defaultUserId,
+            }));
+          }
+        } catch {}
+        return [];
+      })(),
       scheduled_workouts: [
         {
           id: 'wo-001',
@@ -227,19 +176,7 @@ function ensureLocalStore(): LocalStoreSchema {
           updated_at: new Date().toISOString(),
         },
       ],
-      workout_activity_matches: [
-        {
-          id: 'match-001',
-          workout_id: 'wo-001',
-          activity_id: 'act-001',
-          is_manual_match: false,
-          completion_percentage: 104.2,
-          distance_delta_meters: 420,
-          duration_delta_seconds: 120,
-          pace_delta_seconds_per_km: -1, // 1 sec faster
-          matched_at: new Date().toISOString(),
-        },
-      ],
+      workout_activity_matches: [],
       fitness_goals: [
         {
           id: 'goal-001',
@@ -349,10 +286,26 @@ export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001';
 export async function getUser(userId: string = DEFAULT_USER_ID): Promise<User | null> {
   if (pgPool) {
     const res = await pgPool.query('SELECT * FROM users WHERE id = $1', [userId]);
-    return res.rows[0] || null;
+    if (!res.rows[0]) return null;
+    const row = res.rows[0];
+    return {
+      ...row,
+      weight_kg: row.weight_kg !== null && row.weight_kg !== undefined ? Number(row.weight_kg) : 65.0,
+      height_cm: row.height_cm !== null && row.height_cm !== undefined ? Number(row.height_cm) : 170.0,
+      resting_heart_rate: row.resting_heart_rate !== null && row.resting_heart_rate !== undefined ? Number(row.resting_heart_rate) : 68,
+      max_heart_rate: row.max_heart_rate !== null && row.max_heart_rate !== undefined ? Number(row.max_heart_rate) : 188,
+    };
   }
   const store = ensureLocalStore();
-  return store.users.find((u) => u.id === userId) || store.users[0] || null;
+  const user = store.users.find((u) => u.id === userId) || store.users[0] || null;
+  if (!user) return null;
+  return {
+    ...user,
+    weight_kg: user.weight_kg !== undefined ? Number(user.weight_kg) : 65.0,
+    height_cm: user.height_cm !== undefined ? Number(user.height_cm) : 170.0,
+    resting_heart_rate: user.resting_heart_rate !== undefined ? Number(user.resting_heart_rate) : 68,
+    max_heart_rate: user.max_heart_rate !== undefined ? Number(user.max_heart_rate) : 188,
+  };
 }
 
 export async function getStravaConnection(userId: string = DEFAULT_USER_ID): Promise<StravaConnection | null> {

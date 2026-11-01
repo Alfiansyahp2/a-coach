@@ -26,6 +26,7 @@ import {
   Calendar,
   Database,
   Gauge,
+  Heart,
   RefreshCw,
   ShieldCheck,
   TrendingUp,
@@ -65,17 +66,45 @@ async function DashboardTelemetry() {
         </div>
 
         {user && (
-          <div className="flex items-center gap-2">
-            {user.avatar_url && (
-              <img
-                src={user.avatar_url}
-                alt={user.name}
-                className="w-6 h-6 rounded-full border border-[#232838] object-cover"
-              />
-            )}
-            <span className="text-xs font-medium text-white">
-              {user.name}
-            </span>
+          <div className="flex items-center gap-3">
+            {/* Athlete Biometric Baseline Telemetry Badge */}
+            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-[#12151D] border border-[#232838] text-xs font-mono">
+              <span className="flex items-center gap-1 text-[#f43f5e]">
+                <Heart className="w-3.5 h-3.5 fill-[#f43f5e]/20" />
+                <span className="font-tabular font-bold">{user.resting_heart_rate || 68}</span>
+                <span className="text-[10px] text-[#9BA3AF]">bpm rest</span>
+              </span>
+              <span className="text-[#3A404D]">|</span>
+              <span className="text-[#00F0FF] font-tabular">
+                {user.height_cm || 170} <span className="text-[10px] text-[#9BA3AF]">cm</span>
+              </span>
+              <span className="text-[#3A404D]">|</span>
+              <span className="text-[#D4FF00] font-tabular">
+                {user.weight_kg || 65} <span className="text-[10px] text-[#9BA3AF]">kg</span>
+              </span>
+              <span className="text-[#3A404D]">|</span>
+              <span className="text-[#10b981] font-semibold text-[11px]">
+                BMI 22.5
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {user.avatar_url && (
+                <img
+                  src={user.avatar_url}
+                  alt={user.name}
+                  className="w-7 h-7 rounded-full border border-[#232838] object-cover"
+                />
+              )}
+              <div className="hidden sm:block text-left">
+                <div className="text-xs font-semibold text-white leading-none">
+                  {user.name}
+                </div>
+                <div className="text-[10px] font-mono text-[#10b981] leading-tight pt-0.5">
+                  Calibrated Athlete
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

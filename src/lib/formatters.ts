@@ -101,37 +101,76 @@ export function formatCalories(cal: number | null | undefined): string {
 }
 
 /**
- * Estimate percentage time in 5 standard heart rate zones given average HR and max HR
+ * Compute BMI and category given weight in kg and height in cm.
  */
-export function estimateHeartRateZones(avgHr: number, maxHr?: number | null) {
-  const peak = maxHr || Math.round(avgHr * 1.15);
-  const z2Threshold = peak * 0.70;
-  const z3Threshold = peak * 0.80;
-  const z4Threshold = peak * 0.90;
+export function calculateBMI(weightKg: number = 65, heightCm: number = 170): { bmi: number; classification: string } {
+  if (!weightKg || !heightCm || heightCm <= 0) return { bmi: 0, classification: 'Unknown' };
+  const heightM = heightCm / 100;
+  const bmi = Math.round((weightKg / (heightM * heightM)) * 10) / 10;
+  let classification = 'Optimal / Athletic';
+  if (bmi < 18.5) classification = 'Underweight';
+  else if (bmi < 24.9) classification = 'Optimal / Athletic';
+  else if (bmi < 29.9) classification = 'Overweight';
+  else classification = 'High';
+  return { bmi, classification };
+}
 
-  if (avgHr < z2Threshold) {
+/**
+ * Return Karvonen zones boundaries given resting HR (default 68) and max HR (default 188).
+ */
+export function getKarvonenZones(restingHr: number = 68, maxHr: number = 188) {
+  const peak = Math.max(maxHr, restingHr + 30);
+  const hrr = peak - restingHr;
+  return {
+    restingHr,
+    maxHr: peak,
+    hrr,
+    z1: { min: Math.round(restingHr + hrr * 0.50), max: Math.round(restingHr + hrr * 0.60) },
+    z2: { min: Math.round(restingHr + hrr * 0.60), max: Math.round(restingHr + hrr * 0.70) },
+    z3: { min: Math.round(restingHr + hrr * 0.70), max: Math.round(restingHr + hrr * 0.80) },
+    z4: { min: Math.round(restingHr + hrr * 0.80), max: Math.round(restingHr + hrr * 0.90) },
+    z5: { min: Math.round(restingHr + hrr * 0.90), max: peak },
+  };
+}
+
+/**
+ * Estimate percentage time in 5 physiological heart rate zones given average HR, max HR, and resting HR (Karvonen method).
+ */
+export function estimateHeartRateZones(avgHr: number, maxHr?: number | null, restingHr: number = 68) {
+  const peak = maxHr || 188;
+  const zones = getKarvonenZones(restingHr, peak);
+
+  if (avgHr < zones.z2.min) {
     return [
-      { zone: 'Z1 Active Recovery', range: `< ${Math.round(peak * 0.6)} bpm`, pct: 30, color: '#38bdf8' },
-      { zone: 'Z2 Aerobic Base', range: `${Math.round(peak * 0.6)} - ${Math.round(z2Threshold)} bpm`, pct: 55, color: '#10b981' },
-      { zone: 'Z3 Tempo Sustained', range: `${Math.round(z2Threshold)} - ${Math.round(z3Threshold)} bpm`, pct: 12, color: '#f59e0b' },
-      { zone: 'Z4 Lactate Threshold', range: `${Math.round(z3Threshold)} - ${Math.round(z4Threshold)} bpm`, pct: 3, color: '#f97316' },
-      { zone: 'Z5 Neuromuscular VO2', range: `> ${Math.round(z4Threshold)} bpm`, pct: 0, color: '#ef4444' },
+      { zone: 'Z1 Active Recovery', range: `< ${zones.z1.max} bpm`, pct: 35, color: '#38bdf8' },
+      { zone: 'Z2 Aerobic Base', range: `${zones.z2.min} - ${zones.z2.max} bpm`, pct: 50, color: '#10b981' },
+      { zone: 'Z3 Tempo Sustained', range: `${zones.z3.min} - ${zones.z3.max} bpm`, pct: 12, color: '#f59e0b' },
+      { zone: 'Z4 Lactate Threshold', range: `${zones.z4.min} - ${zones.z4.max} bpm`, pct: 3, color: '#f97316' },
+      { zone: 'Z5 Neuromuscular VO2', range: `> ${zones.z5.min} bpm`, pct: 0, color: '#ef4444' },
     ];
-  } else if (avgHr < z3Threshold) {
+  } else if (avgHr < zones.z3.min) {
     return [
-      { zone: 'Z1 Active Recovery', range: `< ${Math.round(peak * 0.6)} bpm`, pct: 10, color: '#38bdf8' },
-      { zone: 'Z2 Aerobic Base', range: `${Math.round(peak * 0.6)} - ${Math.round(z2Threshold)} bpm`, pct: 60, color: '#10b981' },
-      { zone: 'Z3 Tempo Sustained', range: `${Math.round(z2Threshold)} - ${Math.round(z3Threshold)} bpm`, pct: 22, color: '#f59e0b' },
-      { zone: 'Z4 Lactate Threshold', range: `${Math.round(z3Threshold)} - ${Math.round(z4Threshold)} bpm`, pct: 7, color: '#f97316' },
-      { zone: 'Z5 Neuromuscular VO2', range: `> ${Math.round(z4Threshold)} bpm`, pct: 1, color: '#ef4444' },
+      { zone: 'Z1 Active Recovery', range: `< ${zones.z1.max} bpm`, pct: 10, color: '#38bdf8' },
+      { zone: 'Z2 Aerobic Base', range: `${zones.z2.min} - ${zones.z2.max} bpm`, pct: 60, color: '#10b981' },
+      { zone: 'Z3 Tempo Sustained', range: `${zones.z3.min} - ${zones.z3.max} bpm`, pct: 22, color: '#f59e0b' },
+      { zone: 'Z4 Lactate Threshold', range: `${zones.z4.min} - ${zones.z4.max} bpm`, pct: 7, color: '#f97316' },
+      { zone: 'Z5 Neuromuscular VO2', range: `> ${zones.z5.min} bpm`, pct: 1, color: '#ef4444' },
+    ];
+  } else if (avgHr < zones.z4.min) {
+    return [
+      { zone: 'Z1 Active Recovery', range: `< ${zones.z1.max} bpm`, pct: 5, color: '#38bdf8' },
+      { zone: 'Z2 Aerobic Base', range: `${zones.z2.min} - ${zones.z2.max} bpm`, pct: 25, color: '#10b981' },
+      { zone: 'Z3 Tempo Sustained', range: `${zones.z3.min} - ${zones.z3.max} bpm`, pct: 45, color: '#f59e0b' },
+      { zone: 'Z4 Lactate Threshold', range: `${zones.z4.min} - ${zones.z4.max} bpm`, pct: 20, color: '#f97316' },
+      { zone: 'Z5 Neuromuscular VO2', range: `> ${zones.z5.min} bpm`, pct: 5, color: '#ef4444' },
     ];
   } else {
     return [
-      { zone: 'Z1 Active Recovery', range: `< ${Math.round(peak * 0.6)} bpm`, pct: 5, color: '#38bdf8' },
-      { zone: 'Z2 Aerobic Base', range: `${Math.round(peak * 0.6)} - ${Math.round(z2Threshold)} bpm`, pct: 25, color: '#10b981' },
-      { zone: 'Z3 Tempo Sustained', range: `${Math.round(z2Threshold)} - ${Math.round(z3Threshold)} bpm`, pct: 40, color: '#f59e0b' },
-      { zone: 'Z4 Lactate Threshold', range: `${Math.round(z3Threshold)} - ${Math.round(z4Threshold)} bpm`, pct: 24, color: '#f97316' },
-      { zone: 'Z5 Neuromuscular VO2', range: `> ${Math.round(z4Threshold)} bpm`, pct: 6, color: '#ef4444' },
+      { zone: 'Z1 Active Recovery', range: `< ${zones.z1.max} bpm`, pct: 3, color: '#38bdf8' },
+      { zone: 'Z2 Aerobic Base', range: `${zones.z2.min} - ${zones.z2.max} bpm`, pct: 15, color: '#10b981' },
+      { zone: 'Z3 Tempo Sustained', range: `${zones.z3.min} - ${zones.z3.max} bpm`, pct: 30, color: '#f59e0b' },
+      { zone: 'Z4 Lactate Threshold', range: `${zones.z4.min} - ${zones.z4.max} bpm`, pct: 37, color: '#f97316' },
+      { zone: 'Z5 Neuromuscular VO2', range: `> ${zones.z5.min} bpm`, pct: 15, color: '#ef4444' },
     ];
   }
 }

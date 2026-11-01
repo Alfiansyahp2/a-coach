@@ -62,3 +62,4 @@ Kebutuhan antarmuka:
 - **Rute yang Dihasilkan**:
   - `◐ /` (Partial Prerender)
   - `◐ /activities/[id]` (Partial Prerender dynamic streaming)
+

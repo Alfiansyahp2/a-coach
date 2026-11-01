@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import {
   getActivityById,
+  getUser,
   getAdjacentActivities,
   getWorkoutActivityMatches,
   DEFAULT_USER_ID,
@@ -66,7 +67,10 @@ async function ActivityDetailContent({ params }: ActivityDetailPageProps) {
   await connection();
 
   const { id } = await params;
-  const activity = await getActivityById(id, DEFAULT_USER_ID);
+  const [activity, user] = await Promise.all([
+    getActivityById(id, DEFAULT_USER_ID),
+    getUser(DEFAULT_USER_ID),
+  ]);
 
   if (!activity) {
     notFound();
@@ -92,7 +96,7 @@ async function ActivityDetailContent({ params }: ActivityDetailPageProps) {
     : 100;
 
   const hrZones = activity.average_heartrate
-    ? estimateHeartRateZones(activity.average_heartrate, activity.max_heartrate)
+    ? estimateHeartRateZones(activity.average_heartrate, activity.max_heartrate, user?.resting_heart_rate || 68)
     : [];
 
   return (
@@ -412,13 +416,9 @@ async function ActivityDetailContent({ params }: ActivityDetailPageProps) {
                   </span>
                 </div>
                 <div className="text-[11px] text-[#5A6272] font-mono flex items-center justify-between">
-                  <span>Intensity Zone:</span>
-                  <span className="text-white font-semibold">
-                    {activity.average_heartrate && activity.average_heartrate > 165
-                      ? 'Zone 4 (Threshold)'
-                      : activity.average_heartrate && activity.average_heartrate > 145
-                      ? 'Zone 3 (Aerobic Tempo)'
-                      : 'Zone 2 (Aerobic Base)'}
+                  <span>Resting HR Baseline:</span>
+                  <span className="text-[#f43f5e] font-tabular font-semibold">
+                    {user?.resting_heart_rate || 68} bpm (Karvonen)
                   </span>
                 </div>
               </div>
