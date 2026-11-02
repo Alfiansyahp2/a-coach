@@ -529,7 +529,7 @@ export async function getAuthoritativeHealthContext(
 
   const clinicianRestrictions: string[] = [];
   for (const m of assessments) {
-    if (m.clinician_restrictions && m.clinician_restrictions.trim().length > 0) {
+    if (m.verification_status === 'CLINICIAN_VERIFIED' && m.clinician_restrictions && m.clinician_restrictions.trim().length > 0) {
       clinicianRestrictions.push(m.clinician_restrictions.trim());
     }
   }
@@ -576,7 +576,7 @@ export async function recordMedicalProcedureAndAssessment(
 }> {
   const restrictions = params.clearance_granted
     ? 'CLEARED_FOR_TRAINING'
-    : params.clinician_restrictions || 'IMPACT_RESTRICTED';
+    : params.clinician_restrictions || '';
 
   const assessment = await createAthleteMedicalAssessment({
     user_id: userId,

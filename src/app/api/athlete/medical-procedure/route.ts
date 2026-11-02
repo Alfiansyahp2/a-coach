@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       imaging_summary: body.imaging_summary || null,
       clinician_restrictions: body.clearance_granted
         ? "CLEARED_FOR_TRAINING"
-        : (body.clinician_restrictions || "IMPACT_RESTRICTED"),
+        : (body.clinician_restrictions || null),
       rehabilitation_protocol: body.rehabilitation_protocol || body.procedure_details || null,
       return_to_sport_criteria: body.return_to_sport_criteria || null,
       follow_up_date: body.follow_up_date || null,
