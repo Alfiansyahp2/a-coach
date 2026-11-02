@@ -113,9 +113,16 @@ export function EditAthleteProfileModal({
         body: JSON.stringify(bioPayload),
       });
 
-      const bioData = await bioRes.json();
+      const bioText = await bioRes.text();
+      let bioData: any = {};
+      try {
+        bioData = bioText ? JSON.parse(bioText) : {};
+      } catch {
+        throw new Error(`Respon server tidak valid (${bioRes.status})`);
+      }
+
       if (!bioRes.ok || !bioData.success) {
-        throw new Error(bioData.error || "Gagal memperbarui biometrik atlet.");
+        throw new Error(bioData.error || bioData.message || "Gagal memperbarui biometrik atlet.");
       }
 
       // 2. Submit Medical Procedure if updated or recorded
@@ -143,9 +150,16 @@ export function EditAthleteProfileModal({
           body: JSON.stringify(medPayload),
         });
 
-        const medData = await medRes.json();
+        const medText = await medRes.text();
+        let medData: any = {};
+        try {
+          medData = medText ? JSON.parse(medText) : {};
+        } catch {
+          throw new Error(`Respon server tidak valid (${medRes.status})`);
+        }
+
         if (!medRes.ok || !medData.success) {
-          throw new Error(medData.error || "Gagal mencatat prosedur medis.");
+          throw new Error(medData.error || medData.message || "Gagal mencatat prosedur medis.");
         }
         medUpdated = true;
       }
