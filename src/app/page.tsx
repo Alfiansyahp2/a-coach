@@ -26,6 +26,7 @@ import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
 import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
 import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
+import { AddActivityModal } from "@/components/AddActivityModal";
 import { computePersonalRecords } from "@/lib/personalRecords";
 import {
   Activity as ActivityIcon,
@@ -87,8 +88,11 @@ async function DashboardTelemetry() {
           </div>
         </div>
 
-        {user && (
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
+          <AddActivityModal variant="button" />
+
+          {user && (
+            <div className="flex items-center gap-3">
             {/* Athlete Biometric Baseline Badge (Calibrated to 68 bpm, 170cm, 65kg) */}
             <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] text-xs font-mono">
               <span className="flex items-center gap-1 text-[#FF2A6D]">
@@ -133,6 +137,7 @@ async function DashboardTelemetry() {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* 2. Strava OAuth Handshake Gateway (Collapsible & Compact) */}

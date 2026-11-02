@@ -36,7 +36,8 @@ import {
   Gauge,
   Sliders,
 } from "lucide-react";
-import { formatDistance, formatDuration, formatDate } from "@/lib/formatters";
+import { formatDistance, formatDuration, formatDate, formatDateOnly } from "@/lib/formatters";
+import { AddActivityModal } from "@/components/AddActivityModal";
 
 interface ScheduleTrainingHubProps {
   initialPlan: TrainingPlan | null;
@@ -386,6 +387,8 @@ export function ScheduleTrainingHub({
               <span>Daftar Sesi</span>
             </button>
           </div>
+
+          <AddActivityModal variant="button" />
 
           <button
             onClick={handleRegenerate}
@@ -1122,8 +1125,14 @@ export function ScheduleTrainingHub({
               </div>
             )}
 
-            {/* Close Button */}
-            <div className="flex justify-end pt-2 border-t border-[#1F2430]">
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-[#1F2430]">
+              <AddActivityModal
+                variant="outline"
+                defaultWorkout={selectedWorkout}
+                defaultDate={formatDateOnly(selectedWorkout.scheduled_date)}
+                onSuccess={() => setSelectedWorkout(null)}
+              />
               <button
                 onClick={() => setSelectedWorkout(null)}
                 className="px-4 py-1.5 rounded-sm bg-[#161922] border border-[#1F2430] hover:border-[#D4FF00] text-xs font-semibold text-[#F0F2F5] transition-colors"
