@@ -20,7 +20,7 @@ export function computePersonalRecords(
   // ==========================================
   // 1. RUNNING BENCHMARKS
   // ==========================================
-  
+
   // 1A. Fastest 5K Pace / Run
   const runs5k = runs.filter((r) => Number(r.distance_meters || 0) >= 4900);
   if (runs5k.length > 0) {
@@ -33,6 +33,8 @@ export function computePersonalRecords(
     const distKm = Number(best5k.distance_meters) / 1000;
     const paceSec = Math.round(Number(best5k.moving_time_seconds) / distKm);
     const est5kSec = Math.round(paceSec * 5);
+    const pMin = Math.floor(paceSec / 60);
+    const pSec = paceSec % 60;
 
     prs.push({
       id: `pr-run-5k-${userId}`,
@@ -44,6 +46,7 @@ export function computePersonalRecords(
       record_display: formatDuration(est5kSec),
       achieved_date: best5k.start_date,
       activity_name: best5k.name,
+      subtext: `Pace: ${pMin}:${pSec < 10 ? "0" : ""}${pSec} /km • ${distKm.toFixed(2)} km run`,
       created_at: best5k.start_date,
     });
   }
@@ -60,6 +63,8 @@ export function computePersonalRecords(
     const distKm = Number(best10k.distance_meters) / 1000;
     const paceSec = Math.round(Number(best10k.moving_time_seconds) / distKm);
     const est10kSec = Math.round(paceSec * 10);
+    const pMin = Math.floor(paceSec / 60);
+    const pSec = paceSec % 60;
 
     prs.push({
       id: `pr-run-10k-${userId}`,
@@ -71,6 +76,7 @@ export function computePersonalRecords(
       record_display: formatDuration(est10kSec),
       achieved_date: best10k.start_date,
       activity_name: best10k.name,
+      subtext: `Pace: ${pMin}:${pSec < 10 ? "0" : ""}${pSec} /km • ${distKm.toFixed(2)} km session`,
       created_at: best10k.start_date,
     });
   }
@@ -81,6 +87,11 @@ export function computePersonalRecords(
       Number(cur.distance_meters || 0) > Number(best.distance_meters || 0) ? cur : best
     );
     const km = Number(longestRun.distance_meters || 0) / 1000;
+    const durSec = Number(longestRun.moving_time_seconds || 0);
+    const paceSec = Math.round(durSec / km);
+    const pMin = Math.floor(paceSec / 60);
+    const pSec = paceSec % 60;
+
     prs.push({
       id: `pr-run-longest-${userId}`,
       user_id: userId,
@@ -91,6 +102,7 @@ export function computePersonalRecords(
       record_display: `${km.toFixed(2)} km`,
       achieved_date: longestRun.start_date,
       activity_name: longestRun.name,
+      subtext: `${formatDuration(durSec)} duration • Pace ${pMin}:${pSec < 10 ? "0" : ""}${pSec} /km`,
       created_at: longestRun.start_date,
     });
   }
@@ -102,8 +114,9 @@ export function computePersonalRecords(
       const curPace = Number(cur.moving_time_seconds) / (Number(cur.distance_meters) / 1000);
       return curPace < bestPace ? cur : best;
     });
+    const distKm = Number(bestPaceRun.distance_meters) / 1000;
     const paceSec = Math.round(
-      Number(bestPaceRun.moving_time_seconds) / (Number(bestPaceRun.distance_meters) / 1000)
+      Number(bestPaceRun.moving_time_seconds) / distKm
     );
     const min = Math.floor(paceSec / 60);
     const sec = paceSec % 60;
@@ -117,6 +130,7 @@ export function computePersonalRecords(
       record_display: `${min}:${sec < 10 ? "0" : ""}${sec} /km`,
       achieved_date: bestPaceRun.start_date,
       activity_name: bestPaceRun.name,
+      subtext: `${distKm.toFixed(2)} km in ${formatDuration(Number(bestPaceRun.moving_time_seconds))}`,
       created_at: bestPaceRun.start_date,
     });
   }
@@ -131,6 +145,10 @@ export function computePersonalRecords(
       Number(cur.distance_meters || 0) > Number(best.distance_meters || 0) ? cur : best
     );
     const km = Number(longestRide.distance_meters || 0) / 1000;
+    const durSec = Number(longestRide.moving_time_seconds || 0);
+    const spKmh = (km / (durSec / 3600)).toFixed(1);
+    const elev = Math.round(Number(longestRide.elevation_gain_meters || 0));
+
     prs.push({
       id: `pr-ride-longest-${userId}`,
       user_id: userId,
@@ -141,6 +159,7 @@ export function computePersonalRecords(
       record_display: `${km.toFixed(2)} km`,
       achieved_date: longestRide.start_date,
       activity_name: longestRide.name,
+      subtext: `${formatDuration(durSec)} • Avg ${spKmh} km/h • ▲ ${elev}m`,
       created_at: longestRide.start_date,
     });
   }
@@ -155,10 +174,8 @@ export function computePersonalRecords(
         Number(cur.distance_meters) / 1000 / (Number(cur.moving_time_seconds) / 3600);
       return curKmh > bestKmh ? cur : best;
     });
-    const speedKmh =
-      Number(fastestRide.distance_meters) /
-      1000 /
-      (Number(fastestRide.moving_time_seconds) / 3600);
+    const distKm = Number(fastestRide.distance_meters) / 1000;
+    const speedKmh = distKm / (Number(fastestRide.moving_time_seconds) / 3600);
     prs.push({
       id: `pr-ride-speed-${userId}`,
       user_id: userId,
@@ -169,6 +186,7 @@ export function computePersonalRecords(
       record_display: `${(Math.round(speedKmh * 10) / 10).toFixed(1)} km/h`,
       achieved_date: fastestRide.start_date,
       activity_name: fastestRide.name,
+      subtext: `${distKm.toFixed(2)} km in ${formatDuration(Number(fastestRide.moving_time_seconds))}`,
       created_at: fastestRide.start_date,
     });
   }
@@ -181,6 +199,7 @@ export function computePersonalRecords(
         : best
     );
     const elev = Math.round(Number(maxElevRide.elevation_gain_meters || 0));
+    const distKm = (Number(maxElevRide.distance_meters || 0) / 1000).toFixed(2);
     prs.push({
       id: `pr-ride-elev-${userId}`,
       user_id: userId,
@@ -191,6 +210,7 @@ export function computePersonalRecords(
       record_display: `▲ ${elev} m`,
       achieved_date: maxElevRide.start_date,
       activity_name: maxElevRide.name,
+      subtext: `${distKm} km route • Rolling ascent`,
       created_at: maxElevRide.start_date,
     });
   }
@@ -215,13 +235,13 @@ export function computePersonalRecords(
       sport_type: "Ride",
       category: "40K+ Endurance Ride",
       record_value: Math.round(distKm * 10) / 10,
-      record_display: `${distKm.toFixed(1)} km @ ${kmh.toFixed(1)} km/h`,
+      record_display: `${distKm.toFixed(2)} km`,
       achieved_date: best40k.start_date,
       activity_name: best40k.name,
+      subtext: `Avg ${kmh.toFixed(1)} km/h • ${formatDuration(durSec)} century pace`,
       created_at: best40k.start_date,
     });
   }
 
   return prs;
 }
-

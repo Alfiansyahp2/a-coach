@@ -135,6 +135,7 @@ export interface PersonalRecord {
   record_display: string;
   achieved_date: string;
   activity_name?: string;
+  subtext?: string;
   created_at: string;
   updated_at?: string;
 }

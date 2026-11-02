@@ -191,7 +191,7 @@ function computePRs(activities, userId) {
       sport_type: 'Ride',
       category: '40K+ Endurance Ride',
       record_value: Math.round(distKm * 10) / 10,
-      record_display: `${distKm.toFixed(1)} km @ ${kmh.toFixed(1)} km/h`,
+      record_display: `${distKm.toFixed(2)} km`,
       achieved_date: best40k.start_date,
     });
   }

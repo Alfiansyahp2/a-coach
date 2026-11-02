@@ -36,7 +36,7 @@ Semua rekor pribadi wajib memiliki **integritas data (*Data Provenance Integrity
 | **Longest Ride** | Semua aktivitas bertipe `Ride` | Jarak dalam meter | `XX.XX km` (contoh: `56.10 km`) | Nilai `distance_meters` terbesar dalam satu sesi tunggal. |
 | **Fastest Speed (≥20K)** | Aktivitas bersepeda dengan jarak $\ge 20,000\text{ m}$ | Kecepatan dalam km/h ($0.1$ presisi) | `XX.X km/h` (contoh: `23.8 km/h`) | Kecepatan rata-rata tertinggi pada rute jarak sedang/jauh ($\ge 20\text{ km}$). |
 | **Max Elevation Climb** | Semua aktivitas bertipe `Ride` | Elevasi dalam meter | `▲ XXX m` (contoh: `▲ 125 m`) | Akumulasi tanjakan vertikal tertinggi dalam satu sesi bersepeda. |
-| **40K+ Endurance Ride** | Aktivitas bersepeda dengan jarak $\ge 40,000\text{ m}$ | Jarak dalam kilometer | `XX.X km @ YY.Y km/h` (contoh: `56.1 km @ 21.4 km/h`) | Sesi ketahanan terpanjang dengan kecepatan rata-rata tercepat. |
+| **40K+ Endurance Ride** | Aktivitas bersepeda dengan jarak $\ge 40,000\text{ m}$ | Jarak dalam kilometer ($0.01$ presisi) | `XX.XX km` (contoh: `56.10 km`) | Sesi ketahanan terpanjang ($\ge 40\text{ km}$) dengan kecepatan rata-rata tercepat. Kecepatan rata-rata ditampilkan di subteks pendukung (`Avg 21.4 km/h • century pace`). |
 
 ---
 

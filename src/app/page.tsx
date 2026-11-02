@@ -23,6 +23,7 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
 import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
+import { computePersonalRecords } from "@/lib/personalRecords";
 import {
   Activity as ActivityIcon,
   Calendar,
@@ -50,6 +51,9 @@ async function DashboardTelemetry() {
     getPersonalRecords(DEFAULT_USER_ID),
     getDatabaseStatus(),
   ]);
+
+  const computedPrs = computePersonalRecords(activities, DEFAULT_USER_ID);
+  const displayPrs = prs.length > 0 ? prs.map((p) => { const m = computedPrs.find(c => c.category === p.category); return { ...p, subtext: p.subtext || m?.subtext, activity_name: p.activity_name || m?.activity_name }; }) : computedPrs;
 
   const summary = computeDashboardSummary(activities, workouts);
   const insights = generateTrainingInsights(activities, workouts, goals);
@@ -283,7 +287,7 @@ async function DashboardTelemetry() {
           </div>
 
                     {/* Personal Records Benchmarks Deck */}
-          <PersonalRecordsDeck prs={prs} />
+          <PersonalRecordsDeck prs={displayPrs} />
 
 {/* Fitness Goals Progress Deck */}
           {goals.length > 0 && (
