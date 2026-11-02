@@ -47,12 +47,36 @@ export function DashboardIntegrityStrip({
         <AddActivityModal variant="button" />
 
         {user && (
-          <EditAthleteProfileModal
-            user={user}
-            profile={healthContext?.profile}
-            healthContext={healthContext}
-            variant="badge"
-          />
+          <div className="flex items-center gap-2.5">
+            <EditAthleteProfileModal
+              user={user}
+              profile={healthContext?.profile}
+              healthContext={healthContext}
+              variant="badge"
+            />
+
+            <div className="hidden sm:flex items-center gap-2 pl-2.5 border-l border-[#1F2430]">
+              {user.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user.name}
+                  className="w-7 h-7 rounded-sm border border-[#1F2430] object-cover shadow-xs"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-sm bg-[#161922] border border-[#1F2430] flex items-center justify-center text-xs font-mono font-bold text-[#00F0FF]">
+                  {user.name.charAt(0)}
+                </div>
+              )}
+              <div className="text-left font-mono">
+                <div className="text-xs font-semibold text-[#F0F2F5] leading-none">
+                  {user.name}
+                </div>
+                <div className="text-[9px] text-[#10B981] leading-tight pt-0.5">
+                  Calibrated Athlete
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
