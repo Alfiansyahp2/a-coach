@@ -10,18 +10,13 @@ import {
   AlertCircle,
   Stethoscope,
   Activity,
-  Calendar,
-  ShieldCheck,
   RefreshCw,
-  Sparkles,
   User as UserIcon,
   Save,
-  Check,
-  Info,
-  ChevronRight,
-  ClipboardList,
 } from "lucide-react";
 import { User, AthleteProfile, AuthoritativeAthleteHealthContext } from "@/types";
+import { ProfileBiometricsTab } from "./profile/ProfileBiometricsTab";
+import { ProfileMedicalProceduresTab } from "./profile/ProfileMedicalProceduresTab";
 
 interface EditAthleteProfileModalProps {
   user?: Partial<User> | null;
@@ -79,19 +74,11 @@ export function EditAthleteProfileModal({
   const numericWeight = parseFloat(weightKg) || 0;
   const numericHeight = parseFloat(heightCm) || 0;
   const calculatedBmi =
-    numericWeight > 0 && numericHeight > 0
+    numericHeight > 0 && numericWeight > 0
       ? (numericWeight / ((numericHeight / 100) * (numericHeight / 100))).toFixed(1)
       : "22.5";
 
   const handleOpen = () => {
-    setName(user?.name || "Apex Athlete");
-    setAge(String(profile?.age || 22));
-    setRestingHr(String(user?.resting_heart_rate || 68));
-    setHeightCm(String(user?.height_cm || 170));
-    setWeightKg(String(user?.weight_kg || 65));
-    setTrainingDays(profile?.training_days_per_week || 3);
-    setAnkleStatus(ankleInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT");
-    setKneeStatus(kneeInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT");
     setErrorMsg(null);
     setSuccessMsg(null);
     setIsOpen(true);
@@ -105,49 +92,68 @@ export function EditAthleteProfileModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
-      setErrorMsg("Nama atlet tidak boleh kosong.");
-      return;
-    }
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setIsSubmitting(true);
 
     try {
-      setIsSubmitting(true);
-      setErrorMsg(null);
-
-      const payload = {
-        name: name.trim(),
-        age: parseInt(age, 10) || 22,
-        height_cm: parseFloat(heightCm) || 170,
-        weight_kg: parseFloat(weightKg) || 65,
-        resting_heart_rate: parseInt(restingHr, 10) || 68,
+      // 1. Submit Biometric Updates
+      const bioPayload = {
+        name: name.trim() || undefined,
+        age: parseInt(age, 10) || undefined,
+        resting_heart_rate: parseInt(restingHr, 10) || undefined,
+        height_cm: parseFloat(heightCm) || undefined,
+        weight_kg: parseFloat(weightKg) || undefined,
         training_days_per_week: trainingDays,
-        // Medical assessment
-        has_medical_procedure: hasNewProcedure,
-        procedure_date: procedureDate,
-        provider_type: providerType,
-        provider_name: providerName.trim() || undefined,
-        procedure_details: procedureDetails.trim() || undefined,
-        clinical_findings: clinicalFindings.trim() || undefined,
-        clearance_granted: clearanceGranted,
-        ankle_status: ankleStatus,
-        knee_status: kneeStatus,
       };
 
-      const res = await fetch("/api/athlete/profile", {
-        method: "POST",
+      const bioRes = await fetch("/api/athlete/profile", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(bioPayload),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Gagal memperbarui profil atlet.");
+      const bioData = await bioRes.json();
+      if (!bioRes.ok || !bioData.success) {
+        throw new Error(bioData.error || "Gagal memperbarui biometrik atlet.");
+      }
+
+      // 2. Submit Medical Procedure if updated or recorded
+      let medUpdated = false;
+      if (
+        hasNewProcedure ||
+        ankleStatus !== (ankleInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT") ||
+        kneeStatus !== (kneeInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT")
+      ) {
+        const medPayload = {
+          injury_id: ankleInjury?.id || kneeInjury?.id || null,
+          assessment_date: procedureDate,
+          healthcare_provider_type: providerType,
+          provider_name: providerName.trim() || null,
+          clinical_findings: clinicalFindings.trim() || "Pemeriksaan klinis berkala & monitoring toleransi sendi.",
+          rehabilitation_protocol: procedureDetails.trim() || null,
+          clearance_granted: clearanceGranted,
+          ankle_status: ankleStatus,
+          knee_status: kneeStatus,
+        };
+
+        const medRes = await fetch("/api/athlete/medical-procedure", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(medPayload),
+        });
+
+        const medData = await medRes.json();
+        if (!medRes.ok || !medData.success) {
+          throw new Error(medData.error || "Gagal mencatat prosedur medis.");
+        }
+        medUpdated = true;
       }
 
       setSuccessMsg(
-        clearanceGranted
-          ? "Profil atlet & izin medis berhasil diperbarui! Kunci lari bertahap telah dibuka."
-          : "Profil biometrik & data kesehatan berhasil diperbarui!"
+        medUpdated
+          ? "Biometrik dan catatan prosedur medis berhasil dikalibrasi! Status kesiapan latihan telah diperbarui."
+          : "Biometrik profil atlet berhasil diperbarui!"
       );
 
       setTimeout(() => {
@@ -155,7 +161,7 @@ export function EditAthleteProfileModal({
         router.refresh();
       }, 1200);
     } catch (err: any) {
-      setErrorMsg(err.message || "Terjadi kesalahan saat menyimpan perubahan.");
+      setErrorMsg(err.message || "Terjadi kesalahan saat menyimpan data.");
     } finally {
       setIsSubmitting(false);
     }
@@ -163,70 +169,69 @@ export function EditAthleteProfileModal({
 
   return (
     <>
-      {/* TRIGGER 1: BADGE TRIGGER (REPLACES STATIC HEADER BADGE) */}
+      {/* TRIGGER VARIANT: COMPACT BADGE IN HEADER */}
       {variant === "badge" && (
-        <div
+        <button
           onClick={handleOpen}
-          className="group cursor-pointer flex items-center gap-3 select-none"
-          title="Klik untuk Edit Biometrik & Prosedur Kesehatan Atlet"
+          type="button"
+          title="Klik untuk kalibrasi biometrik & status kesehatan"
+          className="group relative flex items-center gap-2.5 px-3 py-1.5 rounded-sm bg-[#12151D] hover:bg-[#161922] border border-[#1F2430] hover:border-[#00F0FF]/50 transition-all font-mono text-xs cursor-pointer shadow-sm"
         >
-          {/* Athlete Biometric Baseline Badge */}
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm bg-[#12151D] group-hover:bg-[#181C26] border border-[#1F2430] group-hover:border-[#00F0FF]/50 text-xs font-mono transition-all duration-150 shadow-sm">
-            <span className="flex items-center gap-1 text-[#FF2A6D]">
-              <Heart className="w-3 h-3 fill-[#FF2A6D]/20 group-hover:scale-110 transition-transform" />
-              <span className="font-tabular font-bold">
-                {user?.resting_heart_rate || 68}
-              </span>
-              <span className="text-[10px] text-[#9BA3AF]">bpm RHR</span>
+          {/* Resting Heart Rate Indicator */}
+          <div className="flex items-center gap-1.5">
+            <Heart className="w-3.5 h-3.5 text-[#FF2A6D] fill-[#FF2A6D]/20 animate-pulse" />
+            <span className="font-bold font-tabular text-[#FF2A6D]">
+              {user?.resting_heart_rate || profile?.resting_heart_rate || 68}
             </span>
-            <span className="text-[#3A404D]">|</span>
-            <span className="text-[#00F0FF] font-tabular">
-              {user?.height_cm || 170}{" "}
-              <span className="text-[10px] text-[#9BA3AF]">cm</span>
-            </span>
-            <span className="text-[#3A404D]">|</span>
-            <span className="text-[#D4FF00] font-tabular">
-              {user?.weight_kg || 65}{" "}
-              <span className="text-[10px] text-[#9BA3AF]">kg</span>
-            </span>
-            <span className="text-[#3A404D]">|</span>
-            <span className="text-[#10B981] font-semibold text-[11px] font-tabular">
-              BMI {calculatedBmi}
-            </span>
-            <Pencil className="w-2.5 h-2.5 text-[#5A6272] group-hover:text-[#00F0FF] transition-colors ml-0.5" />
+            <span className="text-[10px] text-[#5A6272]">bpm RHR</span>
           </div>
 
-          {/* User Profile Avatar & Label */}
-          <div className="flex items-center gap-2 pl-1 border-l border-[#1F2430] group-hover:opacity-90 transition-opacity">
-            {user?.avatar_url && (
-              <img
-                src={user.avatar_url}
-                alt={user.name}
-                className="w-6 h-6 rounded-sm border border-[#1F2430] object-cover group-hover:border-[#00F0FF] transition-colors"
-              />
-            )}
-            <div className="hidden sm:block text-left font-mono">
-              <div className="text-xs font-semibold text-[#F0F2F5] leading-none group-hover:text-[#00F0FF] transition-colors flex items-center gap-1">
-                <span>{user?.name || "Apex Athlete"}</span>
-                <Pencil className="w-2.5 h-2.5 text-[#5A6272] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="text-[9px] text-[#10B981] leading-tight pt-0.5 flex items-center gap-1">
-                <span>Calibrated Athlete</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-              </div>
-            </div>
+          <span className="text-[#2D3547]">|</span>
+
+          {/* Height */}
+          <div className="flex items-center gap-1">
+            <span className="font-bold font-tabular text-[#00F0FF]">
+              {user?.height_cm || profile?.height_cm || 170}
+            </span>
+            <span className="text-[10px] text-[#5A6272]">cm</span>
           </div>
-        </div>
+
+          <span className="text-[#2D3547]">|</span>
+
+          {/* Weight */}
+          <div className="flex items-center gap-1">
+            <span className="font-bold font-tabular text-[#D4FF00]">
+              {user?.weight_kg || profile?.weight_kg || 65}
+            </span>
+            <span className="text-[10px] text-[#5A6272]">kg</span>
+          </div>
+
+          <span className="text-[#2D3547]">|</span>
+
+          {/* BMI */}
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-[#5A6272]">BMI</span>
+            <span className="font-bold font-tabular text-[#10B981]">
+              {profile?.bmi || 22.5}
+            </span>
+          </div>
+
+          {/* Edit Pencil Icon Tooltip */}
+          <div className="ml-1 pl-1 border-l border-[#1F2430] text-[#5A6272] group-hover:text-[#00F0FF] transition-colors">
+            <Pencil className="w-3 h-3" />
+          </div>
+        </button>
       )}
 
-      {/* TRIGGER 2: STANDALONE BUTTON TRIGGER */}
+      {/* TRIGGER VARIANT: DEDICATED BUTTON */}
       {variant === "button" && (
         <button
           onClick={handleOpen}
-          className="px-3 py-1.5 rounded-sm bg-[#12151D] hover:bg-[#1C212E] border border-[#00F0FF]/40 text-[#00F0FF] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-sm"
+          type="button"
+          className="px-3.5 py-1.5 rounded-sm bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 border border-[#00F0FF]/40 text-[#00F0FF] text-xs font-mono font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
         >
           <Pencil className="w-3.5 h-3.5" />
-          <span>Edit Profil & Prosedur Kesehatan</span>
+          <span>EDIT PROFIL & PROSEDUR MEDIS</span>
         </button>
       )}
 
@@ -318,381 +323,46 @@ export function EditAthleteProfileModal({
 
               {/* TAB 1: BIOMETRICS & PROFILE */}
               {activeTab === "biometrics" && (
-                <div className="space-y-3.5 font-mono">
-                  {/* Athlete Name & Age */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="sm:col-span-2">
-                      <label className="block text-[11px] text-[#9BA3AF] uppercase mb-1">
-                        Nama Atlet
-                      </label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Nama Atlet"
-                        className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] text-[#9BA3AF] uppercase mb-1">
-                        Usia (Tahun)
-                      </label>
-                      <input
-                        type="number"
-                        min="12"
-                        max="90"
-                        value={age}
-                        onChange={(e) => setAge(e.target.value)}
-                        className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-tabular text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Biometric Triad: RHR, Height, Weight */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* Resting Heart Rate */}
-                    <div>
-                      <label className="block text-[11px] text-[#9BA3AF] uppercase mb-1 flex items-center justify-between">
-                        <span className="flex items-center gap-1 text-[#FF2A6D]">
-                          <Heart className="w-3 h-3 fill-[#FF2A6D]/20" />
-                          <span>Resting HR</span>
-                        </span>
-                        <span className="text-[10px] text-[#5A6272]">bpm</span>
-                      </label>
-                      <input
-                        type="number"
-                        min="35"
-                        max="120"
-                        value={restingHr}
-                        onChange={(e) => setRestingHr(e.target.value)}
-                        className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-tabular text-[#F0F2F5] focus:outline-none focus:border-[#FF2A6D]"
-                        required
-                      />
-                      <span className="text-[9px] text-[#5A6272] mt-0.5 block">
-                        Detak jantung bangun pagi
-                      </span>
-                    </div>
-
-                    {/* Height */}
-                    <div>
-                      <label className="block text-[11px] text-[#9BA3AF] uppercase mb-1 flex items-center justify-between">
-                        <span className="text-[#00F0FF]">Tinggi Badan</span>
-                        <span className="text-[10px] text-[#5A6272]">cm</span>
-                      </label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min="100"
-                        max="240"
-                        value={heightCm}
-                        onChange={(e) => setHeightCm(e.target.value)}
-                        className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-tabular text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                        required
-                      />
-                      <span className="text-[9px] text-[#5A6272] mt-0.5 block">
-                        Postur tubuh atlet
-                      </span>
-                    </div>
-
-                    {/* Weight */}
-                    <div>
-                      <label className="block text-[11px] text-[#9BA3AF] uppercase mb-1 flex items-center justify-between">
-                        <span className="text-[#D4FF00]">Berat Badan</span>
-                        <span className="text-[10px] text-[#5A6272]">kg</span>
-                      </label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min="30"
-                        max="200"
-                        value={weightKg}
-                        onChange={(e) => setWeightKg(e.target.value)}
-                        className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-tabular text-[#F0F2F5] focus:outline-none focus:border-[#D4FF00]"
-                        required
-                      />
-                      <span className="text-[9px] text-[#5A6272] mt-0.5 block">
-                        Bobot aktif saat ini
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Live Dynamic BMI Banner */}
-                  <div className="p-3 rounded-sm bg-[#12151D] border border-[#1F2430] flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-[#5A6272] uppercase block">
-                        Body Mass Index (BMI) Terhitung
-                      </span>
-                      <div className="flex items-baseline gap-2 pt-0.5">
-                        <span className="text-xl font-bold font-tabular text-[#10B981]">
-                          {calculatedBmi}
-                        </span>
-                        <span className="text-xs text-[#9BA3AF]">
-                          kg/m²
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="px-2.5 py-1 rounded-xs bg-[#10B981]/15 border border-[#10B981]/30 text-[#10B981] text-xs font-bold">
-                        {parseFloat(calculatedBmi) < 18.5
-                          ? "Kategori: Berat Kurang"
-                          : parseFloat(calculatedBmi) <= 24.9
-                          ? "Kategori: Normal / Ideal"
-                          : "Kategori: Kelebihan Bobot"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Training Days Availability */}
-                  <div className="p-3.5 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-2">
-                    <label className="text-xs font-bold text-[#F0F2F5] flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-[#00F0FF]" />
-                      KETERSEDIAAN HARI LATIHAN MINGGUAN
-                    </label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {[2, 3, 4, 5].map((days) => (
-                        <button
-                          type="button"
-                          key={days}
-                          onClick={() => setTrainingDays(days)}
-                          className={`py-2 rounded-sm text-xs font-bold transition-colors ${
-                            trainingDays === days
-                              ? "bg-[#00F0FF] text-black font-extrabold shadow-sm"
-                              : "bg-[#090A0F] border border-[#1F2430] text-[#9BA3AF] hover:text-white"
-                          }`}
-                        >
-                          {days} Sesi / Minggu
-                        </button>
-                      ))}
-                    </div>
-                    <p className="text-[10px] text-[#9BA3AF] leading-relaxed pt-1">
-                      Program 12-Minggu diselaraskan untuk 3 sesi utama: <strong>Selasa</strong> (Easy), <strong>Jumat</strong> (Recovery), dan <strong>Minggu</strong> (Long Endurance). Senin & Kamis tetap dialokasikan istirahat penuh untuk puasa sunnah.
-                    </p>
-                  </div>
-                </div>
+                <ProfileBiometricsTab
+                  name={name}
+                  setName={setName}
+                  age={age}
+                  setAge={setAge}
+                  restingHr={restingHr}
+                  setRestingHr={setRestingHr}
+                  heightCm={heightCm}
+                  setHeightCm={setHeightCm}
+                  weightKg={weightKg}
+                  setWeightKg={setWeightKg}
+                  calculatedBmi={calculatedBmi}
+                  trainingDays={trainingDays}
+                  setTrainingDays={setTrainingDays}
+                />
               )}
 
               {/* TAB 2: MEDICAL PROCEDURES & CLINICAL ASSESSMENTS */}
               {activeTab === "medical" && (
-                <div className="space-y-4 font-mono">
-                  {/* Status Overview of Joint History */}
-                  <div className="p-3.5 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3">
-                    <div className="flex items-center justify-between pb-1 border-b border-[#1F2430]">
-                      <span className="text-xs font-bold text-[#F0F2F5] flex items-center gap-1.5">
-                        <ShieldCheck className="w-3.5 h-3.5 text-[#00F0FF]" />
-                        STATUS PEMERIKSAAN KLINIS SENDI SAAT INI
-                      </span>
-                      <span className="text-[10px] text-[#5A6272]">Audit Klinis</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      {/* Right Ankle Evaluation Status */}
-                      <div className="p-2.5 rounded-sm bg-[#090A0F] border border-[#1F2430] space-y-1.5">
-                        <span className="text-[10px] text-[#5A6272] uppercase block">
-                          Pergelangan Kaki Kanan (Ankle Sprain History)
-                        </span>
-                        <select
-                          value={ankleStatus}
-                          onChange={(e) => setAnkleStatus(e.target.value)}
-                          className="w-full px-2 py-1.5 rounded-xs bg-[#12151D] border border-[#1F2430] text-xs text-[#00F0FF] font-semibold focus:outline-none"
-                        >
-                          <option value="PENDING_CLINICAL_ASSESSMENT">
-                            Belum Diperiksa (PENDING)
-                          </option>
-                          <option value="CLINICALLY_ASSESSED">
-                            Telah Diperiksa Fisioterapis
-                          </option>
-                          <option value="UNDER_TREATMENT">
-                            Dalam Program Terapi / Rehab
-                          </option>
-                          <option value="DISCHARGED_CLEARED">
-                            Dinyatakan Bebas Cedera (CLEARED)
-                          </option>
-                        </select>
-                      </div>
-
-                      {/* Bilateral Knees Evaluation Status */}
-                      <div className="p-2.5 rounded-sm bg-[#090A0F] border border-[#1F2430] space-y-1.5">
-                        <span className="text-[10px] text-[#5A6272] uppercase block">
-                          Kedua Tempurung Lutut (Bilateral Knees)
-                        </span>
-                        <select
-                          value={kneeStatus}
-                          onChange={(e) => setKneeStatus(e.target.value)}
-                          className="w-full px-2 py-1.5 rounded-xs bg-[#12151D] border border-[#1F2430] text-xs text-[#00F0FF] font-semibold focus:outline-none"
-                        >
-                          <option value="PENDING_CLINICAL_ASSESSMENT">
-                            Belum Diperiksa (PENDING)
-                          </option>
-                          <option value="CLINICALLY_ASSESSED">
-                            Telah Diperiksa Fisioterapis
-                          </option>
-                          <option value="UNDER_TREATMENT">
-                            Dalam Program Terapi / Rehab
-                          </option>
-                          <option value="DISCHARGED_CLEARED">
-                            Dinyatakan Bebas Cedera (CLEARED)
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Add New Medical Procedure / Assessment Form */}
-                  <div className="p-4 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={hasNewProcedure}
-                          onChange={(e) => setHasNewProcedure(e.target.checked)}
-                          className="accent-[#00F0FF] rounded-none w-4 h-4 cursor-pointer"
-                        />
-                        <span className="text-xs font-bold text-[#F0F2F5]">
-                          + Catat Prosedur / Pemeriksaan Medis Baru
-                        </span>
-                      </label>
-                      <span className="text-[10px] text-[#5A6272]">
-                        Fisioterapi & Dokter Olahraga
-                      </span>
-                    </div>
-
-                    {hasNewProcedure && (
-                      <div className="space-y-3 pt-2 border-t border-[#1F2430] text-xs animate-in fade-in duration-150">
-                        {/* Date & Provider Type */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-[10px] text-[#9BA3AF] uppercase mb-1">
-                              Tanggal Prosedur / Pemeriksaan
-                            </label>
-                            <input
-                              type="date"
-                              value={procedureDate}
-                              onChange={(e) => setProcedureDate(e.target.value)}
-                              className="w-full px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                              required={hasNewProcedure}
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-[10px] text-[#9BA3AF] uppercase mb-1">
-                              Tenaga Medis / Pemeriksa
-                            </label>
-                            <select
-                              value={providerType}
-                              onChange={(e) => setProviderType(e.target.value)}
-                              className="w-full px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                            >
-                              <option value="Physiotherapist">Fisioterapis Olahraga</option>
-                              <option value="Sports Medicine Physician">Dokter Spesialis Kedokteran Olahraga (Sp.KO)</option>
-                              <option value="Orthopedic Surgeon">Dokter Spesialis Ortopedi (Sp.OT)</option>
-                              <option value="General Practitioner">Dokter Umum</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Provider Name */}
-                        <div>
-                          <label className="block text-[10px] text-[#9BA3AF] uppercase mb-1">
-                            Nama Dokter / Klinik / Rumah Sakit
-                          </label>
-                          <input
-                            type="text"
-                            value={providerName}
-                            onChange={(e) => setProviderName(e.target.value)}
-                            placeholder="Contoh: Klinik Fisioterapi Olahraga Sehat / dr. Pratama Sp.KO"
-                            className="w-full px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                          />
-                        </div>
-
-                        {/* Procedure / Treatment Details */}
-                        <div>
-                          <label className="block text-[10px] text-[#9BA3AF] uppercase mb-1">
-                            Tindakan / Prosedur Terapi yang Dijalani
-                          </label>
-                          <textarea
-                            rows={2}
-                            value={procedureDetails}
-                            onChange={(e) => setProcedureDetails(e.target.value)}
-                            placeholder="Contoh: Ultrasound modalitas 3 MHz, TENS pergelangan kaki, manual mobilization, penguatan eksentrik betis dan isometric quad setting."
-                            className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                          />
-                        </div>
-
-                        {/* Clinical Findings */}
-                        <div>
-                          <label className="block text-[10px] text-[#9BA3AF] uppercase mb-1">
-                            Hasil Temuan Klinis & Rekomendasi
-                          </label>
-                          <input
-                            type="text"
-                            value={clinicalFindings}
-                            onChange={(e) => setClinicalFindings(e.target.value)}
-                            placeholder="Contoh: Stabilitas ligamen ATFL baik, tidak ada efusi lutut. Boleh bersepeda Zone 2."
-                            className="w-full px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                          />
-                        </div>
-
-                        {/* Return-to-Run Medical Clearance Toggle */}
-                        <div className="p-3 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-between">
-                          <div>
-                            <span className="text-xs font-bold text-[#F0F2F5] flex items-center gap-1.5">
-                              <Sparkles className="w-3.5 h-3.5 text-[#D4FF00]" />
-                              Izin Medis Resmi Kembali Berlari (Medical Clearance)
-                            </span>
-                            <p className="text-[10px] text-[#9BA3AF] pt-0.5">
-                              Aktifkan hanya jika dokter/fisioterapis telah memberikan izin formal untuk memulai lari bertahap.
-                            </p>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={clearanceGranted}
-                              onChange={(e) => setClearanceGranted(e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-9 h-5 bg-[#1F2430] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#10B981]"></div>
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Historical Medical Assessments */}
-                  {healthContext && healthContext.medicalAssessments.length > 0 && (
-                    <div className="space-y-2">
-                      <span className="text-[11px] text-[#5A6272] uppercase block">
-                        Riwayat Prosedur & Asesmen Tercatat ({healthContext.medicalAssessments.length})
-                      </span>
-                      <div className="space-y-1.5">
-                        {healthContext.medicalAssessments.map((m) => (
-                          <div
-                            key={m.id}
-                            className="p-2.5 rounded-sm bg-[#12151D] border border-[#1F2430] text-xs space-y-1"
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-[#F0F2F5]">
-                                {m.provider_name || m.healthcare_provider_type}
-                              </span>
-                              <span className="text-[10px] text-[#00F0FF] font-tabular">
-                                {m.assessment_date}
-                              </span>
-                            </div>
-                            {m.rehabilitation_protocol && (
-                              <p className="text-[11px] text-[#9BA3AF]">
-                                <strong>Tindakan:</strong> {m.rehabilitation_protocol}
-                              </p>
-                            )}
-                            <p className="text-[10px] text-[#5A6272]">
-                              Temuan: {m.clinical_findings}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <ProfileMedicalProceduresTab
+                  healthContext={healthContext}
+                  ankleStatus={ankleStatus}
+                  setAnkleStatus={setAnkleStatus}
+                  kneeStatus={kneeStatus}
+                  setKneeStatus={setKneeStatus}
+                  hasNewProcedure={hasNewProcedure}
+                  setHasNewProcedure={setHasNewProcedure}
+                  procedureDate={procedureDate}
+                  setProcedureDate={setProcedureDate}
+                  providerType={providerType}
+                  setProviderType={setProviderType}
+                  providerName={providerName}
+                  setProviderName={setProviderName}
+                  procedureDetails={procedureDetails}
+                  setProcedureDetails={setProcedureDetails}
+                  clinicalFindings={clinicalFindings}
+                  setClinicalFindings={setClinicalFindings}
+                  clearanceGranted={clearanceGranted}
+                  setClearanceGranted={setClearanceGranted}
+                />
               )}
 
               {/* Submit & Cancel Actions */}
