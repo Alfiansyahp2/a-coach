@@ -162,3 +162,6 @@ export interface SyncLog {
   started_at: string;
   completed_at: string;
 }
+
+export * from './health';
+

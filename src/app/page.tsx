@@ -8,6 +8,7 @@ import {
   getFitnessGoals,
   getPersonalRecords,
   getDatabaseStatus,
+  getAuthoritativeHealthContext,
   DEFAULT_USER_ID,
 } from "@/lib/db";
 import { computeDashboardSummary } from "@/lib/analytics";
@@ -23,6 +24,7 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
 import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
+import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
 import { computePersonalRecords } from "@/lib/personalRecords";
 import {
   Activity as ActivityIcon,
@@ -43,20 +45,21 @@ import {
 
 async function DashboardTelemetry() {
   await connection();
-  const [user, activities, workouts, goals, prs, dbStatus] = await Promise.all([
+  const [user, activities, workouts, goals, prs, dbStatus, healthContext] = await Promise.all([
     getUser(DEFAULT_USER_ID),
     getActivities(DEFAULT_USER_ID, { limit: 50 }),
     getScheduledWorkouts(DEFAULT_USER_ID),
     getFitnessGoals(DEFAULT_USER_ID),
     getPersonalRecords(DEFAULT_USER_ID),
     getDatabaseStatus(),
+    getAuthoritativeHealthContext(DEFAULT_USER_ID),
   ]);
 
   const computedPrs = computePersonalRecords(activities, DEFAULT_USER_ID);
   const displayPrs = prs.length > 0 ? prs.map((p) => { const m = computedPrs.find(c => c.category === p.category); return { ...p, subtext: p.subtext || m?.subtext, activity_name: p.activity_name || m?.activity_name }; }) : computedPrs;
 
   const summary = computeDashboardSummary(activities, workouts);
-  const insights = generateTrainingInsights(activities, workouts, goals);
+  const insights = generateTrainingInsights(activities, workouts, goals, healthContext);
 
   return (
     <div className="space-y-6">
@@ -142,6 +145,11 @@ async function DashboardTelemetry() {
           </span>
         </div>
         <StravaConnectCard />
+      </section>
+
+      {/* 2.5 Athlete Health Profile & Injury Intelligence Deck */}
+      <section>
+        <AthleteHealthDeck healthContext={healthContext} recentActivities={activities} />
       </section>
 
       {/* 3. Hero Telemetry & Volume Progression Deck (Asymmetric Composition) */}
@@ -447,6 +455,13 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/health"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#FF2A6D] text-[#9BA3AF] hover:text-[#FF2A6D] transition-colors text-xs font-mono font-medium"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#FF2A6D]" />
+              <span>Profil Kesehatan</span>
+            </Link>
             <Link
               href="/activities"
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#00F0FF] text-[#9BA3AF] hover:text-[#00F0FF] transition-colors text-xs font-mono font-medium"
