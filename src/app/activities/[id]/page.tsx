@@ -33,6 +33,7 @@ import {
   Clock,
   Compass,
   Flame,
+  FolderKanban,
   Gauge,
   Heart,
   Layers,
@@ -112,6 +113,14 @@ async function ActivityDetailContent({ params }: ActivityDetailPageProps) {
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Dashboard</span>
+            </Link>
+
+            <Link
+              href="/activities"
+              className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-[#9BA3AF] hover:text-[#00F0FF] px-2.5 py-1.5 rounded-sm bg-[#161922] border border-[#1F2430] hover:border-[#00F0FF] transition-colors"
+            >
+              <FolderKanban className="w-3.5 h-3.5 text-[#00F0FF]" />
+              <span className="hidden sm:inline">Registry</span>
             </Link>
 
             <div className="h-4 w-px bg-[#232838]" />

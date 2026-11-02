@@ -32,6 +32,7 @@ import {
   ShieldCheck,
   TrendingUp,
   Trophy,
+  FolderKanban,
   Zap,
   Target,
   AlertTriangle,
@@ -471,8 +472,14 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="text-[11px] font-mono text-[#5A6272] hidden sm:block">
-            Personal Sports Training & Performance Platform
+          <div className="flex items-center gap-3">
+            <Link
+              href="/activities"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#00F0FF] text-[#9BA3AF] hover:text-[#00F0FF] transition-colors text-xs font-mono font-medium"
+            >
+              <FolderKanban className="w-3.5 h-3.5 text-[#00F0FF]" />
+              <span>Manajemen Aktivitas</span>
+            </Link>
           </div>
         </div>
       </header>
