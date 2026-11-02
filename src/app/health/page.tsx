@@ -11,6 +11,7 @@ import {
 import { AthleteHealthHub } from "@/components/health/AthleteHealthHub";
 import {
   ArrowLeft,
+  Calendar,
   Activity as ActivityIcon,
 } from "lucide-react";
 
@@ -82,13 +83,20 @@ export default function HealthPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/training"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#D4FF00] text-[#9BA3AF] hover:text-[#D4FF00] transition-colors text-xs font-mono font-medium"
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#D4FF00]" />
+              <span className="hidden sm:inline">Jadwal</span> Latihan
+            </Link>
             <Link
               href="/activities"
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#00F0FF] text-[#9BA3AF] hover:text-[#00F0FF] transition-colors text-xs font-mono font-medium"
             >
               <ActivityIcon className="w-3.5 h-3.5 text-[#00F0FF]" />
-              <span>Manajemen Aktivitas</span>
+              <span className="hidden sm:inline">Manajemen</span> Aktivitas
             </Link>
           </div>
         </div>

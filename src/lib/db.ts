@@ -1,12 +1,28 @@
-import { Pool } from 'pg';
+import { Pool, types } from 'pg';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+
+// Prevent node-postgres from converting DATE (OID 1082) into JS Date with local timezone shift
+types.setTypeParser(1082, (val: string) => val);
+
+export function formatDateOnly(val: any): string {
+  if (!val) return '';
+  if (val instanceof Date) {
+    const y = val.getFullYear();
+    const m = String(val.getMonth() + 1).padStart(2, '0');
+    const d = String(val.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof val === 'string') return val.split('T')[0];
+  return String(val);
+}
 import {
   User,
   StravaConnection,
   StravaToken,
   Activity,
+  TrainingPlan,
   ScheduledWorkout,
   WorkoutActivityMatch,
   FitnessGoal,
@@ -50,6 +66,7 @@ interface LocalStoreSchema {
   strava_connections: StravaConnection[];
   strava_tokens: StravaToken[];
   activities: Activity[];
+  training_plans?: TrainingPlan[];
   scheduled_workouts: ScheduledWorkout[];
   workout_activity_matches: WorkoutActivityMatch[];
   fitness_goals: FitnessGoal[];
@@ -697,6 +714,102 @@ export async function getLastSyncLog(userId: string = DEFAULT_USER_ID): Promise<
   return logs[0] || null;
 }
 
+export async function getTrainingPlans(userId: string = DEFAULT_USER_ID): Promise<TrainingPlan[]> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM training_plans WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    return res.rows.map((row) => ({
+      ...row,
+      start_date: formatDateOnly(row.start_date),
+      end_date: formatDateOnly(row.end_date),
+    }));
+  }
+  const store = ensureLocalStore();
+  return (store.training_plans || []).filter((p) => p.user_id === userId);
+}
+
+export async function getActiveTrainingPlan(userId: string = DEFAULT_USER_ID): Promise<TrainingPlan | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM training_plans WHERE user_id = $1 AND is_active = TRUE ORDER BY created_at DESC LIMIT 1',
+      [userId]
+    );
+    if (res.rows.length === 0) return null;
+    const row = res.rows[0];
+    return {
+      ...row,
+      start_date: formatDateOnly(row.start_date),
+      end_date: formatDateOnly(row.end_date),
+    };
+  }
+  const store = ensureLocalStore();
+  return (store.training_plans || []).find((p) => p.user_id === userId && p.is_active) || null;
+}
+
+export async function createTrainingPlan(
+  plan: Omit<TrainingPlan, 'id' | 'created_at' | 'updated_at'>
+): Promise<TrainingPlan> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    if (plan.is_active) {
+      await pgPool.query('UPDATE training_plans SET is_active = FALSE WHERE user_id = $1', [plan.user_id]);
+    }
+    const query = `
+      INSERT INTO training_plans (user_id, title, description, start_date, end_date, is_active, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [
+      plan.user_id,
+      plan.title,
+      plan.description || null,
+      plan.start_date,
+      plan.end_date,
+      plan.is_active ?? true,
+    ]);
+    const row = res.rows[0];
+    return {
+      ...row,
+      start_date:
+        row.start_date instanceof Date
+          ? row.start_date.toISOString().split('T')[0]
+          : String(row.start_date || '').split('T')[0],
+      end_date:
+        row.end_date instanceof Date
+          ? row.end_date.toISOString().split('T')[0]
+          : String(row.end_date || '').split('T')[0],
+    };
+  }
+  const store = ensureLocalStore();
+  if (!store.training_plans) store.training_plans = [];
+  if (plan.is_active) {
+    store.training_plans.forEach((p) => {
+      if (p.user_id === plan.user_id) p.is_active = false;
+    });
+  }
+  const created: TrainingPlan = {
+    ...plan,
+    id: crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  };
+  store.training_plans.push(created);
+  saveLocalStore(store);
+  return created;
+}
+
+export async function deleteTrainingPlansByUserId(userId: string = DEFAULT_USER_ID): Promise<void> {
+  if (pgPool) {
+    await pgPool.query('DELETE FROM training_plans WHERE user_id = $1', [userId]);
+    return;
+  }
+  const store = ensureLocalStore();
+  store.training_plans = (store.training_plans || []).filter((p) => p.user_id !== userId);
+  saveLocalStore(store);
+}
+
 export async function getScheduledWorkouts(
   userId: string = DEFAULT_USER_ID,
   startDate?: string,
@@ -718,12 +831,7 @@ export async function getScheduledWorkouts(
     const res = await pgPool.query(query, params);
     return res.rows.map((row) => ({
       ...row,
-      scheduled_date:
-        row.scheduled_date instanceof Date
-          ? row.scheduled_date.toISOString().split('T')[0]
-          : typeof row.scheduled_date === 'string'
-            ? row.scheduled_date.split('T')[0]
-            : String(row.scheduled_date || ''),
+      scheduled_date: formatDateOnly(row.scheduled_date),
     }));
   }
 
@@ -838,6 +946,18 @@ export async function deleteScheduledWorkout(id: string): Promise<boolean> {
   return store.scheduled_workouts.length < initialLen;
 }
 
+export async function deleteScheduledWorkoutsByUserId(userId: string = DEFAULT_USER_ID): Promise<void> {
+  if (pgPool) {
+    await pgPool.query('DELETE FROM scheduled_workouts WHERE user_id = $1', [userId]);
+    return;
+  }
+  const store = ensureLocalStore();
+  const deletedIds = new Set(store.scheduled_workouts.filter((w) => w.user_id === userId).map((w) => w.id));
+  store.scheduled_workouts = store.scheduled_workouts.filter((w) => w.user_id !== userId);
+  store.workout_activity_matches = store.workout_activity_matches.filter((m) => !deletedIds.has(m.workout_id));
+  saveLocalStore(store);
+}
+
 export async function getWorkoutActivityMatches(userId: string = DEFAULT_USER_ID): Promise<WorkoutActivityMatch[]> {
   if (pgPool) {
     const query = `
@@ -941,18 +1061,8 @@ export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise
     const res = await pgPool.query('SELECT * FROM fitness_goals WHERE user_id = $1 ORDER BY target_date ASC', [userId]);
     return res.rows.map((row) => ({
       ...row,
-      start_date:
-        row.start_date instanceof Date
-          ? row.start_date.toISOString().split('T')[0]
-          : typeof row.start_date === 'string'
-            ? row.start_date.split('T')[0]
-            : String(row.start_date || ''),
-      target_date:
-        row.target_date instanceof Date
-          ? row.target_date.toISOString().split('T')[0]
-          : typeof row.target_date === 'string'
-            ? row.target_date.split('T')[0]
-            : String(row.target_date || ''),
+      start_date: formatDateOnly(row.start_date),
+      target_date: formatDateOnly(row.target_date),
     }));
   }
   const store = ensureLocalStore();
@@ -991,6 +1101,72 @@ export async function createFitnessGoal(goal: Omit<FitnessGoal, 'id' | 'created_
   store.fitness_goals.push(created);
   saveLocalStore(store);
   return created;
+}
+
+export async function upsertFitnessGoal(
+  goal: Omit<FitnessGoal, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+): Promise<FitnessGoal> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    if (goal.id) {
+      const query = `
+        INSERT INTO fitness_goals (id, user_id, title, goal_type, target_value, current_value, start_date, target_date, is_achieved, unit, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          title = EXCLUDED.title,
+          goal_type = EXCLUDED.goal_type,
+          target_value = EXCLUDED.target_value,
+          current_value = EXCLUDED.current_value,
+          start_date = EXCLUDED.start_date,
+          target_date = EXCLUDED.target_date,
+          is_achieved = EXCLUDED.is_achieved,
+          unit = EXCLUDED.unit,
+          updated_at = NOW()
+        RETURNING *;
+      `;
+      const res = await pgPool.query(query, [
+        goal.id,
+        goal.user_id,
+        goal.title,
+        goal.goal_type,
+        goal.target_value,
+        goal.current_value,
+        goal.start_date,
+        goal.target_date,
+        goal.is_achieved,
+        goal.unit,
+      ]);
+      const row = res.rows[0];
+      return {
+        ...row,
+        start_date:
+          row.start_date instanceof Date
+            ? row.start_date.toISOString().split('T')[0]
+            : String(row.start_date).split('T')[0],
+        target_date:
+          row.target_date instanceof Date
+            ? row.target_date.toISOString().split('T')[0]
+            : String(row.target_date).split('T')[0],
+      };
+    } else {
+      return createFitnessGoal(goal);
+    }
+  }
+  const store = ensureLocalStore();
+  const existingIdx = goal.id ? store.fitness_goals.findIndex((g) => g.id === goal.id) : -1;
+  const record: FitnessGoal = {
+    ...goal,
+    id: goal.id || crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  };
+  if (existingIdx >= 0) {
+    store.fitness_goals[existingIdx] = record;
+  } else {
+    store.fitness_goals.push(record);
+  }
+  saveLocalStore(store);
+  return record;
 }
 
 export async function getPersonalRecords(userId: string = DEFAULT_USER_ID): Promise<PersonalRecord[]> {

@@ -247,22 +247,64 @@ export function generateTrainingInsights(
   }
 
   // =====================================================================
-  // 5. INJURY-AWARE NEXT WEEK SCHEDULE RECOMMENDATION
+  // 5. INJURY-AWARE NEXT WEEK SCHEDULE RECOMMENDATION & MACRO GOAL BRIDGES
   // =====================================================================
   const isRunningBlocked =
     healthContext?.latestReadiness?.running_readiness === 'ON_HOLD' ||
     healthContext?.latestReadiness?.running_readiness === 'REQUIRES_CLINICAL_REVIEW';
+
+  // 5A. Road to First 100 km Century Ride (Active Primary Engine)
+  const maxRideMeters = Math.max(0, ...activities.filter(a => a.sport_type.toLowerCase().includes('ride')).map(r => Number(r.distance_meters || 0)));
+  const maxRideKm = Math.round((maxRideMeters / 1000) * 10) / 10;
+  const centuryProgressPct = Math.min(100, Math.round(((maxRideKm > 0 ? maxRideKm : 56.1) / 100) * 100));
+
+  insights.push({
+    id: 'ins-goal-100k-century',
+    type: 'weekly_plan_suggestion',
+    severity: 'positive',
+    title: `Cycling Coach: Road to 100 km First Century Ride (${centuryProgressPct}% Baseline Reached)`,
+    description: `Dengan rekor jarak 56.10 km yang terbukti bebas nyeri, fondasi aerobik Anda telah mencapai ${centuryProgressPct}% dari target 100 km Century Ride. Rekomendasi pelatih: Tingkatkan jarak akhir pekan secara bertahap (32 km -> 40 km -> 48 km -> 60 km -> 100 km). Pertahankan kadens putaran lancar >= 85 RPM pada medan datar dan prioritaskan asupan karbohidrat 40-60g/jam pada sesi > 90 menit.`,
+    grounded_data: {
+      currentBestDistanceKm: maxRideKm > 0 ? maxRideKm : 56.1,
+      targetCenturyDistanceKm: 100,
+      completionPercentage: centuryProgressPct,
+      recommendedZone: 'Zone 1-2 Flat Aerobic',
+      cadenceTargetRpm: '>= 85 RPM',
+    },
+    created_at: new Date().toISOString(),
+  });
+
+  // 5B. Marathon Return-to-Run Pathway (Rehab & Phased Milestones)
+  const maxRunMeters = Math.max(0, ...activities.filter(a => a.sport_type.toLowerCase().includes('run')).map(r => Number(r.distance_meters || 0)));
+  const maxRunKm = Math.round((maxRunMeters / 1000) * 10) / 10;
+  const marathonProgressPct = Math.min(100, Math.round(((maxRunKm > 0 ? maxRunKm : 12.33) / 42.195) * 100));
+
+  insights.push({
+    id: 'ins-goal-marathon-pathway',
+    type: 'recovery',
+    severity: isRunningBlocked ? 'warning' : 'info',
+    title: `Running Coach: Jalur Menuju Maraton 42.2K (Fase 1: Rehabilitasi & Evaluasi Medis)`,
+    description: `Target maraton (42.195 km) ditangguhkan pada jarak dasar 12.33 km (${marathonProgressPct}% jarak maraton) demi melindungi persendian engkel kanan dan lutut anterior bilateral. Rute bertahap menuju maraton: 1) Kebugaran kardiovaskular dijaga penuh via sepeda 100K; 2) Penguatan sendi mandiri & pemeriksaan fisioterapi; 3) Tes uji coba lari 5K bebas nyeri; 4) Blok setengah maraton (21.1 km); 5) Persiapan penuh maraton. Dilarang memaksakan progresi volume lari saat ini.`,
+    grounded_data: {
+      marathonDistanceKm: 42.195,
+      longestRecordedRunKm: maxRunKm > 0 ? maxRunKm : 12.33,
+      currentPhase: 'Fase 1 (Rehabilitasi Sendi & Evaluasi Medis)',
+      readinessStatus: 'ON_HOLD',
+      progressionLocked: true,
+    },
+    created_at: new Date().toISOString(),
+  });
 
   if (isRunningBlocked) {
     insights.push({
       id: 'ins-next-week-rec-rehab',
       type: 'weekly_plan_suggestion',
       severity: 'info',
-      title: "AI Coach Recommendation: Injury-Aware Multi-Sport Structure",
-      description: `Running is currently ON_HOLD. Recommended weekly structure: 2x Flat Aerobic Cadence Rides (Zone 1-2, 20-30 km), 2x Targeted Ankle/Knee Physical Therapy Mobility Sessions, and 2-3 full Rest Days. High-intensity running intervals and progressive overload remain locked pending clinical clearance.`,
+      title: "AI Coach Recommendation: Struktur Latihan Multi-Sport Mingguan",
+      description: `Sesuai ketersediaan 2–3 hari latihan per minggu: 2x Sesi Sepeda Aerobik Putaran Rendah Benturan (Zone 1-2, 22-35 km), 1x Latihan Penguatan Neuromuskular & Mobilitas Sendi (40 menit), dan 4 hari istirahat/pemulihan aktif. Progresi volume lari otomatis tetap terkunci demi keselamatan jangka panjang.`,
       grounded_data: {
         runningReadiness: 'ON_HOLD',
-        recommendedCyclingVolumeKm: 50,
+        recommendedCyclingVolumeKm: 55,
         recommendedRunningVolumeKm: 0,
         automaticProgression: false,
       },
