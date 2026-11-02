@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS personal_records (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     activity_id UUID REFERENCES activities(id) ON DELETE SET NULL,
+    sport_type VARCHAR(20) DEFAULT 'Run',
     category VARCHAR(50) NOT NULL,
     record_value NUMERIC(12, 2) NOT NULL,
     record_display VARCHAR(50) NOT NULL,

@@ -129,11 +129,14 @@ export interface PersonalRecord {
   id: string;
   user_id: string;
   activity_id?: string | null;
-  category: '1K' | '5K' | '10K' | 'Half Marathon' | 'Marathon' | 'Longest Distance' | string;
-  record_value: number; // time in seconds or distance in meters
+  sport_type?: 'Run' | 'Ride' | string;
+  category: string;
+  record_value: number; // time in seconds, distance in meters, speed in km/h, or elevation in meters
   record_display: string;
   achieved_date: string;
+  activity_name?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface TrainingInsight {

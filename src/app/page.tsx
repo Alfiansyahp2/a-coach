@@ -22,6 +22,7 @@ import { StravaConnectCard } from "@/components/StravaConnectCard";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
+import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
 import {
   Activity as ActivityIcon,
   Calendar,
@@ -281,41 +282,10 @@ async function DashboardTelemetry() {
             )}
           </div>
 
-          {/* Personal Records Benchmarks Deck */}
-          {prs.length > 0 && (
-            <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 space-y-3">
-              <div className="flex items-center justify-between pb-2.5 border-b border-[#1F2430]">
-                <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5] flex items-center gap-1.5">
-                  <Trophy className="w-3.5 h-3.5 text-[#D4FF00]" />
-                  Personal Records (PR) Benchmarks
-                </h3>
-                <span className="text-[10px] font-mono text-[#5A6272]">
-                  Validated Bests
-                </span>
-              </div>
+                    {/* Personal Records Benchmarks Deck */}
+          <PersonalRecordsDeck prs={prs} />
 
-              <div className="grid grid-cols-3 gap-2">
-                {prs.map((pr) => (
-                  <div
-                    key={pr.id}
-                    className="p-2 rounded-sm bg-[#161922] border border-[#1F2430] flex flex-col justify-between"
-                  >
-                    <span className="text-[10px] uppercase font-mono text-[#9BA3AF] block mb-1">
-                      {pr.category}
-                    </span>
-                    <span className="text-base font-bold font-mono font-tabular text-[#D4FF00] tracking-tight">
-                      {pr.record_display}
-                    </span>
-                    <span className="text-[9px] font-mono text-[#5A6272] mt-1">
-                      {formatDate(pr.achieved_date)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Fitness Goals Progress Deck */}
+{/* Fitness Goals Progress Deck */}
           {goals.length > 0 && (
             <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 space-y-3">
               <div className="flex items-center justify-between pb-2.5 border-b border-[#1F2430]">

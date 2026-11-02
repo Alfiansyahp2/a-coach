@@ -966,11 +966,20 @@ export async function createFitnessGoal(goal: Omit<FitnessGoal, 'id' | 'created_
 
 export async function getPersonalRecords(userId: string = DEFAULT_USER_ID): Promise<PersonalRecord[]> {
   if (pgPool) {
-    const res = await pgPool.query('SELECT * FROM personal_records WHERE user_id = $1 ORDER BY achieved_date DESC', [userId]);
+    const query = 'SELECT pr.*, a.name as activity_name, COALESCE(pr.sport_type, a.sport_type, \'Run\') as sport_type FROM personal_records pr LEFT JOIN activities a ON pr.activity_id = a.id WHERE pr.user_id = $1 ORDER BY pr.sport_type ASC, pr.achieved_date DESC';
+    const res = await pgPool.query(query, [userId]);
     return res.rows;
   }
   const store = ensureLocalStore();
-  return store.personal_records.filter((p) => p.user_id === userId);
+  const prs = store.personal_records.filter((p) => p.user_id === userId);
+  return prs.map((pr) => {
+    const act = store.activities.find((a) => a.id === pr.activity_id);
+    return {
+      ...pr,
+      activity_name: act?.name,
+      sport_type: pr.sport_type || act?.sport_type || 'Run',
+    };
+  });
 }
 
 export async function createSyncLog(log: Omit<SyncLog, 'id'>): Promise<SyncLog> {
