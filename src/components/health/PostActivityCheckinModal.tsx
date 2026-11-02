@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { Activity } from "@/types";
 import {
   X,
@@ -9,13 +10,20 @@ import {
   Activity as ActivityIcon,
   ShieldAlert,
   Save,
+  ExternalLink,
+  Calendar,
+  Clock,
+  MapPin,
+  TrendingUp,
 } from "lucide-react";
+import { formatDate, formatDuration } from "@/lib/formatters";
 
 interface PostActivityCheckinModalProps {
   isOpen: boolean;
   onClose: () => void;
   recentActivities: Activity[];
   onCheckinSuccess?: () => void;
+  initialActivityId?: string;
 }
 
 export function PostActivityCheckinModal({
@@ -23,21 +31,21 @@ export function PostActivityCheckinModal({
   onClose,
   recentActivities,
   onCheckinSuccess,
+  initialActivityId,
 }: PostActivityCheckinModalProps) {
-  const [selectedActivityId, setSelectedActivityId] = useState<string>(
-    recentActivities[0]?.id || ""
-  );
-  const [sportType, setSportType] = useState<string>(
-    recentActivities[0]?.sport_type || "Run"
-  );
-  const [distanceKm, setDistanceKm] = useState<number>(
-    recentActivities[0]
-      ? Math.round((recentActivities[0].distance_meters / 1000) * 100) / 100
-      : 5.0
-  );
-  const [durationSec, setDurationSec] = useState<number>(
-    recentActivities[0]?.moving_time_seconds || 1800
-  );
+  // Sort activities strictly descending by start_date so the newest session is always at the very top
+  const sortedActivities = useMemo(() => {
+    return [...(recentActivities || [])].sort((a, b) => {
+      const timeA = new Date(a.start_date).getTime();
+      const timeB = new Date(b.start_date).getTime();
+      return timeB - timeA;
+    });
+  }, [recentActivities]);
+
+  const [selectedActivityId, setSelectedActivityId] = useState<string>("");
+  const [sportType, setSportType] = useState<string>("Run");
+  const [distanceKm, setDistanceKm] = useState<number>(5.0);
+  const [durationSec, setDurationSec] = useState<number>(1800);
 
   const [painDuring, setPainDuring] = useState<number>(0);
   const [painAfter, setPainAfter] = useState<number>(0);
@@ -52,11 +60,34 @@ export function PostActivityCheckinModal({
     text: string;
   } | null>(null);
 
+  // Sync state when modal opens or activities list updates
+  useEffect(() => {
+    if (isOpen && sortedActivities.length > 0) {
+      const targetId =
+        initialActivityId && sortedActivities.some((a) => a.id === initialActivityId)
+          ? initialActivityId
+          : selectedActivityId && sortedActivities.some((a) => a.id === selectedActivityId)
+          ? selectedActivityId
+          : sortedActivities[0]?.id || "";
+
+      setSelectedActivityId(targetId);
+      const act = sortedActivities.find((a) => a.id === targetId) || sortedActivities[0];
+      if (act) {
+        setSportType(act.sport_type);
+        setDistanceKm(Math.round((act.distance_meters / 1000) * 100) / 100);
+        setDurationSec(act.moving_time_seconds);
+      }
+    }
+  }, [isOpen, initialActivityId, sortedActivities]);
+
   if (!isOpen) return null;
+
+  const selectedActivity =
+    sortedActivities.find((a) => a.id === selectedActivityId) || sortedActivities[0];
 
   const handleActivitySelect = (actId: string) => {
     setSelectedActivityId(actId);
-    const act = recentActivities.find((a) => a.id === actId);
+    const act = sortedActivities.find((a) => a.id === actId);
     if (act) {
       setSportType(act.sport_type);
       setDistanceKm(Math.round((act.distance_meters / 1000) * 100) / 100);
@@ -88,26 +119,32 @@ export function PostActivityCheckinModal({
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(`Respon server tidak valid (${res.status})`);
+      }
+
       if (!res.ok || !data.success) {
-        throw new Error(data.message || data.error || "Check-in failed");
+        throw new Error(data.message || data.error || "Gagal mencatat check-in pasca sesi.");
       }
 
       setStatusMessage({
         type: "success",
-        text: "Check-in recorded! Sport-specific training readiness deterministically updated.",
+        text: "Check-in berhasil disimpan! Kesiapan latihan multi-sport telah diperbarui.",
       });
 
       setTimeout(() => {
         if (onCheckinSuccess) onCheckinSuccess();
         onClose();
-        // Trigger page refresh to update server components
         window.location.reload();
       }, 1200);
     } catch (err: any) {
       setStatusMessage({
         type: "error",
-        text: err.message || "Failed to submit check-in",
+        text: err.message || "Gagal mengirim formulir check-in.",
       });
     } finally {
       setIsSubmitting(false);
@@ -116,7 +153,7 @@ export function PostActivityCheckinModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-[#12151D] border border-[#1F2430] rounded-sm max-w-xl w-full p-5 space-y-4 shadow-2xl relative">
+      <div className="bg-[#12151D] border border-[#1F2430] rounded-sm max-w-xl w-full p-5 space-y-4 shadow-2xl relative font-mono text-xs">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[#1F2430]">
           <div className="flex items-center gap-2">
@@ -128,7 +165,7 @@ export function PostActivityCheckinModal({
                 Post-Activity Subjective Check-in
               </h3>
               <span className="text-[10px] font-mono text-[#5A6272]">
-                Symptom Ingestion & Deterministic Readiness Update
+                Symptom Ingestion &amp; Deterministic Readiness Update
               </span>
             </div>
           </div>
@@ -144,28 +181,86 @@ export function PostActivityCheckinModal({
         <div className="p-3 rounded-sm bg-[#161922] border border-[#FF2A6D]/30 flex items-start gap-2.5 text-[11px] font-mono text-[#9BA3AF]">
           <ShieldAlert className="w-4 h-4 text-[#FF2A6D] shrink-0 mt-0.5" />
           <p>
-            <strong className="text-[#F0F2F5]">Safety Protocol:</strong> Data reported here directly gates future workout prescriptions. If you experience acute swelling, joint giving-way, or sharp weight-bearing pain, stop activity and seek medical evaluation.
+            <strong className="text-[#F0F2F5]">Safety Protocol:</strong> Data yang dilaporkan di sini langsung menentukan batas izin latihan berikutnya. Bila mengalami pembengkakan akut, rasa goyang sendi, atau nyeri hentakan tajam, hentikan sesi latihan dan lakukan evaluasi klinis.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
-          {/* Activity Selection */}
-          {recentActivities.length > 0 && (
-            <div>
-              <label className="block text-[10px] uppercase font-semibold text-[#9BA3AF] mb-1">
-                Link to Ingested Activity
-              </label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Activity Selection with Direct Link */}
+          {sortedActivities.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-[10px]">
+                <label className="uppercase font-bold text-[#9BA3AF] flex items-center gap-1.5">
+                  <ActivityIcon className="w-3.5 h-3.5 text-[#00F0FF]" />
+                  <span>Link to Ingested Activity</span>
+                </label>
+                {selectedActivity && (
+                  <Link
+                    href={`/activities/${selectedActivity.id}`}
+                    target="_blank"
+                    className="text-[#00F0FF] hover:text-[#D4FF00] font-bold flex items-center gap-1 hover:underline transition-colors"
+                  >
+                    <span>Buka Aktivitas Ini Langsung</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                )}
+              </div>
+
+              {/* Dropdown with chronologically sorted activities (newest on top) */}
               <select
                 value={selectedActivityId}
                 onChange={(e) => handleActivitySelect(e.target.value)}
-                className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+                className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-2 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF] text-xs font-mono"
               >
-                {recentActivities.slice(0, 8).map((act) => (
-                  <option key={act.id} value={act.id}>
-                    {act.name} ({act.sport_type} • {(act.distance_meters / 1000).toFixed(1)} km)
-                  </option>
-                ))}
+                {sortedActivities.map((act, idx) => {
+                  const dateStr = formatDate(act.start_date);
+                  const isTop = idx === 0;
+                  return (
+                    <option key={act.id} value={act.id}>
+                      {isTop ? "⭐ [TERBARU] " : ""}{dateStr ? `[${dateStr}] ` : ""}{act.name} ({act.sport_type} • {(act.distance_meters / 1000).toFixed(1)} km)
+                    </option>
+                  );
+                })}
               </select>
+
+              {/* Direct Activity Summary Card with Interactive Deep Link */}
+              {selectedActivity && (
+                <div className="p-2.5 rounded-sm bg-[#161922] border border-[#1F2430] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] px-2 py-0.5 rounded-xs font-bold bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30 shrink-0">
+                        {selectedActivity.sport_type}
+                      </span>
+                      <span className="font-bold text-xs text-[#F0F2F5] truncate">
+                        {selectedActivity.name}
+                      </span>
+                    </div>
+                    <div className="text-[10.5px] text-[#9BA3AF] flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-[#5A6272]" />
+                        <span>{formatDate(selectedActivity.start_date)}</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-[#5A6272]" />
+                        <span>{(selectedActivity.distance_meters / 1000).toFixed(2)} km</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-[#5A6272]" />
+                        <span>{formatDuration(selectedActivity.moving_time_seconds)}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/activities/${selectedActivity.id}`}
+                    target="_blank"
+                    className="px-3 py-1.5 rounded-sm bg-[#00F0FF]/10 hover:bg-[#00F0FF]/20 text-[#00F0FF] border border-[#00F0FF]/30 font-bold text-[10.5px] flex items-center justify-center gap-1.5 transition-all shrink-0 active:scale-[0.98]"
+                  >
+                    <span>Detail Aktivitas</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -178,7 +273,7 @@ export function PostActivityCheckinModal({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                  During Activity
+                  Saat Sesi Latihan
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -189,7 +284,11 @@ export function PostActivityCheckinModal({
                     onChange={(e) => setPainDuring(Number(e.target.value))}
                     className="w-full accent-[#00F0FF]"
                   />
-                  <span className={`font-bold font-tabular text-sm w-5 text-right ${painDuring > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"}`}>
+                  <span
+                    className={`font-bold font-tabular text-sm w-5 text-right ${
+                      painDuring > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"
+                    }`}
+                  >
                     {painDuring}
                   </span>
                 </div>
@@ -197,7 +296,7 @@ export function PostActivityCheckinModal({
 
               <div>
                 <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                  Immediately After
+                  Sesaat Pasca Sesi
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -208,7 +307,11 @@ export function PostActivityCheckinModal({
                     onChange={(e) => setPainAfter(Number(e.target.value))}
                     className="w-full accent-[#00F0FF]"
                   />
-                  <span className={`font-bold font-tabular text-sm w-5 text-right ${painAfter > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"}`}>
+                  <span
+                    className={`font-bold font-tabular text-sm w-5 text-right ${
+                      painAfter > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"
+                    }`}
+                  >
                     {painAfter}
                   </span>
                 </div>
@@ -216,7 +319,7 @@ export function PostActivityCheckinModal({
 
               <div>
                 <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                  Next-Day / Morning
+                  Keesokan Harinya (Pagi)
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -227,7 +330,11 @@ export function PostActivityCheckinModal({
                     onChange={(e) => setPainNextDay(Number(e.target.value))}
                     className="w-full accent-[#00F0FF]"
                   />
-                  <span className={`font-bold font-tabular text-sm w-5 text-right ${painNextDay > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"}`}>
+                  <span
+                    className={`font-bold font-tabular text-sm w-5 text-right ${
+                      painNextDay > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"
+                    }`}
+                  >
                     {painNextDay}
                   </span>
                 </div>
@@ -238,13 +345,13 @@ export function PostActivityCheckinModal({
           {/* Biological Circuit Breakers (Swelling & Instability) */}
           <div className="p-3 bg-[#090A0F] border border-[#1F2430] rounded-sm space-y-2.5">
             <span className="text-[10px] uppercase font-bold text-[#F0F2F5] tracking-wider block">
-              2. Structural Symptoms & Circuit Breakers
+              2. Structural Symptoms &amp; Circuit Breakers
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="flex items-center justify-between p-2 rounded-sm bg-[#161922] border border-[#1F2430] cursor-pointer hover:border-[#2D3547]">
                 <span className="text-[11px] text-[#F0F2F5]">
-                  Joint Swelling Observed?
+                  Pembengkakan Sendi Teramati?
                 </span>
                 <input
                   type="checkbox"
@@ -256,7 +363,7 @@ export function PostActivityCheckinModal({
 
               <label className="flex items-center justify-between p-2 rounded-sm bg-[#161922] border border-[#1F2430] cursor-pointer hover:border-[#2D3547]">
                 <span className="text-[11px] text-[#F0F2F5]">
-                  Joint Instability / Giving Way?
+                  Ketidakstabilan / Sendi Goyang?
                 </span>
                 <input
                   type="checkbox"
@@ -271,7 +378,7 @@ export function PostActivityCheckinModal({
           {/* RPE & Subjective Comments */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-1">
-              <label className="block text-[10px] text-[#9BA3AF] mb-1">
+              <label className="block text-[10px] text-[#9BA3AF] mb-1 font-bold">
                 Perceived Exertion (RPE 1-10)
               </label>
               <input
@@ -286,12 +393,12 @@ export function PostActivityCheckinModal({
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                Subjective Athlete Notes
+              <label className="block text-[10px] text-[#9BA3AF] mb-1 font-bold">
+                Catatan Subjektif Atlet
               </label>
               <input
                 type="text"
-                placeholder="e.g. Ankle felt stable during flat spin, slight knee stiffness on stairs"
+                placeholder="Contoh: Engkel stabil saat putaran flat, sedikit kaku lutut saat tangga"
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
                 className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
@@ -323,17 +430,17 @@ export function PostActivityCheckinModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-3 py-1.5 rounded-sm bg-[#161922] border border-[#1F2430] text-[#9BA3AF] hover:text-white"
+              className="px-3 py-1.5 rounded-sm bg-[#161922] border border-[#1F2430] text-[#9BA3AF] hover:text-white transition-colors"
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-1.5 rounded-sm bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 font-semibold hover:bg-[#00F0FF]/25 transition-colors flex items-center gap-1.5"
+              className="px-4 py-1.5 rounded-sm bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 font-bold hover:bg-[#00F0FF]/25 transition-all flex items-center gap-1.5 active:scale-[0.98]"
             >
               <Save className="w-3.5 h-3.5" />
-              {isSubmitting ? "Evaluating Readiness..." : "Save Check-in & Update"}
+              {isSubmitting ? "Mengevaluasi Kesiapan..." : "Simpan Check-in & Perbarui"}
             </button>
           </div>
         </form>
@@ -341,4 +448,3 @@ export function PostActivityCheckinModal({
     </div>
   );
 }
-
