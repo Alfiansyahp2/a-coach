@@ -1,8 +1,12 @@
+"use client";
+
 import React from "react";
-import { CheckSquare, RefreshCw } from "lucide-react";
+import { CheckSquare, RefreshCw, X, ShieldAlert, Sparkles } from "lucide-react";
 
 interface ActivityBatchActionBarProps {
   selectedIds: string[];
+  totalFilteredCount?: number;
+  onSelectAllFiltered?: () => void;
   batchSport: string;
   setBatchSport: (v: string) => void;
   batchLoading: boolean;
@@ -12,6 +16,8 @@ interface ActivityBatchActionBarProps {
 
 export function ActivityBatchActionBar({
   selectedIds,
+  totalFilteredCount,
+  onSelectAllFiltered,
   batchSport,
   setBatchSport,
   batchLoading,
@@ -20,22 +26,39 @@ export function ActivityBatchActionBar({
 }: ActivityBatchActionBarProps) {
   if (selectedIds.length === 0) return null;
 
+  const isAllFilteredSelected =
+    totalFilteredCount !== undefined &&
+    totalFilteredCount > 0 &&
+    selectedIds.length >= totalFilteredCount;
+
   return (
-    <div className="p-3 rounded-sm bg-[#161922] border border-[#00F0FF]/40 flex flex-wrap items-center justify-between gap-3 text-xs font-mono animate-in fade-in duration-150">
-      <div className="flex items-center gap-2 text-[#00F0FF]">
-        <CheckSquare className="w-4 h-4" />
-        <span>
-          <strong>{selectedIds.length}</strong> sesi terpilih untuk aksi massal
-        </span>
+    <div className="p-3 sm:p-3.5 rounded-sm bg-gradient-to-r from-[#12151D] via-[#1A2234] to-[#12151D] border border-[#00F0FF]/50 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-[0_0_15px_rgba(0,240,255,0.1)] animate-in fade-in duration-150">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[#00F0FF]">
+        <div className="flex items-center gap-1.5 font-bold">
+          <CheckSquare className="w-4 h-4 text-[#00F0FF]" />
+          <span>
+            <strong className="text-sm font-tabular">{selectedIds.length}</strong> sesi terpilih
+          </span>
+        </div>
+
+        {totalFilteredCount && totalFilteredCount > selectedIds.length && onSelectAllFiltered && (
+          <button
+            type="button"
+            onClick={onSelectAllFiltered}
+            className="text-[11px] underline text-[#9BA3AF] hover:text-[#00F0FF] transition-colors cursor-pointer"
+          >
+            Pilih semua {totalFilteredCount} sesi yang tampil
+          </button>
+        )}
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-[#9BA3AF]">Ubah Cabang:</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[#9BA3AF] text-[11px]">Ubah Cabang Massal:</span>
         <select
           value={batchSport}
           onChange={(e) => setBatchSport(e.target.value)}
           disabled={batchLoading}
-          className="px-2 py-1 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-white"
+          className="px-2.5 py-1 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-white font-mono focus:outline-none focus:border-[#00F0FF] cursor-pointer"
         >
           <option value="Run">Run (Lari)</option>
           <option value="Ride">Ride (Sepeda)</option>
@@ -45,9 +68,10 @@ export function ActivityBatchActionBar({
         </select>
 
         <button
+          type="button"
           onClick={onApplyBatch}
           disabled={batchLoading}
-          className="px-3 py-1 rounded-sm bg-[#00F0FF] hover:bg-[#00c8d6] text-black font-semibold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          className="px-3.5 py-1 rounded-sm bg-[#00F0FF] hover:bg-[#00c8d6] text-black font-bold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-sm active:scale-[0.98]"
         >
           {batchLoading ? (
             <>
@@ -55,19 +79,20 @@ export function ActivityBatchActionBar({
               <span>Memperbarui...</span>
             </>
           ) : (
-            <span>Terapkan Massal</span>
+            <span>Terapkan Perubahan</span>
           )}
         </button>
 
         <button
+          type="button"
           onClick={onCancel}
           disabled={batchLoading}
-          className="px-2.5 py-1 rounded-sm bg-[#090A0F] hover:bg-[#1C212E] text-[#9BA3AF] hover:text-white border border-[#1F2430]"
+          className="px-2.5 py-1 rounded-sm bg-[#090A0F] hover:bg-[#1C212E] text-[#9BA3AF] hover:text-white border border-[#1F2430] transition-colors cursor-pointer flex items-center gap-1"
         >
-          Batal
+          <X className="w-3 h-3" />
+          <span>Batal</span>
         </button>
       </div>
     </div>
   );
 }
-
