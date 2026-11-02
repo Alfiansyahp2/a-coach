@@ -1,28 +1,22 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Plus,
   Camera,
-  Upload,
   CheckCircle2,
   AlertCircle,
   X,
-  Bike,
   Activity as ActivityIcon,
-  Clock,
-  MapPin,
-  Mountain,
-  HeartPulse,
-  Sparkles,
-  RefreshCw,
   FileText,
-  Calendar,
-  ShieldCheck,
+  RefreshCw,
   Check,
 } from "lucide-react";
 import { ScheduledWorkout } from "@/types";
+import { ActivityImageUploader } from "./activity/modal/ActivityImageUploader";
+import { ActivityManualFormFields } from "./activity/modal/ActivityManualFormFields";
+import { ActivityHealthCheckinFields } from "./activity/modal/ActivityHealthCheckinFields";
 
 interface AddActivityModalProps {
   variant?: "button" | "outline" | "compact";
@@ -45,7 +39,6 @@ export function AddActivityModal({
   onSuccess,
 }: AddActivityModalProps) {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"image" | "manual">("image");
@@ -121,74 +114,32 @@ export function AddActivityModal({
     }
   };
 
-  // Image upload and OCR extraction
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Show preview
-    const objectUrl = URL.createObjectURL(file);
-    setImagePreview(objectUrl);
-    setIsParsingImage(true);
-    setOcrSuccessMsg(null);
-    setErrorMsg(null);
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    try {
-      const res = await fetch("/api/activities/parse-image", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Gagal memproses gambar telemetri");
-      }
-
-      const tel = data.telemetry;
-      if (tel) {
-        if (tel.sport_type) {
-          setSportType(tel.sport_type);
-        }
-        if (tel.name) {
-          setName(tel.name);
-        }
-        if (tel.distance_km != null) {
-          setDistanceKm(String(tel.distance_km));
-        }
-        if (tel.moving_time_seconds != null) {
-          const totalSec = Number(tel.moving_time_seconds);
-          const h = Math.floor(totalSec / 3600);
-          const m = Math.floor((totalSec % 3600) / 60);
-          const s = totalSec % 60;
-          setDurationHours(String(h));
-          setDurationMinutes(String(m));
-          setDurationSeconds(String(s));
-        }
-        if (tel.elevation_gain_meters != null) {
-          setElevationMeters(String(tel.elevation_gain_meters));
-        }
-        if (tel.raw_text) {
-          setOcrRawText(tel.raw_text);
-        }
-
-        const statsBadge = `${tel.distance_km} km • ${tel.formatted_duration} • ${
-          tel.average_speed_kmh ? `${tel.average_speed_kmh} km/j` : ""
-        } • Elev ${tel.elevation_gain_meters || 0}m`;
-
-        setOcrSuccessMsg(`Telemetri Terdeteksi: ${statsBadge}`);
-      }
-    } catch (err: any) {
-      console.error("OCR parse error:", err);
-      setErrorMsg(`OCR Parser: ${err.message}. Anda tetap dapat mengisi formulir secara manual.`);
-    } finally {
-      setIsParsingImage(false);
+  const handleTelemetryExtracted = (tel: {
+    sport_type?: string;
+    name?: string;
+    distance_km?: number;
+    moving_time_seconds?: number;
+    elevation_gain_meters?: number;
+    average_speed_kmh?: number;
+  }) => {
+    if (tel.sport_type) setSportType(tel.sport_type);
+    if (tel.name) setName(tel.name);
+    if (tel.distance_km != null) setDistanceKm(String(tel.distance_km));
+    if (tel.moving_time_seconds != null) {
+      const totalSec = Number(tel.moving_time_seconds);
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      setDurationHours(String(h));
+      setDurationMinutes(String(m));
+      setDurationSeconds(String(s));
+    }
+    if (tel.elevation_gain_meters != null) {
+      setElevationMeters(String(tel.elevation_gain_meters));
     }
   };
 
-  // Calculate speed and pace live
+  // Live kinematic calculations
   const totalDurationSeconds =
     (parseInt(durationHours || "0", 10) || 0) * 3600 +
     (parseInt(durationMinutes || "0", 10) || 0) * 60 +
@@ -404,379 +355,55 @@ export function AddActivityModal({
 
               {/* IMAGE OCR SCANNER SECTION */}
               {activeTab === "image" && (
-                <div className="p-4 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-[#F0F2F5] font-bold flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#00F0FF]" />
-                      IMAGE TELEMETRY PARSER (OCR)
-                    </span>
-                    <span className="text-[10px] text-[#5A6272] font-mono">
-                      Format: PNG, JPG, WEBP (Strava / Garmin / Apple Watch)
-                    </span>
-                  </div>
-
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
-
-                  {/* Dropzone / Upload Box */}
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`cursor-pointer border-2 border-dashed rounded-sm p-4 text-center transition-all flex flex-col items-center justify-center gap-2 ${
-                      isParsingImage
-                        ? "border-[#00F0FF] bg-[#00F0FF]/5"
-                        : imagePreview
-                        ? "border-[#1F2430] hover:border-[#00F0FF]/50 bg-[#090A0F]"
-                        : "border-[#1F2430] hover:border-[#D4FF00]/50 hover:bg-[#161922] bg-[#090A0F]"
-                    }`}
-                  >
-                    {isParsingImage ? (
-                      <div className="py-4 flex flex-col items-center gap-2 text-xs font-mono text-[#00F0FF]">
-                        <RefreshCw className="w-6 h-6 animate-spin text-[#00F0FF]" />
-                        <span className="font-bold">Membaca dan mengekstrak telemetri gambar...</span>
-                        <span className="text-[10px] text-[#9BA3AF]">
-                          Memproses watermark rute, jarak, durasi, elevasi & kecepatan
-                        </span>
-                      </div>
-                    ) : imagePreview ? (
-                      <div className="flex items-center gap-4 w-full">
-                        <img
-                          src={imagePreview}
-                          alt="Screenshot Pratinjau"
-                          className="w-20 h-20 object-cover rounded-xs border border-[#1F2430] bg-black"
-                        />
-                        <div className="flex-1 text-left font-mono">
-                          <p className="text-xs text-[#F0F2F5] font-bold flex items-center gap-1.5">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-[#D4FF00]" />
-                            Gambar Berhasil Dimuat
-                          </p>
-                          <p className="text-[10px] text-[#9BA3AF] mt-0.5">
-                            Klik di sini untuk mengganti gambar screenshot lain.
-                          </p>
-                          {ocrSuccessMsg && (
-                            <div className="mt-2 text-[11px] text-[#D4FF00] font-bold px-2 py-1 rounded-xs bg-[#D4FF00]/10 border border-[#D4FF00]/30 inline-block">
-                              {ocrSuccessMsg}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="py-3 flex flex-col items-center gap-1 text-xs font-mono text-[#9BA3AF]">
-                        <div className="p-3 rounded-full bg-[#161922] border border-[#1F2430] text-[#00F0FF] mb-1">
-                          <Upload className="w-5 h-5" />
-                        </div>
-                        <span className="text-[#F0F2F5] font-bold">
-                          Klik untuk Memilih atau Seret Screenshot Aktivitas ke Sini
-                        </span>
-                        <span className="text-[10px] text-[#5A6272]">
-                          Otomatis mengisi form jarak (km), durasi (jam/menit), elevasi (m), dan pace/kecepatan
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <ActivityImageUploader
+                  imagePreview={imagePreview}
+                  setImagePreview={setImagePreview}
+                  isParsingImage={isParsingImage}
+                  setIsParsingImage={setIsParsingImage}
+                  ocrSuccessMsg={ocrSuccessMsg}
+                  setOcrSuccessMsg={setOcrSuccessMsg}
+                  ocrRawText={ocrRawText}
+                  setOcrRawText={setOcrRawText}
+                  setErrorMsg={setErrorMsg}
+                  onTelemetryExtracted={handleTelemetryExtracted}
+                />
               )}
 
-              {/* FORM FIELDS */}
-              <div className="space-y-3.5">
-                {/* 1. Sport Type & Activity Name */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#9BA3AF] uppercase mb-1">
-                      Jenis Olahraga
-                    </label>
-                    <select
-                      value={sportType}
-                      onChange={(e) => setSportType(e.target.value)}
-                      className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-mono text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                    >
-                      <option value="Ride">Ride (Sepeda MTB / Road)</option>
-                      <option value="Run">Run (Lari)</option>
-                      <option value="Walk">Walk (Jalan Kaki)</option>
-                      <option value="CrossTraining">Cross Training (Rehab Sendi)</option>
-                      <option value="WeightTraining">Strength (Penguatan Otot)</option>
-                      <option value="Workout">Workout Lainnya</option>
-                    </select>
-                  </div>
+              {/* MANUAL FORM FIELDS */}
+              <ActivityManualFormFields
+                sportType={sportType}
+                setSportType={setSportType}
+                name={name}
+                setName={setName}
+                startDate={startDate}
+                setStartDate={setStartDate}
+                distanceKm={distanceKm}
+                setDistanceKm={setDistanceKm}
+                durationHours={durationHours}
+                setDurationHours={setDurationHours}
+                durationMinutes={durationMinutes}
+                setDurationMinutes={setDurationMinutes}
+                durationSeconds={durationSeconds}
+                setDurationSeconds={setDurationSeconds}
+                elevationMeters={elevationMeters}
+                setElevationMeters={setElevationMeters}
+                description={description}
+                setDescription={setDescription}
+                calculatedSpeedKmh={calculatedSpeedKmh}
+                calculatedPaceMinKm={calculatedPaceMinKm}
+              />
 
-                  <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-mono text-[#9BA3AF] uppercase mb-1">
-                      Judul / Nama Aktivitas
-                    </label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Contoh: Zone 2 MTB Endurance atau Lari Adaptasi Sendi"
-                      className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-mono text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* 2. Date & Time */}
-                <div>
-                  <label className="block text-[11px] font-mono text-[#9BA3AF] uppercase mb-1 flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-[#9BA3AF]" />
-                    <span>Waktu & Tanggal Mulai</span>
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-mono text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                    required
-                  />
-                </div>
-
-                {/* 3. Distance & Duration */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Distance */}
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#9BA3AF] uppercase mb-1 flex items-center justify-between">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3 text-[#00F0FF]" />
-                        <span>Jarak Tempuh (Kilometer)</span>
-                      </span>
-                      <span className="text-[10px] text-[#5A6272]">km</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={distanceKm}
-                      onChange={(e) => setDistanceKm(e.target.value)}
-                      placeholder="Contoh: 10.14"
-                      className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-mono font-tabular text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                      required
-                    />
-                  </div>
-
-                  {/* Elevation Gain */}
-                  <div>
-                    <label className="block text-[11px] font-mono text-[#9BA3AF] uppercase mb-1 flex items-center justify-between">
-                      <span className="flex items-center gap-1">
-                        <Mountain className="w-3 h-3 text-[#D4FF00]" />
-                        <span>Elevasi Mendaki (Elev Gain)</span>
-                      </span>
-                      <span className="text-[10px] text-[#5A6272]">meter</span>
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={elevationMeters}
-                      onChange={(e) => setElevationMeters(e.target.value)}
-                      placeholder="Contoh: 48"
-                      className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-mono font-tabular text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                    />
-                  </div>
-                </div>
-
-                {/* Duration Inputs: Jam, Menit, Detik */}
-                <div>
-                  <label className="block text-[11px] font-mono text-[#9BA3AF] uppercase mb-1 flex items-center justify-between">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-[#00F0FF]" />
-                      <span>Durasi Bergerak (Moving Time)</span>
-                    </span>
-                    <span className="text-[10px] text-[#5A6272]">
-                      Total: {Math.floor(totalDurationSeconds / 60)} Menit {totalDurationSeconds % 60} Detik
-                    </span>
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="flex items-center gap-1.5 bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5">
-                      <input
-                        type="number"
-                        min="0"
-                        max="24"
-                        value={durationHours}
-                        onChange={(e) => setDurationHours(e.target.value)}
-                        className="w-full bg-transparent text-xs font-mono font-tabular text-[#F0F2F5] focus:outline-none"
-                      />
-                      <span className="text-[10px] text-[#5A6272] font-mono">Jam</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5">
-                      <input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={durationMinutes}
-                        onChange={(e) => setDurationMinutes(e.target.value)}
-                        className="w-full bg-transparent text-xs font-mono font-tabular text-[#F0F2F5] focus:outline-none"
-                      />
-                      <span className="text-[10px] text-[#5A6272] font-mono">Menit</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5">
-                      <input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={durationSeconds}
-                        onChange={(e) => setDurationSeconds(e.target.value)}
-                        className="w-full bg-transparent text-xs font-mono font-tabular text-[#F0F2F5] focus:outline-none"
-                      />
-                      <span className="text-[10px] text-[#5A6272] font-mono">Detik</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Live Kinematics Strip */}
-                <div className="p-2.5 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-between text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-[#5A6272] uppercase">Kecepatan Rerata:</span>
-                    <span className="font-bold font-tabular text-[#00F0FF]">
-                      {calculatedSpeedKmh} km/jam
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-[#5A6272] uppercase">Pace:</span>
-                    <span className="font-bold font-tabular text-[#D4FF00]">
-                      {calculatedPaceMinKm} /km
-                    </span>
-                  </div>
-                </div>
-
-                {/* 4. ZONE 2 RPE INTENSITY CALIBRATION */}
-                <div className="p-3.5 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-mono font-bold text-[#F0F2F5] flex items-center gap-1.5">
-                      <HeartPulse className="w-3.5 h-3.5 text-[#D4FF00]" />
-                      INTENSITAS ZONE 2 & RPE (RATE OF PERCEIVED EXERTION)
-                    </label>
-                    <span
-                      className={`text-xs font-mono font-bold px-2 py-0.5 rounded-xs ${
-                        rpeScore <= 2
-                          ? "bg-blue-950/60 text-blue-300 border border-blue-500/30"
-                          : rpeScore <= 4
-                          ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/40"
-                          : rpeScore <= 6
-                          ? "bg-amber-950/60 text-amber-300 border border-amber-500/30"
-                          : "bg-red-950/60 text-red-300 border border-red-500/30"
-                      }`}
-                    >
-                      Skala RPE: {rpeScore} / 10
-                    </span>
-                  </div>
-
-                  {/* RPE Buttons 1-10 */}
-                  <div className="grid grid-cols-10 gap-1 font-mono">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
-                      <button
-                        type="button"
-                        key={score}
-                        onClick={() => setRpeScore(score)}
-                        className={`py-1.5 text-xs font-bold rounded-xs transition-colors ${
-                          rpeScore === score
-                            ? score <= 4
-                              ? "bg-[#D4FF00] text-black font-extrabold"
-                              : score <= 6
-                              ? "bg-amber-500 text-black font-extrabold"
-                              : "bg-red-500 text-white font-extrabold"
-                            : "bg-[#090A0F] border border-[#1F2430] text-[#9BA3AF] hover:text-white"
-                        }`}
-                      >
-                        {score}
-                      </button>
-                    ))}
-                  </div>
-
-                  <p className="text-[10px] text-[#9BA3AF] font-mono leading-relaxed">
-                    {rpeScore <= 4 ? (
-                      <span className="text-[#D4FF00]">
-                        ✓ Target Zone 2 Tercapai (Talk Test OK): Pernapasan stabil, dapat berbicara kalimat lengkap tanpa terengah-engah.
-                      </span>
-                    ) : (
-                      <span className="text-amber-400">
-                        ⚠ Intensitas di atas Zone 2: Nafas mulai memburu / tidak bisa bicara kalimat penuh. Disarankan menurunkan gigi kayuhan atau pace di sesi berikutnya.
-                      </span>
-                    )}
-                  </p>
-                </div>
-
-                {/* 5. INJURY & JOINT SAFETY CHECK-IN (ANKLE & KNEE) */}
-                <div className="p-3.5 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-mono font-bold text-[#F0F2F5] flex items-center gap-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#00F0FF]" />
-                      CHECK-IN KESEHATAN SENDI (ENGKEL & KEDUA LUTUT)
-                    </label>
-                    <span className="text-[10px] text-[#5A6272] font-mono">Protokol Keamanan</span>
-                  </div>
-
-                  {/* Pain Scale */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-[#9BA3AF]">Tingkat Nyeri Saat / Setelah Latihan:</span>
-                      <span
-                        className={`font-bold ${
-                          painScale === 0
-                            ? "text-[#D4FF00]"
-                            : painScale <= 3
-                            ? "text-amber-400"
-                            : "text-red-400"
-                        }`}
-                      >
-                        {painScale === 0 ? "0 (Bebas Nyeri)" : `${painScale} / 10`}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      value={painScale}
-                      onChange={(e) => setPainScale(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#00F0FF] bg-[#090A0F] h-1.5 rounded-none cursor-pointer"
-                    />
-                    <div className="flex justify-between text-[9px] font-mono text-[#5A6272]">
-                      <span>0 - Bebas Nyeri</span>
-                      <span>3 - Ringan / Aman</span>
-                      <span>5 - Mengganggu</span>
-                      <span>10 - Nyeri Akut</span>
-                    </div>
-                  </div>
-
-                  {/* Joint Checklist */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-xs">
-                    <label className="flex items-center gap-2 p-2 rounded-sm bg-[#090A0F] border border-[#1F2430] cursor-pointer hover:border-[#2D3547]">
-                      <input
-                        type="checkbox"
-                        checked={swellingObserved}
-                        onChange={(e) => setSwellingObserved(e.target.checked)}
-                        className="accent-[#00F0FF] rounded-none"
-                      />
-                      <span className="text-[#9BA3AF] text-[11px]">Ada pembengkakan sendi</span>
-                    </label>
-
-                    <label className="flex items-center gap-2 p-2 rounded-sm bg-[#090A0F] border border-[#1F2430] cursor-pointer hover:border-[#2D3547]">
-                      <input
-                        type="checkbox"
-                        checked={instabilityObserved}
-                        onChange={(e) => setInstabilityObserved(e.target.checked)}
-                        className="accent-[#00F0FF] rounded-none"
-                      />
-                      <span className="text-[#9BA3AF] text-[11px]">Ada rasa goyang / tidak stabil</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* 6. Description & Athlete Notes */}
-                <div>
-                  <label className="block text-[11px] font-mono text-[#9BA3AF] uppercase mb-1">
-                    Catatan Atlet / Sensasi Latihan
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Contoh: Kayuhan stabil di gear 3-4, jalan datar, hidrasi cukup, lutut dan engkel aman tanpa keluhan."
-                    className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-mono text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
-                  />
-                </div>
-              </div>
+              {/* CLINICAL JOINT & ZONE 2 HEALTH CHECKIN */}
+              <ActivityHealthCheckinFields
+                rpeScore={rpeScore}
+                setRpeScore={setRpeScore}
+                painScale={painScale}
+                setPainScale={setPainScale}
+                swellingObserved={swellingObserved}
+                setSwellingObserved={setSwellingObserved}
+                instabilityObserved={instabilityObserved}
+                setInstabilityObserved={setInstabilityObserved}
+              />
 
               {/* Submit & Cancel Actions */}
               <div className="pt-2 border-t border-[#1F2430] flex items-center justify-end gap-2.5 font-mono">
