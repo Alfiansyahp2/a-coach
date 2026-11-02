@@ -1,18 +1,45 @@
-import { Pool } from 'pg';
+import { Pool, types } from 'pg';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+
+// Prevent node-postgres from converting DATE (OID 1082) into JS Date with local timezone shift
+types.setTypeParser(1082, (val: string) => val);
+
+export function formatDateOnly(val: any): string {
+  if (!val) return '';
+  if (val instanceof Date) {
+    const y = val.getFullYear();
+    const m = String(val.getMonth() + 1).padStart(2, '0');
+    const d = String(val.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof val === 'string') return val.split('T')[0];
+  return String(val);
+}
 import {
   User,
   StravaConnection,
   StravaToken,
   Activity,
+  TrainingPlan,
   ScheduledWorkout,
   WorkoutActivityMatch,
   FitnessGoal,
   PersonalRecord,
   SyncLog,
+  AthleteProfile,
+  AthleteInjury,
+  AthletePainLog,
+  AthleteTrainingResponse,
+  AthleteMedicalAssessment,
+  AthleteTrainingReadiness,
+  HealthAuditTrail,
+  AuthoritativeAthleteHealthContext,
+  MedicalEvaluationStatus,
+  VerificationStatus,
 } from '@/types';
+import { evaluateTrainingReadiness } from '@/lib/readinessEngine';
 
 // Detect whether PostgreSQL is enabled
 const databaseUrl = process.env.DATABASE_URL;
@@ -42,11 +69,19 @@ interface LocalStoreSchema {
   strava_connections: StravaConnection[];
   strava_tokens: StravaToken[];
   activities: Activity[];
+  training_plans?: TrainingPlan[];
   scheduled_workouts: ScheduledWorkout[];
   workout_activity_matches: WorkoutActivityMatch[];
   fitness_goals: FitnessGoal[];
   personal_records: PersonalRecord[];
   sync_logs: SyncLog[];
+  athlete_profiles: AthleteProfile[];
+  athlete_injuries: AthleteInjury[];
+  athlete_pain_logs: AthletePainLog[];
+  athlete_training_responses: AthleteTrainingResponse[];
+  athlete_medical_assessments: AthleteMedicalAssessment[];
+  athlete_training_readiness: AthleteTrainingReadiness[];
+  health_audit_trail: HealthAuditTrail[];
 }
 
 function ensureLocalStore(): LocalStoreSchema {
@@ -164,6 +199,13 @@ function ensureLocalStore(): LocalStoreSchema {
         },
       ],
       sync_logs: [],
+      athlete_profiles: [],
+      athlete_injuries: [],
+      athlete_pain_logs: [],
+      athlete_training_responses: [],
+      athlete_medical_assessments: [],
+      athlete_training_readiness: [],
+      health_audit_trail: [],
     };
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(initialStore, null, 2), 'utf8');
@@ -185,6 +227,13 @@ function ensureLocalStore(): LocalStoreSchema {
       fitness_goals: [],
       personal_records: [],
       sync_logs: [],
+      athlete_profiles: [],
+      athlete_injuries: [],
+      athlete_pain_logs: [],
+      athlete_training_responses: [],
+      athlete_medical_assessments: [],
+      athlete_training_readiness: [],
+      health_audit_trail: [],
     };
   }
 }
@@ -630,6 +679,177 @@ export async function upsertActivity(
   };
 }
 
+export interface CreateManualActivityParams {
+  name: string;
+  sport_type: string;
+  start_date: string;
+  distance_meters?: number;
+  moving_time_seconds?: number;
+  elapsed_time_seconds?: number;
+  elevation_gain_meters?: number;
+  average_speed_mps?: number;
+  max_speed_mps?: number;
+  average_heartrate?: number;
+  max_heartrate?: number;
+  average_cadence?: number;
+  average_watts?: number;
+  calories?: number;
+  description?: string;
+  workout_id?: string;
+  // Clinical / Check-in responses
+  rpe_score?: number | null;
+  pain_during_activity?: number | null;
+  pain_after_activity?: number | null;
+  pain_next_day?: number | null;
+  swelling_observed?: boolean | null;
+  instability_observed?: boolean | null;
+  athlete_comments?: string | null;
+}
+
+export async function createManualActivity(
+  userId: string = DEFAULT_USER_ID,
+  params: CreateManualActivityParams
+): Promise<{
+  activity: Activity;
+  matchedWorkout: ScheduledWorkout | null;
+  match: WorkoutActivityMatch | null;
+  trainingResponse?: AthleteTrainingResponse | null;
+}> {
+  // Generate synthetic unique strava_activity_id for manual / parsed entries (bigint safe number)
+  const syntheticStravaId = Date.now() * 1000 + Math.floor(Math.random() * 1000);
+  
+  const distance_meters = Number(params.distance_meters || 0);
+  const moving_time_seconds = Number(params.moving_time_seconds || 0);
+  const elapsed_time_seconds = Number(params.elapsed_time_seconds || moving_time_seconds);
+  const elevation_gain_meters = Number(params.elevation_gain_meters || 0);
+  
+  let average_speed_mps = params.average_speed_mps;
+  if (!average_speed_mps && moving_time_seconds > 0 && distance_meters > 0) {
+    average_speed_mps = Number((distance_meters / moving_time_seconds).toFixed(2));
+  }
+
+  const { activity } = await upsertActivity({
+    user_id: userId,
+    strava_activity_id: syntheticStravaId,
+    name: params.name || 'Manual Workout Activity',
+    sport_type: (params.sport_type || 'Ride') as any,
+    start_date: params.start_date || new Date().toISOString(),
+    distance_meters,
+    moving_time_seconds,
+    elapsed_time_seconds,
+    elevation_gain_meters,
+    average_speed_mps: average_speed_mps || 0,
+    max_speed_mps: params.max_speed_mps !== undefined && params.max_speed_mps !== null ? params.max_speed_mps : undefined,
+    average_heartrate: params.average_heartrate || null,
+    max_heartrate: params.max_heartrate || null,
+    average_cadence: params.average_cadence || null,
+    average_watts: params.average_watts || null,
+    calories: params.calories || null,
+    description: params.description || null,
+  });
+
+  // Attempt workout correlation
+  let matchedWorkout: ScheduledWorkout | null = null;
+  let match: WorkoutActivityMatch | null = null;
+
+  try {
+    const workouts = await getScheduledWorkouts(userId);
+    const activityDate = formatDateOnly(params.start_date);
+
+    if (params.workout_id) {
+      matchedWorkout = workouts.find((w) => w.id === params.workout_id) || null;
+    } else {
+      // Find matching planned or missed workout on the same day
+      const candidateWorkouts = workouts.filter((w) => {
+        const wDate = formatDateOnly(w.scheduled_date);
+        return wDate === activityDate && (w.status === 'PLANNED' || w.status === 'MISSED');
+      });
+
+      if (candidateWorkouts.length > 0) {
+        // Match by sport type if possible
+        const normSport = (params.sport_type || '').toLowerCase();
+        const sameSport = candidateWorkouts.find((w) => {
+          const wCategory = (w.workout_category || '').toLowerCase();
+          return (
+            (normSport.includes('ride') && (wCategory.includes('ride') || wCategory.includes('cycl'))) ||
+            (normSport.includes('run') && (wCategory.includes('run') || wCategory.includes('lari'))) ||
+            wCategory === normSport
+          );
+        });
+        matchedWorkout = sameSport || candidateWorkouts[0];
+      }
+    }
+
+    if (matchedWorkout) {
+      let completionPercentage = 100;
+      if (matchedWorkout.target_distance_meters && matchedWorkout.target_distance_meters > 0) {
+        completionPercentage = Math.min(200, Math.round((distance_meters / matchedWorkout.target_distance_meters) * 100));
+      } else if (matchedWorkout.target_duration_seconds && matchedWorkout.target_duration_seconds > 0) {
+        completionPercentage = Math.min(200, Math.round((moving_time_seconds / matchedWorkout.target_duration_seconds) * 100));
+      }
+
+      const distDelta = distance_meters - (matchedWorkout.target_distance_meters || 0);
+      const durDelta = moving_time_seconds - (matchedWorkout.target_duration_seconds || 0);
+
+      match = await saveWorkoutActivityMatch({
+        workout_id: matchedWorkout.id,
+        activity_id: activity.id,
+        is_manual_match: true,
+        completion_percentage: completionPercentage,
+        distance_delta_meters: distDelta,
+        duration_delta_seconds: durDelta,
+        pace_delta_seconds_per_km: 0,
+      });
+
+      await updateScheduledWorkout(matchedWorkout.id, {
+        status: 'COMPLETED',
+      });
+      matchedWorkout.status = 'COMPLETED';
+    }
+  } catch (matchErr) {
+    console.warn('Failed to correlate workout with manual activity:', matchErr);
+  }
+
+  // Record athlete training response if check-in metrics provided
+  let trainingResponse: AthleteTrainingResponse | null = null;
+  if (
+    params.rpe_score != null ||
+    params.pain_during_activity != null ||
+    params.pain_after_activity != null ||
+    params.swelling_observed != null ||
+    params.athlete_comments != null
+  ) {
+    try {
+      trainingResponse = await upsertAthleteTrainingResponse({
+        user_id: userId,
+        activity_id: activity.id,
+        strava_activity_id: syntheticStravaId,
+        sport_type: params.sport_type,
+        distance_km: Number((distance_meters / 1000).toFixed(2)),
+        duration_seconds: moving_time_seconds,
+        rpe_score: params.rpe_score ?? null,
+        pain_during_activity: params.pain_during_activity ?? 0,
+        pain_after_activity: params.pain_after_activity ?? 0,
+        pain_next_day: params.pain_next_day ?? null,
+        swelling_observed: Boolean(params.swelling_observed),
+        instability_observed: Boolean(params.instability_observed),
+        fatigue_response: (params.rpe_score ?? 0) >= 8 ? 'HIGH' : (params.rpe_score ?? 0) >= 5 ? 'NORMAL' : 'LOW',
+        athlete_comments: params.athlete_comments || params.description || null,
+        checkin_completed_at: new Date().toISOString(),
+      });
+    } catch (respErr) {
+      console.warn('Failed to save athlete training response:', respErr);
+    }
+  }
+
+  return {
+    activity,
+    matchedWorkout,
+    match,
+    trainingResponse,
+  };
+}
+
 export async function getLatestActivityDate(userId: string = DEFAULT_USER_ID): Promise<string | null> {
   if (pgPool) {
     const res = await pgPool.query('SELECT MAX(start_date) as max_date FROM activities WHERE user_id = $1', [userId]);
@@ -668,6 +888,102 @@ export async function getLastSyncLog(userId: string = DEFAULT_USER_ID): Promise<
   return logs[0] || null;
 }
 
+export async function getTrainingPlans(userId: string = DEFAULT_USER_ID): Promise<TrainingPlan[]> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM training_plans WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    return res.rows.map((row) => ({
+      ...row,
+      start_date: formatDateOnly(row.start_date),
+      end_date: formatDateOnly(row.end_date),
+    }));
+  }
+  const store = ensureLocalStore();
+  return (store.training_plans || []).filter((p) => p.user_id === userId);
+}
+
+export async function getActiveTrainingPlan(userId: string = DEFAULT_USER_ID): Promise<TrainingPlan | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM training_plans WHERE user_id = $1 AND is_active = TRUE ORDER BY created_at DESC LIMIT 1',
+      [userId]
+    );
+    if (res.rows.length === 0) return null;
+    const row = res.rows[0];
+    return {
+      ...row,
+      start_date: formatDateOnly(row.start_date),
+      end_date: formatDateOnly(row.end_date),
+    };
+  }
+  const store = ensureLocalStore();
+  return (store.training_plans || []).find((p) => p.user_id === userId && p.is_active) || null;
+}
+
+export async function createTrainingPlan(
+  plan: Omit<TrainingPlan, 'id' | 'created_at' | 'updated_at'>
+): Promise<TrainingPlan> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    if (plan.is_active) {
+      await pgPool.query('UPDATE training_plans SET is_active = FALSE WHERE user_id = $1', [plan.user_id]);
+    }
+    const query = `
+      INSERT INTO training_plans (user_id, title, description, start_date, end_date, is_active, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      RETURNING *;
+    `;
+    const res = await pgPool.query(query, [
+      plan.user_id,
+      plan.title,
+      plan.description || null,
+      plan.start_date,
+      plan.end_date,
+      plan.is_active ?? true,
+    ]);
+    const row = res.rows[0];
+    return {
+      ...row,
+      start_date:
+        row.start_date instanceof Date
+          ? row.start_date.toISOString().split('T')[0]
+          : String(row.start_date || '').split('T')[0],
+      end_date:
+        row.end_date instanceof Date
+          ? row.end_date.toISOString().split('T')[0]
+          : String(row.end_date || '').split('T')[0],
+    };
+  }
+  const store = ensureLocalStore();
+  if (!store.training_plans) store.training_plans = [];
+  if (plan.is_active) {
+    store.training_plans.forEach((p) => {
+      if (p.user_id === plan.user_id) p.is_active = false;
+    });
+  }
+  const created: TrainingPlan = {
+    ...plan,
+    id: crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  };
+  store.training_plans.push(created);
+  saveLocalStore(store);
+  return created;
+}
+
+export async function deleteTrainingPlansByUserId(userId: string = DEFAULT_USER_ID): Promise<void> {
+  if (pgPool) {
+    await pgPool.query('DELETE FROM training_plans WHERE user_id = $1', [userId]);
+    return;
+  }
+  const store = ensureLocalStore();
+  store.training_plans = (store.training_plans || []).filter((p) => p.user_id !== userId);
+  saveLocalStore(store);
+}
+
 export async function getScheduledWorkouts(
   userId: string = DEFAULT_USER_ID,
   startDate?: string,
@@ -689,12 +1005,7 @@ export async function getScheduledWorkouts(
     const res = await pgPool.query(query, params);
     return res.rows.map((row) => ({
       ...row,
-      scheduled_date:
-        row.scheduled_date instanceof Date
-          ? row.scheduled_date.toISOString().split('T')[0]
-          : typeof row.scheduled_date === 'string'
-            ? row.scheduled_date.split('T')[0]
-            : String(row.scheduled_date || ''),
+      scheduled_date: formatDateOnly(row.scheduled_date),
     }));
   }
 
@@ -809,6 +1120,18 @@ export async function deleteScheduledWorkout(id: string): Promise<boolean> {
   return store.scheduled_workouts.length < initialLen;
 }
 
+export async function deleteScheduledWorkoutsByUserId(userId: string = DEFAULT_USER_ID): Promise<void> {
+  if (pgPool) {
+    await pgPool.query('DELETE FROM scheduled_workouts WHERE user_id = $1', [userId]);
+    return;
+  }
+  const store = ensureLocalStore();
+  const deletedIds = new Set(store.scheduled_workouts.filter((w) => w.user_id === userId).map((w) => w.id));
+  store.scheduled_workouts = store.scheduled_workouts.filter((w) => w.user_id !== userId);
+  store.workout_activity_matches = store.workout_activity_matches.filter((m) => !deletedIds.has(m.workout_id));
+  saveLocalStore(store);
+}
+
 export async function getWorkoutActivityMatches(userId: string = DEFAULT_USER_ID): Promise<WorkoutActivityMatch[]> {
   if (pgPool) {
     const query = `
@@ -912,18 +1235,8 @@ export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise
     const res = await pgPool.query('SELECT * FROM fitness_goals WHERE user_id = $1 ORDER BY target_date ASC', [userId]);
     return res.rows.map((row) => ({
       ...row,
-      start_date:
-        row.start_date instanceof Date
-          ? row.start_date.toISOString().split('T')[0]
-          : typeof row.start_date === 'string'
-            ? row.start_date.split('T')[0]
-            : String(row.start_date || ''),
-      target_date:
-        row.target_date instanceof Date
-          ? row.target_date.toISOString().split('T')[0]
-          : typeof row.target_date === 'string'
-            ? row.target_date.split('T')[0]
-            : String(row.target_date || ''),
+      start_date: formatDateOnly(row.start_date),
+      target_date: formatDateOnly(row.target_date),
     }));
   }
   const store = ensureLocalStore();
@@ -962,6 +1275,72 @@ export async function createFitnessGoal(goal: Omit<FitnessGoal, 'id' | 'created_
   store.fitness_goals.push(created);
   saveLocalStore(store);
   return created;
+}
+
+export async function upsertFitnessGoal(
+  goal: Omit<FitnessGoal, 'id' | 'created_at' | 'updated_at'> & { id?: string }
+): Promise<FitnessGoal> {
+  const now = new Date().toISOString();
+  if (pgPool) {
+    if (goal.id) {
+      const query = `
+        INSERT INTO fitness_goals (id, user_id, title, goal_type, target_value, current_value, start_date, target_date, is_achieved, unit, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          title = EXCLUDED.title,
+          goal_type = EXCLUDED.goal_type,
+          target_value = EXCLUDED.target_value,
+          current_value = EXCLUDED.current_value,
+          start_date = EXCLUDED.start_date,
+          target_date = EXCLUDED.target_date,
+          is_achieved = EXCLUDED.is_achieved,
+          unit = EXCLUDED.unit,
+          updated_at = NOW()
+        RETURNING *;
+      `;
+      const res = await pgPool.query(query, [
+        goal.id,
+        goal.user_id,
+        goal.title,
+        goal.goal_type,
+        goal.target_value,
+        goal.current_value,
+        goal.start_date,
+        goal.target_date,
+        goal.is_achieved,
+        goal.unit,
+      ]);
+      const row = res.rows[0];
+      return {
+        ...row,
+        start_date:
+          row.start_date instanceof Date
+            ? row.start_date.toISOString().split('T')[0]
+            : String(row.start_date).split('T')[0],
+        target_date:
+          row.target_date instanceof Date
+            ? row.target_date.toISOString().split('T')[0]
+            : String(row.target_date).split('T')[0],
+      };
+    } else {
+      return createFitnessGoal(goal);
+    }
+  }
+  const store = ensureLocalStore();
+  const existingIdx = goal.id ? store.fitness_goals.findIndex((g) => g.id === goal.id) : -1;
+  const record: FitnessGoal = {
+    ...goal,
+    id: goal.id || crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  };
+  if (existingIdx >= 0) {
+    store.fitness_goals[existingIdx] = record;
+  } else {
+    store.fitness_goals.push(record);
+  }
+  saveLocalStore(store);
+  return record;
 }
 
 export async function getPersonalRecords(userId: string = DEFAULT_USER_ID): Promise<PersonalRecord[]> {
@@ -1035,3 +1414,761 @@ export async function getDatabaseStatus(): Promise<{ type: 'PostgreSQL' | 'Local
     info: 'Using file-backed atomic store (.data/store.json). Set DATABASE_URL to connect to PostgreSQL.',
   };
 }
+
+// =====================================================================
+// ATHLETE HEALTH, INJURY & READINESS DATA ACCESS LAYER
+// =====================================================================
+
+export async function getAthleteProfile(userId: string = DEFAULT_USER_ID): Promise<AthleteProfile | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM athlete_profiles WHERE user_id = $1 LIMIT 1',
+      [userId]
+    );
+    if (res.rows.length === 0) return null;
+    const r = res.rows[0];
+    return {
+      ...r,
+      age: r.age ? Number(r.age) : null,
+      height_cm: r.height_cm ? Number(r.height_cm) : null,
+      weight_kg: r.weight_kg ? Number(r.weight_kg) : null,
+      bmi: r.bmi ? Number(r.bmi) : null,
+      resting_heart_rate: r.resting_heart_rate ? Number(r.resting_heart_rate) : null,
+      training_days_per_week: Number(r.training_days_per_week || 3),
+      physiological_measurements: r.physiological_measurements || {},
+    };
+  }
+
+  const store = ensureLocalStore();
+  return store.athlete_profiles.find((p) => p.user_id === userId) || null;
+}
+
+export async function upsertAthleteProfile(
+  profile: Partial<AthleteProfile> & { user_id: string }
+): Promise<AthleteProfile> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `INSERT INTO athlete_profiles (
+        user_id, age, height_cm, weight_kg, resting_heart_rate,
+        training_days_per_week, preferred_sports, training_experience,
+        performance_objectives, physiological_measurements, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET
+        age = COALESCE(EXCLUDED.age, athlete_profiles.age),
+        height_cm = COALESCE(EXCLUDED.height_cm, athlete_profiles.height_cm),
+        weight_kg = COALESCE(EXCLUDED.weight_kg, athlete_profiles.weight_kg),
+        resting_heart_rate = COALESCE(EXCLUDED.resting_heart_rate, athlete_profiles.resting_heart_rate),
+        training_days_per_week = COALESCE(EXCLUDED.training_days_per_week, athlete_profiles.training_days_per_week),
+        preferred_sports = COALESCE(EXCLUDED.preferred_sports, athlete_profiles.preferred_sports),
+        training_experience = COALESCE(EXCLUDED.training_experience, athlete_profiles.training_experience),
+        performance_objectives = COALESCE(EXCLUDED.performance_objectives, athlete_profiles.performance_objectives),
+        physiological_measurements = COALESCE(EXCLUDED.physiological_measurements, athlete_profiles.physiological_measurements),
+        updated_at = NOW()
+      RETURNING *`,
+      [
+        profile.user_id,
+        profile.age ?? null,
+        profile.height_cm ?? null,
+        profile.weight_kg ?? null,
+        profile.resting_heart_rate ?? null,
+        profile.training_days_per_week ?? 3,
+        profile.preferred_sports ?? ['Running', 'Cycling'],
+        profile.training_experience ?? 'INTERMEDIATE',
+        profile.performance_objectives ?? 'Aerobic endurance with injury prevention',
+        JSON.stringify(profile.physiological_measurements ?? {}),
+      ]
+    );
+    const r = res.rows[0];
+    return {
+      ...r,
+      age: r.age ? Number(r.age) : null,
+      height_cm: r.height_cm ? Number(r.height_cm) : null,
+      weight_kg: r.weight_kg ? Number(r.weight_kg) : null,
+      bmi: r.bmi ? Number(r.bmi) : null,
+      resting_heart_rate: r.resting_heart_rate ? Number(r.resting_heart_rate) : null,
+      training_days_per_week: Number(r.training_days_per_week || 3),
+      physiological_measurements: r.physiological_measurements || {},
+    };
+  }
+
+  const store = ensureLocalStore();
+  const idx = store.athlete_profiles.findIndex((p) => p.user_id === profile.user_id);
+  const now = new Date().toISOString();
+  const weight = profile.weight_kg ?? 65;
+  const height = profile.height_cm ?? 170;
+  const bmi = Math.round((weight / ((height / 100) * (height / 100))) * 10) / 10;
+
+  const record: AthleteProfile = {
+    id: idx !== -1 ? store.athlete_profiles[idx].id : crypto.randomUUID(),
+    user_id: profile.user_id,
+    age: profile.age ?? 22,
+    height_cm: height,
+    weight_kg: weight,
+    bmi,
+    resting_heart_rate: profile.resting_heart_rate ?? 68,
+    training_days_per_week: profile.training_days_per_week ?? 3,
+    preferred_sports: profile.preferred_sports ?? ['Running', 'Cycling'],
+    training_experience: profile.training_experience ?? 'INTERMEDIATE',
+    performance_objectives: profile.performance_objectives ?? 'Aerobic endurance with injury prevention',
+    physiological_measurements: profile.physiological_measurements ?? {
+      hr_max: null,
+      lthr: null,
+      ftp_watts: null,
+      vo2_max: null,
+      running_threshold_pace_sec: null,
+      cycling_power_zones: null,
+      baseline_consistency_weeks: null,
+      sleep_recovery_baseline: null,
+    },
+    created_at: idx !== -1 ? store.athlete_profiles[idx].created_at : now,
+    updated_at: now,
+  };
+
+  if (idx !== -1) {
+    store.athlete_profiles[idx] = record;
+  } else {
+    store.athlete_profiles.push(record);
+  }
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getAthleteInjuries(userId: string = DEFAULT_USER_ID): Promise<AthleteInjury[]> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM athlete_injuries WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    return res.rows.map((r) => ({
+      ...r,
+      previous_swelling: Boolean(r.previous_swelling),
+      estimated_injury_date: r.estimated_injury_date ? r.estimated_injury_date.toISOString().split('T')[0] : null,
+    }));
+  }
+
+  const store = ensureLocalStore();
+  return store.athlete_injuries.filter((i) => i.user_id === userId);
+}
+
+export async function createAthleteInjury(
+  injury: Omit<AthleteInjury, 'id' | 'created_at' | 'updated_at'>
+): Promise<AthleteInjury> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `INSERT INTO athlete_injuries (
+        user_id, body_region, side, injury_mechanism, timeframe_description,
+        estimated_injury_date, previous_symptoms, initial_severity,
+        previous_swelling, previous_swelling_duration, medical_evaluation_status,
+        current_status, clinician_restrictions, functional_limitations,
+        recovery_notes
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      RETURNING *`,
+      [
+        injury.user_id,
+        injury.body_region,
+        injury.side,
+        injury.injury_mechanism,
+        injury.timeframe_description,
+        injury.estimated_injury_date || null,
+        injury.previous_symptoms || null,
+        injury.initial_severity || 'MODERATE',
+        Boolean(injury.previous_swelling),
+        injury.previous_swelling_duration || null,
+        injury.medical_evaluation_status || 'PENDING_CLINICAL_ASSESSMENT',
+        injury.current_status || 'ACTIVE_SYMPTOMATIC',
+        injury.clinician_restrictions || null,
+        injury.functional_limitations || null,
+        injury.recovery_notes || null,
+      ]
+    );
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const now = new Date().toISOString();
+  const record: AthleteInjury = {
+    ...injury,
+    id: crypto.randomUUID(),
+    created_at: now,
+    updated_at: now,
+  };
+  store.athlete_injuries.unshift(record);
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getAthletePainLogs(
+  userId: string = DEFAULT_USER_ID,
+  limit: number = 20
+): Promise<AthletePainLog[]> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM athlete_pain_logs WHERE user_id = $1 ORDER BY logged_at DESC LIMIT $2',
+      [userId, limit]
+    );
+    return res.rows.map((r) => ({
+      ...r,
+      pain_score: r.pain_score !== null ? Number(r.pain_score) : null,
+      pain_during_activity: r.pain_during_activity !== null ? Number(r.pain_during_activity) : null,
+      pain_immediately_after: r.pain_immediately_after !== null ? Number(r.pain_immediately_after) : null,
+      pain_24h_after: r.pain_24h_after !== null ? Number(r.pain_24h_after) : null,
+      swelling_present: Boolean(r.swelling_present),
+      joint_instability: Boolean(r.joint_instability),
+    }));
+  }
+
+  const store = ensureLocalStore();
+  return store.athlete_pain_logs.filter((p) => p.user_id === userId).slice(0, limit);
+}
+
+export async function createAthletePainLog(
+  log: Omit<AthletePainLog, 'id' | 'created_at'>
+): Promise<AthletePainLog> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `INSERT INTO athlete_pain_logs (
+        user_id, injury_id, body_region, side, pain_score, pain_type,
+        associated_activity, pain_during_activity, pain_immediately_after,
+        pain_24h_after, swelling_present, joint_instability,
+        functional_limitations, logged_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      RETURNING *`,
+      [
+        log.user_id,
+        log.injury_id || null,
+        log.body_region,
+        log.side,
+        log.pain_score ?? null,
+        log.pain_type || null,
+        log.associated_activity || null,
+        log.pain_during_activity ?? null,
+        log.pain_immediately_after ?? null,
+        log.pain_24h_after ?? null,
+        Boolean(log.swelling_present),
+        Boolean(log.joint_instability),
+        log.functional_limitations || null,
+        log.logged_at || new Date().toISOString(),
+      ]
+    );
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const record: AthletePainLog = {
+    ...log,
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+  };
+  store.athlete_pain_logs.unshift(record);
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getAthleteTrainingResponses(
+  userId: string = DEFAULT_USER_ID,
+  limit: number = 20
+): Promise<AthleteTrainingResponse[]> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM athlete_training_responses WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2',
+      [userId, limit]
+    );
+    return res.rows.map((r) => ({
+      ...r,
+      distance_km: Number(r.distance_km),
+      duration_seconds: Number(r.duration_seconds),
+      rpe_score: r.rpe_score !== null ? Number(r.rpe_score) : null,
+      pain_during_activity: r.pain_during_activity !== null ? Number(r.pain_during_activity) : null,
+      pain_after_activity: r.pain_after_activity !== null ? Number(r.pain_after_activity) : null,
+      pain_next_day: r.pain_next_day !== null ? Number(r.pain_next_day) : null,
+      swelling_observed: Boolean(r.swelling_observed),
+      instability_observed: Boolean(r.instability_observed),
+    }));
+  }
+
+  const store = ensureLocalStore();
+  return store.athlete_training_responses.filter((r) => r.user_id === userId).slice(0, limit);
+}
+
+export async function upsertAthleteTrainingResponse(
+  resp: Omit<AthleteTrainingResponse, 'id' | 'created_at'>
+): Promise<AthleteTrainingResponse> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `INSERT INTO athlete_training_responses (
+        user_id, activity_id, strava_activity_id, sport_type, distance_km,
+        duration_seconds, rpe_score, pain_during_activity, pain_after_activity,
+        pain_next_day, swelling_observed, instability_observed,
+        fatigue_response, athlete_comments, checkin_completed_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      ON CONFLICT (user_id, activity_id) DO UPDATE SET
+        rpe_score = EXCLUDED.rpe_score,
+        pain_during_activity = EXCLUDED.pain_during_activity,
+        pain_after_activity = EXCLUDED.pain_after_activity,
+        pain_next_day = EXCLUDED.pain_next_day,
+        swelling_observed = EXCLUDED.swelling_observed,
+        instability_observed = EXCLUDED.instability_observed,
+        fatigue_response = EXCLUDED.fatigue_response,
+        athlete_comments = EXCLUDED.athlete_comments,
+        checkin_completed_at = NOW()
+      RETURNING *`,
+      [
+        resp.user_id,
+        resp.activity_id || null,
+        resp.strava_activity_id || null,
+        resp.sport_type,
+        resp.distance_km,
+        resp.duration_seconds,
+        resp.rpe_score ?? null,
+        resp.pain_during_activity ?? null,
+        resp.pain_after_activity ?? null,
+        resp.pain_next_day ?? null,
+        Boolean(resp.swelling_observed),
+        Boolean(resp.instability_observed),
+        resp.fatigue_response || 'NORMAL',
+        resp.athlete_comments || null,
+        resp.checkin_completed_at || new Date().toISOString(),
+      ]
+    );
+    const r = res.rows[0];
+    return {
+      ...r,
+      distance_km: Number(r.distance_km),
+      duration_seconds: Number(r.duration_seconds),
+      rpe_score: r.rpe_score !== null ? Number(r.rpe_score) : null,
+      pain_during_activity: r.pain_during_activity !== null ? Number(r.pain_during_activity) : null,
+      pain_after_activity: r.pain_after_activity !== null ? Number(r.pain_after_activity) : null,
+      pain_next_day: r.pain_next_day !== null ? Number(r.pain_next_day) : null,
+      swelling_observed: Boolean(r.swelling_observed),
+      instability_observed: Boolean(r.instability_observed),
+    };
+  }
+
+  const store = ensureLocalStore();
+  const idx = store.athlete_training_responses.findIndex(
+    (r) => r.user_id === resp.user_id && r.activity_id === resp.activity_id
+  );
+  const record: AthleteTrainingResponse = {
+    ...resp,
+    id: idx !== -1 ? store.athlete_training_responses[idx].id : crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+  };
+  if (idx !== -1) {
+    store.athlete_training_responses[idx] = record;
+  } else {
+    store.athlete_training_responses.unshift(record);
+  }
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getAthleteMedicalAssessments(
+  userId: string = DEFAULT_USER_ID
+): Promise<AthleteMedicalAssessment[]> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM athlete_medical_assessments WHERE user_id = $1 ORDER BY assessment_date DESC',
+      [userId]
+    );
+    return res.rows.map((r) => ({
+      ...r,
+      assessment_date: r.assessment_date ? r.assessment_date.toISOString().split('T')[0] : '',
+      follow_up_date: r.follow_up_date ? r.follow_up_date.toISOString().split('T')[0] : null,
+    }));
+  }
+
+  const store = ensureLocalStore();
+  return store.athlete_medical_assessments.filter((m) => m.user_id === userId);
+}
+
+export async function createAthleteMedicalAssessment(
+  assessment: Omit<AthleteMedicalAssessment, 'id' | 'created_at'>
+): Promise<AthleteMedicalAssessment> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `INSERT INTO athlete_medical_assessments (
+        user_id, injury_id, assessment_date, healthcare_provider_type,
+        provider_name, clinical_findings, confirmed_diagnosis,
+        imaging_summary, clinician_restrictions, rehabilitation_protocol,
+        return_to_sport_criteria, follow_up_date, verification_status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *`,
+      [
+        assessment.user_id,
+        assessment.injury_id || null,
+        assessment.assessment_date,
+        assessment.healthcare_provider_type,
+        assessment.provider_name || null,
+        assessment.clinical_findings,
+        assessment.confirmed_diagnosis || null,
+        assessment.imaging_summary || null,
+        assessment.clinician_restrictions,
+        assessment.rehabilitation_protocol || null,
+        assessment.return_to_sport_criteria || null,
+        assessment.follow_up_date || null,
+        assessment.verification_status || 'ATHLETE_ENTERED',
+      ]
+    );
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const record: AthleteMedicalAssessment = {
+    ...assessment,
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+  };
+  store.athlete_medical_assessments.unshift(record);
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getLatestAthleteReadiness(
+  userId: string = DEFAULT_USER_ID
+): Promise<AthleteTrainingReadiness | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM athlete_training_readiness WHERE user_id = $1 ORDER BY evaluated_at DESC LIMIT 1',
+      [userId]
+    );
+    if (res.rows.length === 0) return null;
+    const r = res.rows[0];
+    return {
+      ...r,
+      trigger_symptoms: Array.isArray(r.trigger_symptoms) ? r.trigger_symptoms : [],
+      source_telemetry_refs: Array.isArray(r.source_telemetry_refs) ? r.source_telemetry_refs : [],
+      medical_clearance: Boolean(r.medical_clearance),
+      automatic_progression_allowed: Boolean(r.automatic_progression_allowed),
+    };
+  }
+
+  const store = ensureLocalStore();
+  const list = store.athlete_training_readiness.filter((r) => r.user_id === userId);
+  return list.length > 0 ? list[0] : null;
+}
+
+export async function saveAthleteReadiness(
+  readiness: Omit<AthleteTrainingReadiness, 'id' | 'created_at'>
+): Promise<AthleteTrainingReadiness> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `INSERT INTO athlete_training_readiness (
+        user_id, evaluated_at, athlete_status, running_readiness,
+        cycling_readiness, general_readiness, running_restrictions,
+        cycling_restrictions, rationale, trigger_symptoms,
+        source_telemetry_refs, medical_clearance, automatic_progression_allowed
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *`,
+      [
+        readiness.user_id,
+        readiness.evaluated_at || new Date().toISOString(),
+        readiness.athlete_status,
+        readiness.running_readiness,
+        readiness.cycling_readiness,
+        readiness.general_readiness,
+        readiness.running_restrictions || null,
+        readiness.cycling_restrictions || null,
+        readiness.rationale,
+        JSON.stringify(readiness.trigger_symptoms || []),
+        JSON.stringify(readiness.source_telemetry_refs || []),
+        Boolean(readiness.medical_clearance),
+        Boolean(readiness.automatic_progression_allowed),
+      ]
+    );
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const record: AthleteTrainingReadiness = {
+    ...readiness,
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+  };
+  store.athlete_training_readiness.unshift(record);
+  saveLocalStore(store);
+  return record;
+}
+
+export async function logHealthAuditTrail(
+  trail: Omit<HealthAuditTrail, 'id' | 'created_at'>
+): Promise<HealthAuditTrail> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `INSERT INTO health_audit_trail (
+        user_id, entity_type, entity_id, action, state_before, state_after, modified_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *`,
+      [
+        trail.user_id,
+        trail.entity_type,
+        trail.entity_id,
+        trail.action,
+        trail.state_before ? JSON.stringify(trail.state_before) : null,
+        trail.state_after ? JSON.stringify(trail.state_after) : null,
+        trail.modified_by || 'ATHLETE',
+      ]
+    );
+    return res.rows[0];
+  }
+
+  const store = ensureLocalStore();
+  const record: HealthAuditTrail = {
+    ...trail,
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+  };
+  store.health_audit_trail.unshift(record);
+  saveLocalStore(store);
+  return record;
+}
+
+export async function getAuthoritativeHealthContext(
+  userId: string = DEFAULT_USER_ID
+): Promise<AuthoritativeAthleteHealthContext> {
+  const [profile, injuries, painLogs, responses, assessments, readiness] = await Promise.all([
+    getAthleteProfile(userId),
+    getAthleteInjuries(userId),
+    getAthletePainLogs(userId, 15),
+    getAthleteTrainingResponses(userId, 15),
+    getAthleteMedicalAssessments(userId),
+    getLatestAthleteReadiness(userId),
+  ]);
+
+  const clinicianRestrictions: string[] = [];
+  for (const m of assessments) {
+    if (m.clinician_restrictions && m.clinician_restrictions.trim().length > 0) {
+      clinicianRestrictions.push(m.clinician_restrictions.trim());
+    }
+  }
+  for (const inj of injuries) {
+    if (inj.clinician_restrictions && inj.clinician_restrictions.trim().length > 0) {
+      clinicianRestrictions.push(inj.clinician_restrictions.trim());
+    }
+  }
+
+  return {
+    profile,
+    injuries,
+    recentPainLogs: painLogs,
+    recentResponses: responses,
+    medicalAssessments: assessments,
+    latestReadiness: readiness,
+    clinicianRestrictions,
+  };
+}
+
+export interface UpdateUserProfileParams {
+  name?: string;
+  age?: number;
+  height_cm?: number;
+  weight_kg?: number;
+  resting_heart_rate?: number;
+  max_heart_rate?: number;
+  training_days_per_week?: number;
+}
+
+export async function updateUserProfile(
+  userId: string = DEFAULT_USER_ID,
+  params: UpdateUserProfileParams
+): Promise<{ user: User; profile: AthleteProfile }> {
+  const currentUser = await getUser(userId);
+  const currentProfile = await getAthleteProfile(userId);
+
+  const updatedName = params.name !== undefined && params.name.trim().length > 0 ? params.name.trim() : currentUser?.name || 'Apex Athlete';
+  const updatedHeight = params.height_cm !== undefined ? Number(params.height_cm) : currentUser?.height_cm || 170.0;
+  const updatedWeight = params.weight_kg !== undefined ? Number(params.weight_kg) : currentUser?.weight_kg || 65.0;
+  const updatedRhr = params.resting_heart_rate !== undefined ? Number(params.resting_heart_rate) : currentUser?.resting_heart_rate || 68;
+  const updatedMaxHr = params.max_heart_rate !== undefined ? Number(params.max_heart_rate) : currentUser?.max_heart_rate || 188;
+  const updatedAge = params.age !== undefined ? Number(params.age) : currentProfile?.age || 22;
+  const updatedDays = params.training_days_per_week !== undefined ? Number(params.training_days_per_week) : currentProfile?.training_days_per_week || 3;
+
+  const updatedBmi = Math.round((updatedWeight / ((updatedHeight / 100) * (updatedHeight / 100))) * 10) / 10;
+
+  let user: User;
+  let profile: AthleteProfile;
+
+  if (pgPool) {
+    const userRes = await pgPool.query(
+      `UPDATE users
+       SET name = $1, height_cm = $2, weight_kg = $3, resting_heart_rate = $4, max_heart_rate = $5, updated_at = NOW()
+       WHERE id = $6
+       RETURNING *`,
+      [updatedName, updatedHeight, updatedWeight, updatedRhr, updatedMaxHr, userId]
+    );
+    const uRow = userRes.rows[0];
+    user = {
+      ...uRow,
+      weight_kg: Number(uRow.weight_kg),
+      height_cm: Number(uRow.height_cm),
+      resting_heart_rate: Number(uRow.resting_heart_rate),
+      max_heart_rate: Number(uRow.max_heart_rate),
+    };
+
+    const profRes = await pgPool.query(
+      `INSERT INTO athlete_profiles (
+        user_id, age, height_cm, weight_kg, resting_heart_rate, training_days_per_week, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      ON CONFLICT (user_id) DO UPDATE SET
+        age = EXCLUDED.age,
+        height_cm = EXCLUDED.height_cm,
+        weight_kg = EXCLUDED.weight_kg,
+        resting_heart_rate = EXCLUDED.resting_heart_rate,
+        training_days_per_week = EXCLUDED.training_days_per_week,
+        updated_at = NOW()
+      RETURNING *`,
+      [userId, updatedAge, updatedHeight, updatedWeight, updatedRhr, updatedDays]
+    );
+    const pRow = profRes.rows[0];
+    profile = {
+      ...pRow,
+      age: Number(pRow.age),
+      height_cm: Number(pRow.height_cm),
+      weight_kg: Number(pRow.weight_kg),
+      bmi: Number(pRow.bmi),
+      resting_heart_rate: Number(pRow.resting_heart_rate),
+      training_days_per_week: Number(pRow.training_days_per_week),
+      physiological_measurements: pRow.physiological_measurements || {},
+    };
+  } else {
+    const store = ensureLocalStore();
+    const uIdx = store.users.findIndex((u) => u.id === userId);
+    user = {
+      id: userId,
+      email: currentUser?.email || 'athlete@protraining.internal',
+      name: updatedName,
+      avatar_url: currentUser?.avatar_url,
+      height_cm: updatedHeight,
+      weight_kg: updatedWeight,
+      resting_heart_rate: updatedRhr,
+      max_heart_rate: updatedMaxHr,
+      created_at: currentUser?.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    if (uIdx !== -1) store.users[uIdx] = user;
+    else store.users.push(user);
+
+    profile = await upsertAthleteProfile({
+      user_id: userId,
+      age: updatedAge,
+      height_cm: updatedHeight,
+      weight_kg: updatedWeight,
+      resting_heart_rate: updatedRhr,
+      training_days_per_week: updatedDays,
+    });
+    saveLocalStore(store);
+  }
+
+  await logHealthAuditTrail({
+    user_id: userId,
+    entity_type: 'ATHLETE_PROFILE',
+    entity_id: userId,
+    action: 'UPDATE',
+    state_before: {
+      name: currentUser?.name,
+      rhr: currentUser?.resting_heart_rate,
+      height: currentUser?.height_cm,
+      weight: currentUser?.weight_kg,
+      age: currentProfile?.age,
+    },
+    state_after: {
+      name: user.name,
+      rhr: user.resting_heart_rate,
+      height: user.height_cm,
+      weight: user.weight_kg,
+      age: profile.age,
+    },
+    modified_by: 'ATHLETE_USER',
+  });
+
+  return { user, profile };
+}
+
+export interface RecordMedicalProcedureParams {
+  injury_id?: string | null;
+  assessment_date: string;
+  healthcare_provider_type: string;
+  provider_name?: string | null;
+  clinical_findings: string;
+  confirmed_diagnosis?: string | null;
+  imaging_summary?: string | null;
+  clinician_restrictions?: string | null;
+  rehabilitation_protocol?: string | null;
+  return_to_sport_criteria?: string | null;
+  follow_up_date?: string | null;
+  clearance_granted?: boolean;
+  ankle_status?: MedicalEvaluationStatus;
+  knee_status?: MedicalEvaluationStatus;
+}
+
+export async function recordMedicalProcedureAndAssessment(
+  userId: string = DEFAULT_USER_ID,
+  params: RecordMedicalProcedureParams
+): Promise<{
+  assessment: AthleteMedicalAssessment;
+  readiness: AthleteTrainingReadiness | null;
+}> {
+  const restrictions = params.clearance_granted
+    ? 'CLEARED_FOR_TRAINING'
+    : params.clinician_restrictions || 'IMPACT_RESTRICTED';
+
+  const assessment = await createAthleteMedicalAssessment({
+    user_id: userId,
+    injury_id: params.injury_id || null,
+    assessment_date: params.assessment_date || new Date().toISOString().split('T')[0],
+    healthcare_provider_type: params.healthcare_provider_type || 'Physiotherapist',
+    provider_name: params.provider_name || null,
+    clinical_findings: params.clinical_findings || 'Prosedur kesehatan dan evaluasi klinis berkala.',
+    confirmed_diagnosis: params.confirmed_diagnosis || null,
+    imaging_summary: params.imaging_summary || null,
+    clinician_restrictions: restrictions,
+    rehabilitation_protocol: params.rehabilitation_protocol || null,
+    return_to_sport_criteria: params.return_to_sport_criteria || null,
+    follow_up_date: params.follow_up_date || null,
+    verification_status: params.clearance_granted ? 'CLINICIAN_VERIFIED' : 'ATHLETE_ENTERED',
+  });
+
+  // Update injury evaluation status if provided
+  if (pgPool) {
+    if (params.ankle_status) {
+      await pgPool.query(
+        `UPDATE athlete_injuries SET medical_evaluation_status = $1, updated_at = NOW()
+         WHERE user_id = $2 AND body_region ILIKE '%Ankle%'`,
+        [params.ankle_status, userId]
+      );
+    }
+    if (params.knee_status) {
+      await pgPool.query(
+        `UPDATE athlete_injuries SET medical_evaluation_status = $1, updated_at = NOW()
+         WHERE user_id = $2 AND body_region ILIKE '%Knee%'`,
+        [params.knee_status, userId]
+      );
+    }
+  }
+
+  // Deterministically evaluate readiness with updated context
+  let readiness: AthleteTrainingReadiness | null = null;
+  try {
+    const context = await getAuthoritativeHealthContext(userId);
+    const computed = evaluateTrainingReadiness(context);
+    readiness = await saveAthleteReadiness(computed);
+  } catch (err) {
+    console.warn('Failed to re-evaluate readiness after medical assessment:', err);
+  }
+
+  await logHealthAuditTrail({
+    user_id: userId,
+    entity_type: 'ATHLETE_MEDICAL_ASSESSMENT',
+    entity_id: assessment.id,
+    action: 'CREATE',
+    state_before: null,
+    state_after: {
+      provider: assessment.provider_name,
+      procedure: assessment.rehabilitation_protocol,
+      clearance_granted: Boolean(params.clearance_granted),
+    },
+    modified_by: 'ATHLETE_OR_CLINICIAN',
+  });
+
+  return { assessment, readiness };
+}
+

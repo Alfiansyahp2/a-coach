@@ -79,6 +79,18 @@ export interface Activity {
   updated_at: string;
 }
 
+export interface TrainingPlan {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string | null;
+  start_date: string; // YYYY-MM-DD
+  end_date: string; // YYYY-MM-DD
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ScheduledWorkout {
   id: string;
   user_id: string;
@@ -162,3 +174,6 @@ export interface SyncLog {
   started_at: string;
   completed_at: string;
 }
+
+export * from './health';
+
