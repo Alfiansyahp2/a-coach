@@ -162,11 +162,11 @@ export function StravaConnectCard() {
   };
 
   return (
-    <div className="w-full bg-[#12151D] border border-[#232838] rounded-xl p-4 sm:p-5 shadow-xl transition-all">
+    <div className="w-full bg-[#12151D] border border-[#1F2430] rounded-sm p-4 sm:p-5  transition-all">
       {/* Notification Banner */}
       {banner && (
         <div
-          className={`mb-5 p-3.5 rounded-lg text-sm flex items-start gap-3 border ${banner.type === "success"
+          className={`mb-5 p-3.5 rounded-sm text-sm flex items-start gap-3 border ${banner.type === "success"
               ? "bg-[#052e16] border-[#10b981]/40 text-[#4ade80]"
               : "bg-[#3f0713] border-[#f43f5e]/40 text-[#fda4af]"
             }`}
@@ -187,9 +187,9 @@ export function StravaConnectCard() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#232838]">
+      <div className="flex items-center justify-between pb-3 border-b border-[#1F2430]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/30 flex items-center justify-center text-[#FC4C02] shrink-0">
+          <div className="w-8 h-8 rounded-sm bg-[#FC4C02]/10 border border-[#FC4C02]/30 flex items-center justify-center text-[#FC4C02] shrink-0">
             <Activity className="w-4 h-4" />
           </div>
           <div>
@@ -198,7 +198,7 @@ export function StravaConnectCard() {
                 Strava API v3 Integration
               </h2>
               {!loading && (
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-medium ${
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono font-medium ${
                   status?.isConnected
                     ? "bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30"
                     : status?.isConfigured
@@ -207,7 +207,7 @@ export function StravaConnectCard() {
                 }`}>
                   {status?.isConnected ? (
                     <>
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-sm bg-[#10b981] animate-pulse" />
                       Active Link
                     </>
                   ) : status?.isConfigured ? (
@@ -229,7 +229,7 @@ export function StravaConnectCard() {
           {!status?.isConfigured && !loading && (
             <button
               onClick={() => setIsGuideOpen(!isGuideOpen)}
-              className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-[#9BA3AF] hover:text-white bg-[#161922] border border-[#232838] hover:border-[#FC4C02] transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 rounded-sm text-xs font-mono font-medium text-[#9BA3AF] hover:text-white bg-[#161922] border border-[#1F2430] hover:border-[#FC4C02] transition-colors flex items-center gap-1"
             >
               <span>{isGuideOpen ? "Tutup Panduan" : "Panduan Setup"}</span>
               {isGuideOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -240,7 +240,7 @@ export function StravaConnectCard() {
             onClick={fetchStatus}
             disabled={loading}
             title="Re-check configuration"
-            className="p-1.5 rounded-lg text-xs text-[#9BA3AF] hover:text-[#F0F2F5] bg-[#161922] border border-[#232838] hover:border-[#384158] transition-colors disabled:opacity-50"
+            className="p-1.5 rounded-sm text-xs text-[#9BA3AF] hover:text-[#F0F2F5] bg-[#161922] border border-[#1F2430] hover:border-[#384158] transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[#FC4C02]" : ""}`} />
           </button>
@@ -272,8 +272,8 @@ export function StravaConnectCard() {
                 </button>
               </div>
             ) : (
-              <div className="p-3.5 rounded-lg bg-[#161922] border border-[#232838] space-y-2.5 text-xs">
-                <div className="flex items-center justify-between text-[#FF9500] font-medium pb-1.5 border-b border-[#232838]">
+              <div className="p-3.5 rounded-sm bg-[#161922] border border-[#1F2430] space-y-2.5 text-xs">
+                <div className="flex items-center justify-between text-[#FF9500] font-medium pb-1.5 border-b border-[#1F2430]">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>Langkah Integrasi Strava Developer API</span>
@@ -303,13 +303,13 @@ export function StravaConnectCard() {
                   </li>
                   <li>
                     Atur <strong>Authorization Callback Domain</strong> menjadi:{" "}
-                    <code className="bg-[#090A0F] px-1.5 py-0.5 rounded text-[#D4FF00] font-mono border border-[#232838]">
+                    <code className="bg-[#090A0F] px-1.5 py-0.5 rounded text-[#D4FF00] font-mono border border-[#1F2430]">
                       localhost:3000
                     </code>
                   </li>
                   <li>
                     Salin Client ID & Client Secret ke file <code className="font-mono text-[#00F0FF]">.env.local</code>:
-                    <div className="mt-1 p-2 rounded bg-[#090A0F] border border-[#232838] font-mono text-[10px] text-[#9BA3AF]">
+                    <div className="mt-1 p-2 rounded bg-[#090A0F] border border-[#1F2430] font-mono text-[10px] text-[#9BA3AF]">
                       STRAVA_CLIENT_ID=&quot;your_client_id&quot;<br />
                       STRAVA_CLIENT_SECRET=&quot;your_client_secret&quot;
                     </div>
@@ -321,16 +321,16 @@ export function StravaConnectCard() {
         ) : status?.isConnected && status.athlete ? (
           // State: Connected
           <div className="space-y-5">
-            <div className="flex items-center justify-between p-4 rounded-lg bg-[#161922] border border-[#232838]">
+            <div className="flex items-center justify-between p-4 rounded-sm bg-[#161922] border border-[#1F2430]">
               <div className="flex items-center gap-3.5">
                 {status.athlete.avatar ? (
                   <img
                     src={status.athlete.avatar}
                     alt={status.athlete.name}
-                    className="w-12 h-12 rounded-full border border-[#232838] object-cover"
+                    className="w-12 h-12 rounded-sm border border-[#1F2430] object-cover"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-[#1A1E28] border border-[#2B3245] flex items-center justify-center font-bold text-base text-[#F0F2F5]">
+                  <div className="w-12 h-12 rounded-sm bg-[#1A1E28] border border-[#2B3245] flex items-center justify-center font-bold text-base text-[#F0F2F5]">
                     {status.athlete.name.charAt(0)}
                   </div>
                 )}
@@ -348,7 +348,7 @@ export function StravaConnectCard() {
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#f43f5e] bg-[#f43f5e]/10 hover:bg-[#f43f5e]/20 border border-[#f43f5e]/30 flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 rounded-sm text-xs font-medium text-[#f43f5e] bg-[#f43f5e]/10 hover:bg-[#f43f5e]/20 border border-[#f43f5e]/30 flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 {disconnecting ? (
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -361,7 +361,7 @@ export function StravaConnectCard() {
 
             {/* Scope & Security Telemetry */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-[#161922] border border-[#232838]">
+              <div className="p-3 rounded-sm bg-[#161922] border border-[#1F2430]">
                 <div className="flex items-center gap-1.5 text-[#9BA3AF] mb-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#10b981]" />
                   <span>Encryption at Rest</span>
@@ -369,7 +369,7 @@ export function StravaConnectCard() {
                 <p className="text-[#F0F2F5] font-mono font-medium">AES-256-GCM (Authenticated)</p>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#161922] border border-[#232838]">
+              <div className="p-3 rounded-sm bg-[#161922] border border-[#1F2430]">
                 <div className="flex items-center gap-1.5 text-[#9BA3AF] mb-1">
                   <Zap className="w-3.5 h-3.5 text-[#00F0FF]" />
                   <span>Authorized Scopes</span>
@@ -388,7 +388,7 @@ export function StravaConnectCard() {
             </div>
 
             {/* Activity Synchronization Panel */}
-            <div className="p-4 rounded-lg bg-[#161922] border border-[#232838] space-y-3">
+            <div className="p-4 rounded-sm bg-[#161922] border border-[#1F2430] space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
@@ -405,7 +405,7 @@ export function StravaConnectCard() {
                 <button
                   onClick={handleSync}
                   disabled={syncing || disconnecting}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-white bg-[#FC4C02] hover:bg-[#e04300] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-[#FC4C02]/20 disabled:opacity-50"
+                  className="px-4 py-2 rounded-sm text-xs font-semibold text-white bg-[#FC4C02] hover:bg-[#e04300] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0  disabled:opacity-50"
                 >
                   {syncing ? (
                     <>
@@ -423,7 +423,7 @@ export function StravaConnectCard() {
 
               {/* Sync Telemetry Status Strip */}
               {syncTelemetry?.lastSync && (
-                <div className="pt-2 border-t border-[#232838]/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#9BA3AF]">
+                <div className="pt-2 border-t border-[#1F2430]/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#9BA3AF]">
                   <div className="flex items-center gap-2">
                     <Clock className="w-3.5 h-3.5 text-[#5A6272]" />
                     <span>
@@ -483,7 +483,7 @@ export function StravaConnectCard() {
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <a
                 href="/api/auth/strava/authorize"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#FC4C02] hover:bg-[#e04300] text-white font-medium text-xs tracking-wide shadow-lg shadow-[#FC4C02]/20 transition-all active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-sm bg-[#FC4C02] hover:bg-[#e04300] text-white font-medium text-xs tracking-wide  transition-all active:scale-[0.98]"
               >
                 <Activity className="w-4 h-4" />
                 <span>Connect with Strava</span>

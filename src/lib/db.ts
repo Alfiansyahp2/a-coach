@@ -431,6 +431,78 @@ export async function getAdjacentActivities(
   };
 }
 
+
+export async function updateActivity(
+  id: string,
+  userId: string = DEFAULT_USER_ID,
+  updates: {
+    name?: string;
+    sport_type?: string;
+    start_date?: string;
+    description?: string;
+    distance_meters?: number;
+    moving_time_seconds?: number;
+    elevation_gain_meters?: number;
+  }
+): Promise<Activity | null> {
+  const current = await getActivityById(id, userId);
+  if (!current) return null;
+
+  const newDistance = updates.distance_meters !== undefined ? updates.distance_meters : current.distance_meters;
+  const newMovingTime = updates.moving_time_seconds !== undefined ? updates.moving_time_seconds : current.moving_time_seconds;
+  const newSpeedMps = newMovingTime > 0 ? Math.round((newDistance / newMovingTime) * 1000) / 1000 : current.average_speed_mps;
+
+  if (pgPool) {
+    const res = await pgPool.query(
+      `UPDATE activities 
+       SET 
+         name = COALESCE($1, name),
+         sport_type = COALESCE($2, sport_type),
+         start_date = COALESCE($3, start_date),
+         description = COALESCE($4, description),
+         distance_meters = COALESCE($5, distance_meters),
+         moving_time_seconds = COALESCE($6, moving_time_seconds),
+         elevation_gain_meters = COALESCE($7, elevation_gain_meters),
+         average_speed_mps = $8,
+         updated_at = NOW()
+       WHERE id = $9 AND user_id = $10
+       RETURNING *`,
+      [
+        updates.name !== undefined ? updates.name : null,
+        updates.sport_type !== undefined ? updates.sport_type : null,
+        updates.start_date !== undefined ? updates.start_date : null,
+        updates.description !== undefined ? updates.description : null,
+        updates.distance_meters !== undefined ? updates.distance_meters : null,
+        updates.moving_time_seconds !== undefined ? updates.moving_time_seconds : null,
+        updates.elevation_gain_meters !== undefined ? updates.elevation_gain_meters : null,
+        newSpeedMps,
+        id,
+        userId,
+      ]
+    );
+    if (!res.rows[0]) return null;
+    return normalizeActivityRow(res.rows[0]);
+  }
+
+  const store = ensureLocalStore();
+  const act = store.activities.find((a) => a.id === id && a.user_id === userId);
+  if (!act) return null;
+
+  if (updates.name !== undefined) act.name = updates.name;
+  if (updates.sport_type !== undefined) act.sport_type = updates.sport_type;
+  if (updates.start_date !== undefined) act.start_date = updates.start_date;
+  if (updates.description !== undefined) act.description = updates.description;
+  if (updates.distance_meters !== undefined) act.distance_meters = updates.distance_meters;
+  if (updates.moving_time_seconds !== undefined) act.moving_time_seconds = updates.moving_time_seconds;
+  if (updates.elevation_gain_meters !== undefined) act.elevation_gain_meters = updates.elevation_gain_meters;
+  act.average_speed_mps = newSpeedMps;
+  act.updated_at = new Date().toISOString();
+
+  saveLocalStore(store);
+  return normalizeActivityRow(act);
+}
+
+
 export async function getActivities(
   userId: string = DEFAULT_USER_ID,
   filters?: { sportType?: string; limit?: number; afterDate?: string }
