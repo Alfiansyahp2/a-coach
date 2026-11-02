@@ -196,7 +196,7 @@ async function DashboardTelemetry() {
 
           {/* Right: Bespoke Native SVG Volume Progression Chart (5 Cols) */}
           <div className="lg:col-span-5">
-            <VolumeProgressionChart activities={activities} days={7} />
+            <VolumeProgressionChart activities={activities} initialTimeframe="all" />
           </div>
         </div>
       </section>
