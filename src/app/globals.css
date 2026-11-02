@@ -1,11 +1,39 @@
 @import "tailwindcss";
 
+@theme {
+  --color-surface-canvas: #090a0f;
+  --color-surface-card: #12151d;
+  --color-surface-elevated: #161922;
+  --color-surface-highlight: #1c212e;
+  --color-border-subtle: #1f2430;
+  --color-border-medium: #2d3547;
+  --color-text-primary: #f0f2f5;
+  --color-text-secondary: #9ba3af;
+  --color-text-muted: #5a6272;
+  --color-accent-volt: #d4ff00;
+  --color-accent-cyan: #00f0ff;
+  --color-accent-amber: #ff9500;
+  --color-accent-crimson: #ff2a6d;
+  --color-accent-strava: #fc4c02;
+}
+
 :root {
   --background: #090a0f;
   --foreground: #f0f2f5;
+  --surface-canvas: #090a0f;
   --surface-card: #12151d;
-  --surface-elevated: #1a1e28;
-  --border-subtle: #232838;
+  --surface-elevated: #161922;
+  --surface-highlight: #1c212e;
+  --border-subtle: #1f2430;
+  --border-medium: #2d3547;
+  --text-primary: #f0f2f5;
+  --text-secondary: #9ba3af;
+  --text-muted: #5a6272;
+  --accent-volt: #d4ff00;
+  --accent-cyan: #00f0ff;
+  --accent-amber: #ff9500;
+  --accent-crimson: #ff2a6d;
+  --accent-strava: #fc4c02;
 }
 
 body {
@@ -19,4 +47,26 @@ body {
 .font-tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
+}
+
+/* Precision Hairline Focus Ring */
+*:focus-visible {
+  outline: 2px solid var(--accent-volt);
+  outline-offset: 1px;
+}
+
+/* Sleek Obsidian Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090a0f;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2430;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2d3547;
 }
