@@ -1,3 +1,4 @@
+import { EditActivityModal } from "@/components/EditActivityModal";
 import React, { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -183,9 +184,12 @@ async function ActivityDetailContent({ params }: ActivityDetailPageProps) {
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-                {activity.name}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                  {activity.name}
+                </h1>
+                <EditActivityModal activity={activity} variant="button" />
+              </div>
               <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-[#9BA3AF] font-mono">
                 <span className="flex items-center gap-1.5 text-[#F0F2F5]">
                   <Calendar className="w-3.5 h-3.5 text-[#FC4C02]" />
@@ -199,6 +203,8 @@ async function ActivityDetailContent({ params }: ActivityDetailPageProps) {
                     minute: '2-digit',
                   })}
                 </span>
+                <span className="text-[#3A404D]">|</span>
+                <EditActivityModal activity={activity} variant="inline" />
                 {activity.description && (
                   <>
                     <span>•</span>
