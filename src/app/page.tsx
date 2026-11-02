@@ -26,6 +26,7 @@ import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
 import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
 import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
+import { EditAthleteProfileModal } from "@/components/health/EditAthleteProfileModal";
 import { AddActivityModal } from "@/components/AddActivityModal";
 import { computePersonalRecords } from "@/lib/personalRecords";
 import {
@@ -92,51 +93,13 @@ async function DashboardTelemetry() {
           <AddActivityModal variant="button" />
 
           {user && (
-            <div className="flex items-center gap-3">
-            {/* Athlete Biometric Baseline Badge (Calibrated to 68 bpm, 170cm, 65kg) */}
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] text-xs font-mono">
-              <span className="flex items-center gap-1 text-[#FF2A6D]">
-                <Heart className="w-3 h-3 fill-[#FF2A6D]/20" />
-                <span className="font-tabular font-bold">
-                  {user.resting_heart_rate || 68}
-                </span>
-                <span className="text-[10px] text-[#9BA3AF]">bpm RHR</span>
-              </span>
-              <span className="text-[#3A404D]">|</span>
-              <span className="text-[#00F0FF] font-tabular">
-                {user.height_cm || 170}{" "}
-                <span className="text-[10px] text-[#9BA3AF]">cm</span>
-              </span>
-              <span className="text-[#3A404D]">|</span>
-              <span className="text-[#D4FF00] font-tabular">
-                {user.weight_kg || 65}{" "}
-                <span className="text-[10px] text-[#9BA3AF]">kg</span>
-              </span>
-              <span className="text-[#3A404D]">|</span>
-              <span className="text-[#10B981] font-semibold text-[11px] font-tabular">
-                BMI 22.5
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 pl-1 border-l border-[#1F2430]">
-              {user.avatar_url && (
-                <img
-                  src={user.avatar_url}
-                  alt={user.name}
-                  className="w-6 h-6 rounded-sm border border-[#1F2430] object-cover"
-                />
-              )}
-              <div className="hidden sm:block text-left font-mono">
-                <div className="text-xs font-semibold text-[#F0F2F5] leading-none">
-                  {user.name}
-                </div>
-                <div className="text-[9px] text-[#10B981] leading-tight pt-0.5">
-                  Calibrated Athlete
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+            <EditAthleteProfileModal
+              user={user}
+              profile={healthContext?.profile}
+              healthContext={healthContext}
+              variant="badge"
+            />
+          )}
         </div>
       </div>
 
