@@ -6,38 +6,42 @@ export function DashboardTopNavbar() {
   return (
     <header className="border-b border-[#1F2430] bg-[#090A0F]/90 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-sm bg-[#12151D] border border-[#1F2430] flex items-center justify-center font-mono font-black text-xs text-[#D4FF00] tracking-tighter">
+        <Link
+          href="/"
+          className="flex items-center gap-3 group transition-opacity hover:opacity-90"
+          title="Kembali ke Dashboard Utama"
+        >
+          <div className="w-7 h-7 rounded-sm bg-[#12151D] border border-[#1F2430] group-hover:border-[#D4FF00]/50 flex items-center justify-center font-mono font-black text-xs text-[#D4FF00] tracking-tighter shadow-sm group-hover:shadow-[0_0_12px_rgba(212,255,0,0.2)] transition-all">
             AC
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm tracking-tight text-white font-mono">
+            <span className="font-bold text-sm tracking-tight text-white font-mono group-hover:text-[#D4FF00] transition-colors">
               a-coach
             </span>
             <span className="text-[9px] font-mono tracking-wider px-1.5 py-0.5 rounded-sm bg-[#12151D] text-[#9BA3AF] border border-[#1F2430]">
               OBSIDIAN TELEMETRY
             </span>
           </div>
-        </div>
+        </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/training"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#D4FF00] text-[#9BA3AF] hover:text-[#D4FF00] transition-colors text-xs font-mono font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#D4FF00]/50 text-[#9BA3AF] hover:text-[#D4FF00] transition-all text-xs font-mono font-medium"
           >
             <Calendar className="w-3.5 h-3.5 text-[#D4FF00]" />
             <span>Jadwal Latihan</span>
           </Link>
           <Link
             href="/health"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#FF2A6D] text-[#9BA3AF] hover:text-[#FF2A6D] transition-colors text-xs font-mono font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#FF2A6D]/50 text-[#9BA3AF] hover:text-[#FF2A6D] transition-all text-xs font-mono font-medium"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-[#FF2A6D]" />
             <span className="hidden sm:inline">Profil</span> Kesehatan
           </Link>
           <Link
             href="/activities"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#00F0FF] text-[#9BA3AF] hover:text-[#00F0FF] transition-colors text-xs font-mono font-medium"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#00F0FF]/50 text-[#9BA3AF] hover:text-[#00F0FF] transition-all text-xs font-mono font-medium"
           >
             <FolderKanban className="w-3.5 h-3.5 text-[#00F0FF]" />
             <span className="hidden sm:inline">Manajemen</span> Aktivitas
@@ -47,4 +51,3 @@ export function DashboardTopNavbar() {
     </header>
   );
 }
-

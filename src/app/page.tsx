@@ -19,12 +19,10 @@ import { StravaConnectCard } from "@/components/StravaConnectCard";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
-import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
 import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
 import { DashboardTopNavbar } from "@/components/dashboard/DashboardTopNavbar";
 import { DashboardIntegrityStrip } from "@/components/dashboard/DashboardIntegrityStrip";
-import { DashboardScheduledWorkoutsCard } from "@/components/dashboard/DashboardScheduledWorkoutsCard";
-import { DashboardMacroGoalsCard } from "@/components/dashboard/DashboardMacroGoalsCard";
+import { DashboardTacticalDeck } from "@/components/dashboard/DashboardTacticalDeck";
 import { DashboardAiInsightsDeck } from "@/components/dashboard/DashboardAiInsightsDeck";
 import { Gauge, RefreshCw, Zap } from "lucide-react";
 
@@ -71,6 +69,9 @@ async function DashboardTelemetry() {
     healthContext
   );
 
+  const currentVolumeKm = summary.totalDistanceThisWeek / 1000;
+  const targetWeek1Km = 18.0;
+
   return (
     <div className="space-y-6">
       {/* 1. Precision Navigation & Telemetry Integrity Strip */}
@@ -80,21 +81,7 @@ async function DashboardTelemetry() {
         healthContext={healthContext}
       />
 
-      {/* 2. Strava OAuth Handshake Gateway */}
-      <section>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5">
-            <Zap className="w-3 h-3 text-[#FC4C02]" />
-            OAuth 2.0 Integration Gateway
-          </h2>
-          <span className="text-[10px] font-mono text-[#5A6272]">
-            Telemetry Bridge • REST API v3
-          </span>
-        </div>
-        <StravaConnectCard />
-      </section>
-
-      {/* 2.5 Athlete Health Profile & Injury Intelligence Deck */}
+      {/* 2. Athlete Health Profile & Joint Safety Gate */}
       <section>
         <AthleteHealthDeck
           healthContext={healthContext}
@@ -105,54 +92,68 @@ async function DashboardTelemetry() {
       {/* 3. Hero Telemetry & Volume Progression Deck */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5">
-            <Gauge className="w-3 h-3 text-[#00F0FF]" />
-            Weekly Workload Telemetry &amp; Progression
+          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5 font-bold">
+            <Gauge className="w-3.5 h-3.5 text-[#00F0FF]" />
+            <span>Weekly Workload Telemetry &amp; Progression</span>
           </h2>
           <span className="text-[10px] font-mono text-[#5A6272]">
-            Monday – Sunday Cycle
+            Siklus Mingguan (Senin – Minggu)
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
           {/* Left: 4 Precision Metric Blocks */}
-          <div className="lg:col-span-7 grid grid-cols-2 gap-2.5">
+          <div className="lg:col-span-7 grid grid-cols-2 gap-3">
             <MetricCard
-              label="Total Volume This Week"
-              value={(summary.totalDistanceThisWeek / 1000).toFixed(1)}
+              label="Total Volume Minggu Ini"
+              value={currentVolumeKm.toFixed(1)}
               unit="km"
               delta={{
-                value: `${
-                  summary.weeklyDistanceDeltaPct >= 0 ? "+" : ""
-                }${summary.weeklyDistanceDeltaPct}%`,
-                isPositive: summary.weeklyDistanceDeltaPct >= 0,
-                note: "vs prior week window",
+                value:
+                  currentVolumeKm > 0
+                    ? `${summary.weeklyDistanceDeltaPct >= 0 ? "+" : ""}${summary.weeklyDistanceDeltaPct}%`
+                    : "Minggu 1",
+                isPositive: currentVolumeKm > 0 ? summary.weeklyDistanceDeltaPct >= 0 : true,
+                note: currentVolumeKm > 0 ? "vs minggu sebelumnya" : "Siklus baru aktif",
+              }}
+              subtext={
+                currentVolumeKm === 0
+                  ? "🎯 Target Minggu 1: 18.0 km (MTB Zone 2)"
+                  : undefined
+              }
+              targetProgress={{
+                current: currentVolumeKm,
+                target: targetWeek1Km,
               }}
               accentColor="volt"
             />
 
             <MetricCard
-              label="Active Moving Duration"
+              label="Durasi Gerak Aktif"
               value={formatDuration(summary.totalDurationThisWeek)}
-              subtext={`${summary.completedActivitiesCount} sessions recorded`}
+              subtext={
+                summary.completedActivitiesCount > 0
+                  ? `${summary.completedActivitiesCount} sesi dicatat minggu ini`
+                  : "Target: 45–60 mnt / sesi aerobik"
+              }
               accentColor="default"
             />
 
             <MetricCard
-              label="Aerobic Running Velocity"
+              label="Laju Lari Rata-Rata"
               value={
                 summary.averagePaceSecondsPerKm > 0
                   ? formatPaceSeconds(summary.averagePaceSecondsPerKm)
                   : "--:-- /km"
               }
-              subtext="Weighted average running pace"
-              accentColor="volt"
+              subtext="Status lari: Ditunda (On Hold sendi)"
+              accentColor="amber"
             />
 
             <MetricCard
-              label="Plan Adherence Rate"
+              label="Tingkat Kepatuhan Jadwal"
               value={`${summary.consistencyScore}%`}
-              subtext="Prescribed schedule compliance"
+              subtext="Kepatuhan preskripsi rencana latihan"
               accentColor="cyan"
             />
           </div>
@@ -167,25 +168,39 @@ async function DashboardTelemetry() {
         </div>
       </section>
 
-      {/* 4. Operations Deck: Ingested Stream + Tactical Calendar & PRs */}
+      {/* 4. Operations Deck: Ingested Stream (Left) + Tactical Command Deck (Right) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Column (7 cols): Ingested Activity Feed */}
         <div className="lg:col-span-7">
           <ActivityFeed activities={activities} />
         </div>
 
-        {/* Right Column (5 cols): Tactical Schedule, PRs & Goals */}
-        <div className="lg:col-span-5 space-y-4">
-          <DashboardScheduledWorkoutsCard
+        {/* Right Column (5 cols): Tactical Command Deck (Tabbed: Scheduled Workouts, Macro Goals, PRs) */}
+        <div className="lg:col-span-5">
+          <DashboardTacticalDeck
             workouts={workouts}
             activePlan={activePlan}
+            goals={goals}
+            prs={displayPrs}
           />
-          <PersonalRecordsDeck prs={displayPrs} />
-          <DashboardMacroGoalsCard goals={goals} />
         </div>
       </section>
 
-      {/* 5. Grounded AI Coach Analytical Dossier */}
+      {/* 5. Strava OAuth Handshake Gateway (Collapsible & Refined) */}
+      <section>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5 font-bold">
+            <Zap className="w-3.5 h-3.5 text-[#FC4C02]" />
+            <span>OAuth 2.0 Integration Gateway</span>
+          </h2>
+          <span className="text-[10px] font-mono text-[#5A6272]">
+            Telemetry Bridge • REST API v3
+          </span>
+        </div>
+        <StravaConnectCard />
+      </section>
+
+      {/* 6. Grounded AI Coach Analytical Dossier (3-Column Filterable Grid) */}
       <DashboardAiInsightsDeck insights={insights} />
     </div>
   );
