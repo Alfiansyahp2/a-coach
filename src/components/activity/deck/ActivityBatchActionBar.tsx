@@ -62,9 +62,12 @@ export function ActivityBatchActionBar({
         >
           <option value="Run">Run (Lari)</option>
           <option value="Ride">Ride (Sepeda)</option>
+          <option value="Swim">Swim (Renang)</option>
           <option value="Walk">Walk (Jalan)</option>
           <option value="Hike">Hike (Hiking)</option>
+          <option value="WeightTraining">Weight Training (Gym)</option>
           <option value="Workout">Workout (Umum)</option>
+          <option value="CrossTraining">Cross Training</option>
         </select>
 
         <button

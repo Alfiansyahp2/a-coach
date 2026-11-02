@@ -11,6 +11,7 @@ import { ActivityDeckHeader } from "./activity/deck/ActivityDeckHeader";
 import { ActivityFilterToolbar } from "./activity/deck/ActivityFilterToolbar";
 import { ActivityBatchActionBar } from "./activity/deck/ActivityBatchActionBar";
 import { ActivityGroupCard } from "./activity/deck/ActivityGroupCard";
+import { getDistinctSports, getSportMeta } from "@/lib/sportUtils";
 
 interface ActivityManagementDeckProps {
   activities: Activity[];
@@ -132,15 +133,17 @@ export function ActivityManagementDeck({
     setSelectedIds(allFilteredIds);
   };
 
-  // Quick counts
-  const rideCount = activities.filter(
-    (a) =>
-      a.sport_type.toLowerCase().includes("ride") ||
-      a.sport_type.toLowerCase().includes("cycl")
-  ).length;
-  const runCount = activities.filter((a) =>
-    a.sport_type.toLowerCase().includes("run")
-  ).length;
+  // Dynamically compute available distinct sports for filters
+  const distinctSports = useMemo(() => getDistinctSports(activities), [activities]);
+  const availableSports = useMemo(() => {
+    return distinctSports.map((s) => {
+      const meta = getSportMeta(s);
+      const count = activities.filter(
+        (a) => a.sport_type.toLowerCase() === s.toLowerCase()
+      ).length;
+      return { id: s, name: meta.name, count };
+    });
+  }, [distinctSports, activities]);
 
   // Batch update sport type
   const handleBatchUpdateSport = async () => {
@@ -177,7 +180,7 @@ export function ActivityManagementDeck({
 
   return (
     <div className="space-y-5">
-      {/* 1. Header Toolbar & Interactive Telemetry KPI Cards */}
+      {/* 1. Header Toolbar & Dynamic Interactive Telemetry KPI Cards */}
       <ActivityDeckHeader
         activities={activities}
         sportFilter={sportFilter}
@@ -198,7 +201,8 @@ export function ActivityManagementDeck({
         setDensity={setDensity}
         isAllCollapsed={isAllCollapsed}
         onToggleAllCollapsed={handleToggleAllCollapsed}
-        counts={{ all: activities.length, ride: rideCount, run: runCount }}
+        availableSports={availableSports}
+        totalCount={activities.length}
       />
 
       {/* 3. Batch Action Toolbar (When Items are Selected) */}

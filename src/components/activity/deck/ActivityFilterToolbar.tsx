@@ -12,8 +12,13 @@ import {
   AlignJustify,
   Bike,
   Footprints,
+  Waves,
+  Dumbbell,
+  Compass,
+  Activity as ActivityIcon,
 } from "lucide-react";
 import { GroupByOption } from "./activityGroupUtils";
+import { getSportMeta } from "@/lib/sportUtils";
 
 interface ActivityFilterToolbarProps {
   groupBy: GroupByOption;
@@ -28,7 +33,8 @@ interface ActivityFilterToolbarProps {
   setDensity?: (v: "detailed" | "compact") => void;
   isAllCollapsed?: boolean;
   onToggleAllCollapsed?: () => void;
-  counts?: { all: number; ride: number; run: number };
+  availableSports?: { id: string; name: string; count: number }[];
+  totalCount?: number;
 }
 
 export function ActivityFilterToolbar({
@@ -44,8 +50,26 @@ export function ActivityFilterToolbar({
   setDensity,
   isAllCollapsed = false,
   onToggleAllCollapsed,
-  counts = { all: 34, ride: 24, run: 10 },
+  availableSports = [],
+  totalCount = 34,
 }: ActivityFilterToolbarProps) {
+  const renderSportIcon = (iconName: string, className = "w-3 h-3") => {
+    switch (iconName) {
+      case "bike":
+        return <Bike className={className} />;
+      case "footprints":
+        return <Footprints className={className} />;
+      case "waves":
+        return <Waves className={className} />;
+      case "dumbbell":
+        return <Dumbbell className={className} />;
+      case "compass":
+        return <Compass className={className} />;
+      default:
+        return <ActivityIcon className={className} />;
+    }
+  };
+
   return (
     <div className="p-3.5 sm:p-4 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3 font-mono shadow-sm">
       {/* Row 1: Grouping Tabs, Density Toggle & Collapse All */}
@@ -176,14 +200,14 @@ export function ActivityFilterToolbar({
         </div>
       </div>
 
-      {/* Row 2: Search Input & Sport Filter Pills */}
+      {/* Row 2: Search Input & Dynamic Sport Filter Pills */}
       <div className="flex flex-col sm:flex-row items-center gap-3 pt-2.5 border-t border-[#1F2430]/60">
         {/* Search Field */}
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5A6272]" />
           <input
             type="text"
-            placeholder="Cari aktivitas berdasarkan judul, catatan, atau rute..."
+            placeholder="Cari aktivitas berdasarkan judul, catatan, cabang olahraga, atau rute..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-8 pr-8 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] focus:border-[#00F0FF] focus:outline-none text-xs text-[#F0F2F5] placeholder-[#5A6272] font-mono transition-colors"
@@ -192,50 +216,53 @@ export function ActivityFilterToolbar({
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#5A6272] hover:text-white"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#5A6272] hover:text-white cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Quick Sport Filter Pill Strip */}
+        {/* Dynamic Sport Filter Pill Strip */}
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto text-xs shrink-0">
           <button
             type="button"
             onClick={() => setSportFilter("All")}
-            className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold ${
+            className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold shrink-0 ${
               sportFilter === "All"
                 ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-xs"
                 : "bg-[#090A0F] border border-[#1F2430] text-[#9BA3AF] hover:text-white hover:border-[#2D3547]"
             }`}
           >
-            Semua ({counts.all})
+            Semua ({totalCount})
           </button>
-          <button
-            type="button"
-            onClick={() => setSportFilter("Ride")}
-            className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
-              sportFilter.toLowerCase().includes("ride")
-                ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 shadow-xs"
-                : "bg-[#090A0F] border border-[#1F2430] text-[#9BA3AF] hover:text-[#00F0FF] hover:border-[#00F0FF]/30"
-            }`}
-          >
-            <Bike className="w-3 h-3" />
-            <span>Sepeda ({counts.ride})</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setSportFilter("Run")}
-            className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold flex items-center gap-1.5 ${
-              sportFilter.toLowerCase().includes("run")
-                ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/40 shadow-xs"
-                : "bg-[#090A0F] border border-[#1F2430] text-[#9BA3AF] hover:text-[#D4FF00] hover:border-[#D4FF00]/30"
-            }`}
-          >
-            <Footprints className="w-3 h-3" />
-            <span>Lari ({counts.run})</span>
-          </button>
+
+          {availableSports.map((sport) => {
+            const meta = getSportMeta(sport.id);
+            const isSelected = sportFilter.toLowerCase() === sport.id.toLowerCase();
+
+            return (
+              <button
+                type="button"
+                key={sport.id}
+                onClick={() => setSportFilter(sport.id)}
+                className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold flex items-center gap-1.5 shrink-0 border ${
+                  isSelected
+                    ? "bg-[#161922] shadow-xs"
+                    : "bg-[#090A0F] border-[#1F2430] text-[#9BA3AF] hover:bg-[#161922]"
+                }`}
+                style={{
+                  color: isSelected ? meta.accentHex : undefined,
+                  borderColor: isSelected ? `${meta.accentHex}80` : undefined,
+                }}
+              >
+                {renderSportIcon(meta.iconName, "w-3 h-3")}
+                <span>
+                  {sport.name} ({sport.count})
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
