@@ -42,6 +42,7 @@ import {
   Layers,
 } from "lucide-react";
 import { PostActivityCheckinModal } from "./PostActivityCheckinModal";
+import { EditAthleteProfileModal } from "./EditAthleteProfileModal";
 
 interface AthleteHealthHubProps {
   initialContext: AuthoritativeAthleteHealthContext;
@@ -723,6 +724,17 @@ export function AthleteHealthHub({
                 <li>Mampu melakukan 30 detik single-leg balance dengan mata tertutup.</li>
                 <li>Izin tertulis atau persetujuan lisan dari tenaga medis terlisensi.</li>
               </ul>
+            </div>
+
+            <div className="pt-2 flex items-center justify-between">
+              <span className="text-[10px] text-[#5A6272]">
+                Catat evaluasi atau tindakan fisioterapi terbaru:
+              </span>
+              <EditAthleteProfileModal
+                variant="button"
+                profile={context.profile}
+                healthContext={context}
+              />
             </div>
           </div>
         </div>
