@@ -5,9 +5,11 @@ import {
   getUser,
   getActivities,
   getScheduledWorkouts,
+  getActiveTrainingPlan,
   getFitnessGoals,
   getPersonalRecords,
   getDatabaseStatus,
+  getAuthoritativeHealthContext,
   DEFAULT_USER_ID,
 } from "@/lib/db";
 import { computeDashboardSummary } from "@/lib/analytics";
@@ -22,6 +24,11 @@ import { StravaConnectCard } from "@/components/StravaConnectCard";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
+import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
+import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
+import { EditAthleteProfileModal } from "@/components/health/EditAthleteProfileModal";
+import { AddActivityModal } from "@/components/AddActivityModal";
+import { computePersonalRecords } from "@/lib/personalRecords";
 import {
   Activity as ActivityIcon,
   Calendar,
@@ -41,17 +48,22 @@ import {
 
 async function DashboardTelemetry() {
   await connection();
-  const [user, activities, workouts, goals, prs, dbStatus] = await Promise.all([
+  const [user, activities, workouts, goals, prs, dbStatus, healthContext, activePlan] = await Promise.all([
     getUser(DEFAULT_USER_ID),
     getActivities(DEFAULT_USER_ID, { limit: 50 }),
     getScheduledWorkouts(DEFAULT_USER_ID),
     getFitnessGoals(DEFAULT_USER_ID),
     getPersonalRecords(DEFAULT_USER_ID),
     getDatabaseStatus(),
+    getAuthoritativeHealthContext(DEFAULT_USER_ID),
+    getActiveTrainingPlan(DEFAULT_USER_ID),
   ]);
 
+  const computedPrs = computePersonalRecords(activities, DEFAULT_USER_ID);
+  const displayPrs = prs.length > 0 ? prs.map((p) => { const m = computedPrs.find(c => c.category === p.category); return { ...p, subtext: p.subtext || m?.subtext, activity_name: p.activity_name || m?.activity_name }; }) : computedPrs;
+
   const summary = computeDashboardSummary(activities, workouts);
-  const insights = generateTrainingInsights(activities, workouts, goals);
+  const insights = generateTrainingInsights(activities, workouts, goals, healthContext);
 
   return (
     <div className="space-y-6">
@@ -77,52 +89,18 @@ async function DashboardTelemetry() {
           </div>
         </div>
 
-        {user && (
-          <div className="flex items-center gap-3">
-            {/* Athlete Biometric Baseline Badge (Calibrated to 68 bpm, 170cm, 65kg) */}
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] text-xs font-mono">
-              <span className="flex items-center gap-1 text-[#FF2A6D]">
-                <Heart className="w-3 h-3 fill-[#FF2A6D]/20" />
-                <span className="font-tabular font-bold">
-                  {user.resting_heart_rate || 68}
-                </span>
-                <span className="text-[10px] text-[#9BA3AF]">bpm RHR</span>
-              </span>
-              <span className="text-[#3A404D]">|</span>
-              <span className="text-[#00F0FF] font-tabular">
-                {user.height_cm || 170}{" "}
-                <span className="text-[10px] text-[#9BA3AF]">cm</span>
-              </span>
-              <span className="text-[#3A404D]">|</span>
-              <span className="text-[#D4FF00] font-tabular">
-                {user.weight_kg || 65}{" "}
-                <span className="text-[10px] text-[#9BA3AF]">kg</span>
-              </span>
-              <span className="text-[#3A404D]">|</span>
-              <span className="text-[#10B981] font-semibold text-[11px] font-tabular">
-                BMI 22.5
-              </span>
-            </div>
+        <div className="flex items-center gap-3">
+          <AddActivityModal variant="button" />
 
-            <div className="flex items-center gap-2 pl-1 border-l border-[#1F2430]">
-              {user.avatar_url && (
-                <img
-                  src={user.avatar_url}
-                  alt={user.name}
-                  className="w-6 h-6 rounded-sm border border-[#1F2430] object-cover"
-                />
-              )}
-              <div className="hidden sm:block text-left font-mono">
-                <div className="text-xs font-semibold text-[#F0F2F5] leading-none">
-                  {user.name}
-                </div>
-                <div className="text-[9px] text-[#10B981] leading-tight pt-0.5">
-                  Calibrated Athlete
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          {user && (
+            <EditAthleteProfileModal
+              user={user}
+              profile={healthContext?.profile}
+              healthContext={healthContext}
+              variant="badge"
+            />
+          )}
+        </div>
       </div>
 
       {/* 2. Strava OAuth Handshake Gateway (Collapsible & Compact) */}
@@ -137,6 +115,11 @@ async function DashboardTelemetry() {
           </span>
         </div>
         <StravaConnectCard />
+      </section>
+
+      {/* 2.5 Athlete Health Profile & Injury Intelligence Deck */}
+      <section>
+        <AthleteHealthDeck healthContext={healthContext} recentActivities={activities} />
       </section>
 
       {/* 3. Hero Telemetry & Volume Progression Deck (Asymmetric Composition) */}
@@ -213,13 +196,25 @@ async function DashboardTelemetry() {
           {/* Scheduled Training Calendar Card */}
           <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 space-y-3">
             <div className="flex items-center justify-between pb-2.5 border-b border-[#1F2430]">
-              <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5] flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-[#00F0FF]" />
-                Scheduled Training Calendar
-              </h3>
-              <span className="text-[10px] font-mono text-[#5A6272]">
-                {workouts.length} Active Workouts
-              </span>
+              <div>
+                <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5] flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#00F0FF]" />
+                  Scheduled Training Calendar
+                </h3>
+                {activePlan && (
+                  <span className="text-[10px] font-mono text-[#00F0FF] block mt-0.5 truncate max-w-[270px]">
+                    Plan: {activePlan.title}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="px-1.5 py-0.5 rounded-sm bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 text-[9px] font-mono font-bold">
+                  ACTIVE
+                </span>
+                <span className="text-[10px] font-mono text-[#5A6272]">
+                  {workouts.length} Sesi
+                </span>
+              </div>
             </div>
 
             {workouts.length === 0 ? (
@@ -237,110 +232,107 @@ async function DashboardTelemetry() {
               </div>
             ) : (
               <div className="space-y-1.5">
-                {workouts.slice(0, 4).map((wo) => (
-                  <div
-                    key={wo.id}
-                    className="p-2.5 rounded-sm bg-[#161922] border border-[#1F2430] flex items-center justify-between"
-                  >
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] uppercase font-mono px-1.5 py-0.2 rounded-sm bg-[#1C212E] text-[#9BA3AF] border border-[#2D3547]">
-                          {wo.workout_category}
-                        </span>
-                        <span
-                          className={`text-[9px] font-mono uppercase font-semibold ${
-                            wo.status === "COMPLETED"
-                              ? "text-[#10B981]"
-                              : "text-[#FF9500]"
-                          }`}
-                        >
-                          {wo.status}
-                        </span>
+                {workouts.slice(0, 5).map((wo) => {
+                  const isCycling = wo.workout_category === "Cycling";
+                  const isCross = wo.workout_category === "Cross Training" || wo.workout_category === "Strength Training";
+                  return (
+                    <div
+                      key={wo.id}
+                      className="p-2.5 rounded-sm bg-[#161922] border border-[#1F2430] flex items-center justify-between"
+                    >
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`text-[9px] uppercase font-mono px-1.5 py-0.2 rounded-sm border ${
+                              isCycling
+                                ? "bg-[#00F0FF]/10 text-[#00F0FF] border-[#00F0FF]/30 font-semibold"
+                                : isCross
+                                ? "bg-[#D4FF00]/10 text-[#D4FF00] border-[#D4FF00]/30 font-semibold"
+                                : "bg-[#1C212E] text-[#9BA3AF] border-[#2D3547]"
+                            }`}
+                          >
+                            {wo.workout_category}
+                          </span>
+                          <span
+                            className={`text-[9px] font-mono uppercase font-semibold ${
+                              wo.status === "COMPLETED"
+                                ? "text-[#10B981]"
+                                : "text-[#00F0FF]"
+                            }`}
+                          >
+                            {wo.status}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#5A6272] font-mono">
+                          {formatDate(wo.scheduled_date)} •{" "}
+                          <span className="text-[#9BA3AF]">{wo.target_intensity || "Standard"}</span>
+                        </p>
                       </div>
-                      <p className="text-[11px] text-[#5A6272] font-mono">
-                        {formatDate(wo.scheduled_date)} •{" "}
-                        {wo.target_intensity || "Standard"}
-                      </p>
-                    </div>
 
-                    <div className="text-right font-mono">
-                      <div className="text-xs font-bold font-tabular text-[#F0F2F5]">
-                        {wo.target_distance_meters
-                          ? formatDistance(wo.target_distance_meters)
-                          : "-- km"}
-                      </div>
-                      <div className="text-[11px] text-[#9BA3AF] font-tabular">
-                        {wo.target_pace_seconds_per_km
-                          ? formatPaceSeconds(wo.target_pace_seconds_per_km)
-                          : "--:-- /km"}
+                      <div className="text-right font-mono">
+                        <div className="text-xs font-bold font-tabular text-[#F0F2F5]">
+                          {wo.target_distance_meters
+                            ? formatDistance(wo.target_distance_meters)
+                            : wo.target_duration_seconds
+                            ? formatDuration(wo.target_duration_seconds)
+                            : "--"}
+                        </div>
+                        <div className="text-[10px] text-[#5A6272] font-tabular">
+                          {wo.target_duration_seconds && wo.target_distance_meters
+                            ? formatDuration(wo.target_duration_seconds)
+                            : wo.status === "COMPLETED"
+                            ? "Verified Strava"
+                            : "Prescribed"}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
-          {/* Personal Records Benchmarks Deck */}
-          {prs.length > 0 && (
-            <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 space-y-3">
-              <div className="flex items-center justify-between pb-2.5 border-b border-[#1F2430]">
-                <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5] flex items-center gap-1.5">
-                  <Trophy className="w-3.5 h-3.5 text-[#D4FF00]" />
-                  Personal Records (PR) Benchmarks
-                </h3>
-                <span className="text-[10px] font-mono text-[#5A6272]">
-                  Validated Bests
-                </span>
-              </div>
+                    {/* Personal Records Benchmarks Deck */}
+          <PersonalRecordsDeck prs={displayPrs} />
 
-              <div className="grid grid-cols-3 gap-2">
-                {prs.map((pr) => (
-                  <div
-                    key={pr.id}
-                    className="p-2 rounded-sm bg-[#161922] border border-[#1F2430] flex flex-col justify-between"
-                  >
-                    <span className="text-[10px] uppercase font-mono text-[#9BA3AF] block mb-1">
-                      {pr.category}
-                    </span>
-                    <span className="text-base font-bold font-mono font-tabular text-[#D4FF00] tracking-tight">
-                      {pr.record_display}
-                    </span>
-                    <span className="text-[9px] font-mono text-[#5A6272] mt-1">
-                      {formatDate(pr.achieved_date)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Fitness Goals Progress Deck */}
+          {/* Fitness Goals Progress Deck (Macro Objectives: 100K Century, Marathon Pathway, Frequency) */}
           {goals.length > 0 && (
             <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 space-y-3">
               <div className="flex items-center justify-between pb-2.5 border-b border-[#1F2430]">
                 <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5] flex items-center gap-1.5">
                   <Target className="w-3.5 h-3.5 text-[#00F0FF]" />
-                  Active Target Objectives
+                  Active Target Objectives (Macro Milestones)
                 </h3>
                 <span className="text-[10px] font-mono text-[#5A6272]">
-                  {goals.length} Tracked
+                  {goals.length} Sasaran Terkalibrasi
                 </span>
               </div>
 
               <div className="space-y-2.5">
                 {goals.map((g) => {
+                  const currentNum = Number(g.current_value);
+                  const targetNum = Number(g.target_value);
                   const pct = Math.min(
                     100,
-                    Math.round((Number(g.current_value) / Number(g.target_value)) * 100)
+                    Math.round((currentNum / targetNum) * 100)
                   );
-                  const isKm = g.goal_type === "DISTANCE_MONTHLY";
-                  const currentDisplay = isKm
-                    ? `${(Number(g.current_value) / 1000).toFixed(1)} km`
-                    : `${Number(g.current_value)} sessions`;
-                  const targetDisplay = isKm
-                    ? `${(Number(g.target_value) / 1000).toFixed(0)} km`
-                    : `${Number(g.target_value)} sessions`;
+                  const isMeters = g.goal_type === "DISTANCE_MONTHLY";
+                  const isKm = g.unit === "km" || isMeters;
+
+                  const currentDisplay = isMeters
+                    ? `${(currentNum / 1000).toFixed(1)} km`
+                    : isKm
+                    ? `${currentNum.toFixed(1)} km`
+                    : `${currentNum} ${g.unit || "sessions"}`;
+
+                  const targetDisplay = isMeters
+                    ? `${(targetNum / 1000).toFixed(0)} km`
+                    : isKm
+                    ? `${targetNum.toFixed(1)} km`
+                    : `${targetNum} ${g.unit || "sessions"}`;
+
+                  const is100k = g.title.toLowerCase().includes("100");
+                  const isMarathon = g.title.toLowerCase().includes("marathon");
 
                   return (
                     <div
@@ -348,10 +340,21 @@ async function DashboardTelemetry() {
                       className="p-2.5 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5"
                     >
                       <div className="flex items-center justify-between text-xs font-mono">
-                        <span className="text-[#F0F2F5] font-medium">
-                          {g.title}
+                        <span className="text-[#F0F2F5] font-medium flex items-center gap-1.5">
+                          {is100k && <span className="w-2 h-2 rounded-none bg-[#00F0FF]" />}
+                          {isMarathon && <span className="w-2 h-2 rounded-none bg-[#FF2A6D]" />}
+                          {!is100k && !isMarathon && <span className="w-2 h-2 rounded-none bg-[#10B981]" />}
+                          <span>{g.title}</span>
                         </span>
-                        <span className="text-[#00F0FF] font-tabular font-bold">
+                        <span
+                          className={`font-tabular font-bold ${
+                            is100k
+                              ? "text-[#00F0FF]"
+                              : isMarathon
+                              ? "text-[#FF9500]"
+                              : "text-[#10B981]"
+                          }`}
+                        >
                           {pct}%
                         </span>
                       </div>
@@ -359,14 +362,20 @@ async function DashboardTelemetry() {
                       {/* Progress Bar */}
                       <div className="w-full h-1.5 bg-[#090A0F] rounded-none overflow-hidden border border-[#1F2430]">
                         <div
-                          className="h-full bg-[#00F0FF] transition-all duration-300"
+                          className={`h-full transition-all duration-300 ${
+                            is100k
+                              ? "bg-[#00F0FF]"
+                              : isMarathon
+                              ? "bg-[#FF9500]"
+                              : "bg-[#10B981]"
+                          }`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
 
                       <div className="flex items-center justify-between text-[10px] font-mono text-[#5A6272]">
-                        <span>Current: {currentDisplay}</span>
-                        <span>Target: {targetDisplay}</span>
+                        <span>Tercapai: <strong className="text-[#9BA3AF]">{currentDisplay}</strong></span>
+                        <span>Target: <strong className="text-[#F0F2F5]">{targetDisplay}</strong></span>
                       </div>
                     </div>
                   );
@@ -472,13 +481,27 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/training"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#D4FF00] text-[#9BA3AF] hover:text-[#D4FF00] transition-colors text-xs font-mono font-medium"
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#D4FF00]" />
+              <span>Jadwal Latihan</span>
+            </Link>
+            <Link
+              href="/health"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#FF2A6D] text-[#9BA3AF] hover:text-[#FF2A6D] transition-colors text-xs font-mono font-medium"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#FF2A6D]" />
+              <span className="hidden sm:inline">Profil</span> Kesehatan
+            </Link>
             <Link
               href="/activities"
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#00F0FF] text-[#9BA3AF] hover:text-[#00F0FF] transition-colors text-xs font-mono font-medium"
             >
               <FolderKanban className="w-3.5 h-3.5 text-[#00F0FF]" />
-              <span>Manajemen Aktivitas</span>
+              <span className="hidden sm:inline">Manajemen</span> Aktivitas
             </Link>
           </div>
         </div>

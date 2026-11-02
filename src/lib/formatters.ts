@@ -180,7 +180,19 @@ export function formatElevation(meters: number): string {
   return `${Math.round(meters)} m`;
 }
 
-  export function formatDate(dateVal: string | Date): string {
+export function formatDateOnly(val: any): string {
+  if (!val) return '';
+  if (val instanceof Date) {
+    const y = val.getFullYear();
+    const m = String(val.getMonth() + 1).padStart(2, '0');
+    const d = String(val.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof val === 'string') return val.split('T')[0];
+  return String(val);
+}
+
+export function formatDate(dateVal: string | Date): string {
     if (!dateVal) return '';
     const d = typeof dateVal === 'string' ? new Date(dateVal) : dateVal;
     if (isNaN(d.getTime())) return String(dateVal);

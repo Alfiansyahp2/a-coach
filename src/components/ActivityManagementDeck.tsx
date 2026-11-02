@@ -12,6 +12,7 @@ import {
   speedMpsToKmh,
 } from "@/lib/formatters";
 import { EditActivityModal } from "@/components/EditActivityModal";
+import { AddActivityModal } from "@/components/AddActivityModal";
 import {
   Activity as ActivityIcon,
   ChevronRight,
@@ -273,8 +274,9 @@ export function ActivityManagementDeck({ activities: initialActivities }: Activi
           </p>
         </div>
 
-        {/* Quick KPI Strip */}
-        <div className="flex items-center gap-3 text-xs font-mono">
+        {/* Quick KPI Strip & Add Activity Action */}
+        <div className="flex flex-wrap items-center gap-3 text-xs font-mono">
+          <AddActivityModal variant="button" />
           <div className="px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-center">
             <span className="text-[10px] text-[#5A6272] block uppercase">Total Sesi</span>
             <span className="font-bold font-tabular text-[#F0F2F5] text-sm">
