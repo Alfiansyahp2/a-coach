@@ -7,68 +7,68 @@ interface ActivityPlanMatchCardProps {
 
 export function ActivityPlanMatchCard({ match }: ActivityPlanMatchCardProps) {
   return (
-    <section className="bg-[#12151D] border border-[#1F2430] rounded-sm p-5 space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-[#1F2430]">
+    <section className="bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl p-5 space-y-4 font-mono shadow-xs">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#00F0FF]" />
-          <h3 className="text-sm font-semibold text-white">
+          <Layers className="w-4 h-4 text-[var(--color-cycling)]" />
+          <h3 className="text-sm font-bold text-[var(--color-text-primary)]">
             Calendar Training Reconciliation (Planned vs Actual)
           </h3>
         </div>
-        <span className="text-xs font-mono text-[#9BA3AF]">
+        <span className="text-xs font-mono text-[var(--color-text-secondary)]">
           Status:{" "}
           {match ? (
-            <span className="text-[#10b981] font-semibold">
+            <span className="text-[var(--color-cycling)] font-semibold">
               Matched with Workout
             </span>
           ) : (
-            <span className="text-[#9BA3AF]">Unscheduled / Free Training</span>
+            <span className="text-[var(--color-text-muted)]">Unscheduled / Free Training</span>
           )}
         </span>
       </div>
 
       {match ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
-          <div className="p-4 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5">
-            <div className="text-[#9BA3AF]">Completion Adherence</div>
-            <div className="text-xl font-bold font-tabular text-[#10b981]">
+          <div className="p-4 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1.5">
+            <div className="text-[var(--color-text-secondary)]">Completion Adherence</div>
+            <div className="text-xl font-bold font-tabular text-[var(--color-cycling)]">
               {match.completion_percentage}%
             </div>
-            <div className="text-[11px] text-[#5A6272]">
+            <div className="text-[11px] text-[var(--color-text-muted)]">
               Target planned vs actual distance executed
             </div>
           </div>
 
-          <div className="p-4 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5">
-            <div className="text-[#9BA3AF]">Distance Delta</div>
+          <div className="p-4 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1.5">
+            <div className="text-[var(--color-text-secondary)]">Distance Delta</div>
             <div
               className={`text-xl font-bold font-tabular ${
                 match.distance_delta_meters >= 0
-                  ? "text-[#10b981]"
-                  : "text-[#f43f5e]"
+                  ? "text-[var(--color-cycling)]"
+                  : "text-[var(--color-alert-red)]"
               }`}
             >
               {match.distance_delta_meters >= 0 ? "+" : ""}
               {(match.distance_delta_meters / 1000).toFixed(2)} km
             </div>
-            <div className="text-[11px] text-[#5A6272]">
+            <div className="text-[11px] text-[var(--color-text-muted)]">
               Variance against target workout mileage
             </div>
           </div>
 
-          <div className="p-4 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5">
-            <div className="text-[#9BA3AF]">Pace Delta</div>
+          <div className="p-4 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1.5">
+            <div className="text-[var(--color-text-secondary)]">Pace Delta</div>
             <div
               className={`text-xl font-bold font-tabular ${
                 match.pace_delta_seconds_per_km <= 0
-                  ? "text-[#10b981]"
-                  : "text-[#f59e0b]"
+                  ? "text-[var(--color-cycling)]"
+                  : "text-[var(--color-alert-amber)]"
               }`}
             >
               {match.pace_delta_seconds_per_km > 0 ? "+" : ""}
               {match.pace_delta_seconds_per_km}s /km
             </div>
-            <div className="text-[11px] text-[#5A6272]">
+            <div className="text-[11px] text-[var(--color-text-muted)]">
               {match.pace_delta_seconds_per_km <= 0
                 ? "Ahead of planned threshold pace"
                 : "Slightly conservative vs planned pace"}
@@ -76,12 +76,11 @@ export function ActivityPlanMatchCard({ match }: ActivityPlanMatchCardProps) {
           </div>
         </div>
       ) : (
-        <div className="p-4 rounded-sm bg-[#161922] border border-[#1F2430] text-xs text-[#9BA3AF] flex items-center justify-between">
+        <div className="p-4 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] flex items-center justify-between">
           <span>
-            This endurance session was recorded as an independent workout. It
-            contributes fully to weekly volume and ACWR workload metrics.
+            Sesi latihan daya tahan ini tercatat sebagai sesi mandiri. Seluruh jarak dan beban berkontribusi penuh pada kalkulasi volume mingguan.
           </span>
-          <span className="px-2 py-1 rounded bg-[#1A1E28] text-white font-mono text-[10px]">
+          <span className="px-2.5 py-1 rounded-full bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] font-mono text-[10px] font-semibold">
             Valid Workout
           </span>
         </div>
@@ -89,4 +88,3 @@ export function ActivityPlanMatchCard({ match }: ActivityPlanMatchCardProps) {
     </section>
   );
 }
-

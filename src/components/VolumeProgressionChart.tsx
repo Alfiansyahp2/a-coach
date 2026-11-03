@@ -41,7 +41,6 @@ export function VolumeProgressionChart({
     const dates = activities.map((a) => new Date(a.start_date).getTime());
     const minTime = Math.min(...dates);
     const latestActivityTime = Math.max(...dates);
-    const anchorDate = new Date(Math.max(now.getTime(), latestActivityTime));
 
     const monthNames = [
       "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -118,10 +117,11 @@ export function VolumeProgressionChart({
     const dailyBuckets: VolumeBucket[] = [];
 
     for (let i = numDays - 1; i >= 0; i--) {
-      const d = new Date(anchorDate.getTime() - i * 86400000);
-      const dateStr = d.toISOString().split("T")[0];
-      const dayLabel = dayNames[d.getDay()];
-      const dayNumber = String(d.getDate()).padStart(2, "0");
+      const d = new Date(now.getTime() - i * 86400000);
+      const iso = d.toISOString().split("T")[0];
+      const dayName = dayNames[d.getUTCDay()];
+      const dayNum = String(d.getUTCDate()).padStart(2, "0");
+      const monthStr = monthNames[d.getUTCMonth()];
 
       let runKm = 0;
       let rideKm = 0;
@@ -129,7 +129,7 @@ export function VolumeProgressionChart({
       let count = 0;
 
       for (const act of activities) {
-        if (act.start_date.startsWith(dateStr)) {
+        if (act.start_date.split("T")[0] === iso) {
           const distKm = Number(act.distance_meters || 0) / 1000;
           const elev = Number(act.elevation_gain_meters || 0);
           const sport = (act.sport_type || "").toLowerCase();
@@ -147,10 +147,10 @@ export function VolumeProgressionChart({
       }
 
       dailyBuckets.push({
-        id: dateStr,
-        label: dayLabel[0],
-        subLabel: dayNumber,
-        fullDateStr: `${dayLabel}, ${dateStr}`,
+        id: iso,
+        label: dayName,
+        subLabel: `${dayNum} ${monthStr}`,
+        fullDateStr: `${dayName}, ${dayNum} ${monthStr}`,
         runKm: Math.round(runKm * 10) / 10,
         rideKm: Math.round(rideKm * 10) / 10,
         totalKm: Math.round((runKm + rideKm) * 10) / 10,
@@ -162,31 +162,32 @@ export function VolumeProgressionChart({
     return dailyBuckets;
   }, [activities, timeframe]);
 
+  // Aggregate Period Metrics
+  const totalPeriodKm = useMemo(
+    () => buckets.reduce((acc, b) => acc + b.totalKm, 0),
+    [buckets]
+  );
   const totalPeriodRunKm = useMemo(
-    () => Math.round(buckets.reduce((acc, b) => acc + b.runKm, 0) * 10) / 10,
+    () => buckets.reduce((acc, b) => acc + b.runKm, 0),
     [buckets]
   );
   const totalPeriodRideKm = useMemo(
-    () => Math.round(buckets.reduce((acc, b) => acc + b.rideKm, 0) * 10) / 10,
+    () => buckets.reduce((acc, b) => acc + b.rideKm, 0),
     [buckets]
   );
-  const totalPeriodKm = useMemo(
-    () => Math.round((totalPeriodRunKm + totalPeriodRideKm) * 10) / 10,
-    [totalPeriodRunKm, totalPeriodRideKm]
-  );
 
-  const maxTotal = useMemo(
-    () => Math.max(...buckets.map((b) => b.totalKm), timeframe === "all" ? 60 : 15),
-    [buckets, timeframe]
-  );
+  const maxTotal = useMemo(() => {
+    const rawMax = Math.max(...buckets.map((b) => b.totalKm), 5);
+    return Math.ceil(rawMax / 5) * 5;
+  }, [buckets]);
 
-  // SVG Geometry Calculation
   const count = buckets.length;
+
   const barWidth = useMemo(() => {
-    if (count <= 7) return 7;
-    if (count <= 10) return 6;
-    if (count <= 15) return 4.2;
-    return 2.1;
+    if (count <= 7) return 9.5;
+    if (count <= 14) return 5.0;
+    if (count <= 30) return 2.2;
+    return Math.max(1.5, 80 / count);
   }, [count]);
 
   const gap = useMemo(() => {
@@ -195,66 +196,66 @@ export function VolumeProgressionChart({
   }, [count, barWidth]);
 
   return (
-    <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 flex flex-col justify-between">
+    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 flex flex-col justify-between shadow-xs">
       {/* Chart Header with Timeframe Selectors */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] uppercase tracking-wider font-mono text-[#9BA3AF] block">
+            <span className="text-[11px] uppercase tracking-wider font-mono text-[var(--color-text-secondary)] block">
               {timeframe === "all"
                 ? "Volume Progression (All History)"
                 : `Volume Progression (${timeframe.toUpperCase()})`}
             </span>
-            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-sm bg-[#161922] text-[#00F0FF] border border-[#1F2430]">
+            <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold">
               {timeframe === "all" ? "Weekly Aggregation" : "Daily Telemetry"}
             </span>
           </div>
           <div className="flex items-baseline gap-2 mt-0.5">
-            <span className="text-xl font-bold font-mono font-tabular text-[#F0F2F5]">
+            <span className="text-xl font-bold font-mono font-tabular text-[var(--color-text-primary)]">
               {totalPeriodKm.toFixed(1)}
             </span>
-            <span className="text-xs font-mono text-[#9BA3AF]">km combined</span>
+            <span className="text-xs font-mono text-[var(--color-text-muted)]">km combined</span>
           </div>
         </div>
 
         {/* Timeframe Filter Buttons */}
-        <div className="flex items-center gap-1 p-0.5 rounded-sm bg-[#090A0F] border border-[#1F2430] self-start sm:self-auto text-[10px] font-mono">
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] self-start sm:self-auto text-[10px] font-mono">
           <button
             onClick={() => setTimeframe("7d")}
-            className={`px-2 py-0.5 rounded-sm transition-colors font-medium ${
+            className={`px-2.5 py-1 rounded-md transition-all font-semibold ${
               timeframe === "7d"
-                ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-                : "text-[#9BA3AF] hover:text-white"
+                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             7D
           </button>
           <button
             onClick={() => setTimeframe("14d")}
-            className={`px-2 py-0.5 rounded-sm transition-colors font-medium ${
+            className={`px-2.5 py-1 rounded-md transition-all font-semibold ${
               timeframe === "14d"
-                ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-                : "text-[#9BA3AF] hover:text-white"
+                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             14D
           </button>
           <button
             onClick={() => setTimeframe("30d")}
-            className={`px-2 py-0.5 rounded-sm transition-colors font-medium ${
+            className={`px-2.5 py-1 rounded-md transition-all font-semibold ${
               timeframe === "30d"
-                ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-                : "text-[#9BA3AF] hover:text-white"
+                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             30D
           </button>
           <button
             onClick={() => setTimeframe("all")}
-            className={`px-2.5 py-0.5 rounded-sm transition-colors font-bold ${
+            className={`px-3 py-1 rounded-md transition-all font-bold ${
               timeframe === "all"
-                ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 shadow-sm"
-                : "text-[#9BA3AF] hover:text-[#00F0FF]"
+                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             ALL / SEMUA
@@ -263,18 +264,18 @@ export function VolumeProgressionChart({
       </div>
 
       {/* Subheader Legend */}
-      <div className="flex items-center justify-between text-[10px] font-mono mb-2 pb-2 border-b border-[#1F2430]/60">
+      <div className="flex items-center justify-between text-[10px] font-mono mb-2 pb-2 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-none bg-[#D4FF00]" />
-            <span className="text-[#9BA3AF]">Run ({totalPeriodRunKm.toFixed(1)}k)</span>
+            <span className="w-2.5 h-2.5 rounded-xs bg-[var(--color-running)]" />
+            <span className="text-[var(--color-text-secondary)]">Run ({totalPeriodRunKm.toFixed(1)}k)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-none bg-[#00F0FF]" />
-            <span className="text-[#9BA3AF]">Ride ({totalPeriodRideKm.toFixed(1)}k)</span>
+            <span className="w-2.5 h-2.5 rounded-xs bg-[var(--color-cycling)]" />
+            <span className="text-[var(--color-text-secondary)]">Ride ({totalPeriodRideKm.toFixed(1)}k)</span>
           </div>
         </div>
-        <span className="text-[10px] font-mono text-[#5A6272]">
+        <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
           {timeframe === "all"
             ? `${buckets.length} Weeks • ${activities.length} Recorded Sessions`
             : `${buckets.length} Days Window`}
@@ -294,7 +295,7 @@ export function VolumeProgressionChart({
             y1="55"
             x2="100"
             y2="55"
-            stroke="#1F2430"
+            stroke="var(--color-border)"
             strokeWidth="0.8"
           />
           <line
@@ -302,7 +303,7 @@ export function VolumeProgressionChart({
             y1="28"
             x2="100"
             y2="28"
-            stroke="#1F2430"
+            stroke="var(--color-border)"
             strokeWidth="0.5"
             strokeDasharray="1 2"
           />
@@ -334,33 +335,35 @@ export function VolumeProgressionChart({
                     y={2}
                     width={barWidth + 2.4}
                     height={53}
-                    fill="#1C212E"
-                    opacity={0.65}
+                    fill="var(--color-surface-muted)"
+                    opacity={0.8}
                     rx={1}
                   />
                 )}
 
-                {/* Ride Segment (Bottom) */}
+                {/* Ride Segment (Bottom) - Cycling Green */}
                 {b.rideKm > 0 && (
                   <rect
                     x={x}
                     y={rideY}
                     width={barWidth}
                     height={rideH}
-                    fill="#00F0FF"
+                    fill="var(--color-cycling)"
                     opacity={isHovered ? 1 : 0.85}
+                    rx={0.5}
                   />
                 )}
 
-                {/* Run Segment (Top) */}
+                {/* Run Segment (Top) - Running Orange */}
                 {b.runKm > 0 && (
                   <rect
                     x={x}
                     y={runY}
                     width={barWidth}
                     height={runH}
-                    fill="#D4FF00"
+                    fill="var(--color-running)"
                     opacity={isHovered ? 1 : 0.9}
+                    rx={0.5}
                   />
                 )}
 
@@ -370,7 +373,7 @@ export function VolumeProgressionChart({
                     cx={x + barWidth / 2}
                     cy={53}
                     r={0.8}
-                    fill="#5A6272"
+                    fill="var(--color-text-muted)"
                   />
                 )}
               </g>
@@ -379,7 +382,7 @@ export function VolumeProgressionChart({
         </svg>
 
         {/* X-Axis Labels */}
-        <div className="flex justify-between items-center px-1 pt-1 border-t border-[#1F2430]/40">
+        <div className="flex justify-between items-center px-1 pt-1 border-t border-[var(--color-border)]">
           {buckets.map((b, idx) => {
             const isHovered = hoveredBucket?.id === b.id;
             const showLabel =
@@ -390,22 +393,22 @@ export function VolumeProgressionChart({
                 key={b.id}
                 className={`text-center font-mono text-[10px] transition-colors ${
                   isHovered
-                    ? "text-white font-bold"
+                    ? "text-[var(--color-text-primary)] font-bold"
                     : b.totalKm > 0
-                    ? "text-[#9BA3AF]"
-                    : "text-[#5A6272]"
+                    ? "text-[var(--color-text-secondary)]"
+                    : "text-[var(--color-text-muted)]"
                 }`}
                 style={{ width: `${100 / count}%` }}
               >
                 {showLabel ? (
                   <>
                     <span className="block truncate">{b.label}</span>
-                    <span className="block text-[8px] text-[#5A6272] truncate">
+                    <span className="block text-[8px] text-[var(--color-text-muted)] truncate">
                       {b.subLabel}
                     </span>
                   </>
                 ) : (
-                  <span className="block w-1 h-1 mx-auto rounded-full bg-[#1F2430] my-2" />
+                  <span className="block w-1 h-1 mx-auto rounded-full bg-[var(--color-border)] my-2" />
                 )}
               </div>
             );
@@ -414,41 +417,41 @@ export function VolumeProgressionChart({
       </div>
 
       {/* Dynamic Hover Telemetry Readout */}
-      <div className="mt-2.5 h-6 flex items-center justify-between text-[11px] font-mono px-2 py-1 bg-[#090A0F] border border-[#1F2430] rounded-sm">
+      <div className="mt-3 min-h-7 flex items-center justify-between text-[11px] font-mono px-3 py-1.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg">
         {hoveredBucket ? (
           <>
-            <span className="text-[#F0F2F5] font-semibold truncate mr-2">
+            <span className="text-[var(--color-text-primary)] font-semibold truncate mr-2">
               {hoveredBucket.fullDateStr}:
             </span>
             <div className="flex items-center gap-2 shrink-0">
               {hoveredBucket.runKm > 0 && (
-                <span className="text-[#D4FF00] font-tabular">
+                <span className="text-[var(--color-running)] font-tabular font-bold">
                   {hoveredBucket.runKm} km run
                 </span>
               )}
               {hoveredBucket.rideKm > 0 && (
-                <span className="text-[#00F0FF] font-tabular">
+                <span className="text-[var(--color-cycling)] font-tabular font-bold">
                   {hoveredBucket.rideKm} km ride
                 </span>
               )}
               {hoveredBucket.elevation > 0 && (
-                <span className="text-[#FF9500] font-tabular">
+                <span className="text-[var(--color-alert-amber)] font-tabular">
                   ▲ {hoveredBucket.elevation}m
                 </span>
               )}
               {hoveredBucket.sessionCount > 0 && (
-                <span className="text-[#9BA3AF] text-[10px]">
+                <span className="text-[var(--color-text-muted)] text-[10px]">
                   ({hoveredBucket.sessionCount} sessions)
                 </span>
               )}
               {hoveredBucket.totalKm === 0 && (
-                <span className="text-[#5A6272]">Rest Day / No Recorded Telemetry</span>
+                <span className="text-[var(--color-text-muted)]">Rest Day / No Recorded Telemetry</span>
               )}
             </div>
           </>
         ) : (
-          <span className="text-[#5A6272] flex items-center justify-between w-full">
-            <span>Hover column for split telemetry</span>
+          <span className="text-[var(--color-text-muted)] flex items-center justify-between w-full">
+            <span>Hover bar for telemetry split</span>
             <span>
               {timeframe === "all" ? "Max weekly:" : "Max daily:"} {maxTotal.toFixed(1)} km
             </span>

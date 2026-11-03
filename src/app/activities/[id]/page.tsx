@@ -28,15 +28,15 @@ interface ActivityDetailPageProps {
 
 function ActivityDetailSkeleton() {
   return (
-    <div className="min-h-screen bg-[#090A0F] text-[#F0F2F5] flex flex-col font-sans p-6 sm:p-12 animate-pulse space-y-8">
-      <div className="h-6 w-32 bg-[#1A1E28] rounded-sm" />
-      <div className="h-10 w-96 bg-[#1A1E28] rounded-sm" />
-      <div className="h-80 w-full bg-[#12151D] border border-[#1F2430] rounded-sm" />
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-primary)] flex flex-col font-sans p-6 sm:p-12 animate-pulse space-y-8">
+      <div className="h-6 w-32 bg-[var(--color-surface-muted)] rounded-md" />
+      <div className="h-10 w-96 bg-[var(--color-surface-muted)] rounded-md" />
+      <div className="h-80 w-full bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl" />
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="h-32 bg-[#12151D] border border-[#1F2430] rounded-sm"
+            className="h-32 bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl"
           />
         ))}
       </div>
@@ -91,7 +91,7 @@ async function ActivityDetailContent({ params }: ActivityDetailPageProps) {
     : [];
 
   return (
-    <div className="min-h-screen bg-[#090A0F] text-[#F0F2F5] flex flex-col font-sans selection:bg-[#FC4C02]/30 selection:text-white pb-16">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-primary)] flex flex-col font-sans transition-colors duration-200 pb-16">
       {/* Top Header Navigation */}
       <ActivityDetailHeader
         activity={activity}

@@ -238,7 +238,7 @@ export function AddActivityModal({
       {variant === "button" && (
         <button
           onClick={handleOpen}
-          className="px-3.5 py-1.5 rounded-sm bg-[#D4FF00] hover:bg-[#c2eb00] text-[#090A0F] text-xs font-bold font-mono tracking-tight transition-all duration-150 flex items-center gap-1.5 shadow-md shadow-[#D4FF00]/10"
+          className="px-3.5 py-1.5 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-semibold font-mono tracking-tight transition-all flex items-center gap-1.5 shadow-xs"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>TAMBAH AKTIVITAS</span>
@@ -248,9 +248,9 @@ export function AddActivityModal({
       {variant === "outline" && (
         <button
           onClick={handleOpen}
-          className="px-3 py-1.5 rounded-sm bg-[#12151D] hover:bg-[#1A1F2C] border border-[#00F0FF]/40 text-[#00F0FF] text-xs font-mono font-medium transition-colors flex items-center gap-1.5"
+          className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-xs"
         >
-          <Plus className="w-3.5 h-3.5" />
+          <Plus className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
           <span>Tambah Aktivitas Manual / Foto</span>
         </button>
       )}
@@ -258,74 +258,74 @@ export function AddActivityModal({
       {variant === "compact" && (
         <button
           onClick={handleOpen}
-          className="px-2 py-1 rounded-sm bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 border border-[#00F0FF]/30 text-[#00F0FF] text-[10px] font-mono font-semibold transition-colors flex items-center gap-1"
+          className="p-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] transition-colors shadow-xs"
+          title="Tambah Aktivitas Manual"
         >
-          <Plus className="w-3 h-3" />
-          <span>Catat Hasil</span>
+          <Plus className="w-4 h-4 text-[var(--color-cycling)]" />
         </button>
       )}
 
-      {/* Modal Backdrop */}
+      {/* Modal Dialog */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
           <div
-            className="w-full max-w-2xl bg-[#0F1218] border border-[#1F2430] rounded-sm shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
+            className="w-full max-w-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="px-5 py-4 border-b border-[#1F2430] bg-[#12151D] flex items-center justify-between">
+            {/* Modal Header */}
+            <div className="px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-sm bg-[#D4FF00]/10 border border-[#D4FF00]/30 text-[#D4FF00]">
+                <div className="p-2 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[var(--color-cycling)]">
                   <ActivityIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold font-mono text-[#F0F2F5] tracking-tight flex items-center gap-2">
-                    CATAT AKTIVITAS BARU
+                  <h3 className="text-sm font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
+                    INPUT AKTIVITAS TELEMETRI BARU
                     {defaultWorkout && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-xs bg-[#00F0FF]/15 border border-[#00F0FF]/30 text-[#00F0FF]">
-                        Tautkan ke Sesi Terjadwal
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 text-[var(--color-cycling)]">
+                        Target: {defaultWorkout.workout_category}
                       </span>
                     )}
                   </h3>
-                  <p className="text-[11px] text-[#9BA3AF] font-mono">
-                    Entri manual atau ekstrak otomatis dari screenshot Strava / Jam Tangan.
+                  <p className="text-[11px] text-[var(--color-text-secondary)] font-mono">
+                    Ekstraksi otomatis via screenshot kamera (OCR) atau input formulir manual.
                   </p>
                 </div>
               </div>
               <button
                 onClick={handleClose}
                 disabled={isSubmitting || isParsingImage}
-                className="p-1.5 rounded-sm text-[#9BA3AF] hover:text-white hover:bg-[#1C212E] transition-colors"
+                className="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-card)] border border-transparent hover:border-[var(--color-border)] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Mode Switcher Tabs */}
-            <div className="px-5 pt-3 pb-2 bg-[#090A0F] border-b border-[#1F2430] flex items-center gap-2 font-mono text-xs">
+            {/* Ingestion Mode Tabs */}
+            <div className="px-5 pt-3 pb-2 bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] flex items-center gap-2 font-mono text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab("image")}
-                className={`px-3 py-1.5 rounded-sm transition-all flex items-center gap-1.5 font-medium ${
+                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
                   activeTab === "image"
-                    ? "bg-[#1C212E] text-[#00F0FF] border border-[#00F0FF]/40 font-bold"
-                    : "text-[#9BA3AF] hover:text-white"
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
-                <Camera className="w-3.5 h-3.5" />
-                <span>📸 Scan Screenshot / Foto Telemetri</span>
+                <Camera className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+                <span>Unggah Foto Telemetri (OCR)</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("manual")}
-                className={`px-3 py-1.5 rounded-sm transition-all flex items-center gap-1.5 font-medium ${
+                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
                   activeTab === "manual"
-                    ? "bg-[#1C212E] text-[#D4FF00] border border-[#D4FF00]/40 font-bold"
-                    : "text-[#9BA3AF] hover:text-white"
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
-                <FileText className="w-3.5 h-3.5" />
-                <span>✍️ Isi Formulir Manual</span>
+                <FileText className="w-3.5 h-3.5 text-[var(--color-running)]" />
+                <span>Formulir Manual</span>
               </button>
             </div>
 
@@ -333,8 +333,8 @@ export function AddActivityModal({
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
               {/* Error Banner */}
               {errorMsg && (
-                <div className="p-3 rounded-sm bg-red-950/40 border border-red-500/50 flex items-start gap-2.5 text-xs text-red-300 font-mono">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-md bg-[var(--color-alert-red)]/10 border border-[var(--color-alert-red)]/30 flex items-start gap-2.5 text-xs text-[var(--color-alert-red)] font-mono">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Peringatan: </span>
                     {errorMsg}
@@ -344,8 +344,8 @@ export function AddActivityModal({
 
               {/* Success Banner */}
               {successMsg && (
-                <div className="p-3 rounded-sm bg-emerald-950/40 border border-emerald-500/50 flex items-start gap-2.5 text-xs text-emerald-300 font-mono">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-md bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 flex items-start gap-2.5 text-xs text-[var(--color-cycling)] font-mono">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Berhasil: </span>
                     {successMsg}
@@ -353,7 +353,7 @@ export function AddActivityModal({
                 </div>
               )}
 
-              {/* IMAGE OCR SCANNER SECTION */}
+              {/* TAB 1: OCR IMAGE INGESTION */}
               {activeTab === "image" && (
                 <ActivityImageUploader
                   imagePreview={imagePreview}
@@ -369,7 +369,7 @@ export function AddActivityModal({
                 />
               )}
 
-              {/* MANUAL FORM FIELDS */}
+              {/* TAB 2 or BELOW OCR: FORM FIELDS */}
               <ActivityManualFormFields
                 sportType={sportType}
                 setSportType={setSportType}
@@ -393,7 +393,7 @@ export function AddActivityModal({
                 calculatedPaceMinKm={calculatedPaceMinKm}
               />
 
-              {/* CLINICAL JOINT & ZONE 2 HEALTH CHECKIN */}
+              {/* ZONE 2 & JOINT HEALTH AUDIT */}
               <ActivityHealthCheckinFields
                 rpeScore={rpeScore}
                 setRpeScore={setRpeScore}
@@ -406,12 +406,12 @@ export function AddActivityModal({
               />
 
               {/* Submit & Cancel Actions */}
-              <div className="pt-2 border-t border-[#1F2430] flex items-center justify-end gap-2.5 font-mono">
+              <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-2.5 font-mono">
                 <button
                   type="button"
                   onClick={handleClose}
                   disabled={isSubmitting || isParsingImage}
-                  className="px-4 py-2 rounded-sm text-xs font-medium text-[#9BA3AF] hover:text-white hover:bg-[#161922] transition-colors"
+                  className="px-4 py-2 rounded-md text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors"
                 >
                   Batal
                 </button>
@@ -419,7 +419,7 @@ export function AddActivityModal({
                 <button
                   type="submit"
                   disabled={isSubmitting || isParsingImage}
-                  className="px-5 py-2 rounded-sm bg-[#D4FF00] hover:bg-[#c2eb00] text-[#090A0F] text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-[#D4FF00]/10 disabled:opacity-50"
+                  className="px-5 py-2 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
@@ -428,8 +428,8 @@ export function AddActivityModal({
                     </>
                   ) : (
                     <>
-                      <Check className="w-4 h-4 stroke-[2.5]" />
-                      <span>SIMPAN AKTIVITAS</span>
+                      <Check className="w-4 h-4" />
+                      <span>SIMPAN AKTIVITAS KE BASIS DATA</span>
                     </>
                   )}
                 </button>

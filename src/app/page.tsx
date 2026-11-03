@@ -15,16 +15,22 @@ import { computeDashboardSummary } from "@/lib/analytics";
 import { generateTrainingInsights } from "@/lib/ai-coach";
 import { computePersonalRecords } from "@/lib/personalRecords";
 import { formatDuration, formatPaceSeconds } from "@/lib/formatters";
+import { AppShell } from "@/components/layout/AppShell";
 import { StravaConnectCard } from "@/components/StravaConnectCard";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import { MetricCard } from "@/components/MetricCard";
 import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
 import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
-import { DashboardTopNavbar } from "@/components/dashboard/DashboardTopNavbar";
 import { DashboardIntegrityStrip } from "@/components/dashboard/DashboardIntegrityStrip";
 import { DashboardTacticalDeck } from "@/components/dashboard/DashboardTacticalDeck";
 import { DashboardAiInsightsDeck } from "@/components/dashboard/DashboardAiInsightsDeck";
 import { Gauge, RefreshCw, Zap } from "lucide-react";
+
+export const metadata = {
+  title: "ENDURANCE PERFORMANCE LAB | Athletic Telemetry Dashboard",
+  description:
+    "Precision endurance sports science instrument panel & athletic coaching telemetry platform",
+};
 
 async function DashboardTelemetry() {
   await connection();
@@ -73,7 +79,7 @@ async function DashboardTelemetry() {
   const targetWeek1Km = 18.0;
 
   return (
-    <div className="space-y-6">
+    <AppShell user={user} dbStatus={dbStatus} healthContext={healthContext}>
       {/* 1. Precision Navigation & Telemetry Integrity Strip */}
       <DashboardIntegrityStrip
         dbStatus={dbStatus}
@@ -82,7 +88,7 @@ async function DashboardTelemetry() {
       />
 
       {/* 2. Athlete Health Profile & Joint Safety Gate */}
-      <section>
+      <section id="health-gate">
         <AthleteHealthDeck
           healthContext={healthContext}
           recentActivities={activities}
@@ -92,11 +98,11 @@ async function DashboardTelemetry() {
       {/* 3. Hero Telemetry & Volume Progression Deck */}
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5 font-bold">
-            <Gauge className="w-3.5 h-3.5 text-[#00F0FF]" />
+          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[var(--color-text-secondary)] flex items-center gap-1.5 font-bold">
+            <Gauge className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
             <span>Weekly Workload Telemetry &amp; Progression</span>
           </h2>
-          <span className="text-[10px] font-mono text-[#5A6272]">
+          <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
             Siklus Mingguan (Senin – Minggu)
           </span>
         </div>
@@ -125,7 +131,7 @@ async function DashboardTelemetry() {
                 current: currentVolumeKm,
                 target: targetWeek1Km,
               }}
-              accentColor="volt"
+              accentColor="endurance"
             />
 
             <MetricCard
@@ -136,7 +142,7 @@ async function DashboardTelemetry() {
                   ? `${summary.completedActivitiesCount} sesi dicatat minggu ini`
                   : "Target: 45–60 mnt / sesi aerobik"
               }
-              accentColor="default"
+              accentColor="cycling"
             />
 
             <MetricCard
@@ -147,14 +153,14 @@ async function DashboardTelemetry() {
                   : "--:-- /km"
               }
               subtext="Status lari: Ditunda (On Hold sendi)"
-              accentColor="amber"
+              accentColor="running"
             />
 
             <MetricCard
               label="Tingkat Kepatuhan Jadwal"
               value={`${summary.consistencyScore}%`}
               subtext="Kepatuhan preskripsi rencana latihan"
-              accentColor="cyan"
+              accentColor="endurance"
             />
           </div>
 
@@ -170,12 +176,10 @@ async function DashboardTelemetry() {
 
       {/* 4. Operations Deck: Ingested Stream (Left) + Tactical Command Deck (Right) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Left Column (7 cols): Ingested Activity Feed */}
         <div className="lg:col-span-7">
           <ActivityFeed activities={activities} />
         </div>
 
-        {/* Right Column (5 cols): Tactical Command Deck (Tabbed: Scheduled Workouts, Macro Goals, PRs) */}
         <div className="lg:col-span-5">
           <DashboardTacticalDeck
             workouts={workouts}
@@ -187,31 +191,33 @@ async function DashboardTelemetry() {
         </div>
       </section>
 
-      {/* 5. Strava OAuth Handshake Gateway (Collapsible & Refined) */}
-      <section>
+      {/* 5. Strava OAuth Handshake Gateway */}
+      <section id="strava-gateway">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5 font-bold">
-            <Zap className="w-3.5 h-3.5 text-[#FC4C02]" />
+          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[var(--color-text-secondary)] flex items-center gap-1.5 font-bold">
+            <Zap className="w-3.5 h-3.5 text-[var(--color-strava)]" />
             <span>OAuth 2.0 Integration Gateway</span>
           </h2>
-          <span className="text-[10px] font-mono text-[#5A6272]">
+          <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
             Telemetry Bridge • REST API v3
           </span>
         </div>
         <StravaConnectCard />
       </section>
 
-      {/* 6. Grounded AI Coach Analytical Dossier (3-Column Filterable Grid) */}
-      <DashboardAiInsightsDeck insights={insights} />
-    </div>
+      {/* 6. Grounded Coach Analytical Dossier */}
+      <section id="coach-insights">
+        <DashboardAiInsightsDeck insights={insights} />
+      </section>
+    </AppShell>
   );
 }
 
 function TelemetryLoadingSkeleton() {
   return (
-    <div className="py-24 flex flex-col items-center justify-center gap-3 text-[#9BA3AF]">
-      <RefreshCw className="w-5 h-5 animate-spin text-[#00F0FF]" />
-      <span className="text-xs font-mono uppercase tracking-wider text-[#5A6272]">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-muted)] py-24 flex flex-col items-center justify-center gap-3 font-mono">
+      <RefreshCw className="w-5 h-5 animate-spin text-[var(--color-cycling)]" />
+      <span className="text-xs uppercase tracking-wider">
         Acquiring Precision Athletic Telemetry Streams...
       </span>
     </div>
@@ -220,18 +226,8 @@ function TelemetryLoadingSkeleton() {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#090A0F] text-[#F0F2F5] flex flex-col font-sans selection:bg-[#D4FF00]/30 selection:text-white">
-      <DashboardTopNavbar />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full">
-        <Suspense fallback={<TelemetryLoadingSkeleton />}>
-          <DashboardTelemetry />
-        </Suspense>
-      </main>
-
-      <footer className="border-t border-[#1F2430] py-4 text-center text-[11px] text-[#5A6272] font-mono">
-        a-coach • Athletic Performance Telemetry Platform • Next.js 16 + PostgreSQL 16
-      </footer>
-    </div>
+    <Suspense fallback={<TelemetryLoadingSkeleton />}>
+      <DashboardTelemetry />
+    </Suspense>
   );
 }

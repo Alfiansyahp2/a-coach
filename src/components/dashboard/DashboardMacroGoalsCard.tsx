@@ -12,18 +12,18 @@ export function DashboardMacroGoalsCard({
   if (goals.length === 0) return null;
 
   return (
-    <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 space-y-3">
-      <div className="flex items-center justify-between pb-2.5 border-b border-[#1F2430]">
-        <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5] flex items-center gap-1.5">
-          <Target className="w-3.5 h-3.5 text-[#00F0FF]" />
-          Active Target Objectives (Macro Milestones)
+    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 space-y-3.5 shadow-xs">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
+        <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+          <Target className="w-4 h-4 text-[var(--color-cycling)]" />
+          <span>Active Target Objectives (Macro Milestones)</span>
         </h3>
-        <span className="text-[10px] font-mono text-[#5A6272]">
-          {goals.length} Sasaran Terkalibrasi
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] font-semibold">
+          {goals.length} Sasaran
         </span>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {goals.map((g) => {
           const currentNum = Number(g.current_value);
           const targetNum = Number(g.target_value);
@@ -46,59 +46,52 @@ export function DashboardMacroGoalsCard({
           const is100k = g.title.toLowerCase().includes("100");
           const isMarathon = g.title.toLowerCase().includes("marathon");
 
+          const colorToken = is100k
+            ? "var(--color-cycling)"
+            : isMarathon
+            ? "var(--color-running)"
+            : "var(--color-endurance)";
+
           return (
             <div
               key={g.id}
-              className="p-2.5 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5"
+              className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)]/60 hover:border-[var(--color-border)] transition-all duration-200 space-y-2 hover:bg-[var(--color-surface-muted)]"
             >
               <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-[#F0F2F5] font-medium flex items-center gap-1.5">
-                  {is100k && (
-                    <span className="w-2 h-2 rounded-none bg-[#00F0FF]" />
-                  )}
-                  {isMarathon && (
-                    <span className="w-2 h-2 rounded-none bg-[#FF2A6D]" />
-                  )}
-                  {!is100k && !isMarathon && (
-                    <span className="w-2 h-2 rounded-none bg-[#10B981]" />
-                  )}
+                <span className="text-[var(--color-text-primary)] font-semibold flex items-center gap-2">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ backgroundColor: colorToken }}
+                  />
                   <span>{g.title}</span>
                 </span>
                 <span
-                  className={`font-tabular font-bold ${
-                    is100k
-                      ? "text-[#00F0FF]"
-                      : isMarathon
-                      ? "text-[#FF9500]"
-                      : "text-[#10B981]"
-                  }`}
+                  className="font-tabular font-extrabold"
+                  style={{ color: colorToken }}
                 >
                   {pct}%
                 </span>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full h-1.5 bg-[#090A0F] rounded-none overflow-hidden border border-[#1F2430]">
+              <div className="w-full h-2 bg-[var(--color-surface-card)] rounded-full overflow-hidden border border-[var(--color-border)]">
                 <div
-                  className={`h-full transition-all duration-300 ${
-                    is100k
-                      ? "bg-[#00F0FF]"
-                      : isMarathon
-                      ? "bg-[#FF9500]"
-                      : "bg-[#10B981]"
-                  }`}
-                  style={{ width: `${pct}%` }}
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    backgroundColor: colorToken,
+                    width: `${pct}%`,
+                  }}
                 />
               </div>
 
-              <div className="flex items-center justify-between text-[10px] font-mono text-[#5A6272]">
+              <div className="flex items-center justify-between text-[10px] font-mono text-[var(--color-text-muted)] pt-0.5">
                 <span>
                   Tercapai:{" "}
-                  <strong className="text-[#9BA3AF]">{currentDisplay}</strong>
+                  <strong className="text-[var(--color-text-secondary)] font-tabular">{currentDisplay}</strong>
                 </span>
                 <span>
                   Target:{" "}
-                  <strong className="text-[#F0F2F5]">{targetDisplay}</strong>
+                  <strong className="text-[var(--color-text-primary)] font-tabular">{targetDisplay}</strong>
                 </span>
               </div>
             </div>
@@ -108,4 +101,3 @@ export function DashboardMacroGoalsCard({
     </div>
   );
 }
-

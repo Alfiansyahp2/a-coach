@@ -108,23 +108,23 @@ export function ScheduleTrainingHub({
   return (
     <div className="space-y-6">
       {/* 1. Header Strip: Active 12-Week Plan & Macro Calibration */}
-      <div className="p-4 rounded-sm bg-[#12151D] border border-[#1F2430] flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono">
+      <div className="p-5 sm:p-6 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono shadow-xs">
         <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-sm bg-[#161922] border border-[#2D3547] flex items-center justify-center text-[#D4FF00]">
-              <CalendarIcon className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)] shadow-xs">
+              <CalendarIcon className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm uppercase tracking-wider font-bold text-[#F0F2F5]">
+                <h1 className="text-sm uppercase tracking-wider font-bold text-[var(--color-text-primary)]">
                   {initialPlan?.title || "Program Periodisasi 12-Minggu Zone 2 Endurance"}
                 </h1>
-                <span className="text-[9px] px-2 py-0.5 rounded-sm bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30 font-bold">
-                  ACTIVE 12-WEEK MACROCYCLE
+                <span className="text-[9.5px] px-2.5 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold uppercase tracking-wider">
+                  Active Macrocycle
                 </span>
               </div>
-              <span className="text-[11px] text-[#5A6272] block">
-                Roadmap 3 Bulan • MTB Zone 2 (RPE 3–4) • 3 Sesi/Minggu • Puasa Senin & Kamis Terproteksi
+              <span className="text-[11px] text-[var(--color-text-secondary)] block">
+                Roadmap 3 Bulan • MTB Zone 2 (RPE 3–4) • 3 Sesi/Minggu • Puasa Senin &amp; Kamis Terproteksi
               </span>
             </div>
           </div>
@@ -132,27 +132,27 @@ export function ScheduleTrainingHub({
 
         <div className="flex items-center gap-2">
           {/* View Mode Toggle: Calendar Grid vs List */}
-          <div className="flex items-center p-0.5 rounded-sm bg-[#161922] border border-[#1F2430] text-xs">
+          <div className="flex items-center p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs">
             <button
               onClick={() => setViewMode("calendar")}
-              className={`px-2.5 py-1 rounded-sm flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${
                 viewMode === "calendar"
-                  ? "bg-[#1C212E] text-[#D4FF00] font-bold shadow-sm"
-                  : "text-[#9BA3AF] hover:text-white"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              <Grid className="w-3.5 h-3.5" />
+              <Grid className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
               <span>Kalender Grid</span>
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`px-2.5 py-1 rounded-sm flex items-center gap-1.5 transition-all ${
+              className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${
                 viewMode === "list"
-                  ? "bg-[#1C212E] text-[#00F0FF] font-bold shadow-sm"
-                  : "text-[#9BA3AF] hover:text-white"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              <List className="w-3.5 h-3.5" />
+              <List className="w-3.5 h-3.5 text-[var(--color-running)]" />
               <span>Daftar Sesi</span>
             </button>
           </div>
@@ -162,16 +162,16 @@ export function ScheduleTrainingHub({
           <button
             onClick={handleRegenerate}
             disabled={isRegenerating}
-            className="px-3 py-1.5 rounded-sm bg-[#D4FF00]/15 border border-[#D4FF00]/40 text-[#D4FF00] hover:bg-[#D4FF00]/25 text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+            className="px-4 py-2 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRegenerating ? "animate-spin" : ""}`} />
-            <span>{isRegenerating ? "MENGALIBRASI..." : "SINKRONISASI ULANG"}</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-[var(--color-cycling)] ${isRegenerating ? "animate-spin" : ""}`} />
+            <span>{isRegenerating ? "Mengalibrasi..." : "Sinkronisasi"}</span>
           </button>
         </div>
       </div>
 
       {message && (
-        <div className="p-3 rounded-sm bg-[#161922] border border-[#D4FF00]/40 text-xs font-mono text-[#D4FF00]">
+        <div className="p-3 rounded-lg bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 text-xs font-mono text-[var(--color-cycling)] font-semibold">
           {message}
         </div>
       )}
@@ -183,78 +183,78 @@ export function ScheduleTrainingHub({
       <Zone2PacingGuidelinePanel />
 
       {/* 4. Phase Switcher (12-Week Periodization Tabs) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5 rounded-sm bg-[#12151D] border border-[#1F2430] font-mono text-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] font-mono text-xs shadow-xs">
         <div className="flex items-center gap-1.5 overflow-x-auto">
-          <span className="text-[10px] uppercase font-bold text-[#5A6272] px-2 flex items-center gap-1">
-            <Sliders className="w-3 h-3 text-[#5A6272]" />
+          <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] px-2 flex items-center gap-1">
+            <Sliders className="w-3 h-3 text-[var(--color-text-muted)]" />
             FASE:
           </span>
           <button
             onClick={() => setSelectedPhase("ALL")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold ${
               selectedPhase === "ALL"
-                ? "bg-[#1C212E] text-white border border-[#2D3547]"
-                : "text-[#9BA3AF] hover:text-white"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             Semua (12 Minggu)
           </button>
           <button
             onClick={() => setSelectedPhase("PHASE_1")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold ${
               selectedPhase === "PHASE_1"
-                ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30"
-                : "text-[#9BA3AF] hover:text-[#00F0FF]"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
             }`}
           >
             Fase 1: Fondasi Awal (M1–4)
           </button>
           <button
             onClick={() => setSelectedPhase("PHASE_2")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold ${
               selectedPhase === "PHASE_2"
-                ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/30"
-                : "text-[#9BA3AF] hover:text-[#D4FF00]"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
             }`}
           >
             Fase 2: Endurance Base (M5–8)
           </button>
           <button
             onClick={() => setSelectedPhase("PHASE_3")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold ${
               selectedPhase === "PHASE_3"
-                ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
-                : "text-[#9BA3AF] hover:text-[#10B981]"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
             }`}
           >
             Fase 3: Spesifisitas Zone 2 (M9–12)
           </button>
         </div>
 
-        <div className="text-[10px] text-[#5A6272] pr-2">
-          <span>Menampilkan: <strong>{displayedWeeks.length} Minggu Siklus</strong></span>
+        <div className="text-[10px] text-[var(--color-text-muted)] pr-2 font-tabular">
+          <span>Menampilkan: <strong className="text-[var(--color-text-primary)]">{displayedWeeks.length} Minggu Siklus</strong></span>
         </div>
       </div>
 
       {/* 5. Sport Type Filter Segment Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2 rounded-sm bg-[#12151D] border border-[#1F2430] font-mono text-xs">
-        <div className="flex items-center gap-1 overflow-x-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] font-mono text-xs shadow-xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
           <button
             onClick={() => setFilter("ALL")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold ${
               filter === "ALL"
-                ? "bg-[#1C212E] text-white border border-[#2D3547]"
-                : "text-[#9BA3AF] hover:text-white"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             Semua Sesi ({initialWorkouts.length})
           </button>
           <button
             onClick={() => setFilter("CYCLING")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold flex items-center gap-1.5 ${
               filter === "CYCLING"
-                ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30"
-                : "text-[#9BA3AF] hover:text-[#00F0FF]"
+                ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
             }`}
           >
             <Bike className="w-3.5 h-3.5" />
@@ -262,10 +262,10 @@ export function ScheduleTrainingHub({
           </button>
           <button
             onClick={() => setFilter("RUNNING")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold flex items-center gap-1.5 ${
               filter === "RUNNING"
-                ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/30"
-                : "text-[#9BA3AF] hover:text-[#D4FF00]"
+                ? "bg-[var(--color-running)]/15 text-[var(--color-running)] border border-[var(--color-running)]/30 font-bold shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-running)]"
             }`}
           >
             <Footprints className="w-3.5 h-3.5" />
@@ -273,21 +273,21 @@ export function ScheduleTrainingHub({
           </button>
           <button
             onClick={() => setFilter("REHAB")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold flex items-center gap-1.5 ${
               filter === "REHAB"
-                ? "bg-[#FF9500]/15 text-[#FF9500] border border-[#FF9500]/30"
-                : "text-[#9BA3AF] hover:text-[#FF9500]"
+                ? "bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30 font-bold shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-alert-amber)]"
             }`}
           >
             <Zap className="w-3.5 h-3.5" />
-            <span>Rehab & Tubuh Atas ({rehabCount})</span>
+            <span>Rehab &amp; Tubuh Atas ({rehabCount})</span>
           </button>
           <button
             onClick={() => setFilter("COMPLETED")}
-            className={`px-3 py-1.5 rounded-sm transition-all font-semibold flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-md transition-all font-semibold flex items-center gap-1.5 ${
               filter === "COMPLETED"
-                ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
-                : "text-[#9BA3AF] hover:text-[#10B981]"
+                ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
@@ -295,8 +295,8 @@ export function ScheduleTrainingHub({
           </button>
         </div>
 
-        <div className="text-[10px] text-[#5A6272] pr-2">
-          <span>Menampilkan: <strong>{filteredWorkouts.length} Sesi Terdaftar</strong></span>
+        <div className="text-[10px] text-[var(--color-text-muted)] pr-2 font-tabular">
+          <span>Menampilkan: <strong className="text-[var(--color-text-primary)]">{filteredWorkouts.length} Sesi Terdaftar</strong></span>
         </div>
       </div>
 
@@ -306,34 +306,34 @@ export function ScheduleTrainingHub({
       {viewMode === "calendar" ? (
         <div className="space-y-6 font-mono">
           {/* Day Names Header Row (Mon - Sun) */}
-          <div className="hidden md:grid grid-cols-7 gap-2 text-center text-xs font-bold text-[#9BA3AF] pb-1 border-b border-[#1F2430]">
-            <div className="text-[#C084FC] flex items-center justify-center gap-1">
-              <span>🌙 SENIN</span>
-              <span className="text-[8.5px] font-normal text-[#A855F7]">(PUASA)</span>
+          <div className="hidden md:grid grid-cols-7 gap-2 text-center text-xs font-bold text-[var(--color-text-muted)] pb-1 border-b border-[var(--color-border)]">
+            <div className="text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1">
+              <span>SENIN</span>
+              <span className="text-[8.5px] font-normal">(PUASA)</span>
             </div>
-            <div className="text-[#00F0FF] flex items-center justify-center gap-1">
+            <div className="text-[var(--color-cycling)] flex items-center justify-center gap-1">
               <span>SELASA</span>
-              <span className="text-[8.5px] font-normal text-[#00F0FF]/80">(EASY MTB)</span>
+              <span className="text-[8.5px] font-normal">(EASY MTB)</span>
             </div>
-            <div className="text-[#FF9500] flex items-center justify-center gap-1">
+            <div className="text-[var(--color-alert-amber)] flex items-center justify-center gap-1">
               <span>RABU</span>
-              <span className="text-[8.5px] font-normal text-[#FF9500]/80">(OPSI/REHAB)</span>
+              <span className="text-[8.5px] font-normal">(OPSI/REHAB)</span>
             </div>
-            <div className="text-[#C084FC] flex items-center justify-center gap-1">
-              <span>🌙 KAMIS</span>
-              <span className="text-[8.5px] font-normal text-[#A855F7]">(PUASA)</span>
+            <div className="text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1">
+              <span>KAMIS</span>
+              <span className="text-[8.5px] font-normal">(PUASA)</span>
             </div>
-            <div className="text-[#D4FF00] flex items-center justify-center gap-1">
+            <div className="text-[var(--color-cycling)] flex items-center justify-center gap-1">
               <span>JUMAT</span>
-              <span className="text-[8.5px] font-normal text-[#D4FF00]/80">(RECOVERY)</span>
+              <span className="text-[8.5px] font-normal">(RECOVERY)</span>
             </div>
-            <div className="text-[#9BA3AF] flex items-center justify-center gap-1">
+            <div className="text-[var(--color-text-secondary)] flex items-center justify-center gap-1">
               <span>SABTU</span>
-              <span className="text-[8.5px] font-normal text-[#D4FF00]/70">(BUFFER)</span>
+              <span className="text-[8.5px] font-normal">(BUFFER)</span>
             </div>
-            <div className="text-[#00F0FF] flex items-center justify-center gap-1">
+            <div className="text-[var(--color-cycling)] flex items-center justify-center gap-1">
               <span>MINGGU</span>
-              <span className="text-[8.5px] font-normal text-[#00F0FF]/80">(LONG MTB)</span>
+              <span className="text-[8.5px] font-normal">(LONG MTB)</span>
             </div>
           </div>
 
@@ -341,57 +341,57 @@ export function ScheduleTrainingHub({
           {displayedWeeks.map((week) => (
             <div
               key={week.weekNumber}
-              className={`p-3.5 rounded-sm bg-[#12151D] border space-y-3 shadow-sm transition-all ${
+              className={`p-4 rounded-xl bg-[var(--color-surface-card)] border space-y-3 shadow-xs transition-all ${
                 week.isDeload
-                  ? "border-[#A855F7]/40 bg-[#141221]"
-                  : "border-[#1F2430]"
+                  ? "border-purple-500/40 bg-purple-500/[0.03]"
+                  : "border-[var(--color-border)]"
               }`}
             >
               {/* Week Row Header */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#1F2430]/70">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`w-2 h-2 rounded-none ${
-                        week.isDeload ? "bg-[#A855F7]" : "bg-[#D4FF00]"
+                      className={`w-2.5 h-2.5 rounded-full ${
+                        week.isDeload ? "bg-purple-500" : "bg-[var(--color-cycling)]"
                       }`}
                     />
-                    <span className="text-xs font-bold uppercase text-[#F0F2F5]">
+                    <span className="text-xs font-bold uppercase text-[var(--color-text-primary)]">
                       {week.weekLabel}
                     </span>
-                    <span className="text-[10px] text-[#00F0FF] px-1.5 py-0.2 rounded-sm bg-[#00F0FF]/10 border border-[#00F0FF]/30">
+                    <span className="text-[10px] text-[var(--color-cycling)] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 font-semibold">
                       {week.focusTitle}
                     </span>
                     {week.isDeload && (
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-sm bg-[#A855F7]/20 text-[#D8B4FE] border border-[#A855F7]/40">
-                        DELOAD WEEK (SUPERKOMPENSASI)
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
+                        DELOAD WEEK
                       </span>
                     )}
                     {week.totalDistanceMeters >= week.minDistanceMeters ? (
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-sm bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30">
                         ✓ TARGET TERCAPAI ({week.targetAchievedPct}%)
                       </span>
                     ) : (
-                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-sm bg-[#FF9500]/15 text-[#FF9500] border border-[#FF9500]/30">
-                        TARGET PROGRES ({week.targetAchievedPct}%)
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30">
+                        PROGRES ({week.targetAchievedPct}%)
                       </span>
                     )}
                   </div>
 
                   {/* Weekly Mileage Target vs Scheduled Breakdown */}
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] text-[#9BA3AF]">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] text-[var(--color-text-secondary)] font-tabular">
                     <span>
-                      Target Minimal: <strong className="text-white font-bold">{week.minTargetKm} km</strong>
+                      Target Minimal: <strong className="text-[var(--color-text-primary)] font-bold">{week.minTargetKm} km</strong>
                     </span>
                     <span>•</span>
                     <span>
-                      Total Terjadwal: <strong className="text-[#D4FF00] font-bold">{(week.totalDistanceMeters / 1000).toFixed(1)} km</strong>
+                      Total Terjadwal: <strong className="text-[var(--color-text-primary)] font-bold">{(week.totalDistanceMeters / 1000).toFixed(1)} km</strong>
                     </span>
                     <span>•</span>
-                    <span className="text-[#5A6272]">
-                      (Sepeda MTB: <strong className="text-[#00F0FF]">{(week.cyclingDistanceMeters / 1000).toFixed(1)} km</strong>
+                    <span className="text-[var(--color-text-muted)]">
+                      (Sepeda MTB: <strong className="text-[var(--color-cycling)]">{(week.cyclingDistanceMeters / 1000).toFixed(1)} km</strong>
                       {week.runningDistanceMeters > 0 && (
-                        <> • Lari: <strong className="text-[#D4FF00]">{(week.runningDistanceMeters / 1000).toFixed(1)} km</strong></>
+                        <> • Lari: <strong className="text-[var(--color-running)]">{(week.runningDistanceMeters / 1000).toFixed(1)} km</strong></>
                       )})
                     </span>
                   </div>
@@ -400,26 +400,26 @@ export function ScheduleTrainingHub({
                 <div className="flex items-center gap-4 text-xs">
                   {/* Mini Progress Bar for Weekly Target Mileage */}
                   <div className="space-y-1 text-right">
-                    <div className="flex items-center justify-between gap-3 text-[9.5px] text-[#5A6272]">
+                    <div className="flex items-center justify-between gap-3 text-[9.5px] text-[var(--color-text-muted)] font-tabular">
                       <span>Progres Jarak:</span>
-                      <span className="font-bold text-white">{(week.totalDistanceMeters / 1000).toFixed(1)} / {week.minTargetKm} km</span>
+                      <span className="font-bold text-[var(--color-text-primary)]">{(week.totalDistanceMeters / 1000).toFixed(1)} / {week.minTargetKm} km</span>
                     </div>
-                    <div className="w-32 h-1.5 bg-[#090A0F] border border-[#1F2430] overflow-hidden">
+                    <div className="w-32 h-2 bg-[var(--color-surface-muted)] rounded-full border border-[var(--color-border)] overflow-hidden">
                       <div
-                        className={`h-full ${
+                        className={`h-full rounded-full ${
                           week.isDeload
-                            ? "bg-[#A855F7]"
+                            ? "bg-purple-500"
                             : week.targetAchievedPct >= 100
-                            ? "bg-[#D4FF00]"
-                            : "bg-[#00F0FF]"
+                            ? "bg-[var(--color-cycling)]"
+                            : "bg-[var(--color-endurance)]"
                         }`}
                         style={{ width: `${Math.min(100, week.targetAchievedPct)}%` }}
                       />
                     </div>
                   </div>
 
-                  <div className="text-[11px] text-[#5A6272] pl-2 border-l border-[#1F2430]">
-                    <span>Durasi: <strong className="text-[#F0F2F5]">{formatDuration(week.totalDurationSeconds)}</strong></span>
+                  <div className="text-[11px] text-[var(--color-text-muted)] pl-2 border-l border-[var(--color-border)] font-tabular">
+                    <span>Durasi: <strong className="text-[var(--color-text-primary)]">{formatDuration(week.totalDurationSeconds)}</strong></span>
                   </div>
                 </div>
               </div>
@@ -454,54 +454,54 @@ export function ScheduleTrainingHub({
               <div
                 key={wo.id}
                 onClick={() => setSelectedWorkout(wo)}
-                className={`p-4 rounded-sm bg-[#12151D] border cursor-pointer transition-all ${
+                className={`p-4 rounded-xl bg-[var(--color-surface-card)] border cursor-pointer transition-all ${
                   isCompleted
-                    ? "border-[#10B981]/40 hover:border-[#10B981]"
+                    ? "border-[var(--color-cycling)]/40 hover:border-[var(--color-cycling)]"
                     : isRun
-                    ? "border-[#D4FF00]/40 hover:border-[#D4FF00]"
+                    ? "border-[var(--color-running)]/40 hover:border-[var(--color-running)]"
                     : isCycling
-                    ? "border-[#00F0FF]/30 hover:border-[#00F0FF]"
-                    : "border-[#1F2430] hover:border-[#2D3547]"
+                    ? "border-[var(--color-cycling)]/30 hover:border-[var(--color-cycling)]"
+                    : "border-[var(--color-border)] hover:border-[var(--color-text-muted)]"
                 }`}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#1F2430]/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[var(--color-border)]">
                   <div className="flex items-center gap-2.5">
                     <span
-                      className={`px-2 py-0.5 rounded-sm text-[10px] font-bold border ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                         isRun
-                          ? "bg-[#D4FF00]/10 text-[#D4FF00] border-[#D4FF00]/30"
+                          ? "bg-[var(--color-running)]/10 text-[var(--color-running)] border-[var(--color-running)]/30"
                           : isCycling
-                          ? "bg-[#00F0FF]/10 text-[#00F0FF] border-[#00F0FF]/30"
+                          ? "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
                           : isCross
-                          ? "bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/30"
-                          : "bg-[#161922] text-[#9BA3AF] border-[#1F2430]"
+                          ? "bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border-[var(--color-alert-amber)]/30"
+                          : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border-[var(--color-border)]"
                       }`}
                     >
                       {wo.workout_category}
                     </span>
 
-                    <span className="text-xs font-bold text-[#F0F2F5]">
+                    <span className="text-xs font-bold text-[var(--color-text-primary)]">
                       {formatDate(wo.scheduled_date)}
                     </span>
 
-                    <span className="text-[10px] text-[#5A6272]">
+                    <span className="text-[10px] text-[var(--color-text-muted)]">
                       • {wo.target_intensity || "Zone 2 • RPE 3–4"}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-sm border ${
+                      className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                         isCompleted
-                          ? "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30"
-                          : "bg-[#00F0FF]/15 text-[#00F0FF] border-[#00F0FF]/30"
+                          ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
+                          : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border-[var(--color-border)]"
                       }`}
                     >
                       {isCompleted ? "VERIFIED COMPLETED" : "PLANNED"}
                     </span>
 
                     <div className="text-right">
-                      <span className="text-sm font-bold font-tabular text-[#F0F2F5]">
+                      <span className="text-sm font-bold font-tabular text-[var(--color-text-primary)]">
                         {wo.target_duration_seconds
                           ? formatDuration(wo.target_duration_seconds)
                           : wo.target_distance_meters
@@ -512,12 +512,12 @@ export function ScheduleTrainingHub({
                   </div>
                 </div>
 
-                <div className="pt-2.5 text-xs text-[#9BA3AF] space-y-1">
+                <div className="pt-2.5 text-xs text-[var(--color-text-secondary)] space-y-1">
                   <p className="leading-relaxed">{wo.description}</p>
                   {wo.target_duration_seconds && wo.target_distance_meters && (
-                    <div className="flex items-center gap-4 text-[10px] text-[#5A6272] pt-1">
-                      <span>Target Durasi: <strong>{formatDuration(wo.target_duration_seconds)}</strong></span>
-                      <span>Target Jarak Estimasi: <strong>{formatDistance(wo.target_distance_meters)}</strong></span>
+                    <div className="flex items-center gap-4 text-[10px] text-[var(--color-text-muted)] pt-1 font-tabular">
+                      <span>Target Durasi: <strong className="text-[var(--color-text-primary)]">{formatDuration(wo.target_duration_seconds)}</strong></span>
+                      <span>Target Jarak Estimasi: <strong className="text-[var(--color-text-primary)]">{formatDistance(wo.target_distance_meters)}</strong></span>
                     </div>
                   )}
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CheckSquare, RefreshCw, X, ShieldAlert, Sparkles } from "lucide-react";
+import { CheckSquare, RefreshCw, X } from "lucide-react";
 
 interface ActivityBatchActionBarProps {
   selectedIds: string[];
@@ -26,16 +26,13 @@ export function ActivityBatchActionBar({
 }: ActivityBatchActionBarProps) {
   if (selectedIds.length === 0) return null;
 
-  const isAllFilteredSelected =
-    totalFilteredCount !== undefined &&
-    totalFilteredCount > 0 &&
-    selectedIds.length >= totalFilteredCount;
-
   return (
-    <div className="p-3 sm:p-3.5 rounded-sm bg-gradient-to-r from-[#12151D] via-[#1A2234] to-[#12151D] border border-[#00F0FF]/50 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-[0_0_15px_rgba(0,240,255,0.1)] animate-in fade-in duration-150">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[#00F0FF]">
-        <div className="flex items-center gap-1.5 font-bold">
-          <CheckSquare className="w-4 h-4 text-[#00F0FF]" />
+    <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-cycling)] flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-md animate-in fade-in duration-200">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[var(--color-cycling)]">
+        <div className="flex items-center gap-2 font-bold">
+          <div className="w-6 h-6 rounded-md bg-[var(--color-cycling)]/15 flex items-center justify-center text-[var(--color-cycling)]">
+            <CheckSquare className="w-4 h-4" />
+          </div>
           <span>
             <strong className="text-sm font-tabular">{selectedIds.length}</strong> sesi terpilih
           </span>
@@ -45,20 +42,20 @@ export function ActivityBatchActionBar({
           <button
             type="button"
             onClick={onSelectAllFiltered}
-            className="text-[11px] underline text-[#9BA3AF] hover:text-[#00F0FF] transition-colors cursor-pointer"
+            className="text-[11px] underline text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)] transition-colors cursor-pointer"
           >
             Pilih semua {totalFilteredCount} sesi yang tampil
           </button>
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[#9BA3AF] text-[11px]">Ubah Cabang Massal:</span>
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className="text-[var(--color-text-secondary)] text-[11px] font-medium">Ubah Cabang Massal:</span>
         <select
           value={batchSport}
           onChange={(e) => setBatchSport(e.target.value)}
           disabled={batchLoading}
-          className="px-2.5 py-1 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-white font-mono focus:outline-none focus:border-[#00F0FF] cursor-pointer"
+          className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] font-mono focus:outline-none focus:border-[var(--color-cycling)] cursor-pointer shadow-xs"
         >
           <option value="Run">Run (Lari)</option>
           <option value="Ride">Ride (Sepeda)</option>
@@ -74,7 +71,7 @@ export function ActivityBatchActionBar({
           type="button"
           onClick={onApplyBatch}
           disabled={batchLoading}
-          className="px-3.5 py-1 rounded-sm bg-[#00F0FF] hover:bg-[#00c8d6] text-black font-bold text-xs transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-sm active:scale-[0.98]"
+          className="px-4 py-1.5 rounded-lg bg-[var(--color-cycling)] hover:opacity-90 text-white font-bold text-xs transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-xs"
         >
           {batchLoading ? (
             <>
@@ -90,9 +87,9 @@ export function ActivityBatchActionBar({
           type="button"
           onClick={onCancel}
           disabled={batchLoading}
-          className="px-2.5 py-1 rounded-sm bg-[#090A0F] hover:bg-[#1C212E] text-[#9BA3AF] hover:text-white border border-[#1F2430] transition-colors cursor-pointer flex items-center gap-1"
+          className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] transition-colors cursor-pointer flex items-center gap-1 shadow-xs"
         >
-          <X className="w-3 h-3" />
+          <X className="w-3.5 h-3.5" />
           <span>Batal</span>
         </button>
       </div>
