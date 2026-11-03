@@ -33,7 +33,7 @@ The **Personal Sports Training & Performance Platform** is an intelligent athlet
 | **FEAT-002** | Sync | Incremental Activity Ingestion | P0 (Must Have) | Ingestion of authorized activities, duplicate prevention, rate limit logging. |
 | **FEAT-003** | Planner | Weekly Training Calendar | P0 (Must Have) | 7-day grid, workout creation, target pace/distance/duration, status updates. |
 | **FEAT-004** | Compare | Planned vs Actual Engine | P0 (Must Have) | Automated heuristic matching, manual match override, delta calculations. |
-| **FEAT-005** | Analytics | Multi-Period Charts & PRs | P1 (Should Have) | Stacked volume charts, pace trends, elevation climbing, PR recognition. |
+| **FEAT-005** | Analytics | Multi-Period Charts & Multi-Sport PRs | P1 (Should Have) | Stacked volume charts, pace trends, dual-sport PR recognition (Running & Cycling) with verified activity linkage. |
 | **FEAT-006** | Goals | Goal Management | P1 (Should Have) | Distance, frequency, and pace goals with progress bars. |
 | **FEAT-007** | AI Coach | Grounded Training Insights | P1 (Should Have) | ACWR calculation, 10% volume rule warning, recovery balancing. |
 | **FEAT-008** | History | Activity Filter & Inspection | P2 (Nice to Have) | Searchable, paginated table with deep telemetry inspection. |

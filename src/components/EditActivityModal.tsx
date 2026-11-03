@@ -56,11 +56,16 @@ export function EditActivityModal({
     Math.round(Number(activity.elevation_gain_meters || 0)).toString()
   );
 
-  const sportOptions = ["Run", "Ride", "Walk", "Hike", "WeightTraining", "Workout"];
+  const [isCustomSport, setIsCustomSport] = useState(false);
+  const [customSportInput, setCustomSportInput] = useState("");
+  const sportOptions = ["Run", "Ride", "Swim", "Walk", "Hike", "WeightTraining", "Workout"];
 
   const handleOpen = () => {
     setName(activity.name);
     setSportType(activity.sport_type);
+    const isPreset = sportOptions.some((s) => s.toLowerCase() === activity.sport_type.toLowerCase());
+    setIsCustomSport(!isPreset);
+    setCustomSportInput(!isPreset ? activity.sport_type : "");
     setStartDate(toDateTimeLocal(activity.start_date));
     setDescription(activity.description || "");
     setDistanceKm((Number(activity.distance_meters || 0) / 1000).toFixed(2));
@@ -248,38 +253,61 @@ export function EditActivityModal({
               </div>
 
               {/* Sport Type */}
-              <div className="space-y-1">
-                <label className="text-[11px] uppercase font-mono text-[#9BA3AF] block font-medium">
-                  Kategori Olahraga
-                </label>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {sportOptions.map((opt) => (
-                    <button
-                      type="button"
-                      key={opt}
-                      onClick={() => setSportType(opt)}
-                      disabled={loading}
-                      className={`px-2 py-1 rounded-sm text-xs font-mono font-medium transition-all flex items-center justify-center gap-1.5 ${
-                        sportType.toLowerCase() === opt.toLowerCase()
-                          ? opt.toLowerCase() === "run"
-                            ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/40 font-bold"
-                            : "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 font-bold"
-                          : "bg-[#161922] text-[#9BA3AF] border border-[#1F2430] hover:text-white"
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-none ${
-                          opt.toLowerCase() === "run"
-                            ? "bg-[#D4FF00]"
-                            : opt.toLowerCase() === "ride"
-                            ? "bg-[#00F0FF]"
-                            : "bg-[#5A6272]"
-                        }`}
-                      />
-                      <span>{opt}</span>
-                    </button>
-                  ))}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] uppercase font-mono text-[#9BA3AF] block font-medium">
+                    Kategori Olahraga
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomSport(!isCustomSport);
+                      if (!isCustomSport && customSportInput) {
+                        setSportType(customSportInput);
+                      }
+                    }}
+                    className="text-[10px] text-[#00F0FF] hover:underline cursor-pointer"
+                  >
+                    {isCustomSport ? "← Pilih dari Preset" : "+ Cabang Kustom"}
+                  </button>
                 </div>
+
+                {!isCustomSport ? (
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {sportOptions.map((opt) => (
+                      <button
+                        type="button"
+                        key={opt}
+                        onClick={() => setSportType(opt)}
+                        disabled={loading}
+                        className={`px-2 py-1 rounded-sm text-xs font-mono font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                          sportType.toLowerCase() === opt.toLowerCase()
+                            ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 font-bold shadow-xs"
+                            : "bg-[#161922] text-[#9BA3AF] border border-[#1F2430] hover:text-white"
+                        }`}
+                      >
+                        <span>{opt}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customSportInput}
+                      onChange={(e) => {
+                        setCustomSportInput(e.target.value);
+                        setSportType(e.target.value.trim() || "Workout");
+                      }}
+                      placeholder="Masukkan nama cabang baru (misal: Trail Run, Rowing, Padel)..."
+                      className="flex-1 px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#00F0FF]/50 text-xs text-white focus:outline-none font-mono"
+                      autoFocus
+                    />
+                    <span className="px-2 py-1 rounded-sm bg-[#00F0FF]/15 text-[#00F0FF] font-bold text-[10px] border border-[#00F0FF]/30">
+                      {customSportInput.trim() || "Kustom"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Deskripsi & Catatan */}

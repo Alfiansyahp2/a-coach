@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "node scripts/seed.js",
-    "import:strava": "python scripts/process_strava_images.py && node scripts/seed_imported_activities.js"
+    "seed:personal": "node scripts/personal/seed_personal.js",
+    "import:strava": "python scripts/process_strava_images.py && node scripts/personal/seed_imported_activities.js"
   },
   "dependencies": {
     "dotenv": "^18.0.9",
@@ -16,7 +17,8 @@
     "next": "16.4.3",
     "pg": "^8.23.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

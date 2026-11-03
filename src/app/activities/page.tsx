@@ -5,6 +5,7 @@ import { getActivities, getUser, DEFAULT_USER_ID } from "@/lib/db";
 import { ActivityManagementDeck } from "@/components/ActivityManagementDeck";
 import {
   ArrowLeft,
+  Calendar,
   FolderKanban,
   ShieldCheck,
   RefreshCw,
@@ -68,11 +69,21 @@ export default function ActivitiesPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-mono">
-            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-[#5A6272]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
-              <span>PostgreSQL Synchronized</span>
-            </div>
+          <div className="flex items-center gap-2 sm:gap-3 text-xs font-mono">
+            <Link
+              href="/training"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#D4FF00] text-[#9BA3AF] hover:text-[#D4FF00] transition-colors font-medium"
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#D4FF00]" />
+              <span className="hidden sm:inline">Jadwal</span> Latihan
+            </Link>
+            <Link
+              href="/health"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#FF2A6D] text-[#9BA3AF] hover:text-[#FF2A6D] transition-colors font-medium"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#FF2A6D]" />
+              <span className="hidden sm:inline">Profil</span> Kesehatan
+            </Link>
           </div>
         </div>
       </header>
