@@ -16,6 +16,9 @@ import {
   Heart,
   Navigation,
   Search,
+  Bike,
+  Footprints,
+  Mountain,
 } from "lucide-react";
 
 interface ActivityFeedProps {
@@ -64,18 +67,18 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
   const visibleActivities = filteredActivities.slice(0, displayCount);
 
   return (
-    <div className="bg-[#12151D] border border-[#1F2430] rounded-sm p-4 space-y-3.5">
+    <div className="bg-[#12151D] border border-[#1F2430] hover:border-[#2D3547] rounded-sm p-4 space-y-3.5 transition-all duration-200 shadow-sm">
       {/* Feed Header & Filters */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#1F2430]">
         <div>
           <div className="flex items-center gap-2">
             <ActivityIcon className="w-3.5 h-3.5 text-[#00F0FF]" />
-            <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5]">
+            <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-[#F0F2F5]">
               Ingested Telemetry Stream
             </h3>
           </div>
-          <p className="text-[11px] text-[#5A6272] font-mono pt-0.5">
-            Synchronized Strava Telemetry • {activities.length} Recorded Sessions
+          <p className="text-[11px] text-[#9BA3AF] font-mono pt-0.5">
+            Synchronized Strava Telemetry • {activities.length} Sesi Terdaftar
           </p>
         </div>
 
@@ -85,7 +88,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
             onClick={() => setSelectedSport("All")}
             className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors ${
               selectedSport === "All"
-                ? "bg-[#1C212E] text-white border border-[#2D3547]"
+                ? "bg-[#1C212E] text-white border border-[#2D3547] font-bold"
                 : "text-[#9BA3AF] hover:text-white"
             }`}
           >
@@ -95,23 +98,23 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
             onClick={() => setSelectedSport("Run")}
             className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors flex items-center gap-1.5 ${
               selectedSport === "Run"
-                ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/40"
+                ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/40 font-bold"
                 : "text-[#9BA3AF] hover:text-[#D4FF00]"
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-none bg-[#D4FF00]" />
-            Run ({runsCount})
+            <Footprints className="w-3 h-3 text-[#D4FF00]" />
+            <span>Run ({runsCount})</span>
           </button>
           <button
             onClick={() => setSelectedSport("Ride")}
             className={`px-2.5 py-1 rounded-sm text-xs font-medium transition-colors flex items-center gap-1.5 ${
               selectedSport === "Ride"
-                ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40"
+                ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 font-bold"
                 : "text-[#9BA3AF] hover:text-[#00F0FF]"
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-none bg-[#00F0FF]" />
-            Ride ({ridesCount})
+            <Bike className="w-3 h-3 text-[#00F0FF]" />
+            <span>Ride ({ridesCount})</span>
           </button>
         </div>
       </div>
@@ -123,7 +126,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Filter activities by keyword (e.g. Tempo, Long Run, Recovery)..."
+          placeholder="Cari aktivitas (misal: Zone 2, Recovery, Century, Tempo)..."
           className="w-full pl-8 pr-12 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] placeholder-[#5A6272] focus:outline-none focus:border-[#00F0FF] transition-colors font-mono"
         />
         {searchQuery && (
@@ -139,12 +142,15 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       {/* Activity Cards List */}
       {visibleActivities.length === 0 ? (
         <div className="py-8 text-center text-xs text-[#5A6272] font-mono border border-dashed border-[#1F2430] rounded-sm">
-          No activities match your filter query.
+          Tidak ada aktivitas yang sesuai dengan kata kunci pencarian.
         </div>
       ) : (
         <div className="space-y-1.5">
           {visibleActivities.map((act) => {
             const isRun = act.sport_type.toLowerCase().includes("run");
+            const isRide =
+              act.sport_type.toLowerCase().includes("ride") ||
+              act.sport_type.toLowerCase().includes("cycl");
             const velocity = isRun
               ? speedMpsToPace(act.average_speed_mps)
               : speedMpsToKmh(act.average_speed_mps);
@@ -158,7 +164,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                 {/* Left: Track Visual & Details */}
                 <div className="flex items-center gap-3 min-w-0">
                   {act.raw_summary_polyline ? (
-                    <div className="w-11 h-11 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center p-1 shrink-0 overflow-hidden group-hover:border-[#2D3547] transition-colors">
+                    <div className="w-11 h-11 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center p-1 shrink-0 overflow-hidden group-hover:border-[#00F0FF]/40 transition-colors">
                       <img
                         src={act.raw_summary_polyline}
                         alt="GPS Track Route"
@@ -166,15 +172,21 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                       />
                     </div>
                   ) : (
-                    <div className="w-11 h-11 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center shrink-0">
-                      <Navigation className="w-4 h-4 text-[#5A6272]" />
+                    <div className="w-11 h-11 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center shrink-0 text-[#5A6272] group-hover:text-[#00F0FF] group-hover:border-[#00F0FF]/40 transition-colors">
+                      {isRide ? (
+                        <Bike className="w-4 h-4" />
+                      ) : isRun ? (
+                        <Footprints className="w-4 h-4" />
+                      ) : (
+                        <Navigation className="w-4 h-4" />
+                      )}
                     </div>
                   )}
 
                   <div className="space-y-0.5 min-w-0">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-[9px] uppercase font-mono px-1.5 py-0.2 rounded-sm font-semibold tracking-wider ${
+                        className={`text-[9px] uppercase font-mono px-1.5 py-0.2 rounded-xs font-bold tracking-wider ${
                           isRun
                             ? "bg-[#D4FF00]/10 text-[#D4FF00] border border-[#D4FF00]/30"
                             : "bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/30"
@@ -182,7 +194,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                       >
                         {act.sport_type}
                       </span>
-                      <h4 className="text-xs font-semibold text-[#F0F2F5] group-hover:text-white transition-colors truncate">
+                      <h4 className="text-xs font-semibold text-[#F0F2F5] group-hover:text-[#00F0FF] transition-colors truncate">
                         {act.name}
                       </h4>
                     </div>
@@ -191,13 +203,22 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                       <span>{formatDate(act.start_date)}</span>
                       <span className="text-[#3A404D]">•</span>
                       <span>{formatDuration(act.moving_time_seconds)}</span>
+                      {act.elevation_gain_meters > 0 && (
+                        <>
+                          <span className="text-[#3A404D]">•</span>
+                          <span className="text-[#f59e0b] flex items-center gap-0.5 font-tabular">
+                            <Mountain className="w-3 h-3" />
+                            {Math.round(act.elevation_gain_meters)}m
+                          </span>
+                        </>
+                      )}
                       {act.average_heartrate && (
                         <>
                           <span className="text-[#3A404D]">•</span>
                           <span className="flex items-center gap-1 text-[#FF2A6D]">
                             <Heart className="w-3 h-3 fill-current" />
-                            <span className="font-tabular">
-                              {Math.round(act.average_heartrate)}
+                            <span className="font-tabular font-bold">
+                              {Math.round(act.average_heartrate)} bpm
                             </span>
                           </span>
                         </>
@@ -221,7 +242,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                     </div>
                   </div>
 
-                  <div className="w-6 h-6 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center text-[#5A6272] group-hover:text-[#F0F2F5] group-hover:border-[#2D3547] group-hover:translate-x-0.5 transition-all">
+                  <div className="w-6 h-6 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center text-[#5A6272] group-hover:text-[#F0F2F5] group-hover:border-[#00F0FF]/50 group-hover:translate-x-0.5 transition-all">
                     <ChevronRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
@@ -235,28 +256,28 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       {filteredActivities.length > 8 && (
         <div className="pt-2 border-t border-[#1F2430] flex items-center justify-between text-xs font-mono text-[#9BA3AF]">
           <span>
-            Displaying{" "}
+            Menampilkan{" "}
             <strong className="text-white font-tabular">{visibleActivities.length}</strong>{" "}
-            of{" "}
+            dari{" "}
             <strong className="text-white font-tabular">
               {filteredActivities.length}
             </strong>{" "}
-            sessions
+            sesi telemetri
           </span>
 
           {displayCount < filteredActivities.length ? (
             <button
               onClick={() => setDisplayCount(filteredActivities.length)}
-              className="px-2.5 py-1 rounded-sm bg-[#161922] hover:bg-[#1C212E] text-white border border-[#1F2430] hover:border-[#2D3547] transition-colors text-xs font-mono"
+              className="px-2.5 py-1 rounded-sm bg-[#161922] hover:bg-[#1C212E] text-white border border-[#1F2430] hover:border-[#00F0FF]/40 transition-colors text-xs font-mono"
             >
-              Show All {filteredActivities.length}
+              Lihat Semua ({filteredActivities.length})
             </button>
           ) : (
             <button
               onClick={() => setDisplayCount(8)}
               className="px-2.5 py-1 rounded-sm bg-[#161922] hover:bg-[#1C212E] text-[#9BA3AF] hover:text-white border border-[#1F2430] transition-colors text-xs font-mono"
             >
-              Collapse to 8
+              Kecilkan ke 8 Sesi
             </button>
           )}
         </div>
