@@ -57,7 +57,7 @@ async function DashboardTelemetry() {
   const computedPrs = computePersonalRecords(activities, DEFAULT_USER_ID);
   const displayPrs =
     prs.length > 0
-      ? prs.map((p) => {
+      ? prs.map((p: any) => {
           const m = computedPrs.find((c) => c.category === p.category);
           return {
             ...p,

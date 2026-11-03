@@ -1,4 +1,7 @@
 import { pgPool, ensureLocalStore, saveLocalStore, DEFAULT_USER_ID, formatDateOnly } from './client';
+import { getAthleteAvailability } from './availabilityRepo';
+import { getAthleteEquipment } from './equipmentRepo';
+import { getTodayWellness } from './wellnessRepo';
 import {
   AthleteProfile,
   AthleteInjury,
@@ -518,13 +521,16 @@ export async function logHealthAuditTrail(
 export async function getAuthoritativeHealthContext(
   userId: string = DEFAULT_USER_ID
 ): Promise<AuthoritativeAthleteHealthContext> {
-  const [profile, injuries, painLogs, responses, assessments, readiness] = await Promise.all([
+  const [profile, injuries, painLogs, responses, assessments, readiness, availability, equipment, todayWellness] = await Promise.all([
     getAthleteProfile(userId),
     getAthleteInjuries(userId),
     getAthletePainLogs(userId, 15),
     getAthleteTrainingResponses(userId, 15),
     getAthleteMedicalAssessments(userId),
     getLatestAthleteReadiness(userId),
+    getAthleteAvailability(userId),
+    getAthleteEquipment(userId),
+    getTodayWellness(userId),
   ]);
 
   const clinicianRestrictions: string[] = [];
@@ -547,6 +553,9 @@ export async function getAuthoritativeHealthContext(
     medicalAssessments: assessments,
     latestReadiness: readiness,
     clinicianRestrictions,
+    availability,
+    equipment,
+    todayWellness,
   };
 }
 

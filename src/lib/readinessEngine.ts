@@ -18,7 +18,7 @@ import { getAnatomicalRegion } from '@/lib/anatomyUtils';
 export function evaluateTrainingReadiness(
   context: AuthoritativeAthleteHealthContext
 ): Omit<AthleteTrainingReadiness, 'id' | 'created_at'> {
-  const { injuries, recentPainLogs, recentResponses, medicalAssessments, clinicianRestrictions } = context;
+  const { injuries, recentPainLogs, recentResponses, medicalAssessments, clinicianRestrictions, todayWellness } = context;
 
   const triggerSymptoms: Array<{ region: string; description: string; severity: string }> = [];
   const sourceTelemetryRefs: Array<{ source: string; details: string }> = [];
@@ -73,6 +73,16 @@ export function evaluateTrainingReadiness(
       source: `Strava Ingested Ride (${bestRide?.distance_km.toFixed(1)} km)`,
       details: 'Empirically tolerated with 0 reported pain during, after, and no swelling.',
     });
+  }
+
+  // 3b. Evaluate Proactive Morning Daily Wellness (Point 5)
+  if (todayWellness) {
+    if (todayWellness.perceived_readiness === 'REST_RECOMMENDED' || (todayWellness.fatigue_score && todayWellness.fatigue_score >= 4)) {
+      sourceTelemetryRefs.push({
+        source: `Morning Daily Wellness (${todayWellness.logged_date})`,
+        details: `Acute systemic fatigue (Score: ${todayWellness.fatigue_score}/5, Sleep: ${todayWellness.sleep_duration_hours ?? '?'}h). Proactive recovery recommended.`,
+      });
+    }
   }
 
   // 4. Compute Sport-Specific Readiness States
