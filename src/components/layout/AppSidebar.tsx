@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
   { name: "Profil Kesehatan", href: "/health", icon: ShieldCheck, badge: "GATE" },
   { name: "Running Coach", href: "/#running-coach", icon: Footprints },
   { name: "Cycling Coach", href: "/#cycling-coach", icon: Bike },
-  { name: "Sasaran & Target", href: "/#goals", icon: Target },
+  { name: "Sasaran & Target", href: "/goals", icon: Target, badge: "TARGET" },
   { name: "Integrasi Strava", href: "/#strava-gateway", icon: Activity },
 ];
 

@@ -13,6 +13,7 @@ import {
   Calendar,
   FolderKanban,
   ShieldCheck,
+  Target,
 } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { AddActivityModal } from "@/components/AddActivityModal";
@@ -32,6 +33,7 @@ export function AppHeader({ user, healthContext }: AppHeaderProps) {
 
   const getSectionTitle = () => {
     if (pathname === "/") return "Overview Telemetri";
+    if (pathname.startsWith("/goals")) return "Sasaran & Target Progresif";
     if (pathname.startsWith("/training")) return "Kalender & Periodisasi 12-Minggu";
     if (pathname.startsWith("/health")) return "Dossier Kesehatan & Beban Sendi";
     if (pathname.startsWith("/activities")) return "Registry Aktivitas & Telemetri";
@@ -125,6 +127,14 @@ export function AppHeader({ user, healthContext }: AppHeaderProps) {
           >
             <LayoutDashboard className="w-4 h-4 text-[var(--color-cycling)]" />
             <span>Overview Dashboard</span>
+          </Link>
+          <Link
+            href="/goals"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2.5 p-2 rounded-lg text-xs font-medium hover:bg-[var(--color-surface-muted)] text-[var(--color-text-primary)]"
+          >
+            <Target className="w-4 h-4 text-[var(--color-cycling)]" />
+            <span>Sasaran &amp; Target Progresif</span>
           </Link>
           <Link
             href="/training"

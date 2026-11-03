@@ -1,5 +1,6 @@
 import React from "react";
-import { Target } from "lucide-react";
+import Link from "next/link";
+import { Target, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 import { FitnessGoal } from "@/types";
 
 interface DashboardMacroGoalsCardProps {
@@ -11,6 +12,10 @@ export function DashboardMacroGoalsCard({
 }: DashboardMacroGoalsCardProps) {
   if (goals.length === 0) return null;
 
+  const hasAchievedMilestone = goals.some(
+    (g) => g.is_achieved || Number(g.current_value) >= Number(g.target_value)
+  );
+
   return (
     <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 space-y-3.5 shadow-xs">
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
@@ -18,16 +23,46 @@ export function DashboardMacroGoalsCard({
           <Target className="w-4 h-4 text-[var(--color-cycling)]" />
           <span>Active Target Objectives (Macro Milestones)</span>
         </h3>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] font-semibold">
-          {goals.length} Sasaran
-        </span>
+        <Link
+          href="/goals"
+          className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] font-semibold hover:text-[var(--color-text-primary)] hover:border-[var(--color-cycling)]/60 transition-colors flex items-center gap-1"
+        >
+          <span>{goals.length} Sasaran</span>
+          <ArrowRight className="w-2.5 h-2.5" />
+        </Link>
       </div>
 
+      {/* Progressive Unlock Gateway Banner when milestone meets criteria */}
+      {hasAchievedMilestone && (
+        <Link
+          href="/goals"
+          className="p-3 rounded-xl bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 hover:border-[var(--color-cycling)] transition-all flex items-center justify-between gap-3 group"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-cycling)] shrink-0" />
+            <div className="min-w-0">
+              <span className="font-mono text-xs font-bold text-[var(--color-cycling)] block truncate">
+                🎯 Tonggak Sasaran Memenuhi Target!
+              </span>
+              <span className="text-[10px] text-[var(--color-text-secondary)] block truncate">
+                Target lanjutan sepeda (Gran Fondo / 200 km) telah terbuka di halaman /goals
+              </span>
+            </div>
+          </div>
+          <span className="px-2.5 py-1 rounded-lg bg-[var(--color-cycling)] text-[var(--color-canvas)] text-[10px] font-mono font-bold shrink-0 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+            <span>Buka &amp; Klaim</span>
+            <ArrowRight className="w-3 h-3" />
+          </span>
+        </Link>
+      )}
+
+      {/* Goal Items */}
       <div className="space-y-3">
         {goals.map((g) => {
           const currentNum = Number(g.current_value);
           const targetNum = Number(g.target_value);
           const pct = Math.min(100, Math.round((currentNum / targetNum) * 100));
+          const isAchieved = g.is_achieved || pct >= 100;
           const isMeters = g.goal_type === "DISTANCE_MONTHLY";
           const isKm = g.unit === "km" || isMeters;
 
@@ -53,9 +88,10 @@ export function DashboardMacroGoalsCard({
             : "var(--color-endurance)";
 
           return (
-            <div
+            <Link
               key={g.id}
-              className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)]/60 hover:border-[var(--color-border)] transition-all duration-200 space-y-2 hover:bg-[var(--color-surface-muted)]"
+              href="/goals"
+              className="block p-3.5 rounded-xl bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)]/60 hover:border-[var(--color-cycling)]/60 transition-all duration-200 space-y-2 hover:bg-[var(--color-surface-muted)] group"
             >
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-[var(--color-text-primary)] font-semibold flex items-center gap-2">
@@ -63,14 +99,23 @@ export function DashboardMacroGoalsCard({
                     className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: colorToken }}
                   />
-                  <span>{g.title}</span>
+                  <span className="group-hover:text-[var(--color-cycling)] transition-colors">
+                    {g.title}
+                  </span>
                 </span>
-                <span
-                  className="font-tabular font-extrabold"
-                  style={{ color: colorToken }}
-                >
-                  {pct}%
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {isAchieved && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[var(--color-cycling)]/20 text-[var(--color-cycling)] font-bold">
+                      TERCAPAI
+                    </span>
+                  )}
+                  <span
+                    className="font-tabular font-extrabold"
+                    style={{ color: isAchieved ? "var(--color-cycling)" : colorToken }}
+                  >
+                    {pct}%
+                  </span>
+                </div>
               </div>
 
               {/* Progress Bar */}
@@ -78,7 +123,7 @@ export function DashboardMacroGoalsCard({
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{
-                    backgroundColor: colorToken,
+                    backgroundColor: isAchieved ? "var(--color-cycling)" : colorToken,
                     width: `${pct}%`,
                   }}
                 />
@@ -94,9 +139,23 @@ export function DashboardMacroGoalsCard({
                   <strong className="text-[var(--color-text-primary)] font-tabular">{targetDisplay}</strong>
                 </span>
               </div>
-            </div>
+            </Link>
           );
         })}
+      </div>
+
+      {/* Footer Link to /goals */}
+      <div className="pt-2 border-t border-[var(--color-border)] flex items-center justify-between">
+        <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
+          Manajemen Sasaran Berjenjang
+        </span>
+        <Link
+          href="/goals"
+          className="text-xs font-mono font-bold text-[var(--color-cycling)] hover:underline flex items-center gap-1"
+        >
+          <span>Buka Sasaran &amp; Target</span>
+          <ArrowRight className="w-3 h-3" />
+        </Link>
       </div>
     </div>
   );
