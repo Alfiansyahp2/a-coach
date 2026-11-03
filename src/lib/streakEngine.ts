@@ -78,13 +78,13 @@ export function formatMonthDayYear(d: Date): string {
 
 /**
  * Maps streak duration into thermodynamic flame heat progression tiers.
- * Physics/Heat order (Least hot -> Hottest):
- * Stage 1 (1–9 minggu):   Api Merah (~800°C) - Paling tidak panas / Suhu awal
- * Stage 2 (10–19 minggu): Api Oranye (~1,100°C) - Panas sedang membara
- * Stage 3 (20–29 minggu): Api Kuning (~1,300°C) - Panas tinggi
- * Stage 4 (30–39 minggu): Api Putih (~1,500°C) - Sangat panas (White hot)
- * Stage 5 (40–49 minggu): Api Biru (~1,800°C) - Api pembakaran terpanas
- * Stage 6 (50+ minggu):   Api Ungu Plasma (>2,200°C) - Puncak suhu kosmik
+ * Physical combustion temperature stages:
+ * Stage 1 (1–9 Weeks):   Api Merah (#EF4444, ~800°C) — Initial ember / least hot.
+ * Stage 2 (10–19 Weeks): Api Oranye (#F97316, ~1,100°C) — Sustained flame / medium heat.
+ * Stage 3 (20–29 Weeks): Api Kuning Emas (#EAB308, ~1,300°C) — High heat consistency.
+ * Stage 4 (30–39 Weeks): Api Putih Terang (#F8FAFC, ~1,500°C) — White-hot intensity.
+ * Stage 5 (40–49 Weeks): Api Biru Cyan (#00F0FF, ~1,800°C) — Pure gas combustion / hottest flame.
+ * Stage 6 (50+ Weeks):   Api Ungu Plasma (#C084FC, >2,200°C) — Cosmic plasma peak.
  */
 export function getFlameHeatTier(
   streakWeeks: number,
@@ -105,7 +105,7 @@ export function getFlameHeatTier(
     };
   }
 
-  // Tahap 1: 1 - 9 Minggu (Paling tidak panas / Merah ~800°C)
+  // Stage 1 (1–9 Weeks): Api Merah (#EF4444, ~800°C) — Initial ember / least hot.
   if (streakWeeks < 10) {
     return {
       stage: 1,
@@ -113,15 +113,15 @@ export function getFlameHeatTier(
       minWeeks: 1,
       maxWeeks: 9,
       colorHex: '#EF4444',
-      glowRgba: 'rgba(239, 68, 68, 0.45)',
+      glowRgba: 'rgba(239, 68, 68, 0.5)',
       temperatureText: '~800°C',
-      description: 'Tahap 1: Api Merah (Suhu awal / paling tidak panas)',
+      description: 'Stage 1: Api Merah (~800°C) — Initial ember / least hot',
       nextTierWeeks: 10,
       weeksToNextTier: 10 - streakWeeks,
     };
   }
 
-  // Tahap 2: 10 - 19 Minggu (Oranye / Panas Sedang ~1,100°C)
+  // Stage 2 (10–19 Weeks): Api Oranye (#F97316, ~1,100°C) — Sustained flame / medium heat.
   if (streakWeeks < 20) {
     return {
       stage: 2,
@@ -129,72 +129,72 @@ export function getFlameHeatTier(
       minWeeks: 10,
       maxWeeks: 19,
       colorHex: '#F97316',
-      glowRgba: 'rgba(249, 115, 22, 0.45)',
+      glowRgba: 'rgba(249, 115, 22, 0.5)',
       temperatureText: '~1,100°C',
-      description: 'Tahap 2: Api Oranye (Panas sedang membara)',
+      description: 'Stage 2: Api Oranye (~1,100°C) — Sustained flame / medium heat',
       nextTierWeeks: 20,
       weeksToNextTier: 20 - streakWeeks,
     };
   }
 
-  // Tahap 3: 20 - 29 Minggu (Kuning Emas / Panas Tinggi ~1,300°C)
+  // Stage 3 (20–29 Weeks): Api Kuning Emas (#EAB308, ~1,300°C) — High heat consistency.
   if (streakWeeks < 30) {
     return {
       stage: 3,
-      name: 'Api Kuning',
+      name: 'Api Kuning Emas',
       minWeeks: 20,
       maxWeeks: 29,
       colorHex: '#EAB308',
-      glowRgba: 'rgba(234, 179, 8, 0.45)',
+      glowRgba: 'rgba(234, 179, 8, 0.5)',
       temperatureText: '~1,300°C',
-      description: 'Tahap 3: Api Kuning (Panas tinggi stabil)',
+      description: 'Stage 3: Api Kuning Emas (~1,300°C) — High heat consistency',
       nextTierWeeks: 30,
       weeksToNextTier: 30 - streakWeeks,
     };
   }
 
-  // Tahap 4: 30 - 39 Minggu (Putih Terang / Sangat Panas ~1,500°C)
+  // Stage 4 (30–39 Weeks): Api Putih Terang (#F8FAFC, ~1,500°C) — White-hot intensity.
   if (streakWeeks < 40) {
     return {
       stage: 4,
-      name: 'Api Putih',
+      name: 'Api Putih Terang',
       minWeeks: 30,
       maxWeeks: 39,
       colorHex: '#F8FAFC',
-      glowRgba: 'rgba(248, 250, 252, 0.5)',
+      glowRgba: 'rgba(248, 250, 252, 0.65)',
       temperatureText: '~1,500°C',
-      description: 'Tahap 4: Api Putih (Sangat panas / White hot)',
+      description: 'Stage 4: Api Putih Terang (~1,500°C) — White-hot intensity',
       nextTierWeeks: 40,
       weeksToNextTier: 40 - streakWeeks,
     };
   }
 
-  // Tahap 5: 40 - 49 Minggu (Biru Cyan / Api Terpanas Pembakaran ~1,800°C)
+  // Stage 5 (40–49 Weeks): Api Biru Cyan (#00F0FF, ~1,800°C) — Pure gas combustion / hottest flame.
   if (streakWeeks < 50) {
     return {
       stage: 5,
-      name: 'Api Biru',
+      name: 'Api Biru Cyan',
       minWeeks: 40,
       maxWeeks: 49,
       colorHex: '#00F0FF',
-      glowRgba: 'rgba(0, 240, 255, 0.5)',
+      glowRgba: 'rgba(0, 240, 255, 0.65)',
       temperatureText: '~1,800°C',
-      description: 'Tahap 5: Api Biru (Api pembakaran terpanas)',
+      description: 'Stage 5: Api Biru Cyan (~1,800°C) — Pure gas combustion / hottest flame',
       nextTierWeeks: 50,
       weeksToNextTier: 50 - streakWeeks,
     };
   }
 
-  // Tahap 6: 50+ Minggu / 1 Tahun+ (Ungu Plasma / Puncak Suhu Kosmik >2,200°C)
+  // Stage 6 (50+ Weeks / 1 Year+): Api Ungu Plasma (#C084FC, >2,200°C) — Cosmic plasma peak.
   return {
     stage: 6,
     name: 'Api Ungu Plasma',
     minWeeks: 50,
     maxWeeks: null,
     colorHex: '#C084FC',
-    glowRgba: 'rgba(192, 132, 252, 0.55)',
+    glowRgba: 'rgba(192, 132, 252, 0.7)',
     temperatureText: '>2,200°C',
-    description: 'Tahap 6: Api Ungu Plasma (Puncak suhu kosmik legendaris)',
+    description: 'Stage 6: Api Ungu Plasma (>2,200°C) — Cosmic plasma peak',
     nextTierWeeks: null,
     weeksToNextTier: null,
   };

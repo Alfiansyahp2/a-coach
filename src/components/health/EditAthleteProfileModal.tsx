@@ -155,19 +155,19 @@ export function EditAthleteProfileModal({
         try {
           medData = medText ? JSON.parse(medText) : {};
         } catch {
-          throw new Error(`Respon server tidak valid (${medRes.status})`);
+          throw new Error(`Respon server medis tidak valid (${medRes.status})`);
         }
 
         if (!medRes.ok || !medData.success) {
-          throw new Error(medData.error || medData.message || "Gagal mencatat prosedur medis.");
+          throw new Error(medData.error || medData.message || "Gagal menyimpan prosedur medis.");
         }
         medUpdated = true;
       }
 
       setSuccessMsg(
         medUpdated
-          ? "Biometrik dan catatan prosedur medis berhasil dikalibrasi! Status kesiapan latihan telah diperbarui."
-          : "Biometrik profil atlet berhasil diperbarui!"
+          ? "Biometrik & prosedur medis atlet berhasil diperbarui secara authoritative!"
+          : "Biometrik dasar atlet berhasil diperbarui!"
       );
 
       setTimeout(() => {
@@ -189,49 +189,49 @@ export function EditAthleteProfileModal({
           onClick={handleOpen}
           type="button"
           title="Klik untuk kalibrasi biometrik & status kesehatan"
-          className="group relative flex items-center gap-2.5 px-3 py-1.5 rounded-sm bg-[#12151D] hover:bg-[#161922] border border-[#1F2430] hover:border-[#00F0FF]/50 transition-all font-mono text-xs cursor-pointer shadow-sm"
+          className="group relative flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] transition-all font-mono text-xs cursor-pointer shadow-xs"
         >
           {/* Resting Heart Rate Indicator */}
           <div className="flex items-center gap-1.5">
-            <Heart className="w-3.5 h-3.5 text-[#FF2A6D] fill-[#FF2A6D]/20 animate-pulse" />
-            <span className="font-bold font-tabular text-[#FF2A6D]">
+            <Heart className="w-3.5 h-3.5 text-[var(--color-alert-red)] fill-[var(--color-alert-red)]/20 animate-pulse" />
+            <span className="font-bold font-tabular text-[var(--color-alert-red)]">
               {user?.resting_heart_rate || profile?.resting_heart_rate || 68}
             </span>
-            <span className="text-[10px] text-[#5A6272]">bpm RHR</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">bpm RHR</span>
           </div>
 
-          <span className="text-[#2D3547]">|</span>
+          <span className="text-[var(--color-border)]">|</span>
 
           {/* Height */}
           <div className="flex items-center gap-1">
-            <span className="font-bold font-tabular text-[#00F0FF]">
+            <span className="font-bold font-tabular text-[var(--color-text-primary)]">
               {user?.height_cm || profile?.height_cm || 170}
             </span>
-            <span className="text-[10px] text-[#5A6272]">cm</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">cm</span>
           </div>
 
-          <span className="text-[#2D3547]">|</span>
+          <span className="text-[var(--color-border)]">|</span>
 
           {/* Weight */}
           <div className="flex items-center gap-1">
-            <span className="font-bold font-tabular text-[#D4FF00]">
+            <span className="font-bold font-tabular text-[var(--color-text-primary)]">
               {user?.weight_kg || profile?.weight_kg || 65}
             </span>
-            <span className="text-[10px] text-[#5A6272]">kg</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">kg</span>
           </div>
 
-          <span className="text-[#2D3547]">|</span>
+          <span className="text-[var(--color-border)]">|</span>
 
           {/* BMI */}
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-[#5A6272]">BMI</span>
-            <span className="font-bold font-tabular text-[#10B981]">
+            <span className="text-[10px] text-[var(--color-text-muted)]">BMI</span>
+            <span className="font-bold font-tabular text-[var(--color-cycling)]">
               {profile?.bmi || 22.5}
             </span>
           </div>
 
           {/* Edit Pencil Icon Tooltip */}
-          <div className="ml-1 pl-1 border-l border-[#1F2430] text-[#5A6272] group-hover:text-[#00F0FF] transition-colors">
+          <div className="ml-1 pl-1 border-l border-[var(--color-border)] text-[var(--color-text-muted)] group-hover:text-[var(--color-cycling)] transition-colors">
             <Pencil className="w-3 h-3" />
           </div>
         </button>
@@ -242,72 +242,72 @@ export function EditAthleteProfileModal({
         <button
           onClick={handleOpen}
           type="button"
-          className="px-3.5 py-1.5 rounded-sm bg-[#00F0FF]/15 hover:bg-[#00F0FF]/25 border border-[#00F0FF]/40 text-[#00F0FF] text-xs font-mono font-semibold transition-colors flex items-center gap-1.5 shadow-sm"
+          className="px-3.5 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-xs"
         >
-          <Pencil className="w-3.5 h-3.5" />
-          <span>EDIT PROFIL & PROSEDUR MEDIS</span>
+          <Pencil className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+          <span>EDIT PROFIL &amp; PROSEDUR MEDIS</span>
         </button>
       )}
 
       {/* MODAL DIALOG */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
           <div
-            className="w-full max-w-2xl bg-[#0F1218] border border-[#1F2430] rounded-sm shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
+            className="w-full max-w-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="px-5 py-4 border-b border-[#1F2430] bg-[#12151D] flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-sm bg-[#00F0FF]/10 border border-[#00F0FF]/30 text-[#00F0FF]">
+                <div className="p-2 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[var(--color-cycling)]">
                   <UserIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold font-mono text-[#F0F2F5] tracking-tight flex items-center gap-2">
-                    EDIT PROFIL & PROSEDUR KESEHATAN
-                    <span className="text-[10px] px-2 py-0.5 rounded-xs bg-[#10B981]/15 border border-[#10B981]/30 text-[#10B981]">
+                  <h3 className="text-sm font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
+                    EDIT PROFIL &amp; PROSEDUR KESEHATAN
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 text-[var(--color-cycling)]">
                       Calibrated Baseline
                     </span>
                   </h3>
-                  <p className="text-[11px] text-[#9BA3AF] font-mono">
-                    Kalibrasi biometrik dasar (RHR, TB, BB) dan pencatatan riwayat prosedur medis / fisioterapi.
+                  <p className="text-[11px] text-[var(--color-text-secondary)] font-mono">
+                    Kalibrasi biometrik dasar (RHR, TB, BB) dan riwayat prosedur medis / fisioterapi.
                   </p>
                 </div>
               </div>
               <button
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="p-1.5 rounded-sm text-[#9BA3AF] hover:text-white hover:bg-[#1C212E] transition-colors"
+                className="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-card)] border border-transparent hover:border-[var(--color-border)] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Mode Tabs */}
-            <div className="px-5 pt-3 pb-2 bg-[#090A0F] border-b border-[#1F2430] flex items-center gap-2 font-mono text-xs">
+            <div className="px-5 pt-3 pb-2 bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] flex items-center gap-2 font-mono text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab("biometrics")}
-                className={`px-3 py-1.5 rounded-sm transition-all flex items-center gap-1.5 font-medium ${
+                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
                   activeTab === "biometrics"
-                    ? "bg-[#1C212E] text-[#00F0FF] border border-[#00F0FF]/40 font-bold"
-                    : "text-[#9BA3AF] hover:text-white"
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
-                <Activity className="w-3.5 h-3.5" />
-                <span>📊 Biometrik & Profil Atlet</span>
+                <Activity className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+                <span>Biometrik &amp; Profil Atlet</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("medical")}
-                className={`px-3 py-1.5 rounded-sm transition-all flex items-center gap-1.5 font-medium ${
+                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
                   activeTab === "medical"
-                    ? "bg-[#1C212E] text-[#D4FF00] border border-[#D4FF00]/40 font-bold"
-                    : "text-[#9BA3AF] hover:text-white"
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
-                <Stethoscope className="w-3.5 h-3.5" />
-                <span>🏥 Prosedur & Catatan Medis</span>
+                <Stethoscope className="w-3.5 h-3.5 text-[var(--color-running)]" />
+                <span>Prosedur &amp; Catatan Medis</span>
               </button>
             </div>
 
@@ -315,8 +315,8 @@ export function EditAthleteProfileModal({
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
               {/* Error Banner */}
               {errorMsg && (
-                <div className="p-3 rounded-sm bg-red-950/40 border border-red-500/50 flex items-start gap-2.5 text-xs text-red-300 font-mono">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-md bg-[var(--color-alert-red)]/10 border border-[var(--color-alert-red)]/30 flex items-start gap-2.5 text-xs text-[var(--color-alert-red)] font-mono">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Peringatan: </span>
                     {errorMsg}
@@ -326,8 +326,8 @@ export function EditAthleteProfileModal({
 
               {/* Success Banner */}
               {successMsg && (
-                <div className="p-3 rounded-sm bg-emerald-950/40 border border-emerald-500/50 flex items-start gap-2.5 text-xs text-emerald-300 font-mono">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-md bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 flex items-start gap-2.5 text-xs text-[var(--color-cycling)] font-mono">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Berhasil: </span>
                     {successMsg}
@@ -380,12 +380,12 @@ export function EditAthleteProfileModal({
               )}
 
               {/* Submit & Cancel Actions */}
-              <div className="pt-2 border-t border-[#1F2430] flex items-center justify-end gap-2.5 font-mono">
+              <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-2.5 font-mono">
                 <button
                   type="button"
                   onClick={handleClose}
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-sm text-xs font-medium text-[#9BA3AF] hover:text-white hover:bg-[#161922] transition-colors"
+                  className="px-4 py-2 rounded-md text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors"
                 >
                   Batal
                 </button>
@@ -393,7 +393,7 @@ export function EditAthleteProfileModal({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 rounded-sm bg-[#00F0FF] hover:bg-[#00d8e6] text-[#090A0F] text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-[#00F0FF]/10 disabled:opacity-50"
+                  className="px-5 py-2 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>

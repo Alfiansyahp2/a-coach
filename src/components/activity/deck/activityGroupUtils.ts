@@ -61,9 +61,9 @@ export function groupActivities(
       const meta = getSportMeta(act.sport_type);
       title = `Cabang Olahraga: ${meta.label.toUpperCase()}`;
       badgeColor =
-        meta.colorKey === "volt"
+        meta.colorKey === "running"
           ? "volt"
-          : meta.colorKey === "cyan"
+          : meta.colorKey === "cycling"
           ? "cyan"
           : meta.colorKey === "amber"
           ? "amber"
@@ -93,7 +93,7 @@ export function groupActivities(
         totalDistance: 0,
         totalDuration: 0,
         totalElevation: 0,
-        avgPaceOrSpeed: "",
+        avgPaceOrSpeed: "--",
       };
     }
 
@@ -103,20 +103,18 @@ export function groupActivities(
     groups[key].totalElevation += Number(act.elevation_gain_meters || 0);
   }
 
-  // Compute averages
+  // Calculate average pace / speed for each group
   for (const key of Object.keys(groups)) {
-    const g = groups[key];
-    const speedSum = g.items.reduce(
-      (acc, item) => acc + Number(item.average_speed_mps || 0),
-      0
-    );
-    const avgSpeed = g.items.length > 0 ? speedSum / g.items.length : 0;
-    const meta = getSportMeta(key);
-    g.avgPaceOrSpeed = meta.isPaceFormat
-      ? speedMpsToPace(avgSpeed)
-      : speedMpsToKmh(avgSpeed);
+    const grp = groups[key];
+    const isRunGroup = key.toLowerCase().includes("run") || grp.title.toLowerCase().includes("run");
+
+    if (grp.totalDuration > 0 && grp.totalDistance > 0) {
+      const avgMps = grp.totalDistance / grp.totalDuration;
+      grp.avgPaceOrSpeed = isRunGroup ? speedMpsToPace(avgMps) : speedMpsToKmh(avgMps);
+    } else {
+      grp.avgPaceOrSpeed = isRunGroup ? "--:-- /km" : "-- km/h";
+    }
   }
 
   return groups;
 }
-

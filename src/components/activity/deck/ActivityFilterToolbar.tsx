@@ -71,23 +71,23 @@ export function ActivityFilterToolbar({
   };
 
   return (
-    <div className="p-3.5 sm:p-4 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3 font-mono shadow-sm">
+    <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-3.5 font-mono shadow-xs">
       {/* Row 1: Grouping Tabs, Density Toggle & Collapse All */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
         {/* Group By Selector */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[#9BA3AF] flex items-center gap-1 font-bold">
-            <Layers className="w-3.5 h-3.5 text-[#00F0FF]" />
+          <span className="text-[var(--color-text-secondary)] flex items-center gap-1 font-bold">
+            <Layers className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
             <span>Kelompokkan:</span>
           </span>
-          <div className="flex items-center gap-1 p-0.5 rounded-sm bg-[#090A0F] border border-[#1F2430]">
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
             <button
               type="button"
               onClick={() => setGroupBy("sport")}
-              className={`px-2.5 py-1 rounded-sm text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                 groupBy === "sport"
-                  ? "bg-[#1C212E] text-[#00F0FF] border border-[#00F0FF]/30 shadow-xs"
-                  : "text-[#9BA3AF] hover:text-white"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
               Cabang Olahraga
@@ -95,175 +95,171 @@ export function ActivityFilterToolbar({
             <button
               type="button"
               onClick={() => setGroupBy("category")}
-              className={`px-2.5 py-1 rounded-sm text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                 groupBy === "category"
-                  ? "bg-[#1C212E] text-[#D4FF00] border border-[#D4FF00]/30 shadow-xs"
-                  : "text-[#9BA3AF] hover:text-white"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              Kategori Latihan
+              Kategori Jarak
             </button>
             <button
               type="button"
               onClick={() => setGroupBy("month")}
-              className={`px-2.5 py-1 rounded-sm text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                 groupBy === "month"
-                  ? "bg-[#1C212E] text-[#00F0FF] border border-[#00F0FF]/30 shadow-xs"
-                  : "text-[#9BA3AF] hover:text-white"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              Siklus Bulan
+              Bulan
             </button>
             <button
               type="button"
               onClick={() => setGroupBy("volume")}
-              className={`px-2.5 py-1 rounded-sm text-xs font-semibold transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                 groupBy === "volume"
-                  ? "bg-[#1C212E] text-[#FF9500] border border-[#FF9500]/30 shadow-xs"
-                  : "text-[#9BA3AF] hover:text-white"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
-              Rentang Jarak
+              Volume Jarak
             </button>
           </div>
         </div>
 
-        {/* Global Toolbar Utilities: Collapse All & Density */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Collapse/Expand All Toggle */}
-          {onToggleAllCollapsed && (
-            <button
-              type="button"
-              onClick={onToggleAllCollapsed}
-              className="px-2.5 py-1 rounded-sm bg-[#161922] border border-[#1F2430] hover:border-[#2D3547] text-[#9BA3AF] hover:text-white transition-colors flex items-center gap-1.5 text-xs font-medium cursor-pointer"
-            >
-              {isAllCollapsed ? (
-                <>
-                  <ChevronsDown className="w-3.5 h-3.5 text-[#00F0FF]" />
-                  <span>Buka Semua Grup</span>
-                </>
-              ) : (
-                <>
-                  <ChevronsUp className="w-3.5 h-3.5 text-[#9BA3AF]" />
-                  <span>Ciutkan Semua Grup</span>
-                </>
-              )}
-            </button>
-          )}
-
-          {/* Density Toggle (Detailed vs Compact) */}
+        {/* Controls: Density & Collapse All */}
+        <div className="flex items-center gap-2">
           {setDensity && (
-            <div className="flex items-center p-0.5 rounded-sm bg-[#090A0F] border border-[#1F2430]">
+            <div className="flex items-center p-0.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
               <button
                 type="button"
                 onClick={() => setDensity("detailed")}
-                title="Tampilan Rinci (dengan telemetri penuh)"
-                className={`px-2 py-1 rounded-sm text-xs transition-colors cursor-pointer flex items-center gap-1 ${
+                title="Tampilan Detail"
+                className={`p-1.5 rounded-md transition-colors ${
                   density === "detailed"
-                    ? "bg-[#1C212E] text-white border border-[#2D3547]"
-                    : "text-[#5A6272] hover:text-[#9BA3AF]"
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] shadow-xs border border-[var(--color-border)]"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
-                <LayoutList className="w-3 h-3" />
-                <span className="hidden sm:inline">Rinci</span>
+                <LayoutList className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => setDensity("compact")}
-                title="Tampilan Padat (daftar baris ringkas)"
-                className={`px-2 py-1 rounded-sm text-xs transition-colors cursor-pointer flex items-center gap-1 ${
+                title="Tampilan Rapat (Compact)"
+                className={`p-1.5 rounded-md transition-colors ${
                   density === "compact"
-                    ? "bg-[#1C212E] text-white border border-[#2D3547]"
-                    : "text-[#5A6272] hover:text-[#9BA3AF]"
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] shadow-xs border border-[var(--color-border)]"
+                    : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
-                <AlignJustify className="w-3 h-3" />
-                <span className="hidden sm:inline">Padat</span>
+                <AlignJustify className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
 
-          {/* Sort Selector */}
-          <div className="flex items-center gap-1.5 pl-1">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#FF9500]" />
-            <select
-              value={sortBy}
-              onChange={(e: any) => setSortBy(e.target.value)}
-              className="px-2.5 py-1 rounded-sm bg-[#090A0F] border border-[#1F2430] hover:border-[#2D3547] text-xs text-[#F0F2F5] font-mono focus:outline-none focus:border-[#00F0FF] cursor-pointer"
+          {onToggleAllCollapsed && (
+            <button
+              type="button"
+              onClick={onToggleAllCollapsed}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-xs font-semibold transition-colors shadow-xs"
             >
-              <option value="date_desc">Tanggal Terbaru (Newest)</option>
-              <option value="date_asc">Tanggal Terlama (Oldest)</option>
-              <option value="dist_desc">Jarak Terpanjang (Max km)</option>
-              <option value="dist_asc">Jarak Terpendek (Min km)</option>
-            </select>
-          </div>
+              {isAllCollapsed ? (
+                <>
+                  <ChevronsDown className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+                  <span>Buka Semua</span>
+                </>
+              ) : (
+                <>
+                  <ChevronsUp className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+                  <span>Tutup Semua</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Row 2: Search Input & Dynamic Sport Filter Pills */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 pt-2.5 border-t border-[#1F2430]/60">
-        {/* Search Field */}
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#5A6272]" />
+      {/* Row 2: Search Input & Sort Dropdown */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-[var(--color-border)]">
+        {/* Search Input */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
           <input
             type="text"
-            placeholder="Cari aktivitas berdasarkan judul, catatan, cabang olahraga, atau rute..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 pr-8 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] focus:border-[#00F0FF] focus:outline-none text-xs text-[#F0F2F5] placeholder-[#5A6272] font-mono transition-colors"
+            placeholder="Cari sesi berdasarkan nama, deskripsi, Strava ID..."
+            className="w-full pl-9 pr-8 py-2 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-cycling)]"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#5A6272] hover:text-white cursor-pointer"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Dynamic Sport Filter Pill Strip */}
-        <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto text-xs shrink-0">
-          <button
-            type="button"
-            onClick={() => setSportFilter("All")}
-            className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold shrink-0 ${
-              sportFilter === "All"
-                ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-xs"
-                : "bg-[#090A0F] border border-[#1F2430] text-[#9BA3AF] hover:text-white hover:border-[#2D3547]"
-            }`}
+        {/* Sort Dropdown */}
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-[var(--color-text-muted)] flex items-center gap-1">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+            <span>Urutkan:</span>
+          </span>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] font-mono focus:outline-none focus:border-[var(--color-cycling)]"
           >
-            Semua ({totalCount})
-          </button>
-
-          {availableSports.map((sport) => {
-            const meta = getSportMeta(sport.id);
-            const isSelected = sportFilter.toLowerCase() === sport.id.toLowerCase();
-
-            return (
-              <button
-                type="button"
-                key={sport.id}
-                onClick={() => setSportFilter(sport.id)}
-                className={`px-3 py-1.5 rounded-sm transition-all cursor-pointer font-bold flex items-center gap-1.5 shrink-0 border ${
-                  isSelected
-                    ? "bg-[#161922] shadow-xs"
-                    : "bg-[#090A0F] border-[#1F2430] text-[#9BA3AF] hover:bg-[#161922]"
-                }`}
-                style={{
-                  color: isSelected ? meta.accentHex : undefined,
-                  borderColor: isSelected ? `${meta.accentHex}80` : undefined,
-                }}
-              >
-                {renderSportIcon(meta.iconName, "w-3 h-3")}
-                <span>
-                  {sport.name} ({sport.count})
-                </span>
-              </button>
-            );
-          })}
+            <option value="date_desc">Tanggal Terbaru</option>
+            <option value="date_asc">Tanggal Terlama</option>
+            <option value="dist_desc">Jarak Terjauh</option>
+            <option value="dist_asc">Jarak Terpendek</option>
+          </select>
         </div>
+      </div>
+
+      {/* Row 3: Sport Filter Chips */}
+      <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[var(--color-border)]">
+        <button
+          type="button"
+          onClick={() => setSportFilter("All")}
+          className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+            sportFilter === "All"
+              ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+          }`}
+        >
+          Semua ({totalCount})
+        </button>
+
+        {availableSports.map((sp) => {
+          const meta = getSportMeta(sp.id);
+          const isSelected = sportFilter.toLowerCase() === sp.id.toLowerCase();
+          return (
+            <button
+              type="button"
+              key={sp.id}
+              onClick={() => setSportFilter(sp.id)}
+              className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                isSelected
+                  ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+              style={{
+                color: isSelected ? meta.accentHex : undefined,
+              }}
+            >
+              {renderSportIcon(meta.iconName, "w-3 h-3")}
+              <span>{sp.name}</span>
+              <span className="text-[10px] opacity-75 font-tabular font-normal">({sp.count})</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

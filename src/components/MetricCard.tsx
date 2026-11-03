@@ -10,7 +10,17 @@ interface MetricCardProps {
     isNeutral?: boolean;
     note?: string;
   };
-  accentColor?: "volt" | "cyan" | "amber" | "crimson" | "default";
+  accentColor?:
+    | "volt"
+    | "cyan"
+    | "amber"
+    | "crimson"
+    | "default"
+    | "endurance"
+    | "cycling"
+    | "running"
+    | "alert"
+    | "strava";
   subtext?: string;
   targetProgress?: {
     current: number;
@@ -28,20 +38,30 @@ export function MetricCard({
   subtext,
   targetProgress,
 }: MetricCardProps) {
-  const accentBorderClasses = {
-    volt: "border-l-2 border-l-[#D4FF00] hover:border-[#D4FF00]/40",
-    cyan: "border-l-2 border-l-[#00F0FF] hover:border-[#00F0FF]/40",
-    amber: "border-l-2 border-l-[#FF9500] hover:border-[#FF9500]/40",
-    crimson: "border-l-2 border-l-[#FF2A6D] hover:border-[#FF2A6D]/40",
-    default: "border-l-2 border-l-transparent hover:border-[#2D3547]",
+  const accentColorStyles: Record<string, string> = {
+    volt: "text-[var(--color-endurance)]",
+    endurance: "text-[var(--color-endurance)]",
+    cyan: "text-[var(--color-cycling)]",
+    cycling: "text-[var(--color-cycling)]",
+    amber: "text-[var(--color-running)]",
+    running: "text-[var(--color-running)]",
+    crimson: "text-[var(--color-alert-red)]",
+    alert: "text-[var(--color-alert-red)]",
+    strava: "text-[var(--color-strava)]",
+    default: "text-[var(--color-text-primary)]",
   };
 
-  const valueColorClasses = {
-    volt: "text-[#D4FF00]",
-    cyan: "text-[#00F0FF]",
-    amber: "text-[#FF9500]",
-    crimson: "text-[#FF2A6D]",
-    default: "text-[#F0F2F5]",
+  const accentProgressStyles: Record<string, string> = {
+    volt: "bg-[var(--color-endurance)]",
+    endurance: "bg-[var(--color-endurance)]",
+    cyan: "bg-[var(--color-cycling)]",
+    cycling: "bg-[var(--color-cycling)]",
+    amber: "bg-[var(--color-running)]",
+    running: "bg-[var(--color-running)]",
+    crimson: "bg-[var(--color-alert-red)]",
+    alert: "bg-[var(--color-alert-red)]",
+    strava: "bg-[var(--color-strava)]",
+    default: "bg-[var(--color-text-primary)]",
   };
 
   const progressPct = targetProgress
@@ -49,69 +69,66 @@ export function MetricCard({
     : null;
 
   return (
-    <div
-      className={`bg-[#12151D] border border-[#1F2430] rounded-sm p-4 transition-all duration-200 flex flex-col justify-between shadow-sm hover:shadow-md ${accentBorderClasses[accentColor]}`}
-    >
-      <div>
-        <div className="flex items-center justify-between gap-2 mb-1.5">
-          <span className="text-[10.5px] uppercase tracking-wider font-mono text-[#9BA3AF] truncate">
-            {label}
-          </span>
-          {delta && (
-            <span
-              className={`text-[9.5px] font-mono px-1.5 py-0.5 rounded-xs shrink-0 font-bold ${
-                delta.isNeutral
-                  ? "bg-[#1C212E] text-[#9BA3AF]"
-                  : delta.isPositive
-                  ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
-                  : "bg-[#FF2A6D]/15 text-[#FF2A6D] border border-[#FF2A6D]/30"
-              }`}
-            >
-              {delta.value}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-baseline gap-1.5">
+    <div className="rounded-xl p-4 bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs transition-colors duration-200 flex flex-col justify-between">
+      {/* Label and Delta */}
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-[11px] uppercase tracking-wider font-mono font-medium text-[var(--color-text-secondary)]">
+          {label}
+        </span>
+        {delta && (
           <span
-            className={`text-2xl sm:text-3xl font-black font-mono font-tabular tracking-tight ${valueColorClasses[accentColor]}`}
+            className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold ${
+              delta.isNeutral
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
+                : delta.isPositive
+                ? "bg-[var(--color-endurance)]/10 text-[var(--color-endurance)] border border-[var(--color-endurance)]/30"
+                : "bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border border-[var(--color-alert-red)]/30"
+            }`}
           >
-            {value}
+            {delta.value}
           </span>
-          {unit && (
-            <span className="text-xs font-mono text-[#9BA3AF] font-medium">
-              {unit}
-            </span>
-          )}
-        </div>
-
-        {/* Optional Target Progress Bar */}
-        {targetProgress && progressPct !== null && (
-          <div className="mt-2 space-y-1">
-            <div className="w-full h-1 bg-[#090A0F] rounded-none overflow-hidden border border-[#1F2430]">
-              <div
-                className={`h-full transition-all duration-300 ${
-                  accentColor === "volt"
-                    ? "bg-[#D4FF00]"
-                    : accentColor === "cyan"
-                    ? "bg-[#00F0FF]"
-                    : "bg-[#10B981]"
-                }`}
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-[9.5px] font-mono text-[#5A6272]">
-              <span>Progres Target</span>
-              <span className="font-tabular font-bold text-[#9BA3AF]">{progressPct}%</span>
-            </div>
-          </div>
         )}
       </div>
 
-      {(subtext || delta?.note) && (
-        <div className="mt-2 pt-2 border-t border-[#1F2430]/70 text-[10.5px] font-mono text-[#5A6272] flex items-center justify-between">
-          <span className="truncate">{subtext || delta?.note}</span>
+      {/* Main Metric Value & Unit */}
+      <div className="my-2.5 flex items-baseline gap-1.5">
+        <span
+          className={`text-2xl sm:text-3xl font-extrabold tracking-tight font-mono font-tabular ${
+            accentColorStyles[accentColor] || accentColorStyles.default
+          }`}
+        >
+          {value}
+        </span>
+        {unit && (
+          <span className="text-xs font-mono font-medium text-[var(--color-text-muted)]">
+            {unit}
+          </span>
+        )}
+      </div>
+
+      {/* Target Progress Bar */}
+      {targetProgress && progressPct !== null && (
+        <div className="space-y-1 mb-2">
+          <div className="w-full h-1.5 rounded-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                accentProgressStyles[accentColor] || accentProgressStyles.default
+              }`}
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-[10px] font-mono text-[var(--color-text-muted)]">
+            <span>Progress: {progressPct}%</span>
+            <span>Target: {targetProgress.target} km</span>
+          </div>
         </div>
+      )}
+
+      {/* Subtext Note */}
+      {subtext && (
+        <p className="text-[11px] font-mono text-[var(--color-text-muted)] line-clamp-1">
+          {subtext}
+        </p>
       )}
     </div>
   );

@@ -219,7 +219,7 @@ export function ActivityManagementDeck({
 
       {/* 4. Grouped Activity Decks */}
       {groupKeys.length === 0 ? (
-        <div className="py-16 text-center text-xs text-[#5A6272] font-mono border border-dashed border-[#1F2430] rounded-sm bg-[#12151D]">
+        <div className="py-16 text-center text-xs text-[var(--color-text-muted)] font-mono border border-dashed border-[var(--color-border)] rounded-xl bg-[var(--color-surface-card)]">
           Tidak ada aktivitas yang sesuai dengan filter pencarian atau kategori ini.
         </div>
       ) : (

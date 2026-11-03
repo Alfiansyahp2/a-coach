@@ -1,6 +1,6 @@
 /**
  * Unified Sport Type Utilities & Domain Extensibility Engine
- * Allows dynamic registration and discovery of sports disciplines across the platform.
+ * Endurance Performance Lab Design System
  */
 
 import {
@@ -10,8 +10,6 @@ import {
   Dumbbell,
   Compass,
   Activity as ActivityIcon,
-  Flame,
-  Zap,
 } from "lucide-react";
 import React from "react";
 import { Activity } from "@/types";
@@ -21,7 +19,7 @@ export interface SportMeta {
   name: string;
   label: string;
   iconName: "bike" | "footprints" | "waves" | "dumbbell" | "compass" | "activity";
-  colorKey: "cyan" | "volt" | "sky" | "amber" | "rose" | "emerald";
+  colorKey: "cycling" | "running" | "sky" | "amber" | "rose" | "endurance";
   accentHex: string;
   badgeClass: string;
   isPaceFormat: boolean; // true = mm:ss /km, false = km/h
@@ -33,9 +31,9 @@ export const PRESET_SPORTS: SportMeta[] = [
     name: "Sepeda",
     label: "Sepeda (Ride)",
     iconName: "bike",
-    colorKey: "cyan",
-    accentHex: "#00F0FF",
-    badgeClass: "bg-[#00F0FF]/15 text-[#00F0FF] border-[#00F0FF]/30",
+    colorKey: "cycling",
+    accentHex: "#4D947B",
+    badgeClass: "bg-[#4D947B]/15 text-[#4D947B] border-[#4D947B]/30",
     isPaceFormat: false,
   },
   {
@@ -43,9 +41,9 @@ export const PRESET_SPORTS: SportMeta[] = [
     name: "Lari",
     label: "Lari (Run)",
     iconName: "footprints",
-    colorKey: "volt",
-    accentHex: "#D4FF00",
-    badgeClass: "bg-[#D4FF00]/15 text-[#D4FF00] border-[#D4FF00]/30",
+    colorKey: "running",
+    accentHex: "#D98757",
+    badgeClass: "bg-[#D98757]/15 text-[#D98757] border-[#D98757]/30",
     isPaceFormat: true,
   },
   {
@@ -64,8 +62,8 @@ export const PRESET_SPORTS: SportMeta[] = [
     label: "Jalan Kaki (Walk)",
     iconName: "compass",
     colorKey: "amber",
-    accentHex: "#F59E0B",
-    badgeClass: "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30",
+    accentHex: "#E5A84B",
+    badgeClass: "bg-[#E5A84B]/15 text-[#E5A84B] border-[#E5A84B]/30",
     isPaceFormat: true,
   },
   {
@@ -74,8 +72,8 @@ export const PRESET_SPORTS: SportMeta[] = [
     label: "Hiking (Hike)",
     iconName: "compass",
     colorKey: "amber",
-    accentHex: "#F59E0B",
-    badgeClass: "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30",
+    accentHex: "#E5A84B",
+    badgeClass: "bg-[#E5A84B]/15 text-[#E5A84B] border-[#E5A84B]/30",
     isPaceFormat: true,
   },
   {
@@ -84,8 +82,8 @@ export const PRESET_SPORTS: SportMeta[] = [
     label: "Gym / Beban (WeightTraining)",
     iconName: "dumbbell",
     colorKey: "rose",
-    accentHex: "#FF2A6D",
-    badgeClass: "bg-[#FF2A6D]/15 text-[#FF2A6D] border-[#FF2A6D]/30",
+    accentHex: "#D65F58",
+    badgeClass: "bg-[#D65F58]/15 text-[#D65F58] border-[#D65F58]/30",
     isPaceFormat: false,
   },
   {
@@ -93,9 +91,9 @@ export const PRESET_SPORTS: SportMeta[] = [
     name: "Latihan Umum",
     label: "Workout / Kondisioning",
     iconName: "activity",
-    colorKey: "emerald",
-    accentHex: "#10B981",
-    badgeClass: "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30",
+    colorKey: "endurance",
+    accentHex: "#B9DC72",
+    badgeClass: "bg-[#B9DC72]/20 text-[#55781a] dark:text-[#B9DC72] border-[#B9DC72]/40",
     isPaceFormat: false,
   },
 ];
@@ -142,9 +140,9 @@ export function getSportMeta(sportType: string): SportMeta {
     name: cleanTitle,
     label: `${cleanTitle} (Kustom)`,
     iconName: "activity",
-    colorKey: "emerald",
-    accentHex: "#10B981",
-    badgeClass: "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30",
+    colorKey: "cycling",
+    accentHex: "#4D947B",
+    badgeClass: "bg-[#4D947B]/15 text-[#4D947B] border-[#4D947B]/30",
     isPaceFormat: false,
   };
 }
