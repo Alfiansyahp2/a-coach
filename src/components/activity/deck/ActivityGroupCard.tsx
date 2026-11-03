@@ -11,6 +11,9 @@ import {
   Heart,
   Bike,
   Footprints,
+  Waves,
+  Dumbbell,
+  Compass,
   Activity as ActivityIcon,
   TrendingUp,
   Clock,
@@ -26,6 +29,7 @@ import {
 import { EditActivityModal } from "@/components/EditActivityModal";
 import { ActivityGroup } from "./activityGroupUtils";
 import { Activity } from "@/types";
+import { getSportMeta } from "@/lib/sportUtils";
 
 interface ActivityGroupCardProps {
   groupKey: string;
@@ -63,6 +67,23 @@ export function ActivityGroupCard({
     }
   };
 
+  const renderSportIcon = (iconName: string, className = "w-4 h-4") => {
+    switch (iconName) {
+      case "bike":
+        return <Bike className={className} />;
+      case "footprints":
+        return <Footprints className={className} />;
+      case "waves":
+        return <Waves className={className} />;
+      case "dumbbell":
+        return <Dumbbell className={className} />;
+      case "compass":
+        return <Compass className={className} />;
+      default:
+        return <ActivityIcon className={className} />;
+    }
+  };
+
   return (
     <div className="bg-[#12151D] border border-[#1F2430] rounded-sm overflow-hidden font-mono shadow-sm transition-all">
       {/* 1. Group Section Header */}
@@ -89,7 +110,7 @@ export function ActivityGroupCard({
               type="button"
               onClick={handleToggleGroupSelection}
               title={allGroupSelected ? "Batalkan pilihan semua" : "Pilih semua dalam grup ini"}
-              className="text-[#5A6272] hover:text-[#00F0FF] transition-colors p-0.5"
+              className="text-[#5A6272] hover:text-[#00F0FF] transition-colors p-0.5 cursor-pointer"
             >
               {allGroupSelected ? (
                 <CheckSquare className="w-4 h-4 text-[#00F0FF]" />
@@ -167,8 +188,8 @@ export function ActivityGroupCard({
       {!isCollapsed && (
         <div className="divide-y divide-[#1F2430]">
           {group.items.map((act) => {
-            const isRun = act.sport_type.toLowerCase().includes("run");
-            const velocity = isRun
+            const meta = getSportMeta(act.sport_type);
+            const velocity = meta.isPaceFormat
               ? speedMpsToPace(act.average_speed_mps)
               : speedMpsToKmh(act.average_speed_mps);
             const isSelected = selectedIds.includes(act.id);
@@ -196,7 +217,7 @@ export function ActivityGroupCard({
                     <button
                       type="button"
                       onClick={() => toggleSelectOne(act.id)}
-                      className="text-[#5A6272] hover:text-[#00F0FF] transition-colors shrink-0"
+                      className="text-[#5A6272] hover:text-[#00F0FF] transition-colors shrink-0 cursor-pointer"
                     >
                       {isSelected ? (
                         <CheckSquare className="w-3.5 h-3.5 text-[#00F0FF]" />
@@ -205,12 +226,8 @@ export function ActivityGroupCard({
                       )}
                     </button>
 
-                    <div className="shrink-0">
-                      {isRun ? (
-                        <Footprints className="w-3.5 h-3.5 text-[#D4FF00]" />
-                      ) : (
-                        <Bike className="w-3.5 h-3.5 text-[#00F0FF]" />
-                      )}
+                    <div className="shrink-0" style={{ color: meta.accentHex }}>
+                      {renderSportIcon(meta.iconName, "w-3.5 h-3.5")}
                     </div>
 
                     <Link
@@ -233,9 +250,8 @@ export function ActivityGroupCard({
                       {formatDistance(act.distance_meters)}
                     </span>
                     <span
-                      className={`font-semibold font-tabular text-[11px] w-16 text-right ${
-                        isRun ? "text-[#D4FF00]" : "text-[#00F0FF]"
-                      }`}
+                      className="font-semibold font-tabular text-[11px] w-16 text-right"
+                      style={{ color: meta.accentHex }}
                     >
                       {velocity}
                     </span>
@@ -264,7 +280,7 @@ export function ActivityGroupCard({
                   <button
                     type="button"
                     onClick={() => toggleSelectOne(act.id)}
-                    className="text-[#5A6272] hover:text-[#00F0FF] transition-colors shrink-0"
+                    className="text-[#5A6272] hover:text-[#00F0FF] transition-colors shrink-0 cursor-pointer"
                   >
                     {isSelected ? (
                       <CheckSquare className="w-4 h-4 text-[#00F0FF]" />
@@ -273,7 +289,7 @@ export function ActivityGroupCard({
                     )}
                   </button>
 
-                  {/* Sport Visual Telemetry Badge (Replaces black broken square!) */}
+                  {/* Sport Visual Telemetry Badge (Dynamic & themed) */}
                   {hasValidImage ? (
                     <div className="w-10 h-10 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
                       <img
@@ -284,28 +300,26 @@ export function ActivityGroupCard({
                     </div>
                   ) : (
                     <div
-                      className={`w-10 h-10 rounded-sm border flex items-center justify-center shrink-0 shadow-xs ${
-                        isRun
-                          ? "bg-[#D4FF00]/10 border-[#D4FF00]/30 text-[#D4FF00]"
-                          : "bg-[#00F0FF]/10 border-[#00F0FF]/30 text-[#00F0FF]"
-                      }`}
+                      className="w-10 h-10 rounded-sm border flex items-center justify-center shrink-0 shadow-xs"
+                      style={{
+                        backgroundColor: `${meta.accentHex}12`,
+                        borderColor: `${meta.accentHex}40`,
+                        color: meta.accentHex,
+                      }}
                     >
-                      {isRun ? (
-                        <Footprints className="w-5 h-5" />
-                      ) : (
-                        <Bike className="w-5 h-5" />
-                      )}
+                      {renderSportIcon(meta.iconName, "w-5 h-5")}
                     </div>
                   )}
 
                   <div className="space-y-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span
-                        className={`text-[9px] uppercase px-1.5 py-0.2 rounded-xs font-bold tracking-wider ${
-                          isRun
-                            ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/30"
-                            : "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30"
-                        }`}
+                        className="text-[9px] uppercase px-1.5 py-0.2 rounded-xs font-bold tracking-wider border"
+                        style={{
+                          backgroundColor: `${meta.accentHex}15`,
+                          color: meta.accentHex,
+                          borderColor: `${meta.accentHex}30`,
+                        }}
                       >
                         {act.sport_type}
                       </span>
@@ -372,9 +386,8 @@ export function ActivityGroupCard({
                       {formatDistance(act.distance_meters)}
                     </div>
                     <div
-                      className={`text-[11px] font-semibold font-tabular ${
-                        isRun ? "text-[#D4FF00]" : "text-[#00F0FF]"
-                      }`}
+                      className="text-[11px] font-semibold font-tabular"
+                      style={{ color: meta.accentHex }}
                     >
                       {velocity}
                     </div>

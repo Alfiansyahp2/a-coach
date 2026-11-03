@@ -39,7 +39,7 @@ async function DashboardTelemetry() {
     activePlan,
   ] = await Promise.all([
     getUser(DEFAULT_USER_ID),
-    getActivities(DEFAULT_USER_ID, { limit: 50 }),
+    getActivities(DEFAULT_USER_ID),
     getScheduledWorkouts(DEFAULT_USER_ID),
     getFitnessGoals(DEFAULT_USER_ID),
     getPersonalRecords(DEFAULT_USER_ID),
@@ -182,6 +182,7 @@ async function DashboardTelemetry() {
             activePlan={activePlan}
             goals={goals}
             prs={displayPrs}
+            activities={activities}
           />
         </div>
       </section>

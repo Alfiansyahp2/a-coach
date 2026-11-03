@@ -25,7 +25,7 @@ async function HealthProfileContent() {
   const [user, healthContext, activities, dbStatus] = await Promise.all([
     getUser(DEFAULT_USER_ID),
     getAuthoritativeHealthContext(DEFAULT_USER_ID),
-    getActivities(DEFAULT_USER_ID, { limit: 10 }),
+    getActivities(DEFAULT_USER_ID, { limit: 50 }),
     getDatabaseStatus(),
   ]);
 

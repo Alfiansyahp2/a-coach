@@ -1,7 +1,19 @@
 "use client";
 
-import React from "react";
-import { Bike, Footprints, Clock, MapPin, Mountain } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Bike,
+  Footprints,
+  Waves,
+  Dumbbell,
+  Compass,
+  Activity as ActivityIcon,
+  Plus,
+  Clock,
+  MapPin,
+  Mountain,
+  Tag,
+} from "lucide-react";
 
 interface ActivityManualFormFieldsProps {
   sportType: string;
@@ -48,39 +60,110 @@ export function ActivityManualFormFields({
   calculatedSpeedKmh,
   calculatedPaceMinKm,
 }: ActivityManualFormFieldsProps) {
-  const isRun = sportType.toLowerCase().includes("run") || sportType.toLowerCase().includes("walk");
+  const [isCustomMode, setIsCustomMode] = useState<boolean>(() => {
+    const presets = ["Ride", "Run", "Swim", "Walk", "WeightTraining", "Workout"];
+    return !presets.includes(sportType);
+  });
+  const [customInput, setCustomInput] = useState<string>(() => {
+    const presets = ["Ride", "Run", "Swim", "Walk", "WeightTraining", "Workout"];
+    return presets.includes(sportType) ? "" : sportType;
+  });
+
+  const presetSports = [
+    { id: "Ride", label: "Sepeda (Ride)", icon: Bike },
+    { id: "Run", label: "Lari (Run)", icon: Footprints },
+    { id: "Swim", label: "Renang (Swim)", icon: Waves },
+    { id: "Walk", label: "Jalan (Walk)", icon: Compass },
+    { id: "WeightTraining", label: "Gym / Beban", icon: Dumbbell },
+    { id: "Workout", label: "Latihan Umum", icon: ActivityIcon },
+  ];
+
+  const handleSelectPreset = (id: string) => {
+    setIsCustomMode(false);
+    setSportType(id);
+  };
+
+  const handleEnableCustom = () => {
+    setIsCustomMode(true);
+    if (customInput.trim()) {
+      setSportType(customInput.trim());
+    }
+  };
+
+  const handleCustomInputChange = (val: string) => {
+    setCustomInput(val);
+    setSportType(val.trim() || "Workout");
+  };
 
   return (
     <div className="space-y-4 font-mono text-xs">
-      {/* Sport Type Selector */}
-      <div className="space-y-1.5">
-        <label className="block text-[10px] text-[#9BA3AF] uppercase">
-          Kategori Olahraga
-        </label>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-          {[
-            { id: "Ride", label: "Sepeda (Ride)", icon: Bike },
-            { id: "Run", label: "Lari (Run)", icon: Footprints },
-            { id: "Walk", label: "Jalan (Walk)", icon: Footprints },
-            { id: "CrossTraining", label: "Cross Training", icon: null },
-            { id: "WeightTraining", label: "Gym / Beban", icon: null },
-            { id: "Workout", label: "Lainnya", icon: null },
-          ].map((item) => (
-            <button
-              type="button"
-              key={item.id}
-              onClick={() => setSportType(item.id)}
-              className={`py-2 px-1.5 rounded-sm text-center transition-all border flex flex-col items-center justify-center gap-1 ${
-                sportType === item.id
-                  ? "bg-[#1C212E] border-[#00F0FF] text-[#00F0FF] font-bold shadow-sm"
-                  : "bg-[#12151D] border-[#1F2430] text-[#9BA3AF] hover:text-white"
-              }`}
-            >
-              {item.icon && <item.icon className="w-3.5 h-3.5" />}
-              <span className="text-[10px] truncate w-full">{item.label}</span>
-            </button>
-          ))}
+      {/* Sport Type Selector & Custom Sport Creator */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="block text-[10px] text-[#9BA3AF] uppercase">
+            Kategori Cabang Olahraga
+          </label>
+          <button
+            type="button"
+            onClick={handleEnableCustom}
+            className={`text-[10px] transition-colors flex items-center gap-1 cursor-pointer ${
+              isCustomMode
+                ? "text-[#00F0FF] font-bold"
+                : "text-[#9BA3AF] hover:text-[#00F0FF]"
+            }`}
+          >
+            <Plus className="w-3 h-3" />
+            <span>+ Cabang Kustom Baru</span>
+          </button>
         </div>
+
+        {/* Preset Sports Grid */}
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          {presetSports.map((item) => {
+            const isSelected = !isCustomMode && sportType.toLowerCase() === item.id.toLowerCase();
+            return (
+              <button
+                type="button"
+                key={item.id}
+                onClick={() => handleSelectPreset(item.id)}
+                className={`py-2 px-1.5 rounded-sm text-center transition-all border flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                  isSelected
+                    ? "bg-[#1C212E] border-[#00F0FF] text-[#00F0FF] font-bold shadow-sm ring-1 ring-[#00F0FF]/30"
+                    : "bg-[#12151D] border-[#1F2430] text-[#9BA3AF] hover:text-white hover:bg-[#161922]"
+                }`}
+              >
+                {item.icon && <item.icon className="w-3.5 h-3.5" />}
+                <span className="text-[10px] truncate w-full">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Custom Sport Input Field */}
+        {isCustomMode && (
+          <div className="p-2.5 rounded-sm bg-[#161922] border border-[#00F0FF]/40 space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-[#00F0FF] font-bold flex items-center gap-1">
+                <Tag className="w-3 h-3" />
+                Tambah &amp; Tetapkan Cabang Olahraga Baru
+              </span>
+              <span className="text-[#5A6272]">Akan terdaftar otomatis di sistem</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={customInput}
+                onChange={(e) => handleCustomInputChange(e.target.value)}
+                placeholder="Tuliskan cabang olahraga baru (contoh: Trail Run, Rowing, Padel, Yoga, Pilates...)"
+                className="flex-1 px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] focus:border-[#00F0FF] text-xs text-white placeholder-[#5A6272] focus:outline-none"
+                autoFocus
+              />
+              <span className="px-2 py-1 rounded-sm bg-[#00F0FF]/15 text-[#00F0FF] font-bold text-[10px] shrink-0 border border-[#00F0FF]/30">
+                {customInput.trim() || "Kustom"}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Name and Date */}
@@ -101,19 +184,19 @@ export function ActivityManualFormFields({
 
         <div>
           <label className="block text-[10px] text-[#9BA3AF] uppercase mb-1">
-            Waktu Mulai
+            Waktu &amp; Tanggal
           </label>
           <input
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-3 py-1.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+            className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
             required
           />
         </div>
       </div>
 
-      {/* Distance, Duration, Elevation */}
+      {/* Distance, Duration & Elevation */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Distance */}
         <div>
@@ -122,7 +205,7 @@ export function ActivityManualFormFields({
               <MapPin className="w-3 h-3" />
               <span>Jarak Tempuh</span>
             </span>
-            <span className="text-[9px] text-[#5A6272]">km</span>
+            <span className="text-[9px] text-[#5A6272]">kilometer</span>
           </label>
           <input
             type="number"
@@ -130,26 +213,25 @@ export function ActivityManualFormFields({
             min="0"
             value={distanceKm}
             onChange={(e) => setDistanceKm(e.target.value)}
-            placeholder="0.0"
+            placeholder="0.00"
             className="w-full px-3 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-tabular text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
             required
           />
         </div>
 
-        {/* Duration (Hours, Minutes, Seconds) */}
+        {/* Duration */}
         <div>
           <label className="block text-[10px] text-[#9BA3AF] uppercase mb-1 flex items-center justify-between">
             <span className="flex items-center gap-1 text-[#D4FF00]">
               <Clock className="w-3 h-3" />
-              <span>Durasi Bergerak</span>
+              <span>Durasi Waktu</span>
             </span>
-            <span className="text-[9px] text-[#5A6272]">j : m : d</span>
+            <span className="text-[9px] text-[#5A6272]">jam : mnt : dtk</span>
           </label>
           <div className="grid grid-cols-3 gap-1">
             <input
               type="number"
               min="0"
-              max="24"
               value={durationHours}
               onChange={(e) => setDurationHours(e.target.value)}
               placeholder="0h"
@@ -161,8 +243,9 @@ export function ActivityManualFormFields({
               max="59"
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(e.target.value)}
-              placeholder="45m"
+              placeholder="0m"
               className="px-2 py-2 rounded-sm bg-[#090A0F] border border-[#1F2430] text-xs font-tabular text-[#F0F2F5] text-center focus:outline-none focus:border-[#D4FF00]"
+              required
             />
             <input
               type="number"
@@ -229,4 +312,3 @@ export function ActivityManualFormFields({
     </div>
   );
 }
-

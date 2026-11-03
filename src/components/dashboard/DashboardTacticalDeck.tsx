@@ -2,16 +2,18 @@
 
 import React, { useState } from "react";
 import { Calendar, Target, Trophy, Layers, LayoutList } from "lucide-react";
-import { ScheduledWorkout, TrainingPlan, FitnessGoal, PersonalRecord } from "@/types";
+import { ScheduledWorkout, TrainingPlan, FitnessGoal, PersonalRecord, Activity } from "@/types";
 import { DashboardScheduledWorkoutsCard } from "./DashboardScheduledWorkoutsCard";
 import { DashboardMacroGoalsCard } from "./DashboardMacroGoalsCard";
 import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
+import { WeeklyStreakCard } from "./WeeklyStreakCard";
 
 interface DashboardTacticalDeckProps {
   workouts: ScheduledWorkout[];
   activePlan: TrainingPlan | null;
   goals: FitnessGoal[];
   prs: PersonalRecord[];
+  activities?: Activity[];
 }
 
 export function DashboardTacticalDeck({
@@ -19,12 +21,16 @@ export function DashboardTacticalDeck({
   activePlan,
   goals,
   prs,
+  activities = [],
 }: DashboardTacticalDeckProps) {
   const [activeTab, setActiveTab] = useState<"workouts" | "goals" | "prs" | "all">("workouts");
 
   return (
     <div className="space-y-3">
-      {/* Tactical Deck Mode & Tab Switcher */}
+      {/* 1. Weekly Training Streak & Flame Retention Deck (Positioned directly ABOVE Image 2) */}
+      <WeeklyStreakCard activities={activities} workouts={workouts} />
+
+      {/* 2. Tactical Deck Mode & Tab Switcher */}
       <div className="p-2.5 bg-[#12151D] border border-[#1F2430] rounded-sm flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
         <div className="flex items-center gap-1.5">
           <span className="text-[#9BA3AF] text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">
@@ -120,4 +126,3 @@ export function DashboardTacticalDeck({
     </div>
   );
 }
-

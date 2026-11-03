@@ -36,6 +36,7 @@ export function AthleteHealthHub({
   >("overview");
   const [isCheckinOpen, setIsCheckinOpen] = useState(false);
   const [isNewInjuryOpen, setIsNewInjuryOpen] = useState(false);
+  const [prefillRegion, setPrefillRegion] = useState<string | undefined>(undefined);
 
   const { profile, injuries, recentPainLogs, recentResponses, latestReadiness } = context;
 
@@ -84,9 +85,14 @@ export function AthleteHealthHub({
       {/* Expandable Form: Add New Injury */}
       {isNewInjuryOpen && (
         <NewInjuryForm
-          onClose={() => setIsNewInjuryOpen(false)}
+          initialRegionName={prefillRegion}
+          onClose={() => {
+            setIsNewInjuryOpen(false);
+            setPrefillRegion(undefined);
+          }}
           onSuccess={() => {
             setIsNewInjuryOpen(false);
+            setPrefillRegion(undefined);
             window.location.reload();
           }}
         />
@@ -168,7 +174,16 @@ export function AthleteHealthHub({
       {activeTab === "overview" && (
         <ClinicalOverviewTab profile={profile} context={context} />
       )}
-      {activeTab === "injuries" && <InjuryDossierTab injuries={injuries} />}
+      {activeTab === "injuries" && (
+        <InjuryDossierTab
+          injuries={injuries}
+          onOpenNewInjury={(regionName) => {
+            setPrefillRegion(regionName);
+            setIsNewInjuryOpen(true);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+        />
+      )}
       {activeTab === "pain_logs" && (
         <PainLogsTab recentPainLogs={recentPainLogs} />
       )}

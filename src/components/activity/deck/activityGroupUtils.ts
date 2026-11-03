@@ -1,5 +1,6 @@
 import { Activity } from "@/types";
 import { speedMpsToPace, speedMpsToKmh } from "@/lib/formatters";
+import { getSportMeta } from "@/lib/sportUtils";
 
 export type GroupByOption = "sport" | "category" | "month" | "volume";
 
@@ -57,8 +58,16 @@ export function groupActivities(
 
     if (groupBy === "sport") {
       key = act.sport_type;
-      title = `Cabang Olahraga: ${act.sport_type.toUpperCase()}`;
-      badgeColor = act.sport_type.toLowerCase().includes("run") ? "volt" : "cyan";
+      const meta = getSportMeta(act.sport_type);
+      title = `Cabang Olahraga: ${meta.label.toUpperCase()}`;
+      badgeColor =
+        meta.colorKey === "volt"
+          ? "volt"
+          : meta.colorKey === "cyan"
+          ? "cyan"
+          : meta.colorKey === "amber"
+          ? "amber"
+          : "default";
     } else if (groupBy === "category") {
       const cat = inferCategory(act.name, act.description);
       key = cat;
@@ -102,8 +111,8 @@ export function groupActivities(
       0
     );
     const avgSpeed = g.items.length > 0 ? speedSum / g.items.length : 0;
-    const isRun = key.toLowerCase().includes("run");
-    g.avgPaceOrSpeed = isRun
+    const meta = getSportMeta(key);
+    g.avgPaceOrSpeed = meta.isPaceFormat
       ? speedMpsToPace(avgSpeed)
       : speedMpsToKmh(avgSpeed);
   }
