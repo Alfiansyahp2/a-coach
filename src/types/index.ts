@@ -82,6 +82,7 @@ export interface Activity {
 export interface TrainingPlan {
   id: string;
   user_id: string;
+  goal_id?: string | null;
   title: string;
   description?: string | null;
   start_date: string; // YYYY-MM-DD
@@ -103,6 +104,8 @@ export interface ScheduledWorkout {
   target_intensity?: string | null; // 'Zone 2', 'RPE 7/10', 'Threshold'
   description?: string | null;
   status: WorkoutStatus;
+  is_key_session?: boolean;
+  milestone_target_km?: number | null;
   created_at: string;
   updated_at: string;
 }

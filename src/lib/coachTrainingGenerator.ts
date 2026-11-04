@@ -7,7 +7,9 @@ import {
   saveWorkoutActivityMatch,
   deleteTrainingPlansByUserId,
   deleteScheduledWorkoutsByUserId,
+  getFitnessGoals,
   upsertFitnessGoal,
+  setPrimaryFitnessGoal,
 } from './db';
 import {
   Activity,
@@ -16,17 +18,24 @@ import {
   FitnessGoal,
 } from '@/types';
 import {
-  getPrescribed12WeekWorkouts,
   getHistoricalBenchmarkWorkouts,
 } from './training/workoutTemplates';
+import {
+  getGoalMetadata,
+  generateWorkoutsForGoal,
+  GoalArchetype,
+} from './training/generators';
 
 export interface GeneratedCoachTrainingResult {
   plan: TrainingPlan;
   workouts: ScheduledWorkout[];
   goals: FitnessGoal[];
   matchedCount: number;
+  archetype: GoalArchetype;
   summary: {
-    cyclingTargetKm: number;
+    primaryGoalTitle: string;
+    targetValue: number;
+    targetUnit: string;
     runningStatus: string;
     weeklyFrequency: number;
     roadTo100kProgressPct: number;
@@ -35,30 +44,29 @@ export interface GeneratedCoachTrainingResult {
 }
 
 /**
- * Generates an end-to-end 12-Week Zone 2 Endurance Program (3 Months)
- * calibrated from the athlete's real database records & clinical consultation parameters:
- * - Equipment: Mountain Bike (MTB) with wide tires; pace secondary to Zone 2 duration
- * - Intensity Method: RPE 3–4 / 10 & Talk Test (full continuous sentences without breathlessness)
- * - Available session duration: 30–60 minutes
- * - Fasting schedule: Senin & Kamis strictly Puasa Sunnah (full rest & glycogen replenishment)
- * - Active training slots: Selasa/Rabu (Session 1), Jumat (Session 2), Minggu (Session 3)
- * - Saturday: Rest / Optional Buffer slot for weekly minimum volume
- * - Injury considerations: Right ankle sprain history & bilateral knee soreness
- * - Periodization: 3 Phases (Phase 1 Foundation W1–4, Phase 2 Development W5–8, Phase 3 Specificity W9–12) with Deload on W8 and W12
+ * Generates an end-to-end 12-Week Adaptive Endurance Program
+ * dynamically calibrated from the athlete's selected primary goal:
+ * - Goal-Driven Architecture: Workout categories, volumes, and progressions differ per goal
+ * - Supercompensation Intervals: Strict rest & glycogen replenishment on Senin & Kamis (Puasa Sunnah)
+ * - Safe Periodization: Tuesday Easy/Opening, Friday Mobility/Rehab, Sunday Key Milestone
+ * - 3:1 Loading to Deload Cycles (Weeks 4, 8, 12)
+ * - Proactive health protection based on athlete ankle & knee clinical state
  */
 export async function generateCoachTrainingFromDatabase(
-  userId: string = DEFAULT_USER_ID
+  userId: string = DEFAULT_USER_ID,
+  targetGoalId?: string
 ): Promise<GeneratedCoachTrainingResult> {
   // 1. Fetch real grounded database assets
-  const [activities, healthContext] = await Promise.all([
+  const [activities, healthContext, existingGoals] = await Promise.all([
     getActivities(userId, { limit: 100 }),
     getAuthoritativeHealthContext(userId),
+    getFitnessGoals(userId),
   ]);
 
   const rides = activities.filter((a) => a.sport_type.toLowerCase().includes('ride'));
   const runs = activities.filter((a) => a.sport_type.toLowerCase().includes('run'));
 
-  // Max recorded metrics from activities
+  // Max recorded metrics from activities (Peak Single Session)
   const maxRideMeters = Math.max(0, ...rides.map((r) => Number(r.distance_meters || 0)));
   const maxRideKm = Math.round((maxRideMeters / 1000) * 10) / 10; // e.g. 56.1 km
   const maxRunMeters = Math.max(0, ...runs.map((r) => Number(r.distance_meters || 0)));
@@ -71,49 +79,46 @@ export async function generateCoachTrainingFromDatabase(
 
   const weeklyTrainingDays = 3;
 
-  // 2. Refresh Fitness Goals directly connected to the athlete's 12-week roadmap
-  // Goal A: First 100 km Century Ride (MTB Zone 2)
+  // 2. Ensure foundational core goals exist with safe defaults
   const goal100k = await upsertFitnessGoal({
     id: '00000000-0000-0000-0000-000000000031',
     user_id: userId,
     title: 'First 100 km Century Ride (MTB Zone 2)',
     goal_type: 'CUSTOM',
     sport_type: 'Ride',
-    priority: 1,
+    priority: targetGoalId === '00000000-0000-0000-0000-000000000031' ? 1 : 1,
     target_event_name: 'Century Ride 100K MTB',
-    target_value: 100, // 100 km
-    current_value: maxRideKm > 0 ? maxRideKm : 56.1, // 56.1 km validated baseline
+    target_value: 100, // 100 km single session
+    current_value: maxRideKm > 0 ? maxRideKm : 56.1, // 56.1 km single session baseline
     start_date: '2026-09-01',
     target_date: '2027-03-31',
     is_achieved: maxRideKm >= 100,
     unit: 'km',
   });
 
-  // Goal B: Marathon Return-to-Run Pathway (42.2 km)
   const goalMarathon = await upsertFitnessGoal({
     id: '00000000-0000-0000-0000-000000000032',
     user_id: userId,
     title: 'Marathon Pathway (42.2K) • Return-to-Run (Zone 2)',
     goal_type: 'CUSTOM',
     sport_type: 'Run',
-    priority: 2,
+    priority: targetGoalId === '00000000-0000-0000-0000-000000000032' ? 1 : 2,
     target_event_name: 'Marathon Return-to-Run (42.2K)',
-    target_value: 42.2,
-    current_value: maxRunKm > 0 ? maxRunKm : 12.3, // 12.3 km historical baseline
+    target_value: 42.2, // 42.2 km single session
+    current_value: maxRunKm > 0 ? maxRunKm : 12.3, // 12.3 km single session baseline
     start_date: '2026-09-01',
     target_date: '2027-04-30',
-    is_achieved: false,
+    is_achieved: maxRunKm >= 42.2,
     unit: 'km',
   });
 
-  // Goal C: Weekly Cadence Compliance (3 Sessions / Week)
   const goalFrequency = await upsertFitnessGoal({
     id: '00000000-0000-0000-0000-000000000033',
     user_id: userId,
     title: 'Konsistensi 3 Sesi Mingguan (Non-Puasa)',
     goal_type: 'FREQUENCY_WEEKLY',
     sport_type: 'All',
-    priority: 1,
+    priority: targetGoalId === '00000000-0000-0000-0000-000000000033' ? 1 : 2,
     target_event_name: 'Weekly Cadence 3x',
     target_value: 3,
     current_value: 3,
@@ -123,7 +128,6 @@ export async function generateCoachTrainingFromDatabase(
     unit: 'sessions',
   });
 
-  // Goal D: 12-Week Total Mileage Accumulation
   const goalMileage = await upsertFitnessGoal({
     id: '00000000-0000-0000-0000-000000000034',
     user_id: userId,
@@ -140,34 +144,56 @@ export async function generateCoachTrainingFromDatabase(
     unit: 'km',
   });
 
-  // 3. Clean existing plans and workouts for fresh authoritative generation
+  // 3. Determine the Active Primary Goal
+  let allGoals = [goal100k, goalMarathon, goalFrequency, goalMileage];
+  if (targetGoalId) {
+    const updated = await setPrimaryFitnessGoal(userId, targetGoalId);
+    if (updated) {
+      allGoals = allGoals.map((g) => (g.id === targetGoalId ? updated : { ...g, priority: 2 }));
+    }
+  }
+
+  // Refetch fresh goals from DB to include any user custom goals
+  const freshGoals = await getFitnessGoals(userId);
+  const activeGoal =
+    (targetGoalId ? freshGoals.find((g) => g.id === targetGoalId) : null) ||
+    freshGoals.find((g) => g.priority === 1) ||
+    goal100k;
+
+  const metadata = getGoalMetadata(activeGoal);
+
+  // 4. Clean existing plans and workouts for fresh authoritative generation
   await deleteScheduledWorkoutsByUserId(userId);
   await deleteTrainingPlansByUserId(userId);
 
-  // 4. Create authoritative 12-Week Training Plan
+  // 5. Create authoritative 12-Week Training Plan linked to the chosen goal
   const planStartDate = '2026-11-02';
   const planEndDate = '2027-01-24';
 
   const plan = await createTrainingPlan({
     user_id: userId,
-    title: '12-Week Zone 2 Endurance Program (Road to 100km Century & Marathon Pathway)',
-    description:
-      'Program periodisasi aerobik 12 minggu (3 bulan) berbasis Zone 2 (RPE 3–4 / Talk Test) untuk sepeda MTB dan lari bertahap. Dikalibrasi presisi dengan rutinitas puasa Senin & Kamis (wajib istirahat penuh), slot latihan aktif Selasa/Rabu, Jumat, dan Minggu, serta perlindungan ketat terhadap riwayat keluhan pergelangan kaki kanan dan kedua lutut.',
+    goal_id: activeGoal.id,
+    title: metadata.planTitle,
+    description: metadata.planDescription,
     start_date: planStartDate,
     end_date: planEndDate,
     is_active: true,
   });
 
-  // 5. Generate 12-Week Workouts and historical benchmarks from templates
-  const workoutsToCreate = getPrescribed12WeekWorkouts(userId, plan.id);
+  // 6. Generate 12-Week Workouts customized to the active goal archetype
+  const workoutsToCreate = generateWorkoutsForGoal(activeGoal, userId, plan.id);
   const historicalMatchedWorkouts = getHistoricalBenchmarkWorkouts(userId, plan.id, activities);
 
-  // Insert all workouts into DB
+  // 7. Insert all workouts into DB
   const createdWorkouts: ScheduledWorkout[] = [];
 
   // Historical completed workouts with correlation
   for (const item of historicalMatchedWorkouts) {
-    const created = await createScheduledWorkout(item.workout);
+    const created = await createScheduledWorkout({
+      ...item.workout,
+      is_key_session: false,
+      milestone_target_km: null,
+    });
     createdWorkouts.push(created);
 
     const act = activities.find((a) => a.id === item.matchActivityId);
@@ -188,7 +214,7 @@ export async function generateCoachTrainingFromDatabase(
     }
   }
 
-  // Future planned workouts
+  // Future planned workouts (36 periodized sessions with key milestone flags)
   for (const item of workoutsToCreate) {
     const created = await createScheduledWorkout(item);
     createdWorkouts.push(created);
@@ -200,10 +226,13 @@ export async function generateCoachTrainingFromDatabase(
   return {
     plan,
     workouts: createdWorkouts,
-    goals: [goal100k, goalMarathon, goalFrequency, goalMileage],
+    goals: freshGoals.length > 0 ? freshGoals : allGoals,
     matchedCount: historicalMatchedWorkouts.length,
+    archetype: metadata.archetype,
     summary: {
-      cyclingTargetKm: 100,
+      primaryGoalTitle: activeGoal.title,
+      targetValue: activeGoal.target_value,
+      targetUnit: activeGoal.unit,
       runningStatus: isRunningOnHold
         ? 'Restricted / Return-to-Run Protocol (Pending Clearance)'
         : 'Active Progression',

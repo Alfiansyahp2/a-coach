@@ -38,6 +38,7 @@ interface ScheduleTrainingHubProps {
 export function ScheduleTrainingHub({
   initialPlan,
   initialWorkouts,
+  initialGoals,
   matches,
 }: ScheduleTrainingHubProps) {
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
@@ -177,7 +178,7 @@ export function ScheduleTrainingHub({
       )}
 
       {/* 2. Macro Objectives Progress Bar Strip */}
-      <MacroObjectivesStrip />
+      <MacroObjectivesStrip goals={initialGoals} plan={initialPlan} />
 
       {/* 3. Zone 2 Endurance Pacing & Parameter Guide Banner */}
       <Zone2PacingGuidelinePanel />

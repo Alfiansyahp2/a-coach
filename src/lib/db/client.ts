@@ -42,7 +42,7 @@ export function formatDateOnly(val: any): string {
 export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // Detect whether PostgreSQL is enabled
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:admin123@localhost:5432/sport_training';
 let poolInstance: Pool | null = null;
 
 if (databaseUrl && databaseUrl.trim().length > 0) {

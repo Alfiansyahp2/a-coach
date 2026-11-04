@@ -101,6 +101,13 @@ export function CalendarDayCard({
                   )}
                 </div>
 
+                {w.is_key_session && (
+                  <div className="flex items-center gap-1 text-[8px] font-bold text-[var(--color-endurance)] bg-[var(--color-endurance)]/10 px-1.5 py-0.5 rounded border border-[var(--color-endurance)]/25">
+                    <Zap className="w-2.5 h-2.5 text-[var(--color-endurance)] shrink-0" />
+                    <span className="truncate">TONGGAK MINGGUAN {w.milestone_target_km ? `(${w.milestone_target_km} KM)` : ''}</span>
+                  </div>
+                )}
+
                 <div className="font-bold text-[11px] text-[var(--color-text-primary)] leading-tight font-tabular">
                   {w.target_duration_seconds
                     ? formatDuration(w.target_duration_seconds)

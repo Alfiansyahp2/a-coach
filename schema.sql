@@ -78,6 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_activities_sport ON activities(user_id, sport_typ
 CREATE TABLE IF NOT EXISTS training_plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    goal_id UUID REFERENCES fitness_goals(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     start_date DATE NOT NULL,
@@ -99,6 +100,8 @@ CREATE TABLE IF NOT EXISTS scheduled_workouts (
     target_intensity VARCHAR(50),
     description TEXT,
     status VARCHAR(20) DEFAULT 'PLANNED' NOT NULL,
+    is_key_session BOOLEAN DEFAULT FALSE NOT NULL,
+    milestone_target_km NUMERIC(10, 2),
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );

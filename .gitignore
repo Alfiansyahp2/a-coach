@@ -50,3 +50,5 @@ next-env.d.ts
 /data/*.png
 /data/*.jpg
 /data/*.jpeg
+
+/.data/

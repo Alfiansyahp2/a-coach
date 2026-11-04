@@ -112,6 +112,8 @@ export function GoalsManagementHub({
   const [filterSport, setFilterSport] = useState<"ALL" | "RIDE" | "RUN" | "FREQUENCY" | "ACHIEVED">("ALL");
   const [simulationMode100k, setSimulationMode100k] = useState(false);
   const [activatedSuccessId, setActivatedSuccessId] = useState<string | null>(null);
+  const [isActivatingGoalId, setIsActivatingGoalId] = useState<string | null>(null);
+  const [bannerMessage, setBannerMessage] = useState<{ title: string; desc: string } | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
   // New Custom Goal Form State
@@ -177,38 +179,94 @@ export function GoalsManagementHub({
     });
   }, [goals, filterSport, simulationMode100k, century100kGoal]);
 
-  // Activate a progressive template target
-  const handleActivateProgression = (template: ProgressionTemplate) => {
-    const existing = goals.find((g) => g.title === template.title);
-    if (existing) {
-      setActivatedSuccessId(existing.id);
-      setTimeout(() => setActivatedSuccessId(null), 3500);
-      return;
+    // Set as Primary Goal and regenerate 12-week training plan
+  const handleSetPrimaryGoal = async (goalId: string, title: string) => {
+    setIsActivatingGoalId(goalId);
+    try {
+      const res = await fetch("/api/goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "set_primary", goal_id: goalId }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal mengalibrasi target utama");
+      }
+
+      setGoals((prev) =>
+        prev.map((g) => (g.id === goalId ? { ...g, priority: 1 } : { ...g, priority: 2 }))
+      );
+      setActivatedSuccessId(goalId);
+      setBannerMessage({
+        title: `Sasaran Utama Diaktifkan: "${title}"`,
+        desc: "Rencana latihan 12-minggu dan selang waktu pemulihan telah otomatis disesuaikan khusus untuk mencapai target ini.",
+      });
+    } catch (err: any) {
+      console.error("Error setting primary goal:", err);
+      alert(`Gagal mengaktifkan target: ${err.message}`);
+    } finally {
+      setIsActivatingGoalId(null);
     }
+  };
 
-    const todayStr = new Date().toISOString().split("T")[0];
-    const targetDate = new Date(Date.now() + template.durationWeeks * 7 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0];
+  // Activate a progressive template target
+  const handleActivateProgression = async (template: ProgressionTemplate) => {
+    setIsActivatingGoalId(template.id);
+    try {
+      const todayStr = new Date().toISOString().split("T")[0];
+      const targetDate = new Date(Date.now() + template.durationWeeks * 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0];
 
-    const newGoal: FitnessGoal = {
-      id: `prog-${Date.now()}`,
-      user_id: "00000000-0000-0000-0000-000000000001",
-      title: template.title,
-      goal_type: "CUSTOM",
-      target_value: template.targetValue,
-      current_value: template.id.includes("next-100") ? 100 : 0,
-      start_date: todayStr,
-      target_date: targetDate,
-      is_achieved: false,
-      unit: template.unit,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+      const res = await fetch("/api/goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          goal: {
+            title: template.title,
+            goal_type: "CUSTOM",
+            sport_type: template.sport,
+            priority: 1,
+            target_event_name: template.focusArea,
+            target_value: template.targetValue,
+            current_value: template.id.includes("next-100") ? 100 : 0,
+            start_date: todayStr,
+            target_date: targetDate,
+            is_achieved: false,
+            unit: template.unit,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Gagal membuat target baru");
+      }
 
-    setGoals((prev) => [newGoal, ...prev]);
-    setActivatedSuccessId(newGoal.id);
-    setTimeout(() => setActivatedSuccessId(null), 4000);
+      const createdGoal: FitnessGoal = data.data;
+
+      // Automatically calibrate 12-week plan for this new goal
+      await fetch("/api/training/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal_id: createdGoal.id }),
+      });
+
+      setGoals((prev) => [
+        createdGoal,
+        ...prev.map((g) => ({ ...g, priority: 2 })),
+      ]);
+      setActivatedSuccessId(createdGoal.id);
+      setBannerMessage({
+        title: `Target Baru Terbuka & Aktif: "${createdGoal.title}"`,
+        desc: "Kalender latihan 12-minggu telah otomatis dikalibrasi ulang khusus untuk target ini.",
+      });
+    } catch (err: any) {
+      console.error("Error activating progression template:", err);
+      alert(`Gagal: ${err.message}`);
+    } finally {
+      setIsActivatingGoalId(null);
+    }
   };
 
   // Add custom goal
@@ -682,6 +740,48 @@ export function GoalsManagementHub({
                   </span>
                 </div>
               )}
+
+              {/* Target Controller Action Bar */}
+              <div className="pt-3 border-t border-[var(--color-border)]/60 flex items-center justify-between gap-2">
+                {g.priority === 1 ? (
+                  <div className="flex items-center justify-between w-full">
+                    <span className="px-2.5 py-1 rounded-lg bg-[var(--color-endurance)]/15 border border-[var(--color-endurance)]/30 text-[var(--color-endurance)] font-mono text-[11px] font-bold flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>★ SASARAN UTAMA AKTIF</span>
+                    </span>
+                    <Link
+                      href="/training"
+                      className="px-3 py-1.5 rounded-lg bg-[var(--color-endurance)] hover:opacity-90 text-[var(--color-canvas)] text-xs font-mono font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                    >
+                      <span>Lihat Kalender</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
+                      Prioritas Sekunder
+                    </span>
+                    <button
+                      onClick={() => handleSetPrimaryGoal(g.id, g.title)}
+                      disabled={isActivatingGoalId === g.id}
+                      className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-endurance)] text-xs font-mono font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95 disabled:opacity-50"
+                    >
+                      {isActivatingGoalId === g.id ? (
+                        <>
+                          <RotateCcw className="w-3.5 h-3.5 animate-spin text-[var(--color-endurance)]" />
+                          <span>Mengalibrasi...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Target className="w-3.5 h-3.5 text-[var(--color-endurance)]" />
+                          <span>🎯 Jadikan Sasaran Utama</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

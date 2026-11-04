@@ -28,6 +28,8 @@ Direktori ini berisi skrip SQL DDL dan runner migrasi aman dengan pengecekan pra
 |---|---|---|
 | `001_athlete_data_center.sql` | DDL migrasi non-destruktif untuk `athlete_availability`, `athlete_equipment`, `athlete_daily_wellness`, ekstensi kolom `fitness_goals`, dan relasi `pain_log_id`. | Dieksekusi otomatis oleh `run_migration_001.cjs`. |
 | `run_migration_001.cjs` | Transaction runner migrasi 001 dengan validasi 34 aktivitas PostgreSQL utuh dan verifikasi pasca-migrasi. | `node scripts/migrations/run_migration_001.cjs` |
+| `002_goal_driven_training.sql` | DDL migrasi penambahan `goal_id` pada `training_plans` dan flag `is_key_session`, `milestone_target_km` pada `scheduled_workouts`. | Dieksekusi otomatis oleh `run_migration_002.cjs`. |
+| `run_migration_002.cjs` | Transaction runner migrasi 002 menghubungkan relasi tujuan ke kalender latihan periodisasi adaptif. | `node scripts/migrations/run_migration_002.cjs` |
 | `migrate_health_schema.js` | DDL pembuat skema kesehatan atlet, tabel cedera, dan log nyeri. | `node scripts/migrations/migrate_health_schema.js` |
 | `migrate_biometrics_and_clean_dummy.js` | Migrasi biometrik fisik ke `athlete_profiles` dan pembersihan dummy. | `node scripts/migrations/migrate_biometrics_and_clean_dummy.js` |
 
@@ -55,6 +57,7 @@ Rangkaian pengujian terotomasi untuk memverifikasi logika coaching, kesiapan sen
 |---|---|---|
 | `test_athlete_health_system.js` | Menguji 31 asersi kesehatan: profil biometrik fisik, isolasi diagnosa AI (tidak mendiagnosa patellofemoral tanpa dokter), sirkuit rem darurat sendi, dan audit trail. | `npm run test:health` |
 | `test_coach_training_system.js` | Menguji keselarasan rencana latihan 12-minggu, preskripsi sesi MTB/lari, dan integrasi target. | `npm run test:coach` |
+| `test_goal_driven_training_engine.js` | Menguji generator adaptif berbasis tujuan (Century 100K vs Maraton 42.2K), integritas 12 tonggak mingguan, dan proteksi hari puasa Senin & Kamis. | `node scripts/tests/test_goal_driven_training_engine.js` |
 | `test_weekly_streak_system.js` | Menguji mesin konsistensi mingguan, kalender Senin–Minggu, dan progresi api konsistensi (*flame streak*). | `npm run test:streak` |
 | `test_add_activity_flow.js` | Menguji alur manual penambahan aktivitas dan pipeline OCR. | `node scripts/tests/test_add_activity_flow.js` |
 
