@@ -9,6 +9,7 @@ import {
   getWorkoutActivityMatches,
   getAuthoritativeHealthContext,
   getDatabaseStatus,
+  getActivities,
 } from "@/lib/db";
 import { formatDateOnly } from "@/lib/formatters";
 import { ScheduleTrainingHub } from "@/components/training/ScheduleTrainingHub";
@@ -22,7 +23,7 @@ export const metadata = {
 
 async function TrainingContent() {
   await connection();
-  const [user, activePlan, workouts, goals, matches, healthContext, dbStatus] = await Promise.all([
+  const [user, activePlan, workouts, goals, matches, healthContext, dbStatus, activities] = await Promise.all([
     getUser(DEFAULT_USER_ID),
     getActiveTrainingPlan(DEFAULT_USER_ID),
     getScheduledWorkouts(DEFAULT_USER_ID),
@@ -30,6 +31,7 @@ async function TrainingContent() {
     getWorkoutActivityMatches(DEFAULT_USER_ID),
     getAuthoritativeHealthContext(DEFAULT_USER_ID),
     getDatabaseStatus(),
+    getActivities(DEFAULT_USER_ID, { limit: 100 }),
   ]);
 
   const serverToday = formatDateOnly(new Date());
@@ -43,6 +45,7 @@ async function TrainingContent() {
         matches={matches}
         healthContext={healthContext}
         initialTodayDate={serverToday}
+        initialActivities={activities}
       />
     </AppShell>
   );

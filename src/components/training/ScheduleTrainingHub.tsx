@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  Activity,
   ScheduledWorkout,
   TrainingPlan,
   FitnessGoal,
@@ -31,6 +32,7 @@ interface ScheduleTrainingHubProps {
   matches: WorkoutActivityMatch[];
   healthContext: AuthoritativeAthleteHealthContext | null;
   initialTodayDate?: string;
+  initialActivities?: Activity[];
 }
 
 export function ScheduleTrainingHub({
@@ -39,6 +41,7 @@ export function ScheduleTrainingHub({
   initialGoals,
   matches,
   initialTodayDate,
+  initialActivities = [],
 }: ScheduleTrainingHubProps) {
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [selectedPhase, setSelectedPhase] = useState<"ALL" | "PHASE_1" | "PHASE_2" | "PHASE_3">("ALL");
@@ -98,7 +101,13 @@ export function ScheduleTrainingHub({
     (w) => w.workout_category === "Cross Training" || w.workout_category === "Strength Training"
   ).length;
 
-  const allWeeks = buildCalendarWeeks(initialWorkouts, filter, todayStr, isRunningCategory);
+  const allWeeks = buildCalendarWeeks(
+    initialWorkouts,
+    initialActivities,
+    filter,
+    todayStr,
+    isRunningCategory
+  );
 
   // Filter weeks by phase
   const displayedWeeks = allWeeks.filter((w) => {
