@@ -1,10 +1,10 @@
-# Changelog: Authoritative Clean Architecture Folder Structure & Codebase Reorganization (`feat/backend`)
+# Changelog: Authoritative Clean Architecture Folder Structure & Codebase Reorganization (`refactor`)
 
 - **Tanggal & Waktu**: 2026-11-04 09:30:00 WIB
 - **Tipe**: `feat(architecture)` / `feat(backend)` / `refactor(clean-architecture)` / `docs(architecture)`
 - **Commit Message Rujukan**: `feat(architecture): implement authoritative clean architecture folder structure, domain engine isolation, and project structure v3.0`
 - **Branch**: `refactor`
-- **Lokasi**: [`docs/10-changelog/feat/backend/2026-11-04_09-30-00_feat-authoritative-clean-architecture-folder-structure-and-modularization.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-04_09-30-00_feat-authoritative-clean-architecture-folder-structure-and-modularization.md)
+- **Lokasi**: [`docs/10-changelog/refactor/2026-11-04_09-30-00_refactor-authoritative-clean-architecture-folder-structure-and-modularization.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-04_09-30-00_refactor-authoritative-clean-architecture-folder-structure-and-modularization.md)
 
 ---
 

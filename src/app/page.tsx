@@ -85,6 +85,8 @@ async function DashboardTelemetry() {
         dbStatus={dbStatus}
         user={user}
         healthContext={healthContext}
+        primaryGoal={goals.find((g) => g.is_primary) || goals[0]}
+        activePlan={activePlan}
       />
 
       {/* 2. Athlete Health Profile & Joint Safety Gate */}

@@ -1,10 +1,10 @@
-# Changelog: Clean Architecture Bulk Line Refactor & Domain Decomposition (`feat/backend`)
+# Changelog: Clean Architecture Bulk Line Refactor & Domain Decomposition (`refactor`)
 
 - **Tanggal & Waktu**: 2026-11-04 09:15:00 WIB
 - **Tipe**: `feat(backend)` / `feat(domain)` / `refactor(clean-architecture)` / `refactor(ui)`
 - **Commit Message Rujukan**: `feat(backend): implement clean architecture bulk line refactor, god component decomposition, and modular domain persistence`
 - **Branch**: `refactor`
-- **Lokasi**: [`docs/10-changelog/feat/backend/2026-11-04_09-15-00_feat-clean-architecture-bulk-line-refactor-and-domain-decomposition.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-04_09-15-00_feat-clean-architecture-bulk-line-refactor-and-domain-decomposition.md)
+- **Lokasi**: [`docs/10-changelog/refactor/2026-11-04_09-15-00_refactor-clean-architecture-bulk-line-and-domain-decomposition.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-04_09-15-00_refactor-clean-architecture-bulk-line-and-domain-decomposition.md)
 
 ---
 
