@@ -40,17 +40,11 @@ async function runTests() {
     assert.ok(hasPlanned, 'Must have planned sessions');
   });
 
-  test('Workouts include safe running return-to-run progression alongside cycling and rehab', () => {
-    // Running sessions are planned as gradual micro-doses (Recovery Run / Easy Run)
-    const runningWorkouts = workoutRes.rows.filter(w => 
-      ['Recovery Run', 'Easy Run'].includes(w.workout_category) && w.status === 'PLANNED'
-    );
-    assert.ok(runningWorkouts.length >= 1, 'Must have planned return-to-run workouts');
-
-    // Cycling and Cross Training are also present
+  test('Workouts follow goal-driven structure with sport-specific progression and safe rehab slots', () => {
     const plannedCategories = new Set(workoutRes.rows.filter(w => w.status === 'PLANNED').map(w => w.workout_category));
-    assert.ok(plannedCategories.has('Cycling'), 'Must have planned cycling workouts');
-    assert.ok(plannedCategories.has('Cross Training') || plannedCategories.has('Strength Training'), 'Must have planned rehab workouts');
+    const hasActiveSport = plannedCategories.has('Cycling') || plannedCategories.has('Easy Run') || plannedCategories.has('Long Run');
+    assert.ok(hasActiveSport, 'Must have planned endurance progression workouts for active goal');
+    assert.ok(plannedCategories.has('Cross Training') || plannedCategories.has('Strength Training'), 'Must have planned rehab/mobility workouts');
   });
 
   // 3. Verify Workout Activity Matching

@@ -5,7 +5,12 @@ const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-const envLocalPath = path.join(__dirname, '..', '.env.local');
+const envCandidates = [
+  path.resolve(process.cwd(), '.env.local'),
+  path.join(__dirname, '..', '.env.local'),
+  path.join(__dirname, '..', '..', '.env.local'),
+];
+const envLocalPath = envCandidates.find((p) => fs.existsSync(p)) || envCandidates[0];
 let dbUrl = process.env.DATABASE_URL;
 
 if (fs.existsSync(envLocalPath)) {

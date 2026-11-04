@@ -5,6 +5,9 @@ export * from './activityRepo';
 export * from './trainingRepo';
 export * from './goalRepo';
 export * from './healthRepo';
+export * from './availabilityRepo';
+export * from './equipmentRepo';
+export * from './wellnessRepo';
 
 import * as client from './client';
 import * as userRepo from './userRepo';
@@ -13,6 +16,9 @@ import * as activityRepo from './activityRepo';
 import * as trainingRepo from './trainingRepo';
 import * as goalRepo from './goalRepo';
 import * as healthRepo from './healthRepo';
+import * as availabilityRepo from './availabilityRepo';
+import * as equipmentRepo from './equipmentRepo';
+import * as wellnessRepo from './wellnessRepo';
 
 const db = {
   ...client,
@@ -22,7 +28,9 @@ const db = {
   ...trainingRepo,
   ...goalRepo,
   ...healthRepo,
+  ...availabilityRepo,
+  ...equipmentRepo,
+  ...wellnessRepo,
 };
 
 export default db;
-
