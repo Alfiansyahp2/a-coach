@@ -26,6 +26,7 @@ export interface CalendarWeek {
   runningDistanceMeters: number;
   totalDurationSeconds: number;
   targetAchievedPct: number;
+  isCurrentWeek: boolean;
 }
 
 export const FULL_DAY_NAMES = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -112,6 +113,7 @@ export function buildCalendarWeeks(
 
     const minDistanceMeters = conf.minTargetKm * 1000;
     const targetAchievedPct = Math.round((totalDist / minDistanceMeters) * 100);
+    const isCurrentWeek = days.some((d) => d.isToday);
 
     weeks.push({
       weekNumber: conf.weekNum,
@@ -129,9 +131,9 @@ export function buildCalendarWeeks(
       runningDistanceMeters: runningDist,
       totalDurationSeconds: totalDur,
       targetAchievedPct,
+      isCurrentWeek,
     });
   }
 
   return weeks;
 }
-

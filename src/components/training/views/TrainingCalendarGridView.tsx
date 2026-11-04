@@ -1,51 +1,63 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { formatDuration } from "@/lib/formatters";
 import { CalendarDayCard } from "../CalendarDayCard";
+import { CalendarWeek } from "../calendarBuilder";
 import { ScheduledWorkout } from "@/types";
 
 interface TrainingCalendarGridViewProps {
-  displayedWeeks: any[];
+  displayedWeeks: CalendarWeek[];
   onSelectWorkout: (workout: ScheduledWorkout) => void;
   isRunningCategory: (category: string) => boolean;
+  todayStr?: string;
 }
+
+const DAY_HEADERS = [
+  { name: "SENIN", subtitle: "(PUASA)", color: "text-purple-600 dark:text-purple-400" },
+  { name: "SELASA", subtitle: "(EASY MTB)", color: "text-[var(--color-cycling)]" },
+  { name: "RABU", subtitle: "(OPSI/REHAB)", color: "text-[var(--color-alert-amber)]" },
+  { name: "KAMIS", subtitle: "(PUASA)", color: "text-purple-600 dark:text-purple-400" },
+  { name: "JUMAT", subtitle: "(RECOVERY)", color: "text-[var(--color-cycling)]" },
+  { name: "SABTU", subtitle: "(BUFFER)", color: "text-[var(--color-text-secondary)]" },
+  { name: "MINGGU", subtitle: "(LONG MTB)", color: "text-[var(--color-cycling)]" },
+];
 
 export function TrainingCalendarGridView({
   displayedWeeks,
   onSelectWorkout,
   isRunningCategory,
+  todayStr,
 }: TrainingCalendarGridViewProps) {
+  const currentDayIndex = useMemo(() => {
+    if (!todayStr) return -1;
+    const parts = todayStr.split("-").map(Number);
+    if (parts.length !== 3) return -1;
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    return (d.getDay() + 6) % 7; // Monday = 0, ..., Wednesday = 2, Sunday = 6
+  }, [todayStr]);
+
   return (
     <div className="space-y-6 font-mono">
       {/* Day Names Header Row (Mon - Sun) */}
       <div className="hidden md:grid grid-cols-7 gap-2 text-center text-xs font-bold text-[var(--color-text-muted)] pb-1 border-b border-[var(--color-border)]">
-        <div className="text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1">
-          <span>SENIN</span>
-          <span className="text-[8.5px] font-normal">(PUASA)</span>
-        </div>
-        <div className="text-[var(--color-cycling)] flex items-center justify-center gap-1">
-          <span>SELASA</span>
-          <span className="text-[8.5px] font-normal">(EASY MTB)</span>
-        </div>
-        <div className="text-[var(--color-alert-amber)] flex items-center justify-center gap-1">
-          <span>RABU</span>
-          <span className="text-[8.5px] font-normal">(OPSI/REHAB)</span>
-        </div>
-        <div className="text-purple-600 dark:text-purple-400 flex items-center justify-center gap-1">
-          <span>KAMIS</span>
-          <span className="text-[8.5px] font-normal">(PUASA)</span>
-        </div>
-        <div className="text-[var(--color-cycling)] flex items-center justify-center gap-1">
-          <span>JUMAT</span>
-          <span className="text-[8.5px] font-normal">(RECOVERY)</span>
-        </div>
-        <div className="text-[var(--color-text-secondary)] flex items-center justify-center gap-1">
-          <span>SABTU</span>
-          <span className="text-[8.5px] font-normal">(BUFFER)</span>
-        </div>
-        <div className="text-[var(--color-cycling)] flex items-center justify-center gap-1">
-          <span>MINGGU</span>
-          <span className="text-[8.5px] font-normal">(LONG MTB)</span>
-        </div>
+        {DAY_HEADERS.map((col, idx) => {
+          const isTodayColumn = currentDayIndex === idx;
+          return (
+            <div
+              key={col.name}
+              className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded-t-lg transition-all ${
+                isTodayColumn
+                  ? `${col.color} bg-[var(--color-surface-card)] border-b-2 border-[var(--color-cycling)] font-extrabold shadow-xs`
+                  : `${col.color}`
+              }`}
+            >
+              {isTodayColumn && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-cycling)] animate-pulse" />
+              )}
+              <span>{col.name}</span>
+              <span className="text-[8.5px] font-normal">{col.subtitle}</span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Weeks Loop */}
@@ -55,6 +67,8 @@ export function TrainingCalendarGridView({
           className={`p-4 rounded-xl bg-[var(--color-surface-card)] border space-y-3 shadow-xs transition-all ${
             week.isDeload
               ? "border-purple-500/40 bg-purple-500/[0.03]"
+              : week.isCurrentWeek
+              ? "border-[var(--color-cycling)]/40 ring-1 ring-[var(--color-cycling)]/20"
               : "border-[var(--color-border)]"
           }`}
         >
@@ -70,6 +84,11 @@ export function TrainingCalendarGridView({
                 <span className="text-xs font-bold uppercase text-[var(--color-text-primary)]">
                   {week.weekLabel}
                 </span>
+                {week.isCurrentWeek && (
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-semibold tracking-wider">
+                    MINGGU AKTIF
+                  </span>
+                )}
                 <span className="text-[10px] text-[var(--color-cycling)] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 font-semibold">
                   {week.focusTitle}
                 </span>
@@ -152,4 +171,3 @@ export function TrainingCalendarGridView({
     </div>
   );
 }
-
