@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Activity, ScheduledWorkout } from "@/types";
-import { CheckCircle2, Heart, Zap } from "lucide-react";
+import { CheckCircle2, Heart, Zap, XCircle } from "lucide-react";
 import { formatDistance, formatDuration } from "@/lib/formatters";
 
 export interface CalendarDayCardProps {
@@ -17,14 +17,18 @@ export interface CalendarDayCardProps {
     activities?: Activity[];
   };
   minTargetKm: number;
+  todayStr?: string;
   onSelectWorkout: (workout: ScheduledWorkout) => void;
+  onSelectActivity?: (activity: Activity) => void;
   isRunningCategory: (category: string) => boolean;
 }
 
 export function CalendarDayCard({
   day,
   minTargetKm,
+  todayStr,
   onSelectWorkout,
+  onSelectActivity,
   isRunningCategory,
 }: CalendarDayCardProps) {
   const workouts = day.workouts || [];
@@ -34,11 +38,18 @@ export function CalendarDayCard({
   const isFastingDay = day.dayOfWeek === 0 || day.dayOfWeek === 3; // Senin or Kamis
   const isSaturday = day.dayOfWeek === 5; // Sabtu
 
+  const isPastDay = Boolean(todayStr && day.dateStr < todayStr && !day.isToday);
+  const hasMissedWorkouts = workouts.some(
+    (w) => w.status !== "COMPLETED" && (w.status === "MISSED" || isPastDay)
+  );
+
   return (
     <div
       className={`min-h-[160px] p-2.5 rounded-xl flex flex-col justify-between transition-all duration-200 ${
         day.isToday
           ? "bg-[var(--color-surface-card)] border-2 border-[var(--color-cycling)] shadow-md ring-1 ring-[var(--color-cycling)]/30"
+          : hasMissedWorkouts && !hasActivities
+          ? "bg-red-500/[0.04] border border-red-500/30 hover:border-red-500/50 shadow-xs"
           : isFastingDay && !hasActivities && !hasWorkouts
           ? "bg-purple-500/[0.04] border border-purple-500/20 shadow-xs"
           : isSaturday && !hasActivities && !hasWorkouts
@@ -50,7 +61,15 @@ export function CalendarDayCard({
     >
       {/* Day Header (Date & Today Badge) */}
       <div className="flex items-center justify-between pb-1.5 border-b border-[var(--color-border)] text-[10px] font-mono">
-        <span className={`md:hidden font-bold ${isFastingDay ? "text-purple-600 dark:text-purple-300" : "text-[var(--color-text-secondary)]"}`}>
+        <span
+          className={`md:hidden font-bold ${
+            isFastingDay
+              ? "text-purple-600 dark:text-purple-300"
+              : hasMissedWorkouts && !hasActivities
+              ? "text-red-500 dark:text-red-400"
+              : "text-[var(--color-text-secondary)]"
+          }`}
+        >
           {day.dayName}
         </span>
         <div className="flex items-center gap-1.5 ml-auto">
@@ -59,7 +78,17 @@ export function CalendarDayCard({
               HARI INI
             </span>
           )}
-          <span className={`font-bold font-tabular ${day.isToday ? "text-[var(--color-cycling)] font-extrabold" : isFastingDay && !hasActivities && !hasWorkouts ? "text-purple-600 dark:text-purple-300" : "text-[var(--color-text-primary)]"}`}>
+          <span
+            className={`font-bold font-tabular ${
+              day.isToday
+                ? "text-[var(--color-cycling)] font-extrabold"
+                : hasMissedWorkouts && !hasActivities
+                ? "text-red-500 dark:text-red-400"
+                : isFastingDay && !hasActivities && !hasWorkouts
+                ? "text-purple-600 dark:text-purple-300"
+                : "text-[var(--color-text-primary)]"
+            }`}
+          >
             {day.dayNumber} {day.monthName}
           </span>
         </div>
@@ -73,14 +102,17 @@ export function CalendarDayCard({
             const isRun = isRunningCategory(w.workout_category);
             const isCycling = w.workout_category === "Cycling";
             const isCompleted = w.status === "COMPLETED";
+            const isMissed = !isCompleted && (w.status === "MISSED" || isPastDay);
 
             return (
               <button
                 key={w.id}
                 onClick={() => onSelectWorkout(w)}
-                className={`w-full text-left p-2 rounded-lg border transition-all space-y-1 block shadow-xs hover:-translate-y-0.5 ${
+                className={`w-full text-left p-2 rounded-lg border transition-all space-y-1 block shadow-xs hover:-translate-y-0.5 cursor-pointer ${
                   isCompleted
                     ? "bg-[var(--color-cycling)]/10 border-[var(--color-cycling)]/40 hover:border-[var(--color-cycling)]"
+                    : isMissed
+                    ? "bg-red-500/10 border-red-500/30 hover:border-red-500/60"
                     : isRun
                     ? "bg-[var(--color-running)]/10 border-[var(--color-running)]/30 hover:border-[var(--color-running)]"
                     : isCycling
@@ -91,7 +123,9 @@ export function CalendarDayCard({
                 <div className="flex items-center justify-between">
                   <span
                     className={`text-[8.5px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                      isRun
+                      isMissed
+                        ? "bg-red-500/20 text-red-500 dark:text-red-400"
+                        : isRun
                         ? "bg-[var(--color-running)]/20 text-[var(--color-running)]"
                         : isCycling
                         ? "bg-[var(--color-cycling)]/20 text-[var(--color-cycling)]"
@@ -102,7 +136,15 @@ export function CalendarDayCard({
                   </span>
 
                   {isCompleted && (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-cycling)] shrink-0" />
+                  )}
+                  {isMissed && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-[7.5px] font-bold text-red-500 bg-red-500/15 px-1 py-0.2 rounded border border-red-500/30">
+                        TERLEWAT
+                      </span>
+                      <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                    </div>
                   )}
                 </div>
 
@@ -113,7 +155,11 @@ export function CalendarDayCard({
                   </div>
                 )}
 
-                <div className="font-bold text-[11px] text-[var(--color-text-primary)] leading-tight font-tabular">
+                <div
+                  className={`font-bold text-[11px] leading-tight font-tabular ${
+                    isMissed ? "text-red-400 line-through opacity-85" : "text-[var(--color-text-primary)]"
+                  }`}
+                >
                   {w.target_duration_seconds
                     ? formatDuration(w.target_duration_seconds)
                     : w.target_distance_meters
@@ -121,8 +167,12 @@ export function CalendarDayCard({
                     : "--"}
                 </div>
 
-                <div className="text-[8px] text-[var(--color-text-secondary)] truncate">
-                  {w.target_intensity || "Zone 2 • RPE 3–4"}
+                <div
+                  className={`text-[8px] truncate ${
+                    isMissed ? "text-red-400/90 font-medium" : "text-[var(--color-text-secondary)]"
+                  }`}
+                >
+                  {isMissed ? "Tidak terlaksana (Sesi Terlewat)" : (w.target_intensity || "Zone 2 • RPE 3–4")}
                 </div>
               </button>
             );
@@ -137,9 +187,11 @@ export function CalendarDayCard({
               (act.sport_type || "").toLowerCase().includes("cycl");
 
             return (
-              <div
+              <button
                 key={act.id}
-                className="w-full text-left p-2 rounded-lg border bg-[var(--color-surface-card)] border-[var(--color-cycling)]/40 hover:border-[var(--color-cycling)] transition-all space-y-1 block shadow-xs"
+                type="button"
+                onClick={() => onSelectActivity?.(act)}
+                className="w-full text-left p-2 rounded-lg border bg-[var(--color-surface-card)] border-[var(--color-cycling)]/40 hover:border-[var(--color-cycling)] hover:-translate-y-0.5 transition-all space-y-1 block shadow-xs group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <span
@@ -158,7 +210,7 @@ export function CalendarDayCard({
                     <span className="text-[7.5px] font-bold text-[var(--color-cycling)] bg-[var(--color-cycling)]/15 px-1 py-0.2 rounded border border-[var(--color-cycling)]/30">
                       TERCATAT
                     </span>
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-cycling)] shrink-0" />
                   </div>
                 </div>
 
@@ -166,10 +218,13 @@ export function CalendarDayCard({
                   {formatDistance(act.distance_meters)} • {formatDuration(act.moving_time_seconds)}
                 </div>
 
-                <div className="text-[8px] text-[var(--color-text-secondary)] truncate" title={act.name}>
+                <div
+                  className="text-[8px] text-[var(--color-text-secondary)] truncate group-hover:text-[var(--color-text-primary)]"
+                  title={act.name}
+                >
                   {act.name}
                 </div>
-              </div>
+              </button>
             );
           })}
 
@@ -222,26 +277,48 @@ export function CalendarDayCard({
       </div>
 
       {/* Day Footer Subtext */}
-      <div className="pt-1 border-t border-[var(--color-border)] text-[9px] font-mono text-[var(--color-text-muted)] text-right">
+      <div className="pt-1 border-t border-[var(--color-border)] text-[9px] font-mono text-[var(--color-text-muted)]">
         {hasActivities ? (
-          <span className="text-[var(--color-cycling)] font-semibold flex items-center justify-end gap-1">
-            <span>✓</span> Terverifikasi ({activities.length} Sesi)
-          </span>
+          <div className="flex items-center justify-between w-full">
+            <span className="text-[var(--color-cycling)] font-semibold flex items-center gap-1 text-[8.5px] sm:text-[9px] truncate">
+              <span>✓</span> {activities.length} Sesi
+            </span>
+            <button
+              type="button"
+              onClick={() => onSelectActivity?.(activities[0])}
+              className="text-[var(--color-cycling)] hover:underline cursor-pointer font-semibold ml-auto shrink-0 text-[8.5px] sm:text-[9px]"
+            >
+              Detail Sesi ↗
+            </button>
+          </div>
         ) : hasWorkouts ? (
-          <span
-            className="text-[var(--color-cycling)] hover:underline cursor-pointer font-semibold"
-            onClick={() => onSelectWorkout(workouts[0])}
-          >
-            Detail Sesi ↗
-          </span>
+          <div className="flex items-center justify-end w-full">
+            <button
+              type="button"
+              onClick={() => onSelectWorkout(workouts[0])}
+              className={`font-semibold hover:underline cursor-pointer text-[8.5px] sm:text-[9px] ${
+                hasMissedWorkouts
+                  ? "text-red-500 dark:text-red-400 hover:text-red-300"
+                  : "text-[var(--color-cycling)] hover:text-emerald-300"
+              }`}
+            >
+              Detail Sesi ↗
+            </button>
+          </div>
         ) : isFastingDay ? (
-          <span className="text-purple-600 dark:text-purple-400 font-semibold flex items-center justify-end gap-1">
-            <span>🌙</span> Puasa Sunnah
-          </span>
+          <div className="text-right">
+            <span className="text-purple-600 dark:text-purple-400 font-semibold flex items-center justify-end gap-1">
+              <span>🌙</span> Puasa Sunnah
+            </span>
+          </div>
         ) : isSaturday ? (
-          <span className="text-[var(--color-text-secondary)] font-semibold">Slot Buffer</span>
+          <div className="text-right">
+            <span className="text-[var(--color-text-secondary)] font-semibold">Slot Buffer</span>
+          </div>
         ) : (
-          <span className={day.isToday ? "text-[var(--color-cycling)] font-semibold" : ""}>Istirahat</span>
+          <div className="text-right">
+            <span className={day.isToday ? "text-[var(--color-cycling)] font-semibold" : ""}>Istirahat</span>
+          </div>
         )}
       </div>
     </div>

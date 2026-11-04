@@ -2,11 +2,12 @@ import React, { useMemo } from "react";
 import { formatDuration } from "@/lib/formatters";
 import { CalendarDayCard } from "../CalendarDayCard";
 import { CalendarWeek } from "../calendarBuilder";
-import { ScheduledWorkout } from "@/types";
+import { ScheduledWorkout, Activity } from "@/types";
 
 interface TrainingCalendarGridViewProps {
   displayedWeeks: CalendarWeek[];
   onSelectWorkout: (workout: ScheduledWorkout) => void;
+  onSelectActivity?: (activity: Activity) => void;
   isRunningCategory: (category: string) => boolean;
   todayStr?: string;
 }
@@ -24,6 +25,7 @@ const DAY_HEADERS = [
 export function TrainingCalendarGridView({
   displayedWeeks,
   onSelectWorkout,
+  onSelectActivity,
   isRunningCategory,
   todayStr,
 }: TrainingCalendarGridViewProps) {
@@ -165,7 +167,9 @@ export function TrainingCalendarGridView({
                   key={day.dateStr}
                   day={day}
                   minTargetKm={week.minTargetKm}
+                  todayStr={todayStr}
                   onSelectWorkout={onSelectWorkout}
+                  onSelectActivity={onSelectActivity}
                   isRunningCategory={isRunningCategory}
                 />
               ))}
