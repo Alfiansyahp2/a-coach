@@ -8,11 +8,9 @@ import {
   Calendar,
   FolderKanban,
   ShieldCheck,
-  TrendingUp,
   Footprints,
   Bike,
   Target,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Activity,
@@ -31,8 +29,8 @@ const navItems: NavItem[] = [
   { name: "Kalender Latihan", href: "/training", icon: Calendar, badge: "12W" },
   { name: "Riwayat Aktivitas", href: "/activities", icon: FolderKanban, badge: "34" },
   { name: "Profil Kesehatan", href: "/health", icon: ShieldCheck, badge: "GATE" },
-  { name: "Running Coach", href: "/#running-coach", icon: Footprints },
-  { name: "Cycling Coach", href: "/#cycling-coach", icon: Bike },
+  { name: "Running Coach", href: "/coach/running", icon: Footprints, badge: "HOLD" },
+  { name: "Cycling Coach", href: "/coach/cycling", icon: Bike, badge: "ACTIVE" },
   { name: "Sasaran & Target", href: "/goals", icon: Target, badge: "TARGET" },
   { name: "Integrasi Strava", href: "/#strava-gateway", icon: Activity },
 ];
@@ -77,7 +75,7 @@ export function AppSidebar() {
             const isActive =
               item.href === "/"
                 ? pathname === "/"
-                : pathname.startsWith(item.href) && item.href !== "/";
+                : pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
             const Icon = item.icon;
 
             return (
@@ -102,7 +100,15 @@ export function AppSidebar() {
                   <span className="truncate flex-1 font-sans">{item.name}</span>
                 )}
                 {isExpanded && item.badge && (
-                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-muted)]">
+                  <span
+                    className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full border ${
+                      item.badge === "HOLD"
+                        ? "bg-amber-500/15 text-amber-500 border-amber-500/30"
+                        : item.badge === "ACTIVE"
+                        ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
+                        : "bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] border-[var(--color-border)]"
+                    }`}
+                  >
                     {item.badge}
                   </span>
                 )}
@@ -121,7 +127,7 @@ export function AppSidebar() {
       <div className="p-2 border-t border-[var(--color-border)] shrink-0">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-center p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] transition-colors text-xs font-mono"
+          className="w-full flex items-center justify-center p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] transition-colors text-xs font-mono cursor-pointer"
           title={isExpanded ? "Ciutkan Sidebar" : "Perluas Sidebar"}
         >
           {isExpanded ? (
