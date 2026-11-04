@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import {
@@ -7,6 +9,13 @@ import {
   CheckSquare,
   Square,
   Heart,
+  Bike,
+  Footprints,
+  Waves,
+  Dumbbell,
+  Compass,
+  Activity as ActivityIcon,
+  Clock,
 } from "lucide-react";
 import {
   formatDistance,
@@ -17,6 +26,8 @@ import {
 } from "@/lib/formatters";
 import { EditActivityModal } from "@/components/EditActivityModal";
 import { ActivityGroup } from "./activityGroupUtils";
+import { Activity } from "@/types";
+import { getSportMeta } from "@/lib/sportUtils";
 
 interface ActivityGroupCardProps {
   groupKey: string;
@@ -25,6 +36,8 @@ interface ActivityGroupCardProps {
   toggleGroup: (k: string) => void;
   selectedIds: string[];
   toggleSelectOne: (id: string) => void;
+  onSelectGroup?: (items: Activity[]) => void;
+  density?: "detailed" | "compact";
 }
 
 export function ActivityGroupCard({
@@ -34,203 +47,197 @@ export function ActivityGroupCard({
   toggleGroup,
   selectedIds,
   toggleSelectOne,
+  onSelectGroup,
+  density = "detailed",
 }: ActivityGroupCardProps) {
   const isRunGroup = groupKey.toLowerCase().includes("run");
+  const groupItemIds = group.items.map((i) => i.id);
+  const allGroupSelected =
+    groupItemIds.length > 0 &&
+    groupItemIds.every((id) => selectedIds.includes(id));
+  const someGroupSelected =
+    !allGroupSelected && groupItemIds.some((id) => selectedIds.includes(id));
+
+  const handleToggleGroupSelection = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSelectGroup) {
+      onSelectGroup(group.items);
+    }
+  };
+
+  const renderSportIcon = (iconName: string, className = "w-4 h-4") => {
+    switch (iconName) {
+      case "bike":
+        return <Bike className={className} />;
+      case "footprints":
+        return <Footprints className={className} />;
+      case "waves":
+        return <Waves className={className} />;
+      case "dumbbell":
+        return <Dumbbell className={className} />;
+      case "compass":
+        return <Compass className={className} />;
+      default:
+        return <ActivityIcon className={className} />;
+    }
+  };
 
   return (
-    <div className="bg-[#12151D] border border-[#1F2430] rounded-sm overflow-hidden">
-      {/* Group Section Header */}
+    <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] overflow-hidden font-mono shadow-xs transition-all">
+      {/* 1. Group Section Header */}
       <div
         onClick={() => toggleGroup(groupKey)}
-        className="p-3.5 bg-[#161922] border-b border-[#1F2430] flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-[#1A1E28] transition-colors"
+        className="p-3 sm:p-3.5 bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] flex flex-wrap items-center justify-between gap-3 cursor-pointer hover:bg-[var(--color-surface-muted)]/80 transition-colors select-none"
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             type="button"
-            className="text-[#9BA3AF] hover:text-white transition-colors"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors p-0.5"
             aria-label="Toggle section"
           >
             {isCollapsed ? (
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-4 h-4 text-[var(--color-cycling)]" />
             ) : (
-              <ChevronUp className="w-4 h-4" />
+              <ChevronUp className="w-4 h-4 text-[var(--color-text-muted)]" />
             )}
           </button>
 
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded-sm font-bold ${
-                group.badgeColor === "volt"
-                  ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/40"
-                  : group.badgeColor === "cyan"
-                  ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40"
-                  : "bg-[#FF9500]/15 text-[#FF9500] border border-[#FF9500]/40"
-              }`}
+          {/* Group Select All Checkbox */}
+          {onSelectGroup && (
+            <button
+              type="button"
+              onClick={handleToggleGroupSelection}
+              title={allGroupSelected ? "Batalkan pilihan semua" : "Pilih semua dalam grup ini"}
+              className="text-[var(--color-text-muted)] hover:text-[var(--color-cycling)] transition-colors p-0.5 cursor-pointer"
             >
-              {group.items.length} Sesi
-            </span>
-            <h3 className="text-xs uppercase font-mono tracking-wider font-semibold text-[#F0F2F5]">
+              {allGroupSelected ? (
+                <CheckSquare className="w-4 h-4 text-[var(--color-cycling)]" />
+              ) : someGroupSelected ? (
+                <CheckSquare className="w-4 h-4 text-[var(--color-cycling)]/60" />
+              ) : (
+                <Square className="w-4 h-4" />
+              )}
+            </button>
+          )}
+
+          <div className="flex items-center gap-2">
+            <h3 className="text-xs font-bold uppercase text-[var(--color-text-primary)]">
               {group.title}
             </h3>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-surface-card)] text-[var(--color-text-secondary)] border border-[var(--color-border)] font-tabular">
+              {group.items.length} Sesi
+            </span>
           </div>
         </div>
 
-        {/* Group Subtotals Strip */}
-        <div className="flex items-center gap-4 text-xs font-mono">
-          <div>
-            <span className="text-[10px] text-[#5A6272] uppercase block">
-              Jarak
-            </span>
-            <span className="font-bold font-tabular text-[#F0F2F5]">
-              {formatDistance(group.totalDistance)}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[10px] text-[#5A6272] uppercase block">
-              Durasi
-            </span>
-            <span className="font-tabular text-[#9BA3AF]">
-              {formatDuration(group.totalDuration)}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[10px] text-[#5A6272] uppercase block">
-              Elevasi
-            </span>
-            <span className="font-tabular text-[#FF9500]">
-              ▲ {Math.round(group.totalElevation)}m
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[10px] text-[#5A6272] uppercase block">
-              Avg Kecepatan
-            </span>
-            <span
-              className={`font-semibold font-tabular ${
-                isRunGroup ? "text-[#D4FF00]" : "text-[#00F0FF]"
-              }`}
-            >
-              {group.avgPaceOrSpeed}
-            </span>
-          </div>
+        <div className="flex items-center gap-3 text-xs font-tabular">
+          <span className="text-[var(--color-text-primary)] font-bold">
+            {formatDistance(group.totalDistance)}
+          </span>
+          <span className="text-[var(--color-text-muted)]">•</span>
+          <span className="text-[var(--color-text-secondary)]">
+            {formatDuration(group.totalDuration)}
+          </span>
         </div>
       </div>
 
-      {/* Group Items List */}
+      {/* 2. Group Activities List */}
       {!isCollapsed && (
-        <div className="divide-y divide-[#1F2430]">
+        <div className="divide-y divide-[var(--color-border)]">
           {group.items.map((act) => {
-            const isRun = act.sport_type.toLowerCase().includes("run");
-            const velocity = isRun
-              ? speedMpsToPace(act.average_speed_mps)
-              : speedMpsToKmh(act.average_speed_mps);
             const isSelected = selectedIds.includes(act.id);
+            const meta = getSportMeta(act.sport_type);
+            const isRun = act.sport_type.toLowerCase().includes("run");
 
             return (
               <div
                 key={act.id}
-                className={`p-3 flex items-center justify-between gap-3 transition-colors ${
-                  isSelected ? "bg-[#1C212E]/70" : "hover:bg-[#161922]/50"
+                className={`p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
+                  isSelected
+                    ? "bg-[var(--color-cycling)]/10"
+                    : "hover:bg-[var(--color-surface-muted)]/50"
                 }`}
               >
-                {/* Left: Checkbox + Thumbnail + Title */}
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-start sm:items-center gap-3 min-w-0">
+                  {/* Select Checkbox */}
                   <button
-                    onClick={() => toggleSelectOne(act.id)}
-                    className="text-[#5A6272] hover:text-[#00F0FF] transition-colors shrink-0"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSelectOne(act.id);
+                    }}
+                    className="mt-0.5 sm:mt-0 text-[var(--color-text-muted)] hover:text-[var(--color-cycling)] transition-colors p-0.5"
                   >
                     {isSelected ? (
-                      <CheckSquare className="w-4 h-4 text-[#00F0FF]" />
+                      <CheckSquare className="w-4 h-4 text-[var(--color-cycling)]" />
                     ) : (
                       <Square className="w-4 h-4" />
                     )}
                   </button>
 
-                  {act.raw_summary_polyline && (
-                    <div className="w-10 h-10 rounded-sm bg-[#090A0F] border border-[#1F2430] flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
-                      <img
-                        src={act.raw_summary_polyline}
-                        alt="GPS Route"
-                        className="w-full h-full object-contain filter brightness-110"
-                      />
-                    </div>
-                  )}
+                  <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
+                    {renderSportIcon(meta.iconName, "w-4 h-4 text-[var(--color-text-primary)]")}
+                  </div>
 
-                  <div className="space-y-0.5 min-w-0">
+                  <div className="min-w-0 space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`text-[9px] uppercase font-mono px-1.5 py-0.2 rounded-sm font-semibold tracking-wider ${
-                          isRun
-                            ? "bg-[#D4FF00]/10 text-[#D4FF00] border border-[#D4FF00]/30"
-                            : "bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/30"
-                        }`}
-                      >
-                        {act.sport_type}
-                      </span>
                       <Link
                         href={`/activities/${act.id}`}
-                        className="text-xs font-semibold text-[#F0F2F5] hover:text-[#00F0FF] transition-colors truncate"
+                        className="font-bold text-xs text-[var(--color-text-primary)] hover:text-[var(--color-cycling)] transition-colors truncate"
                       >
                         {act.name}
                       </Link>
+                      <span
+                        className="text-[9px] px-1.5 py-0.2 rounded-full border font-semibold shrink-0"
+                        style={{
+                          backgroundColor: `${meta.accentHex}15`,
+                          color: meta.accentHex,
+                          borderColor: `${meta.accentHex}40`,
+                        }}
+                      >
+                        {act.sport_type}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[11px] text-[#9BA3AF] font-mono">
+                    <div className="flex flex-wrap items-center gap-x-3 text-[10.5px] text-[var(--color-text-muted)] font-tabular">
                       <span>{formatDate(act.start_date)}</span>
-                      <span className="text-[#3A404D]">•</span>
-                      <span>{formatDuration(act.moving_time_seconds)}</span>
-                      {act.average_heartrate && (
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatDuration(act.moving_time_seconds)}</span>
+                      </span>
+                      {act.elevation_gain_meters > 0 && (
                         <>
-                          <span className="text-[#3A404D]">•</span>
-                          <span className="flex items-center gap-1 text-[#FF2A6D]">
-                            <Heart className="w-3 h-3 fill-current" />
-                            <span className="font-tabular">
-                              {Math.round(act.average_heartrate)} bpm
-                            </span>
-                          </span>
-                        </>
-                      )}
-                      {act.description && (
-                        <>
-                          <span className="text-[#3A404D]">•</span>
-                          <span className="text-[#5A6272] truncate max-w-xs">
-                            {act.description}
-                          </span>
+                          <span>•</span>
+                          <span>▲ {Math.round(act.elevation_gain_meters)}m</span>
                         </>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Right: Metrics + Edit Modal Trigger + Link */}
-                <div className="flex items-center gap-4 shrink-0 font-mono">
-                  <div className="text-right">
-                    <div className="text-xs font-bold font-tabular text-[#F0F2F5]">
+                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 font-tabular">
+                  <div className="text-left sm:text-right">
+                    <div className="text-xs font-bold text-[var(--color-text-primary)]">
                       {formatDistance(act.distance_meters)}
                     </div>
-                    <div
-                      className={`text-[11px] font-semibold font-tabular ${
-                        isRun ? "text-[#D4FF00]" : "text-[#00F0FF]"
-                      }`}
-                    >
-                      {velocity}
+                    <div className="text-[10.5px] text-[var(--color-text-secondary)]">
+                      {isRun
+                        ? speedMpsToPace(act.average_speed_mps)
+                        : speedMpsToKmh(act.average_speed_mps)}
                     </div>
                   </div>
 
-                  {/* Direct Edit Modal */}
-                  <EditActivityModal activity={act} variant="icon" />
-
-                  {/* Direct Link to Activity Detail */}
-                  <Link
-                    href={`/activities/${act.id}`}
-                    title="Lihat Detail Telemetri Lengkap"
-                    className="w-6 h-6 rounded-sm bg-[#090A0F] border border-[#1F2430] hover:border-[#00F0FF] hover:text-[#00F0FF] text-[#5A6272] flex items-center justify-center transition-colors"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <EditActivityModal activity={act} variant="icon" />
+                    <Link
+                      href={`/activities/${act.id}`}
+                      className="p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] transition-colors"
+                      title="Lihat Detail Aktivitas"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             );
@@ -240,4 +247,3 @@ export function ActivityGroupCard({
     </div>
   );
 }
-

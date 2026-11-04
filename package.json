@@ -7,8 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node scripts/seed.js",
-    "import:strava": "python scripts/process_strava_images.py && node scripts/seed_imported_activities.js"
+    "seed": "node scripts/seed/seed.js",
+    "seed:personal": "node scripts/seed/seed_athlete_health.js",
+    "import:strava": "python scripts/parsers/process_strava_images.py && node scripts/seed/seed_imported_activities.js",
+    "test:health": "node scripts/tests/test_athlete_health_system.js",
+    "test:coach": "node scripts/tests/test_coach_training_system.js",
+    "test:streak": "node scripts/tests/test_weekly_streak_system.js",
+    "db:audit": "node scripts/maintenance/audit_database_schema.cjs"
   },
   "dependencies": {
     "dotenv": "^18.0.9",

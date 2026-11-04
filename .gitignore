@@ -40,6 +40,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# strava user data & raw files
+# personal user data, private seeds & imported telemetry
+/scripts/*personal*
+/scripts/personal/
+/data/from_strava/
 /data/from_strava/*
-!/data/from_strava/.gitignore
+/data/imported_activities.json
+/data/personal/
+/data/*.png
+/data/*.jpg
+/data/*.jpeg
+
+/.data/

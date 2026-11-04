@@ -22,30 +22,30 @@ export function ActivityDetailHero({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text-primary)]">
               {activity.name}
             </h1>
             <EditActivityModal activity={activity} variant="button" />
           </div>
-          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-[#9BA3AF] font-mono">
-            <span className="flex items-center gap-1.5 text-[#F0F2F5]">
-              <Calendar className="w-3.5 h-3.5 text-[#FC4C02]" />
+          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-[var(--color-text-secondary)] font-mono">
+            <span className="flex items-center gap-1.5 text-[var(--color-text-primary)]">
+              <Calendar className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
               {formatDate(activity.start_date)}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-[#5A6272]" />
-              {new Date(activity.start_date).toLocaleTimeString("en-US", {
+              <Clock className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+              {new Date(activity.start_date).toLocaleTimeString("id-ID", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
             </span>
-            <span className="text-[#3A404D]">|</span>
+            <span className="text-[var(--color-border)]">|</span>
             <EditActivityModal activity={activity} variant="inline" />
             {activity.description && (
               <>
                 <span>•</span>
-                <span className="text-[#9BA3AF] italic">
+                <span className="text-[var(--color-text-secondary)] italic">
                   {activity.description}
                 </span>
               </>
@@ -54,23 +54,23 @@ export function ActivityDetailHero({
         </div>
 
         {/* Quick KPI Pill Group */}
-        <div className="flex items-center gap-3 bg-[#12151D] border border-[#1F2430] px-4 py-2.5 rounded-sm">
+        <div className="flex items-center gap-3 bg-[var(--color-surface-card)] border border-[var(--color-border)] px-4 py-2.5 rounded-xl shadow-xs">
           <div className="text-right">
-            <div className="text-[10px] uppercase font-mono text-[#9BA3AF]">
-              Distance
+            <div className="text-[10px] uppercase font-mono text-[var(--color-text-muted)]">
+              Jarak Tempuh
             </div>
-            <div className="text-lg font-black font-mono font-tabular text-white">
+            <div className="text-lg font-bold font-mono font-tabular text-[var(--color-text-primary)]">
               {formatDistance(activity.distance_meters)}
             </div>
           </div>
-          <div className="h-8 w-px bg-[#232838]" />
+          <div className="h-8 w-px bg-[var(--color-border)]" />
           <div className="text-right">
-            <div className="text-[10px] uppercase font-mono text-[#9BA3AF]">
+            <div className="text-[10px] uppercase font-mono text-[var(--color-text-muted)]">
               {isRun ? "Avg Pace" : "Avg Speed"}
             </div>
             <div
-              className={`text-lg font-black font-mono font-tabular ${
-                isRun ? "text-[#D4FF00]" : "text-[#00F0FF]"
+              className={`text-lg font-bold font-mono font-tabular ${
+                isRun ? "text-[var(--color-running)]" : "text-[var(--color-cycling)]"
               }`}
             >
               {isRun ? paceStr : speedKmhStr}
@@ -81,4 +81,3 @@ export function ActivityDetailHero({
     </div>
   );
 }
-

@@ -185,25 +185,25 @@ export function StravaConnectCard() {
   };
 
   return (
-    <div className="w-full bg-[#12151D] border border-[#1F2430] rounded-sm p-4 sm:p-5 transition-all">
+    <div className="w-full rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 transition-all shadow-xs">
       {/* Notification Banner */}
       {banner && (
         <div
-          className={`mb-5 p-3.5 rounded-sm text-sm flex items-start gap-3 border ${
+          className={`mb-4 p-3 rounded-lg text-xs font-mono flex items-start gap-3 border ${
             banner.type === "success"
-              ? "bg-[#052e16] border-[#10b981]/40 text-[#4ade80]"
-              : "bg-[#3f0713] border-[#f43f5e]/40 text-[#fda4af]"
+              ? "bg-[var(--color-surface-muted)] border-[var(--color-cycling)]/40 text-[var(--color-cycling)]"
+              : "bg-[var(--color-surface-muted)] border-[var(--color-alert-red)]/40 text-[var(--color-alert-red)]"
           }`}
         >
           {banner.type === "success" ? (
-            <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[#10b981]" />
+            <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-[var(--color-cycling)]" />
           ) : (
-            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-[#f43f5e]" />
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0 text-[var(--color-alert-red)]" />
           )}
           <span className="flex-1">{banner.message}</span>
           <button
             onClick={() => setBanner(null)}
-            className="text-xs opacity-70 hover:opacity-100 uppercase tracking-wider font-semibold ml-2"
+            className="text-[10px] opacity-70 hover:opacity-100 uppercase tracking-wider font-semibold ml-2"
           >
             Dismiss
           </button>
@@ -211,29 +211,29 @@ export function StravaConnectCard() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#1F2430]">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-sm bg-[#FC4C02]/10 border border-[#FC4C02]/30 flex items-center justify-center text-[#FC4C02] shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[var(--color-strava)]/10 border border-[var(--color-strava)]/30 flex items-center justify-center text-[var(--color-strava)] shrink-0 shadow-xs">
             <Activity className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xs sm:text-sm font-semibold text-[#F0F2F5] tracking-tight">
+              <h2 className="text-xs sm:text-sm font-semibold text-[var(--color-text-primary)] tracking-tight">
                 Strava API v3 Integration
               </h2>
               {!loading && (
                 <span
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] font-mono font-medium ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                     status?.isConnected
-                      ? "bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30"
+                      ? "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30"
                       : status?.isConfigured
-                      ? "bg-[#9BA3AF]/10 text-[#9BA3AF] border border-[#9BA3AF]/30"
-                      : "bg-[#FF9500]/10 text-[#FF9500] border border-[#FF9500]/30"
+                      ? "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
+                      : "bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30"
                   }`}
                 >
                   {status?.isConnected ? (
                     <>
-                      <span className="w-1.5 h-1.5 rounded-sm bg-[#10b981] animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-cycling)] animate-pulse" />
                       Active Link
                     </>
                   ) : status?.isConfigured ? (
@@ -244,7 +244,7 @@ export function StravaConnectCard() {
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-[#5A6272] hidden sm:block font-mono">
+            <p className="text-[11px] text-[var(--color-text-muted)] hidden sm:block font-mono">
               OAuth 2.0 PKCE Handshake &amp; Telemetry Bridge
             </p>
           </div>
@@ -255,7 +255,7 @@ export function StravaConnectCard() {
           {!status?.isConfigured && !loading && (
             <button
               onClick={() => setIsGuideOpen(!isGuideOpen)}
-              className="px-2.5 py-1 rounded-sm text-xs font-mono font-medium text-[#9BA3AF] hover:text-white bg-[#161922] border border-[#1F2430] hover:border-[#FC4C02] transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors flex items-center gap-1"
             >
               <span>{isGuideOpen ? "Tutup Panduan" : "Panduan Setup"}</span>
               {isGuideOpen ? (
@@ -270,11 +270,11 @@ export function StravaConnectCard() {
             onClick={fetchStatus}
             disabled={loading}
             title="Re-check configuration"
-            className="p-1.5 rounded-sm text-xs text-[#9BA3AF] hover:text-[#F0F2F5] bg-[#161922] border border-[#1F2430] hover:border-[#384158] transition-colors disabled:opacity-50"
+            className="p-1.5 rounded-lg text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors disabled:opacity-50"
           >
             <RefreshCw
               className={`w-3.5 h-3.5 ${
-                loading ? "animate-spin text-[#FC4C02]" : ""
+                loading ? "animate-spin text-[var(--color-strava)]" : ""
               }`}
             />
           </button>
@@ -284,8 +284,8 @@ export function StravaConnectCard() {
       {/* Body States */}
       <div className="pt-3">
         {loading ? (
-          <div className="flex items-center justify-center py-8 gap-3 text-sm text-[#9BA3AF]">
-            <RefreshCw className="w-4 h-4 animate-spin text-[#FC4C02]" />
+          <div className="flex items-center justify-center py-8 gap-3 text-xs font-mono text-[var(--color-text-muted)]">
+            <RefreshCw className="w-4 h-4 animate-spin text-[var(--color-strava)]" />
             <span>Checking Strava OAuth connection state...</span>
           </div>
         ) : !status?.isConfigured ? (
@@ -304,7 +304,7 @@ export function StravaConnectCard() {
           />
         ) : (
           <div className="space-y-4">
-            <p className="text-xs text-[#9BA3AF] leading-relaxed">
+            <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed font-mono">
               Authorize connection with your Strava profile to synchronize GPS
               tracks, heart rate streams, power wattages, and cadence for planned
               workout comparisons.
@@ -313,14 +313,14 @@ export function StravaConnectCard() {
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <a
                 href="/api/auth/strava/authorize"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-sm bg-[#FC4C02] hover:bg-[#e04300] text-white font-medium text-xs tracking-wide transition-all active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-strava)] hover:opacity-90 text-white font-medium text-xs tracking-wide transition-all active:scale-[0.98] font-mono shadow-xs"
               >
                 <Activity className="w-4 h-4" />
                 <span>Connect with Strava</span>
               </a>
 
-              <div className="flex items-center gap-1.5 text-[11px] text-[#5A6272]">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#10b981]" />
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)] font-mono">
+                <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
                 <span>
                   Encrypted via AES-256-GCM. Read-only permissions requested.
                 </span>

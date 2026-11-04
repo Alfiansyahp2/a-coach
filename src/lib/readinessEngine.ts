@@ -10,6 +10,7 @@ import {
   SafetyValidationResult,
   ScheduledWorkout,
 } from '@/types';
+import { getAnatomicalRegion } from '@/lib/anatomyUtils';
 
 /**
  * Evaluates the authoritative health context to compute a deterministic training readiness state.
@@ -17,7 +18,7 @@ import {
 export function evaluateTrainingReadiness(
   context: AuthoritativeAthleteHealthContext
 ): Omit<AthleteTrainingReadiness, 'id' | 'created_at'> {
-  const { injuries, recentPainLogs, recentResponses, medicalAssessments, clinicianRestrictions } = context;
+  const { injuries, recentPainLogs, recentResponses, medicalAssessments, clinicianRestrictions, todayWellness } = context;
 
   const triggerSymptoms: Array<{ region: string; description: string; severity: string }> = [];
   const sourceTelemetryRefs: Array<{ source: string; details: string }> = [];
@@ -74,6 +75,16 @@ export function evaluateTrainingReadiness(
     });
   }
 
+  // 3b. Evaluate Proactive Morning Daily Wellness (Point 5)
+  if (todayWellness) {
+    if (todayWellness.perceived_readiness === 'REST_RECOMMENDED' || (todayWellness.fatigue_score && todayWellness.fatigue_score >= 4)) {
+      sourceTelemetryRefs.push({
+        source: `Morning Daily Wellness (${todayWellness.logged_date})`,
+        details: `Acute systemic fatigue (Score: ${todayWellness.fatigue_score}/5, Sleep: ${todayWellness.sleep_duration_hours ?? '?'}h). Proactive recovery recommended.`,
+      });
+    }
+  }
+
   // 4. Compute Sport-Specific Readiness States
   let runningReadiness: ReadinessState = 'READY';
   let cyclingReadiness: ReadinessState = 'READY';
@@ -107,21 +118,51 @@ export function evaluateTrainingReadiness(
     cyclingRestrictions = 'All cycling suspended: Acute joint instability or swelling requires clinical review.';
     rationaleItems.push('Safety rule triggered: Recent swelling or joint instability detected. All training suspended pending clinical diagnosis.');
   }
-  // C. UNRESOLVED LOWER-LIMB SYMPTOMS (ASYMMETRIC LOADING TOLERANCE)
+  // C. UNRESOLVED ANATOMICAL SYMPTOMS (FULL-BODY SPORT-SPECIFIC LOADING TOLERANCE)
   else if (activeInjuries.length > 0) {
     athleteStatus = 'ACTIVE_WITH_UNRESOLVED_SYMPTOMS';
     automaticProgression = false;
 
-    // Running has high impact forces (2.5 - 3x body weight per stride)
-    runningReadiness = 'ON_HOLD';
-    runningRestrictions = 'Running suspended pending clinical evaluation of right ankle stability and bilateral anterior knee response.';
-    rationaleItems.push('Running is placed ON_HOLD due to active right ankle inversion history and post-run bilateral anterior knee pain awaiting clinical assessment.');
+    // Classify all active injuries across human anatomy
+    const classified = activeInjuries.map((inj) => ({
+      injury: inj,
+      meta: getAnatomicalRegion(inj.body_region),
+    }));
 
-    // Cycling is non-impact, closed-chain kinetic loading
+    const hasLowerLimb = classified.some((c) => c.meta.isLowerExtremity);
+    const hasAxial = classified.some((c) => c.meta.isAxial);
+    const injuredPartsList = activeInjuries
+      .map((i) => `${i.side.toLowerCase()} ${i.body_region}`)
+      .join(' and ');
+
+    if (hasLowerLimb) {
+      // Running produces repetitive high ground-reaction forces (2.5 - 3x body weight)
+      runningReadiness = 'ON_HOLD';
+      runningRestrictions = `Running suspended pending clinical evaluation of ${injuredPartsList} response.`;
+      rationaleItems.push(
+        `Running is placed ON_HOLD due to active lower-limb weight-bearing symptoms (${injuredPartsList}) awaiting clinical assessment.`
+      );
+    } else if (hasAxial) {
+      runningReadiness = 'CONDITIONAL';
+      runningRestrictions = 'Zone 1-2 soft surface jogging only; avoid hard repetitive compression on spine/core.';
+      rationaleItems.push(`Running is CONDITIONAL due to active axial/spinal symptoms (${injuredPartsList}).`);
+    } else {
+      runningReadiness = 'READY';
+      runningRestrictions = 'Running cleared: Active symptoms are localized to upper limbs without weight-bearing contraindications.';
+    }
+
+    // Cycling closed-chain kinetic loading
     if (hasPainFreeCycling) {
       cyclingReadiness = 'CONDITIONAL';
-      cyclingRestrictions = 'Zone 1-2 flat aerobic cadence rides (duration <= 60 mins, distance <= 30 km) permitted. Avoid heavy out-of-saddle hill climbing or sprint intervals.';
-      rationaleItems.push('Cycling is CONDITIONAL: Non-impact closed-chain pedaling was empirically tolerated on verified distance rides (e.g. 56.10 km with 0 pain during, after, next-day). Sprinting and steep climbing are restricted to avoid joint torque.');
+      let bikeGuidance =
+        'Zone 1-2 flat aerobic cadence rides (duration <= 60 mins, distance <= 30 km) permitted. Avoid heavy out-of-saddle hill climbing or sprint intervals.';
+      if (hasAxial) {
+        bikeGuidance += ' Maintain relaxed upright posture; avoid prolonged aggressive aero tuck.';
+      }
+      cyclingRestrictions = bikeGuidance;
+      rationaleItems.push(
+        'Cycling is CONDITIONAL: Non-impact closed-chain pedaling was empirically tolerated on verified distance rides (e.g. 56.10 km with 0 pain during, after, next-day). Sprinting and steep climbing are restricted to avoid joint torque.'
+      );
     } else {
       cyclingReadiness = 'CONDITIONAL';
       cyclingRestrictions = 'Low-resistance indoor spin or short flat rides (<= 20 km) with prompt post-ride pain monitoring.';

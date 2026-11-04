@@ -45,12 +45,13 @@ export async function createTrainingPlan(
       await pgPool.query('UPDATE training_plans SET is_active = FALSE WHERE user_id = $1', [plan.user_id]);
     }
     const query = `
-      INSERT INTO training_plans (user_id, title, description, start_date, end_date, is_active, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW())
+      INSERT INTO training_plans (user_id, goal_id, title, description, start_date, end_date, is_active, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
       RETURNING *;
     `;
     const res = await pgPool.query(query, [
       plan.user_id,
+      plan.goal_id || null,
       plan.title,
       plan.description || null,
       plan.start_date,
@@ -143,9 +144,9 @@ export async function createScheduledWorkout(
     const query = `
       INSERT INTO scheduled_workouts (
         user_id, plan_id, scheduled_date, workout_category, target_distance_meters,
-        target_duration_seconds, target_pace_seconds_per_km, target_intensity, description, status, updated_at
+        target_duration_seconds, target_pace_seconds_per_km, target_intensity, description, status, is_key_session, milestone_target_km, updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
       RETURNING *;
     `;
     const res = await pgPool.query(query, [
@@ -159,6 +160,8 @@ export async function createScheduledWorkout(
       workout.target_intensity || null,
       workout.description || null,
       workout.status || 'PLANNED',
+      workout.is_key_session ?? false,
+      workout.milestone_target_km || null,
     ]);
     const row = res.rows[0];
     return {

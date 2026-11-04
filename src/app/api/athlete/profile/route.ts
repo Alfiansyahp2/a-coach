@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { connection } from "next/server";
 import {
   DEFAULT_USER_ID,
   getUser,
@@ -10,6 +11,7 @@ import {
 import { revalidatePath } from "next/cache";
 
 export async function GET(req: NextRequest) {
+  await connection();
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId") || DEFAULT_USER_ID;
@@ -35,7 +37,12 @@ export async function GET(req: NextRequest) {
   }
 }
 
+export async function PUT(req: NextRequest) {
+  return POST(req);
+}
+
 export async function POST(req: NextRequest) {
+  await connection();
   try {
     const body = await req.json();
     const userId = body.user_id || DEFAULT_USER_ID;
@@ -91,4 +98,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

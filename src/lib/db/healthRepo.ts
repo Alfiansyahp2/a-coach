@@ -1,4 +1,7 @@
-import { pgPool, ensureLocalStore, saveLocalStore, DEFAULT_USER_ID } from './client';
+import { pgPool, ensureLocalStore, saveLocalStore, DEFAULT_USER_ID, formatDateOnly } from './client';
+import { getAthleteAvailability } from './availabilityRepo';
+import { getAthleteEquipment } from './equipmentRepo';
+import { getTodayWellness } from './wellnessRepo';
 import {
   AthleteProfile,
   AthleteInjury,
@@ -135,7 +138,7 @@ export async function getAthleteInjuries(userId: string = DEFAULT_USER_ID): Prom
     return res.rows.map((r) => ({
       ...r,
       previous_swelling: Boolean(r.previous_swelling),
-      estimated_injury_date: r.estimated_injury_date ? r.estimated_injury_date.toISOString().split('T')[0] : null,
+      estimated_injury_date: r.estimated_injury_date ? formatDateOnly(r.estimated_injury_date) : null,
     }));
   }
 
@@ -365,8 +368,8 @@ export async function getAthleteMedicalAssessments(
     );
     return res.rows.map((r) => ({
       ...r,
-      assessment_date: r.assessment_date ? r.assessment_date.toISOString().split('T')[0] : '',
-      follow_up_date: r.follow_up_date ? r.follow_up_date.toISOString().split('T')[0] : null,
+      assessment_date: formatDateOnly(r.assessment_date),
+      follow_up_date: r.follow_up_date ? formatDateOnly(r.follow_up_date) : null,
     }));
   }
 
@@ -518,18 +521,21 @@ export async function logHealthAuditTrail(
 export async function getAuthoritativeHealthContext(
   userId: string = DEFAULT_USER_ID
 ): Promise<AuthoritativeAthleteHealthContext> {
-  const [profile, injuries, painLogs, responses, assessments, readiness] = await Promise.all([
+  const [profile, injuries, painLogs, responses, assessments, readiness, availability, equipment, todayWellness] = await Promise.all([
     getAthleteProfile(userId),
     getAthleteInjuries(userId),
     getAthletePainLogs(userId, 15),
     getAthleteTrainingResponses(userId, 15),
     getAthleteMedicalAssessments(userId),
     getLatestAthleteReadiness(userId),
+    getAthleteAvailability(userId),
+    getAthleteEquipment(userId),
+    getTodayWellness(userId),
   ]);
 
   const clinicianRestrictions: string[] = [];
   for (const m of assessments) {
-    if (m.clinician_restrictions && m.clinician_restrictions.trim().length > 0) {
+    if (m.verification_status === 'CLINICIAN_VERIFIED' && m.clinician_restrictions && m.clinician_restrictions.trim().length > 0) {
       clinicianRestrictions.push(m.clinician_restrictions.trim());
     }
   }
@@ -547,6 +553,9 @@ export async function getAuthoritativeHealthContext(
     medicalAssessments: assessments,
     latestReadiness: readiness,
     clinicianRestrictions,
+    availability,
+    equipment,
+    todayWellness,
   };
 }
 
@@ -576,7 +585,7 @@ export async function recordMedicalProcedureAndAssessment(
 }> {
   const restrictions = params.clearance_granted
     ? 'CLEARED_FOR_TRAINING'
-    : params.clinician_restrictions || 'IMPACT_RESTRICTED';
+    : params.clinician_restrictions || '';
 
   const assessment = await createAthleteMedicalAssessment({
     user_id: userId,

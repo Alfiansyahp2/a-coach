@@ -33,7 +33,11 @@ export async function POST(req: NextRequest) {
     tempFilePath = path.join(tempDir, `ocr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`);
     fs.writeFileSync(tempFilePath, buffer);
 
-    const scriptPath = path.join(process.cwd(), "scripts", "parse_activity_image.py");
+    const candidatePaths = [
+      path.join(process.cwd(), "scripts", "parsers", "parse_activity_image.py"),
+      path.join(process.cwd(), "scripts", "parse_activity_image.py"),
+    ];
+    const scriptPath = candidatePaths.find((p) => fs.existsSync(p)) || candidatePaths[0];
 
     // Execute Python OCR Script
     const { stdout, stderr } = await execFileAsync("python", [scriptPath, tempFilePath], {

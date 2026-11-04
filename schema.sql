@@ -78,6 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_activities_sport ON activities(user_id, sport_typ
 CREATE TABLE IF NOT EXISTS training_plans (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    goal_id UUID REFERENCES fitness_goals(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     start_date DATE NOT NULL,
@@ -99,6 +100,8 @@ CREATE TABLE IF NOT EXISTS scheduled_workouts (
     target_intensity VARCHAR(50),
     description TEXT,
     status VARCHAR(20) DEFAULT 'PLANNED' NOT NULL,
+    is_key_session BOOLEAN DEFAULT FALSE NOT NULL,
+    milestone_target_km NUMERIC(10, 2),
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
@@ -132,9 +135,15 @@ CREATE TABLE IF NOT EXISTS fitness_goals (
     target_date DATE NOT NULL,
     is_achieved BOOLEAN DEFAULT FALSE NOT NULL,
     unit VARCHAR(30) NOT NULL,
+    sport_type VARCHAR(30) DEFAULT 'Ride',
+    priority INTEGER DEFAULT 1,
+    is_primary BOOLEAN DEFAULT FALSE NOT NULL,
+    target_event_name VARCHAR(255),
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_fitness_goals_primary ON fitness_goals(user_id, is_primary);
 
 CREATE TABLE IF NOT EXISTS personal_records (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -275,6 +284,7 @@ CREATE TABLE IF NOT EXISTS athlete_training_responses (
     instability_observed BOOLEAN DEFAULT FALSE,
     fatigue_response VARCHAR(30) DEFAULT 'NORMAL' CHECK (fatigue_response IN ('LOW', 'NORMAL', 'HIGH', 'EXHAUSTED')),
     athlete_comments TEXT,
+    pain_log_id UUID REFERENCES athlete_pain_logs(id) ON DELETE SET NULL,
     checkin_completed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     CONSTRAINT uq_activity_response UNIQUE (user_id, activity_id)
@@ -375,3 +385,64 @@ CREATE TABLE IF NOT EXISTS health_audit_trail (
 );
 
 CREATE INDEX IF NOT EXISTS idx_health_audit_user ON health_audit_trail(user_id, created_at DESC);
+
+-- =====================================================================
+-- 15. ATHLETE TRAINING AVAILABILITY & LIFESTYLE
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS athlete_availability (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    preferred_days TEXT[] DEFAULT ARRAY['Tuesday', 'Friday', 'Sunday'] NOT NULL,
+    preferred_time_of_day VARCHAR(30) DEFAULT 'MORNING' NOT NULL, -- 'MORNING', 'EVENING', 'FLEXIBLE'
+    max_session_duration_minutes INTEGER DEFAULT 60 NOT NULL,
+    weekend_duration_minutes INTEGER DEFAULT 120 NOT NULL,
+    fasting_schedule JSONB DEFAULT '{"type": "NONE", "is_fasting": false}'::jsonb NOT NULL,
+    protected_rest_days TEXT[] DEFAULT ARRAY['Monday'] NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_athlete_availability_user UNIQUE (user_id)
+);
+
+-- =====================================================================
+-- 16. ATHLETE EQUIPMENT REGISTRY (Shoes & Bikes)
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS athlete_equipment (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sport_type VARCHAR(30) NOT NULL, -- 'Run', 'Ride', 'CrossTraining'
+    name VARCHAR(255) NOT NULL,
+    brand VARCHAR(100),
+    model VARCHAR(100),
+    accumulated_distance_meters NUMERIC(12, 2) DEFAULT 0 NOT NULL,
+    max_recommended_distance_meters NUMERIC(12, 2) DEFAULT 800000 NOT NULL, -- 800 km default cap
+    gear_type VARCHAR(50) DEFAULT 'RUNNING_SHOES' NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    is_retired BOOLEAN DEFAULT FALSE NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_equipment_user_sport ON athlete_equipment(user_id, sport_type);
+
+-- =====================================================================
+-- 17. ATHLETE DAILY MORNING WELLNESS
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS athlete_daily_wellness (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    logged_date DATE DEFAULT CURRENT_DATE NOT NULL,
+    resting_heart_rate INTEGER,
+    sleep_duration_hours NUMERIC(4, 2),
+    sleep_quality_score INTEGER CHECK (sleep_quality_score BETWEEN 1 AND 5),
+    fatigue_score INTEGER CHECK (fatigue_score BETWEEN 1 AND 5),
+    muscle_soreness_score INTEGER CHECK (muscle_soreness_score BETWEEN 1 AND 5),
+    life_stress_score INTEGER CHECK (life_stress_score BETWEEN 1 AND 5),
+    perceived_readiness VARCHAR(30) DEFAULT 'NORMAL' NOT NULL, -- 'OPTIMAL', 'NORMAL', 'REDUCED', 'REST_RECOMMENDED'
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_daily_wellness_user_date UNIQUE (user_id, logged_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_wellness_user_date ON athlete_daily_wellness(user_id, logged_date DESC);

@@ -11,6 +11,7 @@ import { ActivityDeckHeader } from "./activity/deck/ActivityDeckHeader";
 import { ActivityFilterToolbar } from "./activity/deck/ActivityFilterToolbar";
 import { ActivityBatchActionBar } from "./activity/deck/ActivityBatchActionBar";
 import { ActivityGroupCard } from "./activity/deck/ActivityGroupCard";
+import { getDistinctSports, getSportMeta } from "@/lib/sportUtils";
 
 interface ActivityManagementDeckProps {
   activities: Activity[];
@@ -31,6 +32,7 @@ export function ActivityManagementDeck({
   const [batchSport, setBatchSport] = useState<string>("Run");
   const [batchLoading, setBatchLoading] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [density, setDensity] = useState<"detailed" | "compact">("detailed");
 
   // Toggle group collapse
   const toggleGroup = (groupKey: string) => {
@@ -92,11 +94,56 @@ export function ActivityManagementDeck({
     return groupActivities(processedActivities, groupBy);
   }, [processedActivities, groupBy]);
 
+  // Check if all groups are collapsed
+  const groupKeys = Object.keys(groupedData);
+  const isAllCollapsed =
+    groupKeys.length > 0 && groupKeys.every((key) => !!collapsedGroups[key]);
+
+  const handleToggleAllCollapsed = () => {
+    if (isAllCollapsed) {
+      setCollapsedGroups({});
+    } else {
+      const all: Record<string, boolean> = {};
+      groupKeys.forEach((k) => {
+        all[k] = true;
+      });
+      setCollapsedGroups(all);
+    }
+  };
+
+  // Selection handlers
   const toggleSelectOne = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
+
+  const handleToggleSelectGroup = (groupItems: Activity[]) => {
+    const groupIds = groupItems.map((i) => i.id);
+    const allSelected = groupIds.every((id) => selectedIds.includes(id));
+    if (allSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !groupIds.includes(id)));
+    } else {
+      setSelectedIds((prev) => Array.from(new Set([...prev, ...groupIds])));
+    }
+  };
+
+  const handleSelectAllFiltered = () => {
+    const allFilteredIds = processedActivities.map((a) => a.id);
+    setSelectedIds(allFilteredIds);
+  };
+
+  // Dynamically compute available distinct sports for filters
+  const distinctSports = useMemo(() => getDistinctSports(activities), [activities]);
+  const availableSports = useMemo(() => {
+    return distinctSports.map((s) => {
+      const meta = getSportMeta(s);
+      const count = activities.filter(
+        (a) => a.sport_type.toLowerCase() === s.toLowerCase()
+      ).length;
+      return { id: s, name: meta.name, count };
+    });
+  }, [distinctSports, activities]);
 
   // Batch update sport type
   const handleBatchUpdateSport = async () => {
@@ -132,11 +179,15 @@ export function ActivityManagementDeck({
   };
 
   return (
-    <div className="space-y-6">
-      {/* 1. Header Toolbar & Telemetry Summary */}
-      <ActivityDeckHeader activities={activities} />
+    <div className="space-y-5">
+      {/* 1. Header Toolbar & Dynamic Interactive Telemetry KPI Cards */}
+      <ActivityDeckHeader
+        activities={activities}
+        sportFilter={sportFilter}
+        setSportFilter={setSportFilter}
+      />
 
-      {/* 2. Control Deck: Grouping Tabs, Search & Sort */}
+      {/* 2. Control Deck: Grouping Tabs, Search, Sort & Density Controls */}
       <ActivityFilterToolbar
         groupBy={groupBy}
         setGroupBy={setGroupBy}
@@ -146,11 +197,19 @@ export function ActivityManagementDeck({
         setSearchQuery={setSearchQuery}
         sportFilter={sportFilter}
         setSportFilter={setSportFilter}
+        density={density}
+        setDensity={setDensity}
+        isAllCollapsed={isAllCollapsed}
+        onToggleAllCollapsed={handleToggleAllCollapsed}
+        availableSports={availableSports}
+        totalCount={activities.length}
       />
 
       {/* 3. Batch Action Toolbar (When Items are Selected) */}
       <ActivityBatchActionBar
         selectedIds={selectedIds}
+        totalFilteredCount={processedActivities.length}
+        onSelectAllFiltered={handleSelectAllFiltered}
         batchSport={batchSport}
         setBatchSport={setBatchSport}
         batchLoading={batchLoading}
@@ -159,12 +218,12 @@ export function ActivityManagementDeck({
       />
 
       {/* 4. Grouped Activity Decks */}
-      {Object.keys(groupedData).length === 0 ? (
-        <div className="py-12 text-center text-xs text-[#5A6272] font-mono border border-dashed border-[#1F2430] rounded-sm">
-          Tidak ada aktivitas yang sesuai dengan filter pencarian.
+      {groupKeys.length === 0 ? (
+        <div className="py-16 text-center text-xs text-[var(--color-text-muted)] font-mono border border-dashed border-[var(--color-border)] rounded-xl bg-[var(--color-surface-card)]">
+          Tidak ada aktivitas yang sesuai dengan filter pencarian atau kategori ini.
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {Object.entries(groupedData).map(([groupKey, group]) => (
             <ActivityGroupCard
               key={groupKey}
@@ -174,6 +233,8 @@ export function ActivityManagementDeck({
               toggleGroup={toggleGroup}
               selectedIds={selectedIds}
               toggleSelectOne={toggleSelectOne}
+              onSelectGroup={handleToggleSelectGroup}
+              density={density}
             />
           ))}
         </div>
