@@ -137,10 +137,13 @@ CREATE TABLE IF NOT EXISTS fitness_goals (
     unit VARCHAR(30) NOT NULL,
     sport_type VARCHAR(30) DEFAULT 'Ride',
     priority INTEGER DEFAULT 1,
+    is_primary BOOLEAN DEFAULT FALSE NOT NULL,
     target_event_name VARCHAR(255),
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS idx_fitness_goals_primary ON fitness_goals(user_id, is_primary);
 
 CREATE TABLE IF NOT EXISTS personal_records (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -30,6 +30,8 @@ Direktori ini berisi skrip SQL DDL dan runner migrasi aman dengan pengecekan pra
 | `run_migration_001.cjs` | Transaction runner migrasi 001 dengan validasi 34 aktivitas PostgreSQL utuh dan verifikasi pasca-migrasi. | `node scripts/migrations/run_migration_001.cjs` |
 | `002_goal_driven_training.sql` | DDL migrasi penambahan `goal_id` pada `training_plans` dan flag `is_key_session`, `milestone_target_km` pada `scheduled_workouts`. | Dieksekusi otomatis oleh `run_migration_002.cjs`. |
 | `run_migration_002.cjs` | Transaction runner migrasi 002 menghubungkan relasi tujuan ke kalender latihan periodisasi adaptif. | `node scripts/migrations/run_migration_002.cjs` |
+| `003_primary_goal_logic.sql` | DDL migrasi penambahan `is_primary` pada `fitness_goals` dan pembuatan indeks unik/pencarian performa sasaran utama. | Dieksekusi otomatis oleh `run_migration_003.cjs`. |
+| `run_migration_003.cjs` | Transaction runner migrasi 003 untuk menegakkan integritas 1 sasaran utama otoritatif per atlet. | `node scripts/migrations/run_migration_003.cjs` |
 | `migrate_health_schema.js` | DDL pembuat skema kesehatan atlet, tabel cedera, dan log nyeri. | `node scripts/migrations/migrate_health_schema.js` |
 | `migrate_biometrics_and_clean_dummy.js` | Migrasi biometrik fisik ke `athlete_profiles` dan pembersihan dummy. | `node scripts/migrations/migrate_biometrics_and_clean_dummy.js` |
 

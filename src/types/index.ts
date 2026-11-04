@@ -132,6 +132,7 @@ export interface FitnessGoal {
   goal_type: GoalType;
   sport_type?: string; // 'Ride', 'Run', 'Swim', 'All'
   priority?: number; // 1 = Primary, 2 = Secondary, 3 = Maintenance
+  is_primary?: boolean; // true = Target Utama governing the training plan
   target_event_name?: string; // e.g. "Gran Fondo 100K", "10K Trail"
   target_value: number; // e.g., 100000 meters for 100km, or 4 for 4x/week
   current_value: number;

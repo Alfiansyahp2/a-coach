@@ -80,14 +80,30 @@ async function runTests() {
       `Kamis Puasa Sunnah is strictly protected: 0 scheduled workouts (found: ${thursdaySessions.length})`
     );
 
-    // Test 6: Fitness goals table integrity
-    const goalsRes = await pool.query('SELECT * FROM fitness_goals WHERE user_id = $1 ORDER BY priority ASC', [
+    // Test 6: Fitness goals table integrity and is_primary column
+    const isPrimaryColRes = await pool.query(
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'fitness_goals' AND column_name = 'is_primary'"
+    );
+    assert(isPrimaryColRes.rows.length === 1, 'fitness_goals table has is_primary column');
+
+    const goalsRes = await pool.query('SELECT * FROM fitness_goals WHERE user_id = $1 ORDER BY is_primary DESC, priority ASC', [
       DEFAULT_USER_ID,
     ]);
     assert(goalsRes.rows.length >= 4, `Authoritative goals exist in DB: ${goalsRes.rows.length} goals`);
 
-    const primaryGoal = goalsRes.rows.find((g) => Number(g.priority) === 1);
-    assert(Boolean(primaryGoal), `Primary goal (priority=1) is designated: "${primaryGoal ? primaryGoal.title : 'None'}"`);
+    // Exactly one primary goal
+    const primaryGoals = goalsRes.rows.filter((g) => g.is_primary === true);
+    assert(primaryGoals.length === 1, `Exactly ONE Target Utama has is_primary = TRUE (found: ${primaryGoals.length})`);
+
+    const primaryGoal = primaryGoals[0];
+    assert(Boolean(primaryGoal), `Target Utama is designated: "${primaryGoal ? primaryGoal.title : 'None'}"`);
+    console.log(`Active Target Utama: "${primaryGoal?.title}" (Type: ${primaryGoal?.goal_type}, Value: ${primaryGoal?.target_value} ${primaryGoal?.unit})`);
+
+    // Verify Target Utama represents a peak single activity effort or authoritative target
+    assert(
+      Number(primaryGoal?.target_value) > 0,
+      `Target Utama target_value > 0 represents single activity benchmark (${primaryGoal?.target_value})`
+    );
 
     console.log(`\n========================================`);
     console.log(`Test Summary: ${passed} passed, ${failed} failed`);
