@@ -110,3 +110,4 @@ Pada modul **Schedule Training & Periodization** (`/training`), antarmuka kalend
 | **Kompilasi Produksi** | `npm run build` | **LULUS** | 24 rute Next.js (SSG & ISR/PPR) terkompilasi optimal. |
 | **Integritas Data** | PostgreSQL `sport_training` | **AMAN** | 34 aktivitas Strava autentik tetap utuh 100%. |
 | **Sinkronisasi Branch** | `git merge` | **SELESAI** | Cabang `feat/ui` dan `main` berada pada status paritas 1:1. |
+
