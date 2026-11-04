@@ -1,83 +1,62 @@
+"use client";
+
 import React from "react";
-import { Database, ShieldCheck, Activity as ActivityIcon } from "lucide-react";
-import { AddActivityModal } from "@/components/AddActivityModal";
-import { EditAthleteProfileModal } from "@/components/health/EditAthleteProfileModal";
-import { User } from "@/types";
+import Link from "next/link";
+import { Activity as ActivityIcon, Target, Calendar, ArrowRight } from "lucide-react";
+import { User, FitnessGoal, TrainingPlan } from "@/types";
 
 interface DashboardIntegrityStripProps {
-  dbStatus: { type: string; connected: boolean };
-  user: User | null;
-  healthContext: any;
+  dbStatus?: { type: string; connected: boolean };
+  user?: User | null;
+  healthContext?: any;
+  primaryGoal?: FitnessGoal | null;
+  activePlan?: TrainingPlan | null;
 }
 
 export function DashboardIntegrityStrip({
-  dbStatus,
-  user,
-  healthContext,
+  primaryGoal,
 }: DashboardIntegrityStripProps) {
   return (
-    <div className="p-3 sm:p-3.5 rounded-sm bg-gradient-to-r from-[#12151D] via-[#161B26] to-[#12151D] border border-[#1F2430] flex flex-wrap items-center justify-between gap-3 shadow-sm">
-      {/* Left: Telemetry & Security Health HUD */}
-      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-mono">
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#090A0F]/80 border border-[#1F2430] text-[#9BA3AF]">
-          <span
-            className={`w-2 h-2 rounded-full shrink-0 ${
-              dbStatus.connected ? "bg-[#10B981] animate-pulse" : "bg-[#FF2A6D]"
-            }`}
-          />
-          <Database className="w-3.5 h-3.5 text-[#00F0FF]" />
-          <span>DB: <strong className="text-[#F0F2F5]">{dbStatus.type}</strong></span>
-          <span
-            className={`font-bold text-[10px] uppercase ml-0.5 ${
-              dbStatus.connected ? "text-[#10B981]" : "text-[#FF2A6D]"
-            }`}
-          >
-            [{dbStatus.connected ? "ONLINE" : "OFFLINE"}]
-          </span>
-        </div>
-
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#090A0F]/80 border border-[#1F2430] text-[#9BA3AF]">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#10B981]" />
-          <span>Storage: <strong className="text-[#F0F2F5]">AES-256-GCM</strong></span>
-        </div>
+    <div className="p-3 sm:p-3.5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] flex flex-wrap items-center justify-between gap-3 shadow-xs">
+      {/* Left: Telemetry Bridge Indicator */}
+      <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-secondary)] text-xs font-mono shadow-xs">
+        <ActivityIcon className="w-3.5 h-3.5 text-[var(--color-strava)]" />
+        <span className="font-semibold">Strava Bridge Active</span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-endurance)] animate-pulse" />
       </div>
 
-      {/* Right: Quick Actions & Athlete Health Profile Badge */}
-      <div className="flex items-center gap-3">
-        <AddActivityModal variant="button" />
-
-        {user && (
-          <div className="flex items-center gap-2.5">
-            <EditAthleteProfileModal
-              user={user}
-              profile={healthContext?.profile}
-              healthContext={healthContext}
-              variant="badge"
-            />
-
-            <div className="hidden sm:flex items-center gap-2 pl-2.5 border-l border-[#1F2430]">
-              {user.avatar_url ? (
-                <img
-                  src={user.avatar_url}
-                  alt={user.name}
-                  className="w-7 h-7 rounded-sm border border-[#1F2430] object-cover shadow-xs"
-                />
-              ) : (
-                <div className="w-7 h-7 rounded-sm bg-[#161922] border border-[#1F2430] flex items-center justify-center text-xs font-mono font-bold text-[#00F0FF]">
-                  {user.name.charAt(0)}
-                </div>
-              )}
-              <div className="text-left font-mono">
-                <div className="text-xs font-semibold text-[#F0F2F5] leading-none">
-                  {user.name}
-                </div>
-                <div className="text-[9px] text-[#10B981] leading-tight pt-0.5">
-                  Calibrated Athlete
-                </div>
-              </div>
-            </div>
+      {/* Right: Target Utama Showcase & Fast Navigation Hub */}
+      <div className="flex items-center flex-wrap gap-3">
+        {primaryGoal && (
+          <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-[var(--color-endurance)]/10 border border-[var(--color-endurance)]/30 text-xs font-mono">
+            <Target className="w-3.5 h-3.5 text-[var(--color-endurance)]" />
+            <span className="text-[var(--color-text-primary)] font-bold truncate max-w-[220px] sm:max-w-[280px]">
+              {primaryGoal.title}
+            </span>
+            <span className="px-1.5 py-0.2 rounded bg-[var(--color-endurance)] text-black font-extrabold text-[10px]">
+              {Number(primaryGoal.target_value).toFixed(0)} km
+            </span>
           </div>
         )}
+
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <Link
+            href="/goals"
+            className="px-2.5 py-1 rounded-md bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-all flex items-center gap-1 font-semibold"
+          >
+            <span>Hub Sasaran</span>
+            <ArrowRight className="w-3 h-3 text-[var(--color-endurance)]" />
+          </Link>
+
+          <Link
+            href="/training"
+            className="px-2.5 py-1 rounded-md bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-all flex items-center gap-1 font-semibold"
+          >
+            <Calendar className="w-3 h-3 text-[var(--color-cycling)]" />
+            <span>Kalender Latihan</span>
+            <ArrowRight className="w-3 h-3 text-[var(--color-cycling)]" />
+          </Link>
+        </div>
       </div>
     </div>
   );

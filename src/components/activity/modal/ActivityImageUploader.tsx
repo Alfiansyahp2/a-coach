@@ -85,13 +85,13 @@ export function ActivityImageUploader({
   };
 
   return (
-    <div className="p-4 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3 font-mono">
+    <div className="p-4 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-3 font-mono">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-[#F0F2F5] font-bold flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-[#00F0FF]" />
+        <span className="text-xs text-[var(--color-text-primary)] font-bold flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
           IMAGE TELEMETRY PARSER (OCR)
         </span>
-        <span className="text-[10px] text-[#5A6272]">
+        <span className="text-[10px] text-[var(--color-text-muted)]">
           Format: PNG, JPG, WEBP (Strava / Garmin / Apple Watch)
         </span>
       </div>
@@ -99,86 +99,90 @@ export function ActivityImageUploader({
       <input
         type="file"
         ref={fileInputRef}
-        accept="image/*"
         onChange={handleImageSelect}
+        accept="image/*"
         className="hidden"
       />
 
-      {/* Dropzone / Upload Box */}
+      {/* Upload Zone */}
       <div
-        onClick={() => fileInputRef.current?.click()}
-        className={`cursor-pointer border-2 border-dashed rounded-sm p-4 text-center transition-all flex flex-col items-center justify-center gap-2 ${
+        onClick={() => !isParsingImage && fileInputRef.current?.click()}
+        className={`p-6 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
           isParsingImage
-            ? "border-[#00F0FF] bg-[#00F0FF]/5"
+            ? "border-[var(--color-cycling)] bg-[var(--color-surface-card)]"
             : imagePreview
-            ? "border-[#1F2430] hover:border-[#00F0FF]/50 bg-[#090A0F]"
-            : "border-[#1F2430] hover:border-[#D4FF00]/50 hover:bg-[#161922] bg-[#090A0F]"
+            ? "border-[var(--color-border)] bg-[var(--color-surface-card)] hover:border-[var(--color-cycling)]"
+            : "border-[var(--color-border)] bg-[var(--color-surface-card)] hover:border-[var(--color-cycling)]"
         }`}
       >
         {isParsingImage ? (
-          <div className="py-4 flex flex-col items-center gap-2 text-xs text-[#00F0FF]">
-            <RefreshCw className="w-6 h-6 animate-spin text-[#00F0FF]" />
-            <span className="font-bold">Membaca dan mengekstrak telemetri gambar...</span>
-            <span className="text-[10px] text-[#9BA3AF]">
-              Memproses watermark rute, jarak, durasi, elevasi & kecepatan
+          <div className="flex flex-col items-center gap-2 py-2">
+            <RefreshCw className="w-6 h-6 text-[var(--color-cycling)] animate-spin" />
+            <span className="text-xs font-bold text-[var(--color-text-primary)]">
+              Mengekstrak Kinematika dari Gambar...
+            </span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">
+              Mendeteksi Jarak, Durasi, Elevasi, dan Kecepatan Sesi
             </span>
           </div>
         ) : imagePreview ? (
-          <div className="flex items-center gap-4 w-full">
+          <div className="flex flex-col items-center gap-2">
             <img
               src={imagePreview}
-              alt="Screenshot Pratinjau"
-              className="w-20 h-20 object-cover rounded-xs border border-[#1F2430] bg-black"
+              alt="Screenshot Telemetri"
+              className="max-h-36 rounded-md border border-[var(--color-border)] object-contain"
             />
-            <div className="flex-1 text-left">
-              <span className="text-xs text-[#F0F2F5] font-bold block">
-                Gambar Berhasil Dimuat
-              </span>
-              <span className="text-[10px] text-[#9BA3AF] block mt-0.5">
-                Klik untuk mengganti gambar atau periksa field hasil ekstraksi di bawah.
-              </span>
-            </div>
+            <span className="text-[10px] text-[var(--color-cycling)] underline font-semibold">
+              Ganti Gambar Screenshot Lain
+            </span>
           </div>
         ) : (
-          <div className="py-3 flex flex-col items-center gap-1.5 text-xs text-[#9BA3AF]">
-            <Camera className="w-7 h-7 text-[#5A6272]" />
-            <span className="font-bold text-[#F0F2F5]">
-              Klik untuk unggah screenshot aktivitas
+          <div className="flex flex-col items-center gap-1.5 py-3">
+            <div className="w-10 h-10 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)]">
+              <Camera className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+              Klik untuk Unggah Screenshot Aktivitas
             </span>
-            <span className="text-[10px] text-[#5A6272]">
-              Sistem akan otomatis mengekstrak jarak, durasi, elevasi, dan kategori olahraga
+            <span className="text-[10px] text-[var(--color-text-muted)]">
+              AI Vision akan memindai angka jarak, durasi, dan elevasi otomatis
             </span>
           </div>
         )}
       </div>
 
-      {/* OCR Success Banner */}
+      {/* OCR Success Feedback Banner */}
       {ocrSuccessMsg && (
-        <div className="p-2.5 rounded-sm bg-[#00F0FF]/10 border border-[#00F0FF]/30 flex items-center justify-between text-xs text-[#00F0FF]">
-          <span className="flex items-center gap-1.5 font-bold">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+        <div className="p-3 rounded-md bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 text-xs text-[var(--color-cycling)] space-y-1">
+          <div className="flex items-center gap-1.5 font-bold">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>Ekstraksi Telemetri Berhasil!</span>
+          </div>
+          <p className="text-[11px] text-[var(--color-text-primary)] font-tabular pl-5.5">
             {ocrSuccessMsg}
-          </span>
-          {ocrRawText && (
-            <button
-              type="button"
-              onClick={() => setShowRawText(!showRawText)}
-              className="text-[10px] text-[#9BA3AF] hover:text-white underline flex items-center gap-0.5"
-            >
-              <span>{showRawText ? "Tutup Teks Mentah" : "Lihat Teks Mentah"}</span>
-              {showRawText ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            </button>
-          )}
+          </p>
         </div>
       )}
 
-      {/* Raw OCR Text Drawer */}
-      {showRawText && ocrRawText && (
-        <div className="p-2.5 rounded-sm bg-[#090A0F] border border-[#1F2430] text-[10px] text-[#5A6272] font-mono whitespace-pre-wrap max-h-32 overflow-y-auto">
-          {ocrRawText}
+      {/* OCR Raw Text Toggle (For Transparency) */}
+      {ocrRawText && (
+        <div className="space-y-1">
+          <button
+            type="button"
+            onClick={() => setShowRawText(!showRawText)}
+            className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors"
+          >
+            <FileText className="w-3 h-3" />
+            <span>Lihat Teks Mentah Hasil Ekstraksi (Raw OCR)</span>
+            {showRawText ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
+          {showRawText && (
+            <pre className="p-2.5 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[9.5px] text-[var(--color-text-muted)] whitespace-pre-wrap max-h-24 overflow-y-auto">
+              {ocrRawText}
+            </pre>
+          )}
         </div>
       )}
     </div>
   );
 }
-

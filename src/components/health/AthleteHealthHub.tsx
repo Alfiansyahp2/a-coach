@@ -43,40 +43,41 @@ export function AthleteHealthHub({
   return (
     <div className="space-y-4">
       {/* 1. Header Banner & Status Strip */}
-      <div className="p-4 sm:p-5 rounded-sm bg-gradient-to-r from-[#12151D] via-[#161B26] to-[#12151D] border border-[#1F2430] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-sm bg-[#161922] border border-[#FF2A6D]/40 flex items-center justify-center text-[#FF2A6D] shadow-sm shrink-0">
+      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3.5 flex-1 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-alert-red)]/30 flex items-center justify-center text-[var(--color-alert-red)] shadow-xs shrink-0">
             <HeartPulse className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-sm uppercase font-mono tracking-wider font-bold text-[#F0F2F5]">
+              <h1 className="text-sm uppercase font-mono tracking-wider font-bold text-[var(--color-text-primary)]">
                 Dossier Kesehatan &amp; Rekam Jejak Klinis Atlet
               </h1>
-              <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-xs bg-[#FF2A6D]/15 text-[#FF2A6D] border border-[#FF2A6D]/40 font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FF2A6D] animate-pulse" />
+              <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border border-[var(--color-alert-red)]/30 font-bold flex items-center gap-1 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-alert-red)] animate-pulse" />
                 Pemulihan Terpantau (Gejala Belum Tuntas)
               </span>
             </div>
-            <span className="text-[11px] font-mono text-[#9BA3AF] block pt-0.5">
+            <span className="text-[11px] font-mono text-[var(--color-text-secondary)] block pt-0.5 truncate md:whitespace-normal">
               Protokol Terpusat: Sepeda Beban Rendah Kondisional • Lari Ditunda Sementara Menunggu Izin Fisioterapi
             </span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto font-mono text-xs">
+        {/* Both action buttons positioned at the rightmost corner */}
+        <div className="flex items-center justify-end gap-2.5 shrink-0 ml-auto font-mono text-xs">
           <button
             onClick={() => setIsCheckinOpen(true)}
-            className="px-3.5 py-1.5 rounded-sm bg-[#00F0FF]/15 border border-[#00F0FF]/40 text-[#00F0FF] hover:bg-[#00F0FF]/25 font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-[0.98]"
+            className="px-3.5 py-1.5 rounded-lg bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 text-[var(--color-cycling)] hover:bg-[var(--color-cycling)]/20 font-bold transition-all flex items-center gap-1.5 shadow-xs whitespace-nowrap"
           >
             <PlusCircle className="w-4 h-4" />
             <span>CHECK-IN PASCA SESI</span>
           </button>
           <button
             onClick={() => setIsNewInjuryOpen(!isNewInjuryOpen)}
-            className="px-3 py-1.5 rounded-sm bg-[#161922] border border-[#1F2430] hover:border-[#FF2A6D]/50 text-[#9BA3AF] hover:text-[#FF2A6D] transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-alert-red)]/50 text-[var(--color-text-secondary)] hover:text-[var(--color-alert-red)] transition-colors flex items-center gap-1.5 shadow-xs whitespace-nowrap"
           >
-            <AlertTriangle className="w-3.5 h-3.5 text-[#FF2A6D]" />
+            <AlertTriangle className="w-3.5 h-3.5 text-[var(--color-alert-red)]" />
             <span>TAMBAH CATATAN CEDERA</span>
           </button>
         </div>
@@ -98,74 +99,74 @@ export function AthleteHealthHub({
         />
       )}
 
-      {/* 2. Interactive Navigation Tabs (Clean, unnumbered, high contrast) */}
-      <div className="flex items-center gap-1 p-1 rounded-sm bg-[#12151D] border border-[#1F2430] text-xs font-mono overflow-x-auto">
+      {/* 2. Interactive Navigation Tabs */}
+      <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs font-mono overflow-x-auto">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`px-3 py-1.5 rounded-sm transition-all font-bold flex items-center gap-1.5 shrink-0 ${
+          className={`px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 shrink-0 ${
             activeTab === "overview"
-              ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-              : "text-[#9BA3AF] hover:text-white"
+              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
-          <User className="w-3.5 h-3.5 text-[#00F0FF]" />
+          <User className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
           <span>Profil &amp; Biometrik</span>
         </button>
 
         <button
           onClick={() => setActiveTab("injuries")}
-          className={`px-3 py-1.5 rounded-sm transition-all font-bold flex items-center gap-1.5 shrink-0 ${
+          className={`px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 shrink-0 ${
             activeTab === "injuries"
-              ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-              : "text-[#9BA3AF] hover:text-white"
+              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
-          <AlertTriangle className="w-3.5 h-3.5 text-[#FF2A6D]" />
+          <AlertTriangle className="w-3.5 h-3.5 text-[var(--color-alert-red)]" />
           <span>Peta Cedera &amp; Sendi</span>
-          <span className="px-1.5 py-0.2 rounded-xs bg-[#FF2A6D]/20 text-[#FF2A6D] text-[10px]">
+          <span className="px-1.5 py-0.2 rounded-full bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] text-[10px]">
             {injuries.length}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab("pain_logs")}
-          className={`px-3 py-1.5 rounded-sm transition-all font-bold flex items-center gap-1.5 shrink-0 ${
+          className={`px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 shrink-0 ${
             activeTab === "pain_logs"
-              ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-              : "text-[#9BA3AF] hover:text-white"
+              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
-          <History className="w-3.5 h-3.5 text-[#D4FF00]" />
+          <History className="w-3.5 h-3.5 text-[var(--color-running)]" />
           <span>Log Nyeri</span>
-          <span className="px-1.5 py-0.2 rounded-xs bg-[#D4FF00]/20 text-[#D4FF00] text-[10px]">
+          <span className="px-1.5 py-0.2 rounded-full bg-[var(--color-running)]/10 text-[var(--color-running)] text-[10px]">
             {recentPainLogs.length}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab("responses")}
-          className={`px-3 py-1.5 rounded-sm transition-all font-bold flex items-center gap-1.5 shrink-0 ${
+          className={`px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 shrink-0 ${
             activeTab === "responses"
-              ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-              : "text-[#9BA3AF] hover:text-white"
+              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
-          <ActivityIcon className="w-3.5 h-3.5 text-[#10B981]" />
+          <ActivityIcon className="w-3.5 h-3.5 text-[var(--color-endurance)]" />
           <span>Respon Strava</span>
-          <span className="px-1.5 py-0.2 rounded-xs bg-[#10B981]/20 text-[#10B981] text-[10px]">
+          <span className="px-1.5 py-0.2 rounded-full bg-[var(--color-endurance)]/10 text-[var(--color-endurance)] text-[10px]">
             {recentResponses.length}
           </span>
         </button>
 
         <button
           onClick={() => setActiveTab("clinical")}
-          className={`px-3 py-1.5 rounded-sm transition-all font-bold flex items-center gap-1.5 shrink-0 ${
+          className={`px-3 py-1.5 rounded-lg transition-all font-bold flex items-center gap-1.5 shrink-0 ${
             activeTab === "clinical"
-              ? "bg-[#1C212E] text-white border border-[#2D3547] shadow-sm"
-              : "text-[#9BA3AF] hover:text-white"
+              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
           }`}
         >
-          <Stethoscope className="w-3.5 h-3.5 text-[#00F0FF]" />
+          <Stethoscope className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
           <span>Catatan Medis &amp; RTS</span>
         </button>
       </div>
@@ -195,14 +196,14 @@ export function AthleteHealthHub({
       )}
 
       {/* Mandatory Clinical Notice Footer */}
-      <div className="p-3.5 rounded-sm bg-[#090A0F] border border-[#1F2430] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] font-mono text-[#5A6272]">
+      <div className="p-3.5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] font-mono text-[var(--color-text-muted)] shadow-xs">
         <div className="flex items-center gap-2">
-          <Stethoscope className="w-3.5 h-3.5 text-[#00F0FF] shrink-0" />
+          <Stethoscope className="w-3.5 h-3.5 text-[var(--color-cycling)] shrink-0" />
           <span>
             Sistem pendukung keputusan latihan atletik ilmiah. Bukan alat diagnosis medis atau izin mandiri return-to-sport.
           </span>
         </div>
-        <span className="text-[#9BA3AF]">
+        <span className="text-[var(--color-text-secondary)] font-medium">
           Keputusan Dokter &amp; Fisioterapis Bersifat Mutlak Mengikat
         </span>
       </div>

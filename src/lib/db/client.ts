@@ -19,6 +19,9 @@ import {
   AthleteMedicalAssessment,
   AthleteTrainingReadiness,
   HealthAuditTrail,
+  AthleteAvailability,
+  AthleteEquipment,
+  AthleteDailyWellness,
 } from '@/types';
 
 // Prevent node-postgres from converting DATE (OID 1082) into JS Date with local timezone shift
@@ -39,7 +42,7 @@ export function formatDateOnly(val: any): string {
 export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // Detect whether PostgreSQL is enabled
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:admin123@localhost:5432/sport_training';
 let poolInstance: Pool | null = null;
 
 if (databaseUrl && databaseUrl.trim().length > 0) {
@@ -81,6 +84,9 @@ export interface LocalStoreSchema {
   athlete_medical_assessments: AthleteMedicalAssessment[];
   athlete_training_readiness: AthleteTrainingReadiness[];
   health_audit_trail: HealthAuditTrail[];
+  athlete_availability?: AthleteAvailability[];
+  athlete_equipment?: AthleteEquipment[];
+  athlete_daily_wellness?: AthleteDailyWellness[];
 }
 
 export function ensureLocalStore(): LocalStoreSchema {
@@ -247,3 +253,28 @@ export function saveLocalStore(data: LocalStoreSchema) {
   }
 }
 
+
+
+export async function getDatabaseStatus(): Promise<{ type: 'PostgreSQL' | 'Local Store'; connected: boolean; info: string }> {
+  if (pgPool) {
+    try {
+      const res = await pgPool.query('SELECT NOW() as current_time');
+      return {
+        type: 'PostgreSQL',
+        connected: true,
+        info: `Connected to PostgreSQL (${res.rows[0].current_time})`,
+      };
+    } catch (err: any) {
+      return {
+        type: 'PostgreSQL',
+        connected: false,
+        info: `Connection error: ${err.message}`,
+      };
+    }
+  }
+  return {
+    type: 'Local Store',
+    connected: true,
+    info: 'Using file-backed atomic store (.data/store.json). Set DATABASE_URL to connect to PostgreSQL.',
+  };
+}

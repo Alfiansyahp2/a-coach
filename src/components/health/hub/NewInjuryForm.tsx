@@ -100,21 +100,16 @@ export function NewInjuryForm({
           initial_severity: newSeverity,
           previous_swelling: newSwelling,
           functional_limitations: newLimitations.trim() || activeMeta.suggestedLimitations,
+          aggravating_activities: activeMeta.isLowerExtremity ? "Hentakan lari, lompatan plyometrik" : "Beban mekanis berlebih",
+          easing_factors: "Gowes sepeda flat cadence tinggi, kompresi dingin, mobilitas",
           medical_evaluation_status: "PENDING_CLINICAL_ASSESSMENT",
-          current_status: "ACTIVE_SYMPTOMATIC",
+          recovery_notes: activeMeta.trainingGuidance.running,
         }),
       });
 
-      const text = await res.text();
-      let data: any = {};
-      try {
-        data = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error(`Respon server tidak valid (${res.status})`);
-      }
-
+      const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.message || data.error || "Gagal mencatat dossier cedera baru.");
+        throw new Error(data.message || data.error || "Gagal menyimpan dossier cedera");
       }
 
       setFormMsg({
@@ -136,21 +131,21 @@ export function NewInjuryForm({
   };
 
   return (
-    <div className="p-4 sm:p-5 rounded-sm bg-[#12151D] border border-[#FF2A6D]/40 space-y-4 font-mono text-xs shadow-xl animate-in fade-in duration-200">
+    <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-alert-red)]/40 space-y-4 font-mono text-xs shadow-xs animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#1F2430]">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-sm bg-[#161922] border border-[#FF2A6D]/40 flex items-center justify-center text-[#FF2A6D]">
+          <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-alert-red)]/40 flex items-center justify-center text-[var(--color-alert-red)]">
             <AlertTriangle className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-[#F0F2F5] uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-xs font-bold text-[var(--color-text-primary)] uppercase tracking-wider flex items-center gap-2">
               <span>Form Pendaftaran Gejala &amp; Riwayat Cedera Baru</span>
-              <span className="text-[9.5px] px-2 py-0.5 rounded-xs bg-[#FF2A6D]/15 text-[#FF2A6D] border border-[#FF2A6D]/30 font-bold">
+              <span className="text-[9.5px] px-2 py-0.5 rounded-full bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border border-[var(--color-alert-red)]/30 font-bold">
                 Full Body Architecture
               </span>
             </h3>
-            <span className="text-[10.5px] text-[#9BA3AF]">
+            <span className="text-[10.5px] text-[var(--color-text-secondary)]">
               Pilih area anatomi tubuh secara interaktif untuk mengkalibrasi pembatasan olahraga secara deterministik.
             </span>
           </div>
@@ -158,7 +153,7 @@ export function NewInjuryForm({
         <button
           type="button"
           onClick={onClose}
-          className="w-6 h-6 rounded-sm bg-[#161922] border border-[#1F2430] flex items-center justify-center text-[#9BA3AF] hover:text-white"
+          className="w-7 h-7 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
         >
           ✕
         </button>
@@ -167,26 +162,26 @@ export function NewInjuryForm({
       {/* 1. Interactive Anatomical Zone Navigation Pills */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-[11px]">
-          <span className="text-[#9BA3AF] uppercase font-bold flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-[#00F0FF]" />
+          <span className="text-[var(--color-text-secondary)] uppercase font-bold flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
             <span>Langkah 1: Pilih Zona / Area Tubuh Atlet</span>
           </span>
-          <span className="text-[10px] text-[#5A6272]">
+          <span className="text-[10px] text-[var(--color-text-muted)]">
             {ANATOMICAL_REGIONS.length} Wilayah Anatomi Terkalibrasi
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
           <button
             type="button"
             onClick={() => {
               setSelectedZone("ALL");
               setIsCustomMode(false);
             }}
-            className={`px-2.5 py-1 rounded-xs text-[10.5px] font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${
               selectedZone === "ALL" && !isCustomMode
-                ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/50 shadow-[0_0_8px_rgba(0,240,255,0.15)]"
-                : "bg-[#161922] text-[#9BA3AF] border border-[#1F2430] hover:text-[#F0F2F5]"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-cycling)] font-bold shadow-xs"
+                : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text-primary)]"
             }`}
           >
             🌐 Semua Tubuh ({ANATOMICAL_REGIONS.length})
@@ -199,10 +194,10 @@ export function NewInjuryForm({
                 setSelectedZone(zone.key);
                 setIsCustomMode(false);
               }}
-              className={`px-2.5 py-1 rounded-xs text-[10.5px] font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${
                 selectedZone === zone.key && !isCustomMode
-                  ? "bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/50 shadow-[0_0_8px_rgba(0,240,255,0.15)]"
-                  : "bg-[#161922] text-[#9BA3AF] border border-[#1F2430] hover:text-[#F0F2F5]"
+                  ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-cycling)] font-bold shadow-xs"
+                  : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text-primary)]"
               }`}
             >
               {zone.label}
@@ -211,10 +206,10 @@ export function NewInjuryForm({
           <button
             type="button"
             onClick={() => setIsCustomMode(true)}
-            className={`px-2.5 py-1 rounded-xs text-[10.5px] font-semibold whitespace-nowrap transition-all ${
+            className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${
               isCustomMode
-                ? "bg-[#D4FF00]/15 text-[#D4FF00] border border-[#D4FF00]/50 shadow-[0_0_8px_rgba(212,255,0,0.15)]"
-                : "bg-[#161922] text-[#9BA3AF] border border-[#1F2430] hover:text-[#D4FF00]"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-endurance)] border border-[var(--color-endurance)] font-bold shadow-xs"
+                : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-endurance)]"
             }`}
           >
             ✍️ Area Kustom...
@@ -224,7 +219,7 @@ export function NewInjuryForm({
 
       {/* 2. Visual Anatomical Region Selector Grid (When not in custom mode) */}
       {!isCustomMode ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1 bg-[#090A0F] border border-[#1F2430] rounded-sm">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1 bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)] rounded-xl">
           {displayedRegions.map((region) => {
             const isSelected = activeMeta.id === region.id;
             return (
@@ -232,28 +227,28 @@ export function NewInjuryForm({
                 key={region.id}
                 type="button"
                 onClick={() => handleSelectRegion(region)}
-                className={`p-2 rounded-xs border text-left transition-all flex flex-col justify-between gap-1 group ${
+                className={`p-2.5 rounded-lg border text-left transition-all flex flex-col justify-between gap-1 group shadow-xs ${
                   isSelected
-                    ? "bg-[#FF2A6D]/15 border-[#FF2A6D] text-white shadow-[0_0_10px_rgba(255,42,109,0.2)] ring-1 ring-[#FF2A6D]"
-                    : "bg-[#161922] border-[#1F2430] text-[#9BA3AF] hover:border-[#2D3547] hover:text-[#F0F2F5]"
+                    ? "bg-[var(--color-surface-card)] border-[var(--color-alert-red)] text-[var(--color-text-primary)] ring-1 ring-[var(--color-alert-red)]"
+                    : "bg-[var(--color-surface-card)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
               >
                 <div className="flex items-center justify-between gap-1">
-                  <span className={`text-[11px] font-bold truncate ${isSelected ? "text-[#00F0FF]" : "text-[#F0F2F5]"}`}>
+                  <span className={`text-[11px] font-bold truncate ${isSelected ? "text-[var(--color-alert-red)]" : "text-[var(--color-text-primary)]"}`}>
                     {region.name}
                   </span>
-                  {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#FF2A6D] animate-ping" />}
+                  {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-alert-red)] animate-ping" />}
                 </div>
 
-                <div className="flex items-center justify-between text-[9px] text-[#5A6272]">
+                <div className="flex items-center justify-between text-[9px] text-[var(--color-text-muted)]">
                   <span>{region.zoneLabel}</span>
                   <span
-                    className={`px-1 py-0.2 rounded-xs font-semibold ${
+                    className={`px-1.5 py-0.5 rounded-md font-semibold ${
                       region.isLowerExtremity
-                        ? "text-[#FF2A6D] bg-[#FF2A6D]/10"
+                        ? "text-[var(--color-alert-red)] bg-[var(--color-alert-red)]/10"
                         : region.isAxial
-                        ? "text-[#F59E0B] bg-[#F59E0B]/10"
-                        : "text-[#10B981] bg-[#10B981]/10"
+                        ? "text-[var(--color-alert-amber)] bg-[var(--color-alert-amber)]/10"
+                        : "text-[var(--color-cycling)] bg-[var(--color-cycling)]/10"
                     }`}
                   >
                     {region.isLowerExtremity ? "Hentakan Lari" : region.isAxial ? "Postur Spinal" : "Upper Body"}
@@ -264,8 +259,8 @@ export function NewInjuryForm({
           })}
         </div>
       ) : (
-        <div className="p-3 bg-[#090A0F] border border-[#D4FF00]/40 rounded-sm space-y-2">
-          <label className="block text-[10px] uppercase font-bold text-[#D4FF00]">
+        <div className="p-3 bg-[var(--color-surface-muted)] border border-[var(--color-endurance)]/40 rounded-xl space-y-2">
+          <label className="block text-[10px] uppercase font-bold text-[var(--color-endurance)]">
             Ketikkan Area Anatomi Tubuh Kustom
           </label>
           <input
@@ -273,41 +268,41 @@ export function NewInjuryForm({
             value={customRegionText}
             onChange={(e) => setCustomRegionText(e.target.value)}
             placeholder="Contoh: Tulang Rusuk Kiri, Jari Manis Kaki, Trapezius Kanan"
-            className="w-full bg-[#161922] border border-[#1F2430] rounded-sm px-3 py-2 text-[#F0F2F5] text-xs focus:outline-none focus:border-[#D4FF00]"
+            className="w-full bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-lg px-3 py-2 text-[var(--color-text-primary)] text-xs focus:outline-none focus:border-[var(--color-endurance)]"
             required={isCustomMode}
           />
-          <p className="text-[10.5px] text-[#9BA3AF]">
+          <p className="text-[10.5px] text-[var(--color-text-secondary)]">
             Sistem secara otomatis akan mengklasifikasikan kinematika gerak berdasarkan area kustom yang Anda masukkan.
           </p>
         </div>
       )}
 
-      {/* 3. Live Biomechanical Simulation & Training Impact Banner */}
-      <div className="p-3 rounded-sm bg-[#161922] border border-[#00F0FF]/25 space-y-2">
+      {/* 3. Live Biomechanical Simulation Banner */}
+      <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-[#00F0FF] font-bold uppercase">
+            <span className="text-[var(--color-cycling)] font-bold uppercase">
               Area Terpilih: {activeMeta.name}
             </span>
-            <span className="text-[10px] text-[#5A6272]">({activeMeta.clinicalTerm})</span>
+            <span className="text-[10px] text-[var(--color-text-muted)]">({activeMeta.clinicalTerm})</span>
           </div>
           <button
             type="button"
             onClick={handleApplyTemplate}
-            className="text-[10px] px-2 py-0.5 rounded-xs bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/30 hover:bg-[#00F0FF]/20 transition-colors flex items-center gap-1 font-semibold"
+            className="text-[10px] px-2 py-0.5 rounded-md bg-[var(--color-surface-card)] text-[var(--color-cycling)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] transition-colors flex items-center gap-1 font-semibold"
           >
-            <Sparkles className="w-3 h-3" />
+            <Sparkles className="w-3 h-3 text-[var(--color-cycling)]" />
             <span>Isi Ulang Templat Klinis</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1 border-t border-[#1F2430]">
-          <div className="flex items-start gap-1.5 text-[#9BA3AF]">
-            <span className="font-bold text-[#FF2A6D] shrink-0">🏃 Lari:</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1 border-t border-[var(--color-border)]">
+          <div className="flex items-start gap-1.5 text-[var(--color-text-secondary)]">
+            <span className="font-bold text-[var(--color-alert-red)] shrink-0">🏃 Lari:</span>
             <span>{activeMeta.trainingGuidance.running}</span>
           </div>
-          <div className="flex items-start gap-1.5 text-[#9BA3AF]">
-            <span className="font-bold text-[#00F0FF] shrink-0">🚲 Sepeda:</span>
+          <div className="flex items-start gap-1.5 text-[var(--color-text-secondary)]">
+            <span className="font-bold text-[var(--color-cycling)] shrink-0">🚲 Sepeda:</span>
             <span>{activeMeta.trainingGuidance.cycling}</span>
           </div>
         </div>
@@ -317,7 +312,7 @@ export function NewInjuryForm({
       <form onSubmit={handleSubmit} className="space-y-3 pt-1">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-[10px] text-[#9BA3AF] mb-1 uppercase font-bold">
+            <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 uppercase font-bold">
               Area Tubuh (Body Region)
             </label>
             <input
@@ -325,19 +320,19 @@ export function NewInjuryForm({
               readOnly={!isCustomMode}
               value={isCustomMode ? customRegionText : activeMeta.name}
               onChange={(e) => setCustomRegionText(e.target.value)}
-              className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF] cursor-default"
+              className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg px-2.5 py-1.5 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)] cursor-default"
               required
             />
           </div>
 
           <div>
-            <label className="block text-[10px] text-[#9BA3AF] mb-1 uppercase font-bold">
+            <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 uppercase font-bold">
               Sisi Tubuh (Side)
             </label>
             <select
               value={newSide}
               onChange={(e: any) => setNewSide(e.target.value)}
-              className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+              className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg px-2.5 py-1.5 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)]"
             >
               {activeMeta.allowedSides.map((s) => (
                 <option key={s} value={s}>
@@ -354,13 +349,13 @@ export function NewInjuryForm({
           </div>
 
           <div>
-            <label className="block text-[10px] text-[#9BA3AF] mb-1 uppercase font-bold">
+            <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 uppercase font-bold">
               Tingkat Keparahan Awal
             </label>
             <select
               value={newSeverity}
               onChange={(e: any) => setNewSeverity(e.target.value)}
-              className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+              className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg px-2.5 py-1.5 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)]"
             >
               <option value="MILD">Ringan (MILD)</option>
               <option value="MODERATE">Sedang (MODERATE)</option>
@@ -371,7 +366,7 @@ export function NewInjuryForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] text-[#9BA3AF] mb-1 uppercase font-bold">
+            <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 uppercase font-bold">
               Mekanisme Cedera / Pemicu Awal
             </label>
             <input
@@ -379,13 +374,13 @@ export function NewInjuryForm({
               value={newMechanism}
               onChange={(e) => setNewMechanism(e.target.value)}
               placeholder="Contoh: Salah tumpuan saat mendarat, rotasi mendadak"
-              className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+              className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg px-2.5 py-1.5 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)]"
               required
             />
           </div>
 
           <div>
-            <label className="block text-[10px] text-[#9BA3AF] mb-1 uppercase font-bold">
+            <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 uppercase font-bold">
               Rentang Waktu Terjadi
             </label>
             <input
@@ -393,7 +388,7 @@ export function NewInjuryForm({
               value={newTimeframe}
               onChange={(e) => setNewTimeframe(e.target.value)}
               placeholder="Contoh: 3-6 bulan lalu, 2 minggu terakhir"
-              className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+              className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg px-2.5 py-1.5 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)]"
               required
             />
           </div>
@@ -401,7 +396,7 @@ export function NewInjuryForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] text-[#9BA3AF] mb-1 uppercase font-bold">
+            <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 uppercase font-bold">
               Keterbatasan Fungsional Saat Ini
             </label>
             <input
@@ -409,20 +404,20 @@ export function NewInjuryForm({
               value={newLimitations}
               onChange={(e) => setNewLimitations(e.target.value)}
               placeholder="Contoh: Nyeri saat hentakan lari, jalan normal, sepeda bebas nyeri"
-              className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+              className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg px-2.5 py-1.5 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)]"
             />
           </div>
 
           <div className="flex items-center gap-3 pt-5">
-            <label className="flex items-center gap-2 cursor-pointer text-[11px] text-[#F0F2F5] p-2 rounded-xs bg-[#090A0F] border border-[#1F2430] hover:border-[#FF2A6D]/40 w-full transition-colors">
+            <label className="flex items-center gap-2 cursor-pointer text-[11px] text-[var(--color-text-primary)] p-2 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-alert-red)]/40 w-full transition-colors">
               <input
                 type="checkbox"
                 checked={newSwelling}
                 onChange={(e) => setNewSwelling(e.target.checked)}
-                className="w-4 h-4 accent-[#FF2A6D]"
+                className="w-4 h-4 accent-[var(--color-alert-red)]"
               />
               <span className="font-semibold">Pernah Mengalami Pembengkakan Sendi?</span>
-              <span className="text-[9.5px] text-[#9BA3AF] ml-auto">
+              <span className="text-[9.5px] text-[var(--color-text-muted)] ml-auto">
                 {newSwelling ? "Aktifkan Saklar Pengaman" : "Tanpa Pembengkakan"}
               </span>
             </label>
@@ -431,10 +426,10 @@ export function NewInjuryForm({
 
         {formMsg && (
           <div
-            className={`p-2.5 rounded-sm border text-[11px] font-semibold flex items-center gap-2 ${
+            className={`p-2.5 rounded-lg border text-[11px] font-semibold flex items-center gap-2 ${
               formMsg.type === "success"
-                ? "bg-[#10B981]/15 border-[#10B981]/40 text-[#10B981]"
-                : "bg-[#FF2A6D]/15 border-[#FF2A6D]/40 text-[#FF2A6D]"
+                ? "bg-[var(--color-cycling)]/10 border-[var(--color-cycling)]/30 text-[var(--color-cycling)]"
+                : "bg-[var(--color-alert-red)]/10 border-[var(--color-alert-red)]/30 text-[var(--color-alert-red)]"
             }`}
           >
             {formMsg.type === "success" ? (
@@ -446,9 +441,9 @@ export function NewInjuryForm({
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t border-[#1F2430]">
-          <span className="text-[10px] text-[#5A6272] flex items-center gap-1.5">
-            <Compass className="w-3.5 h-3.5 text-[#00F0FF]" />
+        <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
+          <span className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1.5">
+            <Compass className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
             <span>Sistem akan mengunci overload lari secara otomatis jika terdaftar pada tungkai bawah.</span>
           </span>
 
@@ -456,14 +451,14 @@ export function NewInjuryForm({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-1.5 rounded-sm bg-[#090A0F] text-[#9BA3AF] hover:text-white border border-[#1F2430] transition-colors"
+              className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-1.5 rounded-sm bg-[#FF2A6D]/20 text-[#FF2A6D] border border-[#FF2A6D]/50 font-bold hover:bg-[#FF2A6D]/30 transition-all shadow-[0_0_12px_rgba(255,42,109,0.15)] active:scale-[0.98]"
+              className="px-4 py-1.5 rounded-lg bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border border-[var(--color-alert-red)]/40 font-bold hover:bg-[var(--color-alert-red)]/20 transition-all shadow-xs"
             >
               {isSubmitting ? "Menyimpan ke Rekam Medis..." : "Simpan Dossier Cedera"}
             </button>

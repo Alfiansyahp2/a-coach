@@ -52,19 +52,19 @@ export function InjuryDossierTab({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 font-mono">
       {/* 1. Left Column: Full-Body Anatomical Map & Vulnerability Matrix (5 cols) */}
-      <div className="lg:col-span-5 p-4 sm:p-4.5 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-3.5 shadow-sm">
-        <div className="flex items-center justify-between pb-2.5 border-b border-[#1F2430] text-xs">
-          <span className="font-bold text-[#F0F2F5] uppercase flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#00F0FF]" />
+      <div className="lg:col-span-5 p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 shadow-xs">
+        <div className="flex items-center justify-between pb-2.5 border-b border-[var(--color-border)] text-xs">
+          <span className="font-bold text-[var(--color-text-primary)] uppercase flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[var(--color-cycling)]" />
             <span>Peta Anatomis Keseluruhan Tubuh</span>
           </span>
-          <span className="text-[10px] text-[#00F0FF] bg-[#00F0FF]/10 px-2 py-0.5 rounded-xs border border-[#00F0FF]/30 font-semibold">
+          <span className="text-[9.5px] text-[var(--color-cycling)] bg-[var(--color-cycling)]/10 px-2.5 py-0.5 rounded-full border border-[var(--color-cycling)]/30 font-bold">
             {injuries.length} Dossier Terpantau
           </span>
         </div>
 
         {/* Dynamic Full-Body Anatomical Zone Matrix */}
-        <div className="space-y-2.5 text-xs max-h-[640px] overflow-y-auto pr-1 scrollbar-thin">
+        <div className="space-y-2.5 text-xs max-h-[640px] overflow-y-auto pr-1">
           {ANATOMICAL_ZONES.map((zone) => {
             // Find all recorded injuries matching this anatomical zone
             const zoneInjuries = injuries.filter((inj) => {
@@ -77,9 +77,9 @@ export function InjuryDossierTab({
             if (hasActiveInjuries) {
               return (
                 <div key={zone.key} className="space-y-1.5">
-                  <div className="text-[10px] uppercase font-bold text-[#9BA3AF] flex items-center justify-between px-1">
+                  <div className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] flex items-center justify-between px-1">
                     <span>{zone.label}</span>
-                    <span className="text-[9px] text-[#FF2A6D] font-bold">
+                    <span className="text-[9px] text-[var(--color-alert-red)] font-bold">
                       {zoneInjuries.length} Titik Terpantau
                     </span>
                   </div>
@@ -88,44 +88,33 @@ export function InjuryDossierTab({
                     const isSelected =
                       selectedInjury?.id === inj.id ||
                       selectedBodyPart.toLowerCase() === inj.body_region.toLowerCase();
-                    const meta = getAnatomicalRegion(inj.body_region);
 
                     return (
                       <button
                         key={inj.id}
                         type="button"
                         onClick={() => setSelectedBodyPart(inj.body_region)}
-                        className={`w-full p-3 rounded-sm border text-left transition-all cursor-pointer ${
+                        className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between shadow-xs ${
                           isSelected
-                            ? "bg-[#FF2A6D]/15 border-[#FF2A6D] text-white shadow-[0_0_12px_rgba(255,42,109,0.15)] ring-1 ring-[#FF2A6D]"
-                            : "bg-[#161922] border-[#1F2430] text-[#F0F2F5] hover:border-[#FF2A6D]/60 hover:bg-[#1A1F2C]"
+                            ? "bg-[var(--color-surface-muted)] border-[var(--color-alert-red)]"
+                            : "bg-[var(--color-surface-muted)]/50 border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-text-secondary)]"
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 rounded-xs bg-[#FF2A6D] animate-pulse" />
-                            <span className="font-bold text-xs">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-text-primary)]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-alert-red)] animate-pulse" />
+                            <span>
                               {inj.body_region} ({inj.side})
                             </span>
                           </div>
-                          <span className="text-[9px] px-2 py-0.5 rounded-xs bg-[#FF2A6D]/20 text-[#FF2A6D] border border-[#FF2A6D]/40 font-bold uppercase">
-                            {inj.initial_severity === "SEVERE"
-                              ? "Berat"
-                              : inj.initial_severity === "MODERATE"
-                              ? "Sedang"
-                              : "Ringan"}
+                          <span className="text-[10px] text-[var(--color-text-muted)] block">
+                            {inj.functional_limitations}
                           </span>
                         </div>
 
-                        <div className="text-[10px] text-[#9BA3AF] mt-1.5 flex items-center gap-2">
-                          <span className="text-[#10B981]">
-                            🚲 {meta.cyclingImpactSeverity === "SAFE_FLAT" ? "Sepeda Flat Aman" : "Sepeda Kadens"}
-                          </span>
-                          <span className="text-[#2D3547]">•</span>
-                          <span className="text-[#FF2A6D]">
-                            🛑 {meta.isLowerExtremity ? "Lari Ditunda" : "Pantau Impak"}
-                          </span>
-                        </div>
+                        <span className="text-[9.5px] px-2 py-0.5 rounded-full bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border border-[var(--color-alert-red)]/30 font-bold shrink-0 ml-2">
+                          RESTRIKSI
+                        </span>
                       </button>
                     );
                   })}
@@ -133,27 +122,24 @@ export function InjuryDossierTab({
               );
             }
 
-            // Clean / Asymptomatic Zone Row
-            const isZoneSelected =
-              !selectedInjury &&
-              selectedMeta.zoneKey === zone.key;
-
+            // Normal Asymptomatic Zones
+            const isSelected = selectedBodyPart.toLowerCase() === zone.label.toLowerCase();
             return (
               <button
                 key={zone.key}
                 type="button"
                 onClick={() => setSelectedBodyPart(zone.label)}
-                className={`w-full p-2.5 rounded-sm border text-left transition-all flex items-center justify-between text-[#9BA3AF] ${
-                  isZoneSelected
-                    ? "bg-[#10B981]/15 border-[#10B981] text-white shadow-[0_0_10px_rgba(16,185,129,0.15)] ring-1 ring-[#10B981]"
-                    : "bg-[#161922] border-[#1F2430] hover:border-[#2D3547] hover:text-[#F0F2F5]"
+                className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+                  isSelected
+                    ? "bg-[var(--color-surface-muted)] border-[var(--color-cycling)]"
+                    : "bg-[var(--color-surface-muted)]/30 border-[var(--color-border)]/60 hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-border)] text-[var(--color-text-secondary)]"
                 }`}
               >
                 <span className="flex items-center gap-2 text-[11px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-cycling)]" />
                   <span>{zone.label}</span>
                 </span>
-                <span className="text-[9.5px] px-1.5 py-0.5 rounded-xs bg-[#10B981]/15 text-[#10B981] font-bold">
+                <span className="text-[9.5px] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] font-bold">
                   BEBAS GEJALA
                 </span>
               </button>
@@ -161,34 +147,34 @@ export function InjuryDossierTab({
           })}
         </div>
 
-        <div className="pt-2 text-[10px] text-[#5A6272] border-t border-[#1F2430] flex items-center gap-1.5">
-          <Compass className="w-3.5 h-3.5 text-[#00F0FF]" />
+        <div className="pt-2 text-[10px] text-[var(--color-text-muted)] border-t border-[var(--color-border)] flex items-center gap-1.5">
+          <Compass className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
           <span>Klik salah satu area anatomi untuk menginspeksi dossier atau mendaftarkan riwayat baru.</span>
         </div>
       </div>
 
       {/* 2. Right Column: High-Density Dossier & Clinical Guidance Cards (7 cols) */}
-      <div className="lg:col-span-7 p-4 sm:p-5 rounded-sm bg-[#12151D] border border-[#1F2430] space-y-4 shadow-sm">
+      <div className="lg:col-span-7 p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 shadow-xs">
         {selectedInjury ? (
           <div className="space-y-4">
             {/* Header: Area Name & Status Badge */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#1F2430]">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-sm bg-[#FF2A6D]/15 border border-[#FF2A6D]/40 flex items-center justify-center text-[#FF2A6D]">
+                <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-alert-red)]/30 flex items-center justify-center text-[var(--color-alert-red)] shadow-xs">
                   <AlertTriangle className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#F0F2F5] uppercase tracking-wide">
+                  <h3 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">
                     {selectedInjury.body_region} ({selectedInjury.side})
                   </h3>
-                  <span className="text-[10px] text-[#9BA3AF]">
+                  <span className="text-[10px] text-[var(--color-text-muted)]">
                     {selectedMeta.clinicalTerm} • Evaluasi Klinis Berkala
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-xs bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30 text-[10px] font-bold uppercase">
+                <span className="px-3 py-1 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] text-[10px] font-bold uppercase shadow-xs">
                   {selectedInjury.medical_evaluation_status === "PENDING_CLINICAL_ASSESSMENT"
                     ? "Menunggu Asesmen Fisioterapi"
                     : selectedInjury.medical_evaluation_status}
@@ -199,95 +185,95 @@ export function InjuryDossierTab({
             {/* Dossier Structured Cards Grid */}
             <div className="grid grid-cols-1 gap-3 text-xs">
               {/* Card 1: Mekanisme & Kronologi */}
-              <div className="p-3.5 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] text-[#5A6272] uppercase font-bold">
-                  <span className="flex items-center gap-1.5 text-[#00F0FF]">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1.5 shadow-xs">
+                <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] uppercase font-bold">
+                  <span className="flex items-center gap-1.5 text-[var(--color-cycling)]">
                     <Clock className="w-3.5 h-3.5" />
                     Mekanisme Cedera &amp; Rentang Waktu
                   </span>
-                  <span className="text-[#9BA3AF]">{selectedInjury.timeframe_description}</span>
+                  <span className="text-[var(--color-text-secondary)]">{selectedInjury.timeframe_description}</span>
                 </div>
-                <p className="text-[#F0F2F5] font-medium leading-relaxed">
+                <p className="text-[var(--color-text-primary)] font-medium leading-relaxed">
                   {selectedInjury.injury_mechanism}
                 </p>
               </div>
 
               {/* Card 2: Riwayat Gejala & Pembengkakan */}
-              <div className="p-3.5 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] text-[#5A6272] uppercase font-bold">
-                  <span className="flex items-center gap-1.5 text-[#D4FF00]">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1.5 shadow-xs">
+                <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] uppercase font-bold">
+                  <span className="flex items-center gap-1.5 text-[var(--color-endurance)]">
                     <AlertCircle className="w-3.5 h-3.5" />
                     Riwayat Pembengkakan &amp; Gejala Akut
                   </span>
                   <span
                     className={
-                      selectedInjury.previous_swelling ? "text-[#FF2A6D] font-bold" : "text-[#10B981]"
+                      selectedInjury.previous_swelling ? "text-[var(--color-alert-red)] font-bold" : "text-[var(--color-cycling)] font-bold"
                     }
                   >
                     {selectedInjury.previous_swelling ? "Pernah Terjadi Pembengkakan" : "Tanpa Edema Akut"}
                   </span>
                 </div>
-                <p className="text-[#F0F2F5] font-medium leading-relaxed">
+                <p className="text-[var(--color-text-primary)] font-medium leading-relaxed">
                   {selectedInjury.previous_symptoms ||
                     "Tidak ada riwayat pembengkakan akut baru. Nyeri tumpul saat beban impak tinggi."}
                 </p>
               </div>
 
               {/* Card 3: Kapasitas Fungsional Saat Ini */}
-              <div className="p-3.5 rounded-sm bg-[#161922] border border-[#1F2430] space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] text-[#5A6272] uppercase font-bold">
-                  <span className="flex items-center gap-1.5 text-[#10B981]">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1.5 shadow-xs">
+                <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] uppercase font-bold">
+                  <span className="flex items-center gap-1.5 text-[var(--color-cycling)]">
                     <Activity className="w-3.5 h-3.5" />
                     Kapasitas Fungsional Saat Ini
                   </span>
-                  <span className="text-[#00F0FF]">Toleransi Flat Jalan/Gowes</span>
+                  <span className="text-[var(--color-cycling)] font-semibold">Toleransi Flat Jalan/Gowes</span>
                 </div>
-                <p className="text-[#F0F2F5] font-medium leading-relaxed">
+                <p className="text-[var(--color-text-primary)] font-medium leading-relaxed">
                   {selectedInjury.functional_limitations}
                 </p>
               </div>
 
               {/* Card 4: SOP Proteksi Latihan & Batasan Medis */}
-              <div className="p-3.5 rounded-sm bg-gradient-to-r from-[#12151D] to-[#1A1622] border border-[#FF2A6D]/30 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-[10px] text-[#FF2A6D] uppercase font-bold">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-alert-red)]/30 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-[10px] text-[var(--color-alert-red)] uppercase font-bold">
                   <ShieldAlert className="w-3.5 h-3.5" />
                   SOP Pelatih &amp; Instruksi Keselamatan Mandatoris:
                 </div>
-                <p className="text-[#F0F2F5] text-[11px] leading-relaxed italic">
+                <p className="text-[var(--color-text-primary)] text-[11px] leading-relaxed italic">
                   "{selectedInjury.recovery_notes || selectedMeta.trainingGuidance.running}"
                 </p>
               </div>
 
               {/* Card 5: Panduan Lintas Disiplin Biomekanis */}
-              <div className="p-3.5 rounded-sm bg-[#161922] border border-[#00F0FF]/25 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
-                <div>
-                  <span className="text-[#00F0FF] font-bold block mb-1">
+              <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+                <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)]">
+                  <span className="text-[var(--color-cycling)] font-bold block mb-1">
                     🚲 Protokol Bersepeda
                   </span>
-                  <p className="text-[#9BA3AF]">{selectedMeta.trainingGuidance.cycling}</p>
+                  <p className="text-[var(--color-text-secondary)]">{selectedMeta.trainingGuidance.cycling}</p>
                 </div>
-                <div>
-                  <span className="text-[#D4FF00] font-bold block mb-1">
+                <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)]">
+                  <span className="text-[var(--color-endurance)] font-bold block mb-1">
                     🥋 Protokol Cross-Training
                   </span>
-                  <p className="text-[#9BA3AF]">{selectedMeta.trainingGuidance.crossTraining}</p>
+                  <p className="text-[var(--color-text-secondary)]">{selectedMeta.trainingGuidance.crossTraining}</p>
                 </div>
               </div>
             </div>
           </div>
         ) : (
           /* Clean / Asymptomatic Anatomical Area View */
-          <div className="space-y-5 py-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#1F2430]">
+          <div className="space-y-4 py-2">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-sm bg-[#10B981]/15 border border-[#10B981]/40 flex items-center justify-center text-[#10B981]">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)]">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#F0F2F5] uppercase tracking-wide">
+                  <h3 className="text-sm font-bold text-[var(--color-text-primary)] uppercase tracking-wide">
                     {selectedMeta.name}
                   </h3>
-                  <span className="text-[10px] text-[#10B981] font-semibold">
+                  <span className="text-[10px] text-[var(--color-cycling)] font-semibold">
                     Status: Bebas Gejala &amp; Stabil (Asymptomatic)
                   </span>
                 </div>
@@ -297,7 +283,7 @@ export function InjuryDossierTab({
                 <button
                   type="button"
                   onClick={() => onOpenNewInjury(selectedMeta.name)}
-                  className="px-3 py-1 rounded-sm bg-[#FF2A6D]/15 text-[#FF2A6D] border border-[#FF2A6D]/40 text-[10.5px] font-bold hover:bg-[#FF2A6D]/25 transition-all flex items-center gap-1.5"
+                  className="px-3 py-1 rounded-lg bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border border-[var(--color-alert-red)]/30 text-[10.5px] font-bold hover:bg-[var(--color-alert-red)]/20 transition-all flex items-center gap-1.5"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
                   <span>Daftarkan Gejala di Area Ini</span>
@@ -305,43 +291,43 @@ export function InjuryDossierTab({
               )}
             </div>
 
-            <div className="p-4 rounded-sm bg-[#161922] border border-[#1F2430] space-y-3 text-xs leading-relaxed text-[#9BA3AF]">
+            <div className="p-4 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-3 text-xs leading-relaxed text-[var(--color-text-secondary)]">
               <p>
-                <strong className="text-[#F0F2F5]">Tidak Ada Catatan Cedera Aktif:</strong> Seluruh
+                <strong className="text-[var(--color-text-primary)]">Tidak Ada Catatan Cedera Aktif:</strong> Seluruh
                 indikator telemetri pasca latihan dan rekam jejak klinis pada area{" "}
-                <span className="text-[#00F0FF]">{selectedMeta.name}</span> berada dalam kondisi stabil
+                <span className="text-[var(--color-cycling)] font-semibold">{selectedMeta.name}</span> berada dalam kondisi stabil
                 tanpa edema, nyeri berdenyut, atau instabilitas sendi.
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#1F2430]">
-                <div className="p-3 bg-[#090A0F] rounded-xs border border-[#1F2430]">
-                  <span className="text-[10px] text-[#00F0FF] uppercase font-bold block mb-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[var(--color-border)]">
+                <div className="p-3 bg-[var(--color-surface-card)] rounded-lg border border-[var(--color-border)]">
+                  <span className="text-[10px] text-[var(--color-running)] uppercase font-bold block mb-1">
                     🏃 Kapasitas Lari
                   </span>
-                  <span className="text-[11px] text-[#F0F2F5]">
+                  <span className="text-[11px] text-[var(--color-text-primary)]">
                     {selectedMeta.isLowerExtremity
                       ? "Bebas impak saat ini; pertahankan kadens efisien."
                       : "Bebas beban gravitasi penuh."}
                   </span>
                 </div>
-                <div className="p-3 bg-[#090A0F] rounded-xs border border-[#1F2430]">
-                  <span className="text-[10px] text-[#10B981] uppercase font-bold block mb-1">
+                <div className="p-3 bg-[var(--color-surface-card)] rounded-lg border border-[var(--color-border)]">
+                  <span className="text-[10px] text-[var(--color-cycling)] uppercase font-bold block mb-1">
                     🚲 Kapasitas Sepeda
                   </span>
-                  <span className="text-[11px] text-[#F0F2F5]">
+                  <span className="text-[11px] text-[var(--color-text-primary)]">
                     Kinematika rantai tertutup aman tanpa kontraindikasi beban.
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-sm bg-[#090A0F] border border-[#1F2430] text-[10.5px] text-[#5A6272] flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[10.5px] text-[var(--color-text-muted)] flex items-center justify-between">
               <span>Ingin mencatat sensasi nyeri atau ketegangan baru di area ini?</span>
               {onOpenNewInjury && (
                 <button
                   type="button"
                   onClick={() => onOpenNewInjury(selectedMeta.name)}
-                  className="text-[#FF2A6D] hover:underline font-bold"
+                  className="text-[var(--color-alert-red)] hover:underline font-bold"
                 >
                   Buka Form Input Gejala →
                 </button>

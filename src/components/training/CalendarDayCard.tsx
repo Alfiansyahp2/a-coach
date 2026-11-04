@@ -32,37 +32,37 @@ export function CalendarDayCard({
 
   return (
     <div
-      className={`min-h-[155px] p-2 rounded-sm flex flex-col justify-between transition-all ${
+      className={`min-h-[160px] p-2.5 rounded-xl flex flex-col justify-between transition-all duration-200 ${
         day.isToday
-          ? "bg-[#161922] border-2 border-[#D4FF00] shadow-md shadow-[#D4FF00]/5"
+          ? "bg-[var(--color-surface-card)] border-2 border-[var(--color-cycling)] shadow-md"
           : isFastingDay
-          ? "bg-[#151221]/70 border border-[#A855F7]/25"
+          ? "bg-purple-500/[0.04] border border-purple-500/20 shadow-xs"
           : isSaturday
-          ? "bg-[#12151D] border border-[#2D3547]/50"
+          ? "bg-[var(--color-surface-muted)]/60 border border-[var(--color-border)]"
           : hasWorkouts
-          ? "bg-[#161922] border border-[#1F2430] hover:border-[#2D3547]"
-          : "bg-[#0E1017] border border-[#1F2430]/40 opacity-75"
+          ? "bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] shadow-xs"
+          : "bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] opacity-70"
       }`}
     >
       {/* Day Header (Date & Today Badge) */}
-      <div className="flex items-center justify-between pb-1 border-b border-[#1F2430]/40 text-[10px]">
-        <span className={`md:hidden font-bold ${isFastingDay ? "text-[#D8B4FE]" : "text-[#9BA3AF]"}`}>
+      <div className="flex items-center justify-between pb-1.5 border-b border-[var(--color-border)] text-[10px] font-mono">
+        <span className={`md:hidden font-bold ${isFastingDay ? "text-purple-600 dark:text-purple-300" : "text-[var(--color-text-secondary)]"}`}>
           {day.dayName}
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5 ml-auto">
           {day.isToday && (
-            <span className="px-1 py-0.1 rounded-sm bg-[#D4FF00] text-[#090A0F] font-black text-[8px]">
-              TODAY
+            <span className="px-2 py-0.5 rounded-full bg-[var(--color-cycling)] text-white font-bold text-[8px] tracking-wider shadow-xs">
+              HARI INI
             </span>
           )}
-          <span className={`font-bold ${day.isToday ? "text-[#D4FF00]" : isFastingDay ? "text-[#D8B4FE]" : "text-[#F0F2F5]"}`}>
+          <span className={`font-bold font-tabular ${day.isToday ? "text-[var(--color-cycling)] font-extrabold" : isFastingDay ? "text-purple-600 dark:text-purple-300" : "text-[var(--color-text-primary)]"}`}>
             {day.dayNumber} {day.monthName}
           </span>
         </div>
       </div>
 
       {/* Day Content: Workouts / Fasting / Saturday Buffer / Rest */}
-      <div className="py-1.5 flex-1 space-y-1.5">
+      <div className="py-2 flex-1 space-y-1.5 font-mono">
         {hasWorkouts ? (
           day.workouts.map((w) => {
             const isRun = isRunningCategory(w.workout_category);
@@ -73,35 +73,42 @@ export function CalendarDayCard({
               <button
                 key={w.id}
                 onClick={() => onSelectWorkout(w)}
-                className={`w-full text-left p-2 rounded-sm border transition-all space-y-1 block ${
+                className={`w-full text-left p-2 rounded-lg border transition-all space-y-1 block shadow-xs hover:-translate-y-0.5 ${
                   isCompleted
-                    ? "bg-[#10B981]/10 border-[#10B981]/40 hover:border-[#10B981]"
+                    ? "bg-[var(--color-cycling)]/10 border-[var(--color-cycling)]/40 hover:border-[var(--color-cycling)]"
                     : isRun
-                    ? "bg-[#D4FF00]/10 border-[#D4FF00]/40 hover:border-[#D4FF00]"
+                    ? "bg-[var(--color-running)]/10 border-[var(--color-running)]/30 hover:border-[var(--color-running)]"
                     : isCycling
-                    ? "bg-[#00F0FF]/10 border-[#00F0FF]/30 hover:border-[#00F0FF]"
-                    : "bg-[#FF9500]/10 border-[#FF9500]/30 hover:border-[#FF9500]"
+                    ? "bg-[var(--color-cycling)]/10 border-[var(--color-cycling)]/30 hover:border-[var(--color-cycling)]"
+                    : "bg-[var(--color-alert-amber)]/10 border-[var(--color-alert-amber)]/30 hover:border-[var(--color-alert-amber)]"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className={`text-[8px] font-black uppercase px-1 py-0.2 rounded-sm ${
+                    className={`text-[8.5px] font-bold uppercase px-2 py-0.5 rounded-full ${
                       isRun
-                        ? "bg-[#D4FF00]/25 text-[#D4FF00]"
+                        ? "bg-[var(--color-running)]/20 text-[var(--color-running)]"
                         : isCycling
-                        ? "bg-[#00F0FF]/20 text-[#00F0FF]"
-                        : "bg-[#FF9500]/20 text-[#FF9500]"
+                        ? "bg-[var(--color-cycling)]/20 text-[var(--color-cycling)]"
+                        : "bg-[var(--color-alert-amber)]/20 text-[var(--color-alert-amber)]"
                     }`}
                   >
                     {isRun ? "LARI BERTAHAP" : isCycling ? "EASY MTB" : "UPPER/REHAB"}
                   </span>
 
                   {isCompleted && (
-                    <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
                   )}
                 </div>
 
-                <div className="font-bold text-[11px] text-[#F0F2F5] leading-tight">
+                {w.is_key_session && (
+                  <div className="flex items-center gap-1 text-[8px] font-bold text-[var(--color-endurance)] bg-[var(--color-endurance)]/10 px-1.5 py-0.5 rounded border border-[var(--color-endurance)]/25">
+                    <Zap className="w-2.5 h-2.5 text-[var(--color-endurance)] shrink-0" />
+                    <span className="truncate">TONGGAK MINGGUAN {w.milestone_target_km ? `(${w.milestone_target_km} KM)` : ''}</span>
+                  </div>
+                )}
+
+                <div className="font-bold text-[11px] text-[var(--color-text-primary)] leading-tight font-tabular">
                   {w.target_duration_seconds
                     ? formatDuration(w.target_duration_seconds)
                     : w.target_distance_meters
@@ -109,7 +116,7 @@ export function CalendarDayCard({
                     : "--"}
                 </div>
 
-                <div className="text-[8px] text-[#9BA3AF] truncate">
+                <div className="text-[8px] text-[var(--color-text-secondary)] truncate">
                   {w.target_intensity || "Zone 2 • RPE 3–4"}
                 </div>
               </button>
@@ -117,64 +124,64 @@ export function CalendarDayCard({
           })
         ) : isFastingDay ? (
           /* Dedicated Fasting Card (Senin & Kamis) */
-          <div className="h-full flex flex-col items-center justify-center py-2.5 text-center px-1 rounded-sm bg-[#A855F7]/10 border border-[#A855F7]/25 space-y-0.5">
-            <span className="text-sm leading-none">🌙</span>
-            <span className="text-[10px] font-bold text-[#D8B4FE] tracking-wide">Puasa Sunnah</span>
-            <span className="text-[8px] text-[#C084FC]/90">Istirahat Penuh</span>
-            <span className="text-[7.5px] text-[#9BA3AF]">
+          <div className="h-full flex flex-col items-center justify-center py-2.5 text-center px-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 space-y-1">
+            <span className="text-base leading-none">🌙</span>
+            <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 tracking-wide">Puasa Sunnah</span>
+            <span className="text-[8.5px] text-purple-600 dark:text-purple-400">Istirahat Penuh</span>
+            <span className="text-[8px] text-[var(--color-text-muted)]">
               {day.dayOfWeek === 0 ? "Regenerasi Glikogen" : "Pemulihan Tubuh"}
             </span>
           </div>
         ) : isSaturday ? (
           /* Dedicated Saturday Buffer Card */
-          <div className="h-full flex flex-col justify-between p-1.5 rounded-sm bg-[#161922]/70 border border-[#2D3547]/60 hover:border-[#D4FF00]/40 transition-all text-left">
+          <div className="h-full flex flex-col justify-between p-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] transition-all text-left">
             <div>
-              <div className="flex items-center justify-between text-[8px] pb-0.5 border-b border-[#1F2430]/60">
-                <span className="font-bold text-[#9BA3AF]">SABTU BUFFER</span>
-                <span className="px-1 py-0.2 rounded-sm bg-[#D4FF00]/10 text-[#D4FF00] font-black text-[7px]">
+              <div className="flex items-center justify-between text-[8px] pb-1 border-b border-[var(--color-border)]">
+                <span className="font-bold text-[var(--color-text-secondary)]">SABTU BUFFER</span>
+                <span className="px-1.5 py-0.5 rounded-full bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] font-semibold text-[7px] border border-[var(--color-border)]">
                   OPSIONAL
                 </span>
               </div>
-              <div className="my-1 space-y-0.5">
-                <div className="text-[9.5px] font-bold text-[#F0F2F5] leading-tight flex items-center gap-1">
-                  <Zap className="w-2.5 h-2.5 text-[#D4FF00]" />
+              <div className="my-1.5 space-y-0.5">
+                <div className="text-[9.5px] font-bold text-[var(--color-text-primary)] leading-tight flex items-center gap-1">
+                  <Zap className="w-2.5 h-2.5 text-[var(--color-cycling)]" />
                   Buffer Mingguan
                 </div>
-                <p className="text-[7.5px] text-[#9BA3AF] leading-tight">
+                <p className="text-[8px] text-[var(--color-text-secondary)] leading-tight">
                   Slot cadangan: Recovery spin ringan jika target ({minTargetKm} km) belum tercapai.
                 </p>
               </div>
             </div>
-            <div className="pt-0.5 border-t border-[#1F2430]/40 flex items-center justify-between text-[7px] text-[#5A6272]">
+            <div className="pt-1 border-t border-[var(--color-border)] flex items-center justify-between text-[7.5px] text-[var(--color-text-muted)]">
               <span>RPE 1–2</span>
-              <span className="text-[#D4FF00]">Persiapan Minggu</span>
+              <span className="text-[var(--color-cycling)] font-medium">Persiapan Minggu</span>
             </div>
           </div>
         ) : (
           /* Other Rest Days */
-          <div className="h-full flex flex-col items-center justify-center py-3 text-center text-[10px] text-[#5A6272]">
-            <Heart className="w-3.5 h-3.5 text-[#3A404D] mb-1" />
+          <div className="h-full flex flex-col items-center justify-center py-3 text-center text-[10px] text-[var(--color-text-muted)] rounded-lg">
+            <Heart className="w-4 h-4 text-[var(--color-text-muted)] mb-1" />
             <span>Jeda Pemulihan</span>
-            <span className="text-[8px] text-[#3A404D]">Proteksi Sendi</span>
+            <span className="text-[8px] text-[var(--color-text-muted)]">Proteksi Sendi</span>
           </div>
         )}
       </div>
 
       {/* Day Footer Subtext */}
-      <div className="pt-1 border-t border-[#1F2430]/30 text-[8.5px] text-[#5A6272] text-right">
+      <div className="pt-1 border-t border-[var(--color-border)] text-[9px] font-mono text-[var(--color-text-muted)] text-right">
         {hasWorkouts ? (
           <span
-            className="text-[#00F0FF] hover:underline cursor-pointer font-semibold"
+            className="text-[var(--color-cycling)] hover:underline cursor-pointer font-semibold"
             onClick={() => onSelectWorkout(day.workouts[0])}
           >
             Detail Sesi ↗
           </span>
         ) : isFastingDay ? (
-          <span className="text-[#A855F7] font-semibold flex items-center justify-end gap-1">
+          <span className="text-purple-600 dark:text-purple-400 font-semibold flex items-center justify-end gap-1">
             <span>🌙</span> Puasa Sunnah
           </span>
         ) : isSaturday ? (
-          <span className="text-[#D4FF00]/80 font-semibold">Slot Buffer</span>
+          <span className="text-[var(--color-text-secondary)] font-semibold">Slot Buffer</span>
         ) : (
           <span>Istirahat</span>
         )}
@@ -182,4 +189,3 @@ export function CalendarDayCard({
     </div>
   );
 }
-
