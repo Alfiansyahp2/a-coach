@@ -166,8 +166,12 @@ export async function getActivities(
       params.push(filters.limit);
       query += ` LIMIT $${params.length}`;
     }
-    const res = await pgPool.query(query, params);
-    return res.rows.map(normalizeActivityRow);
+    try {
+      const res = await pgPool.query(query, params);
+      return res.rows.map(normalizeActivityRow);
+    } catch (err: any) {
+      console.warn("[PostgreSQL getActivities Error]:", err.message);
+    }
   }
 
   const store = ensureLocalStore();

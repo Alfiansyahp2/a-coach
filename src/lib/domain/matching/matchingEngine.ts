@@ -1,3 +1,4 @@
+import { formatDateOnly } from '@/lib/formatters';
 import { Activity, ScheduledWorkout, WorkoutActivityMatch } from '@/types';
 import {
   getScheduledWorkouts,

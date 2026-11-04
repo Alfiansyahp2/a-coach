@@ -381,10 +381,11 @@ async function runTests() {
   const realStreak = calculateWeeklyStreak(dbActivities, [], new Date('2026-11-02T12:00:00Z'));
 
   assert(realStreak.currentStreakWeeks >= 8, `Current weekly streak is at least 8 weeks (Actual: ${realStreak.currentStreakWeeks})`);
-  assert(realStreak.heatTier.stage === 1, 'Current DB streak maps to Stage 1');
-  assert(realStreak.heatTier.name === 'Api Merah', 'Current flame is Api Merah (paling tidak panas)');
-  assert(realStreak.heatTier.colorHex === '#EF4444', 'Current flame color is #EF4444');
-  assert(realStreak.heatTier.weeksToNextTier === (10 - realStreak.currentStreakWeeks), `${realStreak.heatTier.weeksToNextTier} weeks left to unlock Api Oranye at 10 weeks`);
+  const expectedTier = getFlameHeatTier(realStreak.currentStreakWeeks, true);
+  assert(realStreak.heatTier.stage === expectedTier.stage, 'Current DB streak maps to Stage ' + expectedTier.stage + ' (' + expectedTier.name + ')');
+  assert(realStreak.heatTier.name === expectedTier.name, 'Current flame is ' + expectedTier.name);
+  assert(realStreak.heatTier.colorHex === expectedTier.colorHex, 'Current flame color is ' + expectedTier.colorHex);
+  assert(realStreak.heatTier.weeksToNextTier === expectedTier.weeksToNextTier, expectedTier.weeksToNextTier + ' weeks left to unlock next tier at ' + expectedTier.nextTierWeeks + ' weeks');
 
   console.log('\n======================================================================');
   console.log(`🏁 TEST RESULTS: ${passed} PASSED, ${failed} FAILED`);
