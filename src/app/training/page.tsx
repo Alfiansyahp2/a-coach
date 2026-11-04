@@ -10,6 +10,7 @@ import {
   getAuthoritativeHealthContext,
   getDatabaseStatus,
 } from "@/lib/db";
+import { formatDateOnly } from "@/lib/formatters";
 import { ScheduleTrainingHub } from "@/components/training/ScheduleTrainingHub";
 import { AppShell } from "@/components/layout/AppShell";
 import { RefreshCw } from "lucide-react";
@@ -31,6 +32,8 @@ async function TrainingContent() {
     getDatabaseStatus(),
   ]);
 
+  const serverToday = formatDateOnly(new Date());
+
   return (
     <AppShell user={user} dbStatus={dbStatus} healthContext={healthContext}>
       <ScheduleTrainingHub
@@ -39,6 +42,7 @@ async function TrainingContent() {
         initialGoals={goals}
         matches={matches}
         healthContext={healthContext}
+        initialTodayDate={serverToday}
       />
     </AppShell>
   );

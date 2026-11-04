@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScheduledWorkout,
   TrainingPlan,
@@ -15,6 +15,7 @@ import {
   List,
 } from "lucide-react";
 import { AddActivityModal } from "@/components/AddActivityModal";
+import { formatDateOnly } from "@/lib/formatters";
 import { MacroObjectivesStrip } from "./MacroObjectivesStrip";
 import { Zone2PacingGuidelinePanel } from "./Zone2PacingGuidelinePanel";
 import { WorkoutDossierModal } from "./WorkoutDossierModal";
@@ -29,6 +30,7 @@ interface ScheduleTrainingHubProps {
   initialGoals: FitnessGoal[];
   matches: WorkoutActivityMatch[];
   healthContext: AuthoritativeAthleteHealthContext | null;
+  initialTodayDate?: string;
 }
 
 export function ScheduleTrainingHub({
@@ -36,6 +38,7 @@ export function ScheduleTrainingHub({
   initialWorkouts,
   initialGoals,
   matches,
+  initialTodayDate,
 }: ScheduleTrainingHubProps) {
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [selectedPhase, setSelectedPhase] = useState<"ALL" | "PHASE_1" | "PHASE_2" | "PHASE_3">("ALL");
@@ -44,7 +47,14 @@ export function ScheduleTrainingHub({
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const todayStr = "2026-11-02"; // Reference current date
+  // Dynamic current date resolution (synchronizes with real-world date, e.g. "2026-11-04")
+  const [todayStr, setTodayStr] = useState<string>(
+    () => initialTodayDate || formatDateOnly(new Date())
+  );
+
+  useEffect(() => {
+    setTodayStr(formatDateOnly(new Date()));
+  }, []);
 
   const handleRegenerate = async () => {
     setIsRegenerating(true);
@@ -132,20 +142,22 @@ export function ScheduleTrainingHub({
           <div className="flex items-center p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs">
             <button
               onClick={() => setViewMode("calendar")}
-              className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === "calendar"
+              className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${
+                viewMode === "calendar"
                   ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                }`}
+              }`}
             >
               <Grid className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
               <span>Kalender Grid</span>
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === "list"
+              className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${
+                viewMode === "list"
                   ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
                   : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                }`}
+              }`}
             >
               <List className="w-3.5 h-3.5 text-[var(--color-running)]" />
               <span>Daftar Sesi</span>
@@ -177,20 +189,20 @@ export function ScheduleTrainingHub({
       {/* 3. Zone 2 Endurance Pacing & Parameter Guide Banner */}
       <Zone2PacingGuidelinePanel />
 
-        {/* 4. Phase Switcher & Sport Type Filter Toolbar */}
-        <TrainingPhaseAndFilterToolbar
-          selectedPhase={selectedPhase}
-          onSelectPhase={setSelectedPhase}
-          displayedWeeksCount={displayedWeeks.length}
-          filter={filter}
-          onSelectFilter={setFilter}
-          totalWorkoutsCount={initialWorkouts.length}
-          cyclingCount={cyclingCount}
-          runningCount={runningCount}
-          rehabCount={rehabCount}
-          completedCount={completedCount}
-          filteredCount={filteredWorkouts.length}
-        />
+      {/* 4. Phase Switcher & Sport Type Filter Toolbar */}
+      <TrainingPhaseAndFilterToolbar
+        selectedPhase={selectedPhase}
+        onSelectPhase={setSelectedPhase}
+        displayedWeeksCount={displayedWeeks.length}
+        filter={filter}
+        onSelectFilter={setFilter}
+        totalWorkoutsCount={initialWorkouts.length}
+        cyclingCount={cyclingCount}
+        runningCount={runningCount}
+        rehabCount={rehabCount}
+        completedCount={completedCount}
+        filteredCount={filteredWorkouts.length}
+      />
 
       {/* 5. Active View Rendering: Calendar Grid vs Linear List */}
       {viewMode === "calendar" ? (
@@ -198,6 +210,7 @@ export function ScheduleTrainingHub({
           displayedWeeks={displayedWeeks}
           onSelectWorkout={setSelectedWorkout}
           isRunningCategory={isRunningCategory}
+          todayStr={todayStr}
         />
       ) : (
         <TrainingWorkoutListView

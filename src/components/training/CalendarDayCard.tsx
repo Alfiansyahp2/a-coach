@@ -34,7 +34,7 @@ export function CalendarDayCard({
     <div
       className={`min-h-[160px] p-2.5 rounded-xl flex flex-col justify-between transition-all duration-200 ${
         day.isToday
-          ? "bg-[var(--color-surface-card)] border-2 border-[var(--color-cycling)] shadow-md"
+          ? "bg-[var(--color-surface-card)] border-2 border-[var(--color-cycling)] shadow-md ring-1 ring-[var(--color-cycling)]/30"
           : isFastingDay
           ? "bg-purple-500/[0.04] border border-purple-500/20 shadow-xs"
           : isSaturday
@@ -51,7 +51,7 @@ export function CalendarDayCard({
         </span>
         <div className="flex items-center gap-1.5 ml-auto">
           {day.isToday && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--color-cycling)] text-white font-bold text-[8px] tracking-wider shadow-xs">
+            <span className="px-2 py-0.5 rounded-full bg-[var(--color-cycling)] text-white font-bold text-[8px] tracking-wider shadow-xs animate-pulse">
               HARI INI
             </span>
           )}
@@ -101,7 +101,7 @@ export function CalendarDayCard({
                   )}
                 </div>
 
-                {w.is_key_session && (
+                {w.milestone_target_km && (
                   <div className="flex items-center gap-1 text-[8px] font-bold text-[var(--color-endurance)] bg-[var(--color-endurance)]/10 px-1.5 py-0.5 rounded border border-[var(--color-endurance)]/25">
                     <Zap className="w-2.5 h-2.5 text-[var(--color-endurance)] shrink-0" />
                     <span className="truncate">TONGGAK MINGGUAN {w.milestone_target_km ? `(${w.milestone_target_km} KM)` : ''}</span>
@@ -160,8 +160,8 @@ export function CalendarDayCard({
         ) : (
           /* Other Rest Days */
           <div className="h-full flex flex-col items-center justify-center py-3 text-center text-[10px] text-[var(--color-text-muted)] rounded-lg">
-            <Heart className="w-4 h-4 text-[var(--color-text-muted)] mb-1" />
-            <span>Jeda Pemulihan</span>
+            <Heart className={`w-4 h-4 mb-1 transition-colors ${day.isToday ? "text-[var(--color-alert-amber)] animate-pulse" : "text-[var(--color-text-muted)]"}`} />
+            <span className={day.isToday ? "text-[var(--color-text-primary)] font-bold" : ""}>Jeda Pemulihan</span>
             <span className="text-[8px] text-[var(--color-text-muted)]">Proteksi Sendi</span>
           </div>
         )}
@@ -183,7 +183,7 @@ export function CalendarDayCard({
         ) : isSaturday ? (
           <span className="text-[var(--color-text-secondary)] font-semibold">Slot Buffer</span>
         ) : (
-          <span>Istirahat</span>
+          <span className={day.isToday ? "text-[var(--color-cycling)] font-semibold" : ""}>Istirahat</span>
         )}
       </div>
     </div>
