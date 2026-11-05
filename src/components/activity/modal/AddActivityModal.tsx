@@ -4,14 +4,16 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Plus,
-  Camera,
-  CheckCircle2,
-  AlertCircle,
+  BookOpen,
   X,
-  Activity as ActivityIcon,
-  FileText,
   RefreshCw,
   Check,
+  AlertCircle,
+  CheckCircle2,
+  Calendar,
+  Sparkles,
+  PenLine,
+  Bookmark,
 } from "lucide-react";
 import { ScheduledWorkout } from "@/types";
 import { ActivityImageUploader } from "./ActivityImageUploader";
@@ -41,7 +43,6 @@ export function AddActivityModal({
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"image" | "manual">("image");
 
   // Form states
   const [sportType, setSportType] = useState<string>(
@@ -80,7 +81,7 @@ export function AddActivityModal({
   const [description, setDescription] = useState<string>("");
 
   // Health & Zone 2 metrics
-  const [rpeScore, setRpeScore] = useState<number>(3); // Default Zone 2 (RPE 3)
+  const [rpeScore, setRpeScore] = useState<number>(3);
   const [painScale, setPainScale] = useState<number>(0);
   const [swellingObserved, setSwellingObserved] = useState<boolean>(false);
   const [instabilityObserved, setInstabilityObserved] = useState<boolean>(false);
@@ -139,7 +140,6 @@ export function AddActivityModal({
     }
   };
 
-  // Live kinematic calculations
   const totalDurationSeconds =
     (parseInt(durationHours || "0", 10) || 0) * 3600 +
     (parseInt(durationMinutes || "0", 10) || 0) * 60 +
@@ -194,7 +194,6 @@ export function AddActivityModal({
         average_speed_mps: avgSpeedMps,
         description: description.trim() || undefined,
         workout_id: defaultWorkout?.id || undefined,
-        // Clinical response fields
         rpe_score: rpeScore,
         pain_during_activity: painScale,
         pain_after_activity: painScale,
@@ -216,8 +215,8 @@ export function AddActivityModal({
 
       setSuccessMsg(
         data.matchedWorkout
-          ? `Aktivitas berhasil dicatat dan disinkronkan ke sesi: ${data.matchedWorkout.workout_category} (Status: COMPLETED)!`
-          : "Aktivitas berhasil disimpan ke basis data telemetri!"
+          ? `Sesi tercatat di buku jurnal & tersinkronisasi ke: ${data.matchedWorkout.workout_category}!`
+          : "Catatan sesi berhasil ditulis ke buku jurnal telemetri!"
       );
 
       setTimeout(() => {
@@ -238,201 +237,290 @@ export function AddActivityModal({
       {variant === "button" && (
         <button
           onClick={handleOpen}
-          className="px-3.5 py-1.5 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-semibold font-mono tracking-tight transition-all flex items-center gap-1.5 shadow-xs"
+          className="px-3.5 py-1.5 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-semibold font-mono tracking-tight transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
         >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>TAMBAH AKTIVITAS</span>
+          <BookOpen className="w-4 h-4 stroke-[2.2]" />
+          <span>+ TAMBAH AKTIVITAS</span>
         </button>
       )}
 
       {variant === "outline" && (
         <button
           onClick={handleOpen}
-          className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-xs"
+          className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
         >
-          <Plus className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-          <span>Tambah Aktivitas Manual / Foto</span>
+          <BookOpen className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+          <span>Buka Buku Jurnal</span>
         </button>
       )}
 
       {variant === "compact" && (
         <button
           onClick={handleOpen}
-          className="p-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] transition-colors shadow-xs"
-          title="Tambah Aktivitas Manual"
+          className="p-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] transition-colors shadow-xs cursor-pointer"
+          title="Buka Buku Catatan Aktivitas"
         >
-          <Plus className="w-4 h-4 text-[var(--color-cycling)]" />
+          <BookOpen className="w-4 h-4 text-[var(--color-cycling)]" />
         </button>
       )}
 
-      {/* Modal Dialog */}
+      {/* MODAL OPEN BOOK — DUA HALAMAN BERDAMPINGAN DENGAN LIPATAN TENGAH */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 lg:p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
+          {/* Top Bar Floating Controls */}
+          <div className="absolute top-3 right-4 sm:right-6 z-50 flex items-center gap-2">
+            <button
+              onClick={handleClose}
+              disabled={isSubmitting || isParsingImage}
+              className="px-3 py-1.5 rounded-lg bg-[#19221c]/90 text-stone-300 hover:text-white border border-[#304235] hover:border-emerald-500 font-mono text-xs flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+              <span>Tutup Buku</span>
+            </button>
+          </div>
+
+          {/* THE OPEN BOOK CONTAINER (Cover Kulit Buku di Bawah + Dua Halaman Kertas di Atas) */}
           <div
-            className="w-full max-w-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
+            className="w-full max-w-6xl max-h-[94vh] flex flex-col rounded-2xl bg-[#0a0f0c] p-2.5 sm:p-4 shadow-[0_25px_70px_rgba(0,0,0,0.95),0_0_0_2px_#27372d,0_10px_30px_rgba(16,185,129,0.1)] border border-[#233228] relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[var(--color-cycling)]">
-                  <ActivityIcon className="w-4 h-4" />
+            {/* Pita Pembatas Buku Merah/Emas di Punggung Buku Tengah Atas */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-7 h-8 bg-gradient-to-b from-rose-600 via-rose-700 to-rose-800 rounded-b-md shadow-md z-30 flex items-end justify-center pb-1 pointer-events-none">
+              <div className="w-3 h-1 bg-amber-400/60 rounded-full" />
+            </div>
+
+            {/* FORM WRAPPER MENCAKUP KEDUA HALAMAN */}
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+              {/* TWO PAGES SPREAD (HALAMAN KIRI & HALAMAN KANAN) */}
+              <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl overflow-hidden border border-[#2b3a30] relative shadow-inner">
+                
+                {/* ============================================================ */}
+                {/* 📖 HALAMAN KIRI (LEFT PAGE): Telemetri, Foto OCR & Kinematika */}
+                {/* ============================================================ */}
+                <div
+                  className="bg-[#121814] flex flex-col border-b lg:border-b-0 lg:border-r border-[#243329] relative overflow-y-auto p-5 sm:p-6 shadow-[inset_-12px_0_20px_rgba(0,0,0,0.4)]"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(239, 68, 68, 0.35) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(52, 211, 153, 0.06) 1px, transparent 1px)
+                    `,
+                    backgroundSize: "100% 100%, 100% 28px",
+                    backgroundPosition: "38px 0, 0 8px",
+                  }}
+                >
+                  {/* Nomor Halaman Kiri & Tanggal */}
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#28392e] text-xs font-mono text-stone-400">
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                      <Bookmark className="w-3.5 h-3.5" />
+                      HALAMAN 12 • LOG TELEMETRI
+                    </span>
+                    <span className="text-[11px] text-stone-400 flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-stone-500" />
+                      {new Date(startDate || Date.now()).toLocaleDateString("id-ID", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+
+                  {/* Header Halaman Kiri */}
+                  <div className="mb-4">
+                    <h3 className="text-base sm:text-lg font-bold font-mono text-emerald-300 tracking-tight flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      BUKTI FISIK &amp; KINEMATIKA SESI
+                    </h3>
+                    <p className="text-xs text-stone-400 font-mono mt-0.5">
+                      Rekatkan tangkapan layar Strava/Garmin untuk pembacaan OCR otomatis.
+                    </p>
+                  </div>
+
+                  {/* Error & Success Notice di Halaman Kiri */}
+                  {errorMsg && (
+                    <div className="mb-4 p-3 rounded-lg bg-red-950/60 border border-red-700/70 flex items-start gap-2.5 text-xs text-red-200 font-mono">
+                      <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                      <div>
+                        <span className="font-bold">Koreksi: </span>
+                        {errorMsg}
+                      </div>
+                    </div>
+                  )}
+
+                  {successMsg && (
+                    <div className="mb-4 p-3 rounded-lg bg-emerald-950/60 border border-emerald-600/70 flex items-start gap-2.5 text-xs text-emerald-200 font-mono">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                      <div>
+                        <span className="font-bold">Tercatat: </span>
+                        {successMsg}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Uploader Gambar Telemetri (OCR) */}
+                  <div className="mb-4">
+                    <ActivityImageUploader
+                      imagePreview={imagePreview}
+                      setImagePreview={setImagePreview}
+                      isParsingImage={isParsingImage}
+                      setIsParsingImage={setIsParsingImage}
+                      ocrSuccessMsg={ocrSuccessMsg}
+                      setOcrSuccessMsg={setOcrSuccessMsg}
+                      ocrRawText={ocrRawText}
+                      setOcrRawText={setOcrRawText}
+                      setErrorMsg={setErrorMsg}
+                      onTelemetryExtracted={handleTelemetryExtracted}
+                    />
+                  </div>
+
+                  {/* Box Kinematika Buku (Jarak, Durasi, Elevasi) */}
+                  <div className="mt-auto pt-3 border-t border-[#26372b] space-y-3 font-mono text-xs">
+                    <div className="flex items-center justify-between text-[11px] text-stone-400">
+                      <span className="font-bold text-emerald-400">RINGKASAN METRIK TERTULIS</span>
+                      <span>Halaman Kiri</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
+                        <span className="text-[10px] text-stone-500 block">Jarak Terbaca</span>
+                        <span className="text-sm font-bold text-emerald-300 font-tabular">
+                          {numericDistanceKm > 0 ? `${numericDistanceKm.toFixed(2)} km` : "-"}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
+                        <span className="text-[10px] text-stone-500 block">Total Durasi</span>
+                        <span className="text-sm font-bold text-stone-200 font-tabular">
+                          {totalDurationSeconds > 0
+                            ? `${durationHours}j ${durationMinutes}m ${durationSeconds}d`
+                            : "-"}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
+                        <span className="text-[10px] text-stone-500 block">Rata-rata Speed</span>
+                        <span className="text-sm font-bold text-emerald-400 font-tabular">
+                          {calculatedSpeedKmh} km/jam
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
+                        <span className="text-[10px] text-stone-500 block">Pace Hitungan</span>
+                        <span className="text-sm font-bold text-amber-300 font-tabular">
+                          {calculatedPaceMinKm} /km
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
-                    INPUT AKTIVITAS TELEMETRI BARU
-                    {defaultWorkout && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 text-[var(--color-cycling)]">
+
+                {/* ============================================================ */}
+                {/* 📖 HALAMAN KANAN (RIGHT PAGE): Formulir Manual & Audit Klinis */}
+                {/* ============================================================ */}
+                <div
+                  className="bg-[#131915] flex flex-col relative overflow-y-auto p-5 sm:p-6 shadow-[inset_12px_0_20px_rgba(0,0,0,0.4)]"
+                  style={{
+                    backgroundImage: `
+                      linear-gradient(to right, rgba(239, 68, 68, 0.35) 1px, transparent 1px),
+                      linear-gradient(to bottom, rgba(52, 211, 153, 0.06) 1px, transparent 1px)
+                    `,
+                    backgroundSize: "100% 100%, 100% 28px",
+                    backgroundPosition: "38px 0, 0 8px",
+                  }}
+                >
+                  {/* Nomor Halaman Kanan & Target Sesi */}
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#28392e] text-xs font-mono text-stone-400">
+                    <span className="flex items-center gap-1.5 text-amber-400 font-bold">
+                      <PenLine className="w-3.5 h-3.5" />
+                      HALAMAN 13 • FORMULIR &amp; AUDIT SENDI
+                    </span>
+                    {defaultWorkout ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
                         Target: {defaultWorkout.workout_category}
                       </span>
+                    ) : (
+                      <span className="text-[10px] text-stone-500">Sesi Bebas Mandiri</span>
                     )}
-                  </h3>
-                  <p className="text-[11px] text-[var(--color-text-secondary)] font-mono">
-                    Ekstraksi otomatis via screenshot kamera (OCR) atau input formulir manual.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleClose}
-                disabled={isSubmitting || isParsingImage}
-                className="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-card)] border border-transparent hover:border-[var(--color-border)] transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+                  </div>
 
-            {/* Ingestion Mode Tabs */}
-            <div className="px-5 pt-3 pb-2 bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] flex items-center gap-2 font-mono text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab("image")}
-                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
-                  activeTab === "image"
-                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
-                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                }`}
-              >
-                <Camera className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-                <span>Unggah Foto Telemetri (OCR)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("manual")}
-                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
-                  activeTab === "manual"
-                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
-                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5 text-[var(--color-running)]" />
-                <span>Formulir Manual</span>
-              </button>
-            </div>
+                  {/* Header Halaman Kanan */}
+                  <div className="mb-4">
+                    <h3 className="text-base sm:text-lg font-bold font-mono text-emerald-300 tracking-tight flex items-center gap-2">
+                      <span>PARAMETER &amp; EVALUASI KESEHATAN</span>
+                    </h3>
+                    <p className="text-xs text-stone-400 font-mono mt-0.5">
+                      Lengkapi nama sesi, intensitas RPE Borg CR10, serta kontrol nyeri sendi.
+                    </p>
+                  </div>
 
-            {/* Scrollable Form Body */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
-              {/* Error Banner */}
-              {errorMsg && (
-                <div className="p-3 rounded-md bg-[var(--color-alert-red)]/10 border border-[var(--color-alert-red)]/30 flex items-start gap-2.5 text-xs text-[var(--color-alert-red)] font-mono">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold">Peringatan: </span>
-                    {errorMsg}
+                  {/* Form Isian Input Manual */}
+                  <div className="space-y-4 mb-4">
+                    <ActivityManualFormFields
+                      sportType={sportType}
+                      setSportType={setSportType}
+                      name={name}
+                      setName={setName}
+                      startDate={startDate}
+                      setStartDate={setStartDate}
+                      distanceKm={distanceKm}
+                      setDistanceKm={setDistanceKm}
+                      durationHours={durationHours}
+                      setDurationHours={setDurationHours}
+                      durationMinutes={durationMinutes}
+                      setDurationMinutes={setDurationMinutes}
+                      durationSeconds={durationSeconds}
+                      setDurationSeconds={setDurationSeconds}
+                      elevationMeters={elevationMeters}
+                      setElevationMeters={setElevationMeters}
+                      description={description}
+                      setDescription={setDescription}
+                      calculatedSpeedKmh={calculatedSpeedKmh}
+                      calculatedPaceMinKm={calculatedPaceMinKm}
+                    />
+
+                    {/* Audit Medis Sendi & RPE */}
+                    <ActivityHealthCheckinFields
+                      rpeScore={rpeScore}
+                      setRpeScore={setRpeScore}
+                      painScale={painScale}
+                      setPainScale={setPainScale}
+                      swellingObserved={swellingObserved}
+                      setSwellingObserved={setSwellingObserved}
+                      instabilityObserved={instabilityObserved}
+                      setInstabilityObserved={setInstabilityObserved}
+                    />
+                  </div>
+
+                  {/* Footer Halaman Kanan (Tombol Tulis Jurnal) */}
+                  <div className="mt-auto pt-4 border-t-2 border-[#2b3a30] flex items-center justify-between font-mono">
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      disabled={isSubmitting || isParsingImage}
+                      className="px-4 py-2 rounded-lg text-xs font-medium text-stone-300 hover:text-white bg-[#19221c] hover:bg-[#233128] border border-[#304235] transition-colors cursor-pointer"
+                    >
+                      Batal / Tutup Lembaran
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || isParsingImage}
+                      className="px-6 py-2.5 rounded-lg bg-[var(--color-cycling)] hover:bg-[#1db854] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-[0_4px_16px_rgba(34,197,94,0.4)] disabled:opacity-50 cursor-pointer"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>MENULIS KE JURNAL...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>TULIS KE BUKU JURNAL</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* Success Banner */}
-              {successMsg && (
-                <div className="p-3 rounded-md bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 flex items-start gap-2.5 text-xs text-[var(--color-cycling)] font-mono">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold">Berhasil: </span>
-                    {successMsg}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 1: OCR IMAGE INGESTION */}
-              {activeTab === "image" && (
-                <ActivityImageUploader
-                  imagePreview={imagePreview}
-                  setImagePreview={setImagePreview}
-                  isParsingImage={isParsingImage}
-                  setIsParsingImage={setIsParsingImage}
-                  ocrSuccessMsg={ocrSuccessMsg}
-                  setOcrSuccessMsg={setOcrSuccessMsg}
-                  ocrRawText={ocrRawText}
-                  setOcrRawText={setOcrRawText}
-                  setErrorMsg={setErrorMsg}
-                  onTelemetryExtracted={handleTelemetryExtracted}
-                />
-              )}
-
-              {/* TAB 2 or BELOW OCR: FORM FIELDS */}
-              <ActivityManualFormFields
-                sportType={sportType}
-                setSportType={setSportType}
-                name={name}
-                setName={setName}
-                startDate={startDate}
-                setStartDate={setStartDate}
-                distanceKm={distanceKm}
-                setDistanceKm={setDistanceKm}
-                durationHours={durationHours}
-                setDurationHours={setDurationHours}
-                durationMinutes={durationMinutes}
-                setDurationMinutes={setDurationMinutes}
-                durationSeconds={durationSeconds}
-                setDurationSeconds={setDurationSeconds}
-                elevationMeters={elevationMeters}
-                setElevationMeters={setElevationMeters}
-                description={description}
-                setDescription={setDescription}
-                calculatedSpeedKmh={calculatedSpeedKmh}
-                calculatedPaceMinKm={calculatedPaceMinKm}
-              />
-
-              {/* ZONE 2 & JOINT HEALTH AUDIT */}
-              <ActivityHealthCheckinFields
-                rpeScore={rpeScore}
-                setRpeScore={setRpeScore}
-                painScale={painScale}
-                setPainScale={setPainScale}
-                swellingObserved={swellingObserved}
-                setSwellingObserved={setSwellingObserved}
-                instabilityObserved={instabilityObserved}
-                setInstabilityObserved={setInstabilityObserved}
-              />
-
-              {/* Submit & Cancel Actions */}
-              <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-2.5 font-mono">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  disabled={isSubmitting || isParsingImage}
-                  className="px-4 py-2 rounded-md text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors"
-                >
-                  Batal
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || isParsingImage}
-                  className="px-5 py-2 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>MENYIMPAN...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>SIMPAN AKTIVITAS KE BASIS DATA</span>
-                    </>
-                  )}
-                </button>
+                {/* Garis Lipatan Tengah Buku (Book Crease Shadow) */}
+                <div className="hidden lg:block absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 pointer-events-none z-20 bg-gradient-to-r from-black/50 via-black/80 to-black/50 border-x border-white/5" />
               </div>
             </form>
           </div>
