@@ -18,15 +18,17 @@ import {
 import { useTheme } from "@/components/theme/ThemeProvider";
 import { AddActivityModal } from "@/components/AddActivityModal";
 import { EditAthleteProfileModal } from "@/components/health/EditAthleteProfileModal";
+import { NavbarStreakBadge } from "./NavbarStreakBadge";
 import { User } from "@/types";
 
 interface AppHeaderProps {
   user: User | null;
   dbStatus?: { type: string; connected: boolean };
   healthContext?: any;
+  streakWeeks?: number;
 }
 
-export function AppHeader({ user, healthContext }: AppHeaderProps) {
+export function AppHeader({ user, healthContext, streakWeeks }: AppHeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -42,8 +44,8 @@ export function AppHeader({ user, healthContext }: AppHeaderProps) {
 
   return (
     <header className="h-14 border-b border-[var(--color-border)] bg-[var(--color-surface-card)] sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 transition-colors duration-200">
-      {/* Left: Mobile Toggle & Section Title */}
-      <div className="flex items-center gap-3">
+      {/* Left: Mobile Toggle, Streak Flame Badge, & Section Title */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="md:hidden p-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
@@ -52,7 +54,10 @@ export function AppHeader({ user, healthContext }: AppHeaderProps) {
           {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
         </button>
 
-        <div className="flex items-center gap-2">
+        {/* Animated Fire Streak Badge - Positioned at Left Corner */}
+        <NavbarStreakBadge initialWeeks={streakWeeks} />
+
+        <div className="flex items-center gap-2 border-l border-[var(--color-border)] pl-2.5 sm:pl-3">
           <span className="font-mono text-xs font-bold text-[var(--color-text-primary)] uppercase tracking-wider hidden sm:inline">
             ENDURANCE LAB
           </span>

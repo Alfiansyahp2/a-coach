@@ -10,6 +10,7 @@ interface AppShellProps {
   user?: User | null;
   dbStatus?: { type: string; connected: boolean };
   healthContext?: any;
+  streakWeeks?: number;
 }
 
 export function AppShell({
@@ -17,6 +18,7 @@ export function AppShell({
   user,
   dbStatus = { type: "PostgreSQL", connected: true },
   healthContext,
+  streakWeeks,
 }: AppShellProps) {
   return (
     <div className="min-h-screen flex bg-[var(--color-canvas)] text-[var(--color-text-primary)] transition-colors duration-200">
@@ -29,6 +31,7 @@ export function AppShell({
           user={user || null}
           dbStatus={dbStatus}
           healthContext={healthContext}
+          streakWeeks={streakWeeks}
         />
 
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -43,4 +46,3 @@ export function AppShell({
     </div>
   );
 }
-

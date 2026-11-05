@@ -14,6 +14,7 @@ import {
 import { computeDashboardSummary } from "@/lib/analytics";
 import { generateTrainingInsights } from "@/lib/ai-coach";
 import { computePersonalRecords } from "@/lib/personalRecords";
+import { calculateWeeklyStreak } from "@/lib/streakEngine";
 import { formatDuration, formatPaceSeconds } from "@/lib/formatters";
 import { AppShell } from "@/components/layout/AppShell";
 import { StravaConnectCard } from "@/components/StravaConnectCard";
@@ -67,6 +68,7 @@ async function DashboardTelemetry() {
         })
       : computedPrs;
 
+  const streak = calculateWeeklyStreak(activities, workouts);
   const summary = computeDashboardSummary(activities, workouts);
   const insights = generateTrainingInsights(
     activities,
@@ -79,12 +81,14 @@ async function DashboardTelemetry() {
   const targetWeek1Km = 18.0;
 
   return (
-    <AppShell user={user} dbStatus={dbStatus} healthContext={healthContext}>
+    <AppShell user={user} dbStatus={dbStatus} healthContext={healthContext} streakWeeks={streak.currentStreakWeeks}>
       {/* 1. Precision Navigation & Telemetry Integrity Strip */}
       <DashboardIntegrityStrip
         dbStatus={dbStatus}
         user={user}
         healthContext={healthContext}
+        primaryGoal={goals.find((g) => g.is_primary) || goals[0]}
+        activePlan={activePlan}
       />
 
       {/* 2. Athlete Health Profile & Joint Safety Gate */}

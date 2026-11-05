@@ -47,6 +47,7 @@ Utilitas pemeliharaan harian, sinkronisasi data personal record, dan audit skema
 | `sync_personal_records.js` | Menghitung ulang dan menyinkronkan rekor jarak terjauh, laju terbaik (5K, 10K), dan elevasi tertinggi dari 34 aktivitas Strava. | `node scripts/maintenance/sync_personal_records.js` |
 | `align_repos_with_db.cjs` | Memverifikasi sinkronisasi antara repositori TypeScript dan kolom basis data PostgreSQL. | `node scripts/maintenance/align_repos_with_db.cjs` |
 | `update_schema_sql.cjs` | Mensinkronkan berkas master `schema.sql` dengan skema live PostgreSQL. | `node scripts/maintenance/update_schema_sql.cjs` |
+| `audit_line_counts.cjs` | Memindai dan mengaudit jumlah baris seluruh berkas sumber untuk pencegahan kode monolitik (*bulk code audit*). | `node scripts/maintenance/audit_line_counts.cjs` |
 | `add_get_db_status.cjs` | Helper pengecekan konektivitas pool PostgreSQL vs Local Store. | `node scripts/maintenance/add_get_db_status.cjs` |
 
 ---
