@@ -1,17 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   Plus,
-  Camera,
-  CheckCircle2,
-  AlertCircle,
+  BookOpen,
   X,
-  Activity as ActivityIcon,
-  FileText,
   RefreshCw,
   Check,
+  AlertCircle,
+  CheckCircle2,
+  Calendar,
+  Sparkles,
+  PenLine,
+  Bookmark,
 } from "lucide-react";
 import { ScheduledWorkout } from "@/types";
 import { ActivityImageUploader } from "./ActivityImageUploader";
@@ -41,7 +44,11 @@ export function AddActivityModal({
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"image" | "manual">("image");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Form states
   const [sportType, setSportType] = useState<string>(
@@ -80,7 +87,7 @@ export function AddActivityModal({
   const [description, setDescription] = useState<string>("");
 
   // Health & Zone 2 metrics
-  const [rpeScore, setRpeScore] = useState<number>(3); // Default Zone 2 (RPE 3)
+  const [rpeScore, setRpeScore] = useState<number>(3);
   const [painScale, setPainScale] = useState<number>(0);
   const [swellingObserved, setSwellingObserved] = useState<boolean>(false);
   const [instabilityObserved, setInstabilityObserved] = useState<boolean>(false);
@@ -139,7 +146,6 @@ export function AddActivityModal({
     }
   };
 
-  // Live kinematic calculations
   const totalDurationSeconds =
     (parseInt(durationHours || "0", 10) || 0) * 3600 +
     (parseInt(durationMinutes || "0", 10) || 0) * 60 +
@@ -194,7 +200,6 @@ export function AddActivityModal({
         average_speed_mps: avgSpeedMps,
         description: description.trim() || undefined,
         workout_id: defaultWorkout?.id || undefined,
-        // Clinical response fields
         rpe_score: rpeScore,
         pain_during_activity: painScale,
         pain_after_activity: painScale,
@@ -216,8 +221,8 @@ export function AddActivityModal({
 
       setSuccessMsg(
         data.matchedWorkout
-          ? `Aktivitas berhasil dicatat dan disinkronkan ke sesi: ${data.matchedWorkout.workout_category} (Status: COMPLETED)!`
-          : "Aktivitas berhasil disimpan ke basis data telemetri!"
+          ? `Sesi tercatat di buku jurnal & tersinkronisasi ke: ${data.matchedWorkout.workout_category}!`
+          : "Catatan sesi berhasil ditulis ke buku jurnal telemetri!"
       );
 
       setTimeout(() => {
@@ -232,129 +237,116 @@ export function AddActivityModal({
     }
   };
 
-  return (
-    <>
-      {/* Trigger Buttons */}
-      {variant === "button" && (
+  const modalDialog = isOpen ? (
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 lg:p-6 bg-black/60 dark:bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
+      {/* Top Bar Floating Controls */}
+      <div className="absolute top-3 right-4 sm:right-6 z-[100000] flex items-center gap-2">
         <button
-          onClick={handleOpen}
-          className="px-3.5 py-1.5 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-semibold font-mono tracking-tight transition-all flex items-center gap-1.5 shadow-xs"
+          onClick={handleClose}
+          disabled={isSubmitting || isParsingImage}
+          className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-card)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] font-mono text-xs flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
         >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>TAMBAH AKTIVITAS</span>
+          <X className="w-4 h-4" />
+          <span>Tutup Buku</span>
         </button>
-      )}
+      </div>
 
-      {variant === "outline" && (
-        <button
-          onClick={handleOpen}
-          className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-xs"
-        >
-          <Plus className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-          <span>Tambah Aktivitas Manual / Foto</span>
-        </button>
-      )}
+      {/* THE OPEN BOOK CONTAINER (Kulit Buku Responsif via CSS Variables) */}
+      <div
+        className="w-full max-w-6xl max-h-[94vh] flex flex-col rounded-2xl p-2.5 sm:p-4 shadow-2xl relative overflow-hidden transition-colors duration-200"
+        style={{
+          backgroundColor: "var(--color-book-cover)",
+          borderColor: "var(--color-book-cover-border)",
+          borderWidth: "1px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Pita Pembatas Buku Merah/Emas di Punggung Buku Tengah Atas */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-7 h-8 bg-gradient-to-b from-rose-600 via-rose-700 to-rose-800 rounded-b-md shadow-md z-30 flex items-end justify-center pb-1 pointer-events-none">
+          <div className="w-3 h-1 bg-amber-300 dark:bg-amber-400/60 rounded-full" />
+        </div>
 
-      {variant === "compact" && (
-        <button
-          onClick={handleOpen}
-          className="p-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] transition-colors shadow-xs"
-          title="Tambah Aktivitas Manual"
-        >
-          <Plus className="w-4 h-4 text-[var(--color-cycling)]" />
-        </button>
-      )}
-
-      {/* Modal Dialog */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+        {/* FORM WRAPPER MENCAKUP KEDUA HALAMAN */}
+        <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+          {/* TWO PAGES SPREAD (HALAMAN KIRI & HALAMAN KANAN) */}
           <div
-            className="w-full max-w-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+            className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl overflow-hidden relative shadow-inner"
+            style={{
+              borderColor: "var(--color-border)",
+              borderWidth: "1px",
+            }}
           >
-            {/* Modal Header */}
-            <div className="px-5 py-4 border-b border-[var(--color-border)] bg-[var(--color-surface-muted)] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[var(--color-cycling)]">
-                  <ActivityIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
-                    INPUT AKTIVITAS TELEMETRI BARU
-                    {defaultWorkout && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 text-[var(--color-cycling)]">
-                        Target: {defaultWorkout.workout_category}
-                      </span>
-                    )}
-                  </h3>
-                  <p className="text-[11px] text-[var(--color-text-secondary)] font-mono">
-                    Ekstraksi otomatis via screenshot kamera (OCR) atau input formulir manual.
-                  </p>
-                </div>
+            
+            {/* ============================================================ */}
+            {/* 📖 HALAMAN KIRI (LEFT PAGE): Telemetri, Foto OCR & Kinematika */}
+            {/* ============================================================ */}
+            <div
+              className="flex flex-col border-b lg:border-b-0 lg:border-r relative overflow-y-auto p-5 sm:p-6 transition-colors duration-200"
+              style={{
+                backgroundColor: "var(--color-book-page-left)",
+                borderColor: "var(--color-border)",
+                backgroundImage: `
+                  linear-gradient(to right, var(--color-book-margin) 1px, transparent 1px),
+                  linear-gradient(to bottom, var(--color-book-line) 1px, transparent 1px)
+                `,
+                backgroundSize: "100% 100%, 100% 28px",
+                backgroundPosition: "38px 0, 0 8px",
+              }}
+            >
+              {/* Nomor Halaman Kiri & Tanggal */}
+              <div
+                className="flex items-center justify-between pb-3 mb-4 border-b text-xs font-mono text-[var(--color-text-secondary)]"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <span className="flex items-center gap-1.5 text-[var(--color-cycling)] font-bold">
+                  <Bookmark className="w-3.5 h-3.5" />
+                  HALAMAN 12 • LOG TELEMETRI
+                </span>
+                <span className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-[var(--color-text-muted)]" />
+                  {new Date(startDate || Date.now()).toLocaleDateString("id-ID", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
               </div>
-              <button
-                onClick={handleClose}
-                disabled={isSubmitting || isParsingImage}
-                className="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-card)] border border-transparent hover:border-[var(--color-border)] transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            {/* Ingestion Mode Tabs */}
-            <div className="px-5 pt-3 pb-2 bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] flex items-center gap-2 font-mono text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab("image")}
-                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
-                  activeTab === "image"
-                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
-                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                }`}
-              >
-                <Camera className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-                <span>Unggah Foto Telemetri (OCR)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("manual")}
-                className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
-                  activeTab === "manual"
-                    ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
-                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5 text-[var(--color-running)]" />
-                <span>Formulir Manual</span>
-              </button>
-            </div>
+              {/* Header Halaman Kiri */}
+              <div className="mb-4">
+                <h3 className="text-base sm:text-lg font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[var(--color-cycling)]" />
+                  BUKTI FISIK &amp; KINEMATIKA SESI
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary)] font-mono mt-0.5">
+                  Rekatkan tangkapan layar Strava/Garmin untuk pembacaan OCR otomatis.
+                </p>
+              </div>
 
-            {/* Scrollable Form Body */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
-              {/* Error Banner */}
+              {/* Error & Success Notice di Halaman Kiri */}
               {errorMsg && (
-                <div className="p-3 rounded-md bg-[var(--color-alert-red)]/10 border border-[var(--color-alert-red)]/30 flex items-start gap-2.5 text-xs text-[var(--color-alert-red)] font-mono">
+                <div className="mb-4 p-3 rounded-lg bg-[var(--color-alert-red)]/15 border border-[var(--color-alert-red)]/40 flex items-start gap-2.5 text-xs text-[var(--color-alert-red)] font-mono">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold">Peringatan: </span>
+                    <span className="font-bold">Koreksi: </span>
                     {errorMsg}
                   </div>
                 </div>
               )}
 
-              {/* Success Banner */}
               {successMsg && (
-                <div className="p-3 rounded-md bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 flex items-start gap-2.5 text-xs text-[var(--color-cycling)] font-mono">
+                <div className="mb-4 p-3 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 flex items-start gap-2.5 text-xs text-[var(--color-cycling)] font-mono">
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold">Berhasil: </span>
+                    <span className="font-bold">Tercatat: </span>
                     {successMsg}
                   </div>
                 </div>
               )}
 
-              {/* TAB 1: OCR IMAGE INGESTION */}
-              {activeTab === "image" && (
+              {/* Uploader Gambar Telemetri (OCR) */}
+              <div className="mb-4">
                 <ActivityImageUploader
                   imagePreview={imagePreview}
                   setImagePreview={setImagePreview}
@@ -367,77 +359,215 @@ export function AddActivityModal({
                   setErrorMsg={setErrorMsg}
                   onTelemetryExtracted={handleTelemetryExtracted}
                 />
-              )}
+              </div>
 
-              {/* TAB 2 or BELOW OCR: FORM FIELDS */}
-              <ActivityManualFormFields
-                sportType={sportType}
-                setSportType={setSportType}
-                name={name}
-                setName={setName}
-                startDate={startDate}
-                setStartDate={setStartDate}
-                distanceKm={distanceKm}
-                setDistanceKm={setDistanceKm}
-                durationHours={durationHours}
-                setDurationHours={setDurationHours}
-                durationMinutes={durationMinutes}
-                setDurationMinutes={setDurationMinutes}
-                durationSeconds={durationSeconds}
-                setDurationSeconds={setDurationSeconds}
-                elevationMeters={elevationMeters}
-                setElevationMeters={setElevationMeters}
-                description={description}
-                setDescription={setDescription}
-                calculatedSpeedKmh={calculatedSpeedKmh}
-                calculatedPaceMinKm={calculatedPaceMinKm}
-              />
+              {/* Box Kinematika Buku (Jarak, Durasi, Elevasi) */}
+              <div
+                className="mt-auto pt-3 border-t space-y-3 font-mono text-xs"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <div className="flex items-center justify-between text-[11px] text-[var(--color-text-secondary)]">
+                  <span className="font-bold text-[var(--color-cycling)]">RINGKASAN METRIK TERTULIS</span>
+                  <span>Halaman Kiri</span>
+                </div>
 
-              {/* ZONE 2 & JOINT HEALTH AUDIT */}
-              <ActivityHealthCheckinFields
-                rpeScore={rpeScore}
-                setRpeScore={setRpeScore}
-                painScale={painScale}
-                setPainScale={setPainScale}
-                swellingObserved={swellingObserved}
-                setSwellingObserved={setSwellingObserved}
-                instabilityObserved={instabilityObserved}
-                setInstabilityObserved={setInstabilityObserved}
-              />
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Jarak Terbaca</span>
+                    <span className="text-sm font-bold text-[var(--color-cycling)] font-tabular">
+                      {numericDistanceKm > 0 ? `${numericDistanceKm.toFixed(2)} km` : "-"}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Total Durasi</span>
+                    <span className="text-sm font-bold text-[var(--color-text-primary)] font-tabular">
+                      {totalDurationSeconds > 0
+                        ? `${durationHours}j ${durationMinutes}m ${durationSeconds}d`
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Rata-rata Speed</span>
+                    <span className="text-sm font-bold text-[var(--color-cycling)] font-tabular">
+                      {calculatedSpeedKmh} km/jam
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Pace Hitungan</span>
+                    <span className="text-sm font-bold text-[var(--color-running)] font-tabular">
+                      {calculatedPaceMinKm} /km
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-              {/* Submit & Cancel Actions */}
-              <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-2.5 font-mono">
+            {/* ============================================================ */}
+            {/* 📖 HALAMAN KANAN (RIGHT PAGE): Formulir Manual & Audit Klinis */}
+            {/* ============================================================ */}
+            <div
+              className="flex flex-col relative overflow-y-auto p-5 sm:p-6 transition-colors duration-200"
+              style={{
+                backgroundColor: "var(--color-book-page-right)",
+                backgroundImage: `
+                  linear-gradient(to right, var(--color-book-margin) 1px, transparent 1px),
+                  linear-gradient(to bottom, var(--color-book-line) 1px, transparent 1px)
+                `,
+                backgroundSize: "100% 100%, 100% 28px",
+                backgroundPosition: "38px 0, 0 8px",
+              }}
+            >
+              {/* Nomor Halaman Kanan & Target Sesi */}
+              <div
+                className="flex items-center justify-between pb-3 mb-4 border-b text-xs font-mono text-[var(--color-text-secondary)]"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <span className="flex items-center gap-1.5 text-[var(--color-running)] font-bold">
+                  <PenLine className="w-3.5 h-3.5" />
+                  HALAMAN 13 • FORMULIR &amp; AUDIT SENDI
+                </span>
+                {defaultWorkout ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-[var(--color-cycling)] font-bold">
+                    Target: {defaultWorkout.workout_category}
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-[var(--color-text-muted)]">Sesi Bebas Mandiri</span>
+                )}
+              </div>
+
+              {/* Header Halaman Kanan */}
+              <div className="mb-4">
+                <h3 className="text-base sm:text-lg font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
+                  <span>PARAMETER &amp; EVALUASI KESEHATAN</span>
+                </h3>
+                <p className="text-xs text-[var(--color-text-secondary)] font-mono mt-0.5">
+                  Lengkapi nama sesi, intensitas RPE Borg CR10, serta kontrol nyeri sendi.
+                </p>
+              </div>
+
+              {/* Form Isian Input Manual */}
+              <div className="space-y-4 mb-4">
+                <ActivityManualFormFields
+                  sportType={sportType}
+                  setSportType={setSportType}
+                  name={name}
+                  setName={setName}
+                  startDate={startDate}
+                  setStartDate={setStartDate}
+                  distanceKm={distanceKm}
+                  setDistanceKm={setDistanceKm}
+                  durationHours={durationHours}
+                  setDurationHours={setDurationHours}
+                  durationMinutes={durationMinutes}
+                  setDurationMinutes={setDurationMinutes}
+                  durationSeconds={durationSeconds}
+                  setDurationSeconds={setDurationSeconds}
+                  elevationMeters={elevationMeters}
+                  setElevationMeters={setElevationMeters}
+                  description={description}
+                  setDescription={setDescription}
+                  calculatedSpeedKmh={calculatedSpeedKmh}
+                  calculatedPaceMinKm={calculatedPaceMinKm}
+                />
+
+                {/* Audit Medis Sendi & RPE */}
+                <ActivityHealthCheckinFields
+                  rpeScore={rpeScore}
+                  setRpeScore={setRpeScore}
+                  painScale={painScale}
+                  setPainScale={setPainScale}
+                  swellingObserved={swellingObserved}
+                  setSwellingObserved={setSwellingObserved}
+                  instabilityObserved={instabilityObserved}
+                  setInstabilityObserved={setInstabilityObserved}
+                />
+              </div>
+
+              {/* Footer Halaman Kanan (Tombol Tulis Jurnal) */}
+              <div
+                className="mt-auto pt-4 border-t-2 flex items-center justify-between font-mono"
+                style={{ borderColor: "var(--color-border)" }}
+              >
                 <button
                   type="button"
                   onClick={handleClose}
                   disabled={isSubmitting || isParsingImage}
-                  className="px-4 py-2 rounded-md text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors"
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)] transition-colors cursor-pointer"
                 >
-                  Batal
+                  Batal / Tutup Lembaran
                 </button>
 
                 <button
                   type="submit"
                   disabled={isSubmitting || isParsingImage}
-                  className="px-5 py-2 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-lg bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>MENYIMPAN...</span>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>MENULIS KE JURNAL...</span>
                     </>
                   ) : (
                     <>
                       <Check className="w-4 h-4" />
-                      <span>SIMPAN AKTIVITAS KE BASIS DATA</span>
+                      <span>TULIS KE BUKU JURNAL</span>
                     </>
                   )}
                 </button>
               </div>
-            </form>
+            </div>
+
+            {/* Garis Lipatan Tengah Buku (Book Crease Shadow) */}
+            <div
+              className="hidden lg:block absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 pointer-events-none z-20 border-x"
+              style={{
+                background: `linear-gradient(to right, var(--color-book-crease-start), var(--color-book-crease-mid), var(--color-book-crease-start))`,
+                borderColor: "var(--color-border)",
+              }}
+            />
           </div>
-        </div>
+        </form>
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      {/* Trigger Buttons */}
+      {variant === "button" && (
+        <button
+          onClick={handleOpen}
+          className="px-3.5 py-1.5 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-semibold font-mono tracking-tight transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+        >
+          <BookOpen className="w-4 h-4 stroke-[2.2]" />
+          <span>+ TAMBAH AKTIVITAS</span>
+        </button>
       )}
+
+      {variant === "outline" && (
+        <button
+          onClick={handleOpen}
+          className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+        >
+          <BookOpen className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+          <span>Buka Buku Jurnal</span>
+        </button>
+      )}
+
+      {variant === "compact" && (
+        <button
+          onClick={handleOpen}
+          className="p-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] transition-colors shadow-xs cursor-pointer"
+          title="Buka Buku Catatan Aktivitas"
+        >
+          <BookOpen className="w-4 h-4 text-[var(--color-cycling)]" />
+        </button>
+      )}
+
+      {/* Render via Portal to document.body for top-level stacking */}
+      {mounted && typeof document !== "undefined" && modalDialog
+        ? createPortal(modalDialog, document.body)
+        : modalDialog}
     </>
   );
 }
