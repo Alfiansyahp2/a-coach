@@ -1,4 +1,5 @@
-import { ScheduledWorkout } from "@/types";
+import { Activity, ScheduledWorkout } from "@/types";
+import { formatDateOnly } from "@/lib/formatters";
 
 export interface CalendarDay {
   dateStr: string;
@@ -8,6 +9,7 @@ export interface CalendarDay {
   dayName: string;
   isToday: boolean;
   workouts: ScheduledWorkout[];
+  activities: Activity[];
 }
 
 export interface CalendarWeek {
@@ -22,10 +24,14 @@ export interface CalendarWeek {
   minDistanceMeters: number;
   days: CalendarDay[];
   totalDistanceMeters: number;
+  scheduledDistanceMeters: number;
+  completedDistanceMeters: number;
   cyclingDistanceMeters: number;
   runningDistanceMeters: number;
   totalDurationSeconds: number;
+  completedDurationSeconds: number;
   targetAchievedPct: number;
+  isCurrentWeek: boolean;
 }
 
 export const FULL_DAY_NAMES = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -48,9 +54,11 @@ export const WEEK_CONFIGS = [
 
 /**
  * Builds 12 structured calendar weeks (Nov 02, 2026 to Jan 24, 2027)
+ * Seamlessly integrates planned workouts AND recorded activities into daily cards and weekly mileage.
  */
 export function buildCalendarWeeks(
   initialWorkouts: ScheduledWorkout[],
+  activities: Activity[] = [],
   filter: "ALL" | "RUNNING" | "CYCLING" | "REHAB" | "COMPLETED",
   todayStr: string,
   isRunningCategory: (category: string) => boolean
@@ -60,10 +68,12 @@ export function buildCalendarWeeks(
   for (let wIdx = 0; wIdx < WEEK_CONFIGS.length; wIdx++) {
     const conf = WEEK_CONFIGS[wIdx];
     const days: CalendarDay[] = [];
-    let totalDist = 0;
+    let scheduledDist = 0;
+    let completedDist = 0;
     let cyclingDist = 0;
     let runningDist = 0;
-    let totalDur = 0;
+    let scheduledDur = 0;
+    let completedDur = 0;
 
     // Base date: Monday, Nov 02, 2026
     const baseStart = new Date(2026, 10, 2 + wIdx * 7);
@@ -76,8 +86,9 @@ export function buildCalendarWeeks(
       const dateStr = `${y}-${m}-${String(dayNumber).padStart(2, "0")}`;
       const monthName = SHORT_MONTH_NAMES[curDate.getMonth()];
 
+      // Filter scheduled workouts for this day
       const dayWorkouts = initialWorkouts.filter((wo) => {
-        const wDate = (wo.scheduled_date || "").slice(0, 10);
+        const wDate = formatDateOnly(wo.scheduled_date);
         const matchDate = wDate === dateStr;
         if (!matchDate) return false;
         if (filter === "RUNNING") return isRunningCategory(wo.workout_category);
@@ -88,15 +99,42 @@ export function buildCalendarWeeks(
         return true;
       });
 
+      // Filter recorded Strava/manual activities for this day
+      const dayActivities = activities.filter((act) => {
+        const actDate = formatDateOnly(act.start_date);
+        const matchDate = actDate === dateStr;
+        if (!matchDate) return false;
+        const sport = (act.sport_type || "").toLowerCase();
+        if (filter === "RUNNING") return isRunningCategory(sport);
+        if (filter === "CYCLING") return sport.includes("ride") || sport.includes("cycl");
+        if (filter === "REHAB")
+          return sport.includes("cross") || sport.includes("strength") || sport.includes("weight") || sport.includes("workout");
+        return true;
+      });
+
+      // Accumulate scheduled planned workouts
       for (const wo of dayWorkouts) {
         const dist = Number(wo.target_distance_meters || 0);
-        totalDist += dist;
+        scheduledDist += dist;
         if (isRunningCategory(wo.workout_category)) {
           runningDist += dist;
         } else if (wo.workout_category === "Cycling") {
           cyclingDist += dist;
         }
-        totalDur += Number(wo.target_duration_seconds || 0);
+        scheduledDur += Number(wo.target_duration_seconds || 0);
+      }
+
+      // Accumulate completed activities
+      for (const act of dayActivities) {
+        const dist = Number(act.distance_meters || 0);
+        completedDist += dist;
+        const sport = (act.sport_type || "").toLowerCase();
+        if (isRunningCategory(sport)) {
+          runningDist += dist;
+        } else if (sport.includes("ride") || sport.includes("cycl")) {
+          cyclingDist += dist;
+        }
+        completedDur += Number(act.moving_time_seconds || 0);
       }
 
       days.push({
@@ -107,11 +145,15 @@ export function buildCalendarWeeks(
         dayName: FULL_DAY_NAMES[d],
         isToday: dateStr === todayStr,
         workouts: dayWorkouts,
+        activities: dayActivities,
       });
     }
 
     const minDistanceMeters = conf.minTargetKm * 1000;
-    const targetAchievedPct = Math.round((totalDist / minDistanceMeters) * 100);
+    // Effective progress tracks actual completed distance if activities exist, or completed workouts
+    const effectiveProgressMeters = completedDist > 0 ? completedDist : scheduledDist;
+    const targetAchievedPct = Math.round((effectiveProgressMeters / minDistanceMeters) * 100);
+    const isCurrentWeek = days.some((d) => d.isToday);
 
     weeks.push({
       weekNumber: conf.weekNum,
@@ -124,14 +166,17 @@ export function buildCalendarWeeks(
       minTargetKm: conf.minTargetKm,
       minDistanceMeters,
       days,
-      totalDistanceMeters: totalDist,
+      totalDistanceMeters: Math.max(scheduledDist, completedDist),
+      scheduledDistanceMeters: scheduledDist,
+      completedDistanceMeters: completedDist,
       cyclingDistanceMeters: cyclingDist,
       runningDistanceMeters: runningDist,
-      totalDurationSeconds: totalDur,
+      totalDurationSeconds: Math.max(scheduledDur, completedDur),
+      completedDurationSeconds: completedDur,
       targetAchievedPct,
+      isCurrentWeek,
     });
   }
 
   return weeks;
 }
-

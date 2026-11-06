@@ -117,11 +117,15 @@ export async function getScheduledWorkouts(
       query += ` AND scheduled_date <= $${params.length}`;
     }
     query += ' ORDER BY scheduled_date ASC';
-    const res = await pgPool.query(query, params);
-    return res.rows.map((row) => ({
-      ...row,
-      scheduled_date: formatDateOnly(row.scheduled_date),
-    }));
+    try {
+      const res = await pgPool.query(query, params);
+      return res.rows.map((row) => ({
+        ...row,
+        scheduled_date: formatDateOnly(row.scheduled_date),
+      }));
+    } catch (err: any) {
+      console.warn("[PostgreSQL getScheduledWorkouts Error]:", err.message);
+    }
   }
 
   const store = ensureLocalStore();

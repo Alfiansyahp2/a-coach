@@ -35,14 +35,33 @@ export function formatDateOnly(val: any): string {
     const d = String(val.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
   }
-  if (typeof val === 'string') return val.split('T')[0];
+  if (typeof val === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+    const parsed = new Date(val);
+    if (!isNaN(parsed.getTime())) {
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth() + 1).padStart(2, '0');
+      const d = String(parsed.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    return val.split('T')[0];
+  }
   return String(val);
 }
 
 export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // Detect whether PostgreSQL is enabled
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:admin123@localhost:5432/sport_training';
+// Detect deployment environment vs local development
+const isVercel = Boolean(process.env.VERCEL);
+const isProd = process.env.NODE_ENV === 'production';
+const isCloudDeploy = isVercel || isProd;
+
+// In cloud deployment, only enable PostgreSQL if DATABASE_URL is explicitly set.
+// In local dev, fall back to localhost if available.
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  (isCloudDeploy ? '' : 'postgresql://postgres:admin123@localhost:5432/sport_training');
 let poolInstance: Pool | null = null;
 
 if (databaseUrl && databaseUrl.trim().length > 0) {
@@ -51,6 +70,7 @@ if (databaseUrl && databaseUrl.trim().length > 0) {
       connectionString: databaseUrl,
       max: 10,
       idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
     });
   } catch (err) {
     console.warn('Failed to initialize PostgreSQL pool, falling back to local store:', err);
@@ -61,7 +81,6 @@ if (databaseUrl && databaseUrl.trim().length > 0) {
 export const pgPool = poolInstance;
 
 // Local File Store for fallback / instant development
-const isVercel = Boolean(process.env.VERCEL);
 const DATA_DIR = isVercel ? path.join('/tmp', '.data') : path.join(process.cwd(), '.data');
 let memoryStore: LocalStoreSchema | null = null;
 const DATA_FILE = path.join(DATA_DIR, 'store.json');
