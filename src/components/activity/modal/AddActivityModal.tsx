@@ -238,56 +238,72 @@ export function AddActivityModal({
   };
 
   const modalDialog = isOpen ? (
-    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 lg:p-6 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 lg:p-6 bg-black/60 dark:bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
       {/* Top Bar Floating Controls */}
       <div className="absolute top-3 right-4 sm:right-6 z-[100000] flex items-center gap-2">
         <button
           onClick={handleClose}
           disabled={isSubmitting || isParsingImage}
-          className="px-3.5 py-1.5 rounded-lg bg-[#19221c]/95 text-stone-300 hover:text-white border border-[#304235] hover:border-emerald-500 font-mono text-xs flex items-center gap-1.5 transition-all shadow-xl cursor-pointer"
+          className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-card)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] font-mono text-xs flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
         >
           <X className="w-4 h-4" />
           <span>Tutup Buku</span>
         </button>
       </div>
 
-      {/* THE OPEN BOOK CONTAINER (Cover Kulit Buku di Bawah + Dua Halaman Kertas di Atas) */}
+      {/* THE OPEN BOOK CONTAINER (Kulit Buku Responsif via CSS Variables) */}
       <div
-        className="w-full max-w-6xl max-h-[94vh] flex flex-col rounded-2xl bg-[#0a0f0c] p-2.5 sm:p-4 shadow-[0_25px_70px_rgba(0,0,0,0.95),0_0_0_2px_#27372d,0_10px_30px_rgba(16,185,129,0.1)] border border-[#233228] relative overflow-hidden"
+        className="w-full max-w-6xl max-h-[94vh] flex flex-col rounded-2xl p-2.5 sm:p-4 shadow-2xl relative overflow-hidden transition-colors duration-200"
+        style={{
+          backgroundColor: "var(--color-book-cover)",
+          borderColor: "var(--color-book-cover-border)",
+          borderWidth: "1px",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Pita Pembatas Buku Merah/Emas di Punggung Buku Tengah Atas */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-7 h-8 bg-gradient-to-b from-rose-600 via-rose-700 to-rose-800 rounded-b-md shadow-md z-30 flex items-end justify-center pb-1 pointer-events-none">
-          <div className="w-3 h-1 bg-amber-400/60 rounded-full" />
+          <div className="w-3 h-1 bg-amber-300 dark:bg-amber-400/60 rounded-full" />
         </div>
 
         {/* FORM WRAPPER MENCAKUP KEDUA HALAMAN */}
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
           {/* TWO PAGES SPREAD (HALAMAN KIRI & HALAMAN KANAN) */}
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl overflow-hidden border border-[#2b3a30] relative shadow-inner">
+          <div
+            className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl overflow-hidden relative shadow-inner"
+            style={{
+              borderColor: "var(--color-border)",
+              borderWidth: "1px",
+            }}
+          >
             
             {/* ============================================================ */}
             {/* 📖 HALAMAN KIRI (LEFT PAGE): Telemetri, Foto OCR & Kinematika */}
             {/* ============================================================ */}
             <div
-              className="bg-[#121814] flex flex-col border-b lg:border-b-0 lg:border-r border-[#243329] relative overflow-y-auto p-5 sm:p-6 shadow-[inset_-12px_0_20px_rgba(0,0,0,0.4)]"
+              className="flex flex-col border-b lg:border-b-0 lg:border-r relative overflow-y-auto p-5 sm:p-6 transition-colors duration-200"
               style={{
+                backgroundColor: "var(--color-book-page-left)",
+                borderColor: "var(--color-border)",
                 backgroundImage: `
-                  linear-gradient(to right, rgba(239, 68, 68, 0.35) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(52, 211, 153, 0.06) 1px, transparent 1px)
+                  linear-gradient(to right, var(--color-book-margin) 1px, transparent 1px),
+                  linear-gradient(to bottom, var(--color-book-line) 1px, transparent 1px)
                 `,
                 backgroundSize: "100% 100%, 100% 28px",
                 backgroundPosition: "38px 0, 0 8px",
               }}
             >
               {/* Nomor Halaman Kiri & Tanggal */}
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#28392e] text-xs font-mono text-stone-400">
-                <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+              <div
+                className="flex items-center justify-between pb-3 mb-4 border-b text-xs font-mono text-[var(--color-text-secondary)]"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <span className="flex items-center gap-1.5 text-[var(--color-cycling)] font-bold">
                   <Bookmark className="w-3.5 h-3.5" />
                   HALAMAN 12 • LOG TELEMETRI
                 </span>
-                <span className="text-[11px] text-stone-400 flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-stone-500" />
+                <span className="text-[11px] text-[var(--color-text-muted)] flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-[var(--color-text-muted)]" />
                   {new Date(startDate || Date.now()).toLocaleDateString("id-ID", {
                     weekday: "long",
                     day: "numeric",
@@ -299,19 +315,19 @@ export function AddActivityModal({
 
               {/* Header Halaman Kiri */}
               <div className="mb-4">
-                <h3 className="text-base sm:text-lg font-bold font-mono text-emerald-300 tracking-tight flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                <h3 className="text-base sm:text-lg font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[var(--color-cycling)]" />
                   BUKTI FISIK &amp; KINEMATIKA SESI
                 </h3>
-                <p className="text-xs text-stone-400 font-mono mt-0.5">
+                <p className="text-xs text-[var(--color-text-secondary)] font-mono mt-0.5">
                   Rekatkan tangkapan layar Strava/Garmin untuk pembacaan OCR otomatis.
                 </p>
               </div>
 
               {/* Error & Success Notice di Halaman Kiri */}
               {errorMsg && (
-                <div className="mb-4 p-3 rounded-lg bg-red-950/60 border border-red-700/70 flex items-start gap-2.5 text-xs text-red-200 font-mono">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                <div className="mb-4 p-3 rounded-lg bg-[var(--color-alert-red)]/15 border border-[var(--color-alert-red)]/40 flex items-start gap-2.5 text-xs text-[var(--color-alert-red)] font-mono">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Koreksi: </span>
                     {errorMsg}
@@ -320,8 +336,8 @@ export function AddActivityModal({
               )}
 
               {successMsg && (
-                <div className="mb-4 p-3 rounded-lg bg-emerald-950/60 border border-emerald-600/70 flex items-start gap-2.5 text-xs text-emerald-200 font-mono">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                <div className="mb-4 p-3 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 flex items-start gap-2.5 text-xs text-[var(--color-cycling)] font-mono">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Tercatat: </span>
                     {successMsg}
@@ -346,36 +362,39 @@ export function AddActivityModal({
               </div>
 
               {/* Box Kinematika Buku (Jarak, Durasi, Elevasi) */}
-              <div className="mt-auto pt-3 border-t border-[#26372b] space-y-3 font-mono text-xs">
-                <div className="flex items-center justify-between text-[11px] text-stone-400">
-                  <span className="font-bold text-emerald-400">RINGKASAN METRIK TERTULIS</span>
+              <div
+                className="mt-auto pt-3 border-t space-y-3 font-mono text-xs"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <div className="flex items-center justify-between text-[11px] text-[var(--color-text-secondary)]">
+                  <span className="font-bold text-[var(--color-cycling)]">RINGKASAN METRIK TERTULIS</span>
                   <span>Halaman Kiri</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
-                    <span className="text-[10px] text-stone-500 block">Jarak Terbaca</span>
-                    <span className="text-sm font-bold text-emerald-300 font-tabular">
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Jarak Terbaca</span>
+                    <span className="text-sm font-bold text-[var(--color-cycling)] font-tabular">
                       {numericDistanceKm > 0 ? `${numericDistanceKm.toFixed(2)} km` : "-"}
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
-                    <span className="text-[10px] text-stone-500 block">Total Durasi</span>
-                    <span className="text-sm font-bold text-stone-200 font-tabular">
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Total Durasi</span>
+                    <span className="text-sm font-bold text-[var(--color-text-primary)] font-tabular">
                       {totalDurationSeconds > 0
                         ? `${durationHours}j ${durationMinutes}m ${durationSeconds}d`
                         : "-"}
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
-                    <span className="text-[10px] text-stone-500 block">Rata-rata Speed</span>
-                    <span className="text-sm font-bold text-emerald-400 font-tabular">
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Rata-rata Speed</span>
+                    <span className="text-sm font-bold text-[var(--color-cycling)] font-tabular">
                       {calculatedSpeedKmh} km/jam
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-[#0e1410] border border-[#26362b]">
-                    <span className="text-[10px] text-stone-500 block">Pace Hitungan</span>
-                    <span className="text-sm font-bold text-amber-300 font-tabular">
+                  <div className="p-2.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+                    <span className="text-[10px] text-[var(--color-text-muted)] block">Pace Hitungan</span>
+                    <span className="text-sm font-bold text-[var(--color-running)] font-tabular">
                       {calculatedPaceMinKm} /km
                     </span>
                   </div>
@@ -387,37 +406,41 @@ export function AddActivityModal({
             {/* 📖 HALAMAN KANAN (RIGHT PAGE): Formulir Manual & Audit Klinis */}
             {/* ============================================================ */}
             <div
-              className="bg-[#131915] flex flex-col relative overflow-y-auto p-5 sm:p-6 shadow-[inset_12px_0_20px_rgba(0,0,0,0.4)]"
+              className="flex flex-col relative overflow-y-auto p-5 sm:p-6 transition-colors duration-200"
               style={{
+                backgroundColor: "var(--color-book-page-right)",
                 backgroundImage: `
-                  linear-gradient(to right, rgba(239, 68, 68, 0.35) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(52, 211, 153, 0.06) 1px, transparent 1px)
+                  linear-gradient(to right, var(--color-book-margin) 1px, transparent 1px),
+                  linear-gradient(to bottom, var(--color-book-line) 1px, transparent 1px)
                 `,
                 backgroundSize: "100% 100%, 100% 28px",
                 backgroundPosition: "38px 0, 0 8px",
               }}
             >
               {/* Nomor Halaman Kanan & Target Sesi */}
-              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#28392e] text-xs font-mono text-stone-400">
-                <span className="flex items-center gap-1.5 text-amber-400 font-bold">
+              <div
+                className="flex items-center justify-between pb-3 mb-4 border-b text-xs font-mono text-[var(--color-text-secondary)]"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <span className="flex items-center gap-1.5 text-[var(--color-running)] font-bold">
                   <PenLine className="w-3.5 h-3.5" />
                   HALAMAN 13 • FORMULIR &amp; AUDIT SENDI
                 </span>
                 {defaultWorkout ? (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-[var(--color-cycling)] font-bold">
                     Target: {defaultWorkout.workout_category}
                   </span>
                 ) : (
-                  <span className="text-[10px] text-stone-500">Sesi Bebas Mandiri</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)]">Sesi Bebas Mandiri</span>
                 )}
               </div>
 
               {/* Header Halaman Kanan */}
               <div className="mb-4">
-                <h3 className="text-base sm:text-lg font-bold font-mono text-emerald-300 tracking-tight flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
                   <span>PARAMETER &amp; EVALUASI KESEHATAN</span>
                 </h3>
-                <p className="text-xs text-stone-400 font-mono mt-0.5">
+                <p className="text-xs text-[var(--color-text-secondary)] font-mono mt-0.5">
                   Lengkapi nama sesi, intensitas RPE Borg CR10, serta kontrol nyeri sendi.
                 </p>
               </div>
@@ -461,12 +484,15 @@ export function AddActivityModal({
               </div>
 
               {/* Footer Halaman Kanan (Tombol Tulis Jurnal) */}
-              <div className="mt-auto pt-4 border-t-2 border-[#2b3a30] flex items-center justify-between font-mono">
+              <div
+                className="mt-auto pt-4 border-t-2 flex items-center justify-between font-mono"
+                style={{ borderColor: "var(--color-border)" }}
+              >
                 <button
                   type="button"
                   onClick={handleClose}
                   disabled={isSubmitting || isParsingImage}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-stone-300 hover:text-white bg-[#19221c] hover:bg-[#233128] border border-[#304235] transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-lg text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)] transition-colors cursor-pointer"
                 >
                   Batal / Tutup Lembaran
                 </button>
@@ -474,7 +500,7 @@ export function AddActivityModal({
                 <button
                   type="submit"
                   disabled={isSubmitting || isParsingImage}
-                  className="px-6 py-2.5 rounded-lg bg-[var(--color-cycling)] hover:bg-[#1db854] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-[0_4px_16px_rgba(34,197,94,0.4)] disabled:opacity-50 cursor-pointer"
+                  className="px-6 py-2.5 rounded-lg bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
@@ -492,7 +518,13 @@ export function AddActivityModal({
             </div>
 
             {/* Garis Lipatan Tengah Buku (Book Crease Shadow) */}
-            <div className="hidden lg:block absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 pointer-events-none z-20 bg-gradient-to-r from-black/50 via-black/80 to-black/50 border-x border-white/5" />
+            <div
+              className="hidden lg:block absolute inset-y-0 left-1/2 -translate-x-1/2 w-8 pointer-events-none z-20 border-x"
+              style={{
+                background: `linear-gradient(to right, var(--color-book-crease-start), var(--color-book-crease-mid), var(--color-book-crease-start))`,
+                borderColor: "var(--color-border)",
+              }}
+            />
           </div>
         </form>
       </div>

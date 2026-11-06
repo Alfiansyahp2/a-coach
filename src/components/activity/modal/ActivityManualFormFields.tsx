@@ -99,18 +99,18 @@ export function ActivityManualFormFields({
   return (
     <div className="space-y-4 font-mono text-xs">
       {/* Header section in notebook */}
-      <div className="flex items-center justify-between pb-1.5 border-b border-[#2b3a30]">
-        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-          <PenTool className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+      <div className="flex items-center justify-between pb-1.5 border-b border-[var(--color-border)]">
+        <span className="text-xs font-bold text-[var(--color-cycling)] flex items-center gap-1.5">
+          <PenTool className="w-3.5 h-3.5" />
           KOLOM ENTRI AKTIVITAS ATLET
         </span>
-        <span className="text-[10px] text-stone-400 font-medium">Jurnal Mandiri</span>
+        <span className="text-[10px] text-[var(--color-text-muted)] font-medium">Jurnal Mandiri</span>
       </div>
 
       {/* Sport Type Selector & Custom Sport Creator */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="block text-[10px] text-stone-400 uppercase font-semibold">
+          <label className="block text-[10px] text-[var(--color-text-secondary)] uppercase font-semibold">
             Kategori Cabang Olahraga
           </label>
           <button
@@ -119,7 +119,7 @@ export function ActivityManualFormFields({
             className={`text-[10px] transition-colors flex items-center gap-1 cursor-pointer font-semibold ${
               isCustomMode
                 ? "text-[var(--color-cycling)] font-bold"
-                : "text-stone-400 hover:text-[var(--color-cycling)]"
+                : "text-[var(--color-text-muted)] hover:text-[var(--color-cycling)]"
             }`}
           >
             <Plus className="w-3 h-3" />
@@ -127,7 +127,7 @@ export function ActivityManualFormFields({
           </button>
         </div>
 
-        {/* Preset Sports Grid - Styled like stamp badges */}
+        {/* Preset Sports Grid */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {presetSports.map((item) => {
             const isSelected = !isCustomMode && sportType.toLowerCase() === item.id.toLowerCase();
@@ -138,8 +138,8 @@ export function ActivityManualFormFields({
                 onClick={() => handleSelectPreset(item.id)}
                 className={`py-2 px-1.5 rounded-lg text-center transition-all border flex flex-col items-center justify-center gap-1 cursor-pointer ${
                   isSelected
-                    ? "bg-[#1f3026] border-emerald-500 text-emerald-300 font-bold shadow-[0_2px_8px_rgba(34,197,94,0.2)]"
-                    : "bg-[#121915] border-[#29382f] text-stone-400 hover:text-stone-200 hover:border-[#384d40]"
+                    ? "bg-[var(--color-surface-card)] border-[var(--color-cycling)] text-[var(--color-cycling)] font-bold shadow-xs ring-1 ring-[var(--color-cycling)]/30"
+                    : "bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)]"
                 }`}
               >
                 {item.icon && <item.icon className="w-4 h-4" />}
@@ -151,13 +151,13 @@ export function ActivityManualFormFields({
 
         {/* Custom Sport Input Field */}
         {isCustomMode && (
-          <div className="p-3 rounded-lg bg-[#141c17] border border-[var(--color-cycling)]/40 space-y-1.5 animate-in fade-in duration-150">
+          <div className="p-3 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-cycling)]/40 space-y-1.5 animate-in fade-in duration-150">
             <div className="flex items-center justify-between text-[10px]">
               <span className="text-[var(--color-cycling)] font-bold flex items-center gap-1">
                 <Tag className="w-3 h-3" />
                 Tambah &amp; Tetapkan Cabang Olahraga Baru
               </span>
-              <span className="text-stone-400">Akan terdaftar otomatis di sistem</span>
+              <span className="text-[var(--color-text-muted)]">Akan terdaftar otomatis di sistem</span>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -165,7 +165,7 @@ export function ActivityManualFormFields({
                 value={customInput}
                 onChange={(e) => handleCustomInputChange(e.target.value)}
                 placeholder="Tuliskan cabang olahraga baru (contoh: Trail Run, Rowing, Padel)..."
-                className="flex-1 px-3 py-1.5 rounded-md bg-[#0f1512] border border-[#2d3f33] focus:border-[var(--color-cycling)] text-xs text-stone-200 placeholder-stone-500 focus:outline-none"
+                className="flex-1 px-3 py-1.5 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] focus:border-[var(--color-cycling)] text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none"
                 autoFocus
               />
               <span className="px-2.5 py-1 rounded-md bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] font-bold text-[10px] shrink-0 border border-[var(--color-cycling)]/30">
@@ -179,7 +179,7 @@ export function ActivityManualFormFields({
       {/* Name and Date */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="sm:col-span-2">
-          <label className="block text-[10px] text-stone-400 uppercase font-semibold mb-1">
+          <label className="block text-[10px] text-[var(--color-text-secondary)] uppercase font-semibold mb-1">
             Judul / Nama Aktivitas
           </label>
           <input
@@ -187,20 +187,20 @@ export function ActivityManualFormFields({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Contoh: MTB Zone 2 Endurance Pagi / Walk-Jog Recovery"
-            className="w-full px-3 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/40"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-cycling)]"
             required
           />
         </div>
 
         <div>
-          <label className="block text-[10px] text-stone-400 uppercase font-semibold mb-1">
+          <label className="block text-[10px] text-[var(--color-text-secondary)] uppercase font-semibold mb-1">
             Waktu &amp; Tanggal
           </label>
           <input
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs text-stone-200 focus:outline-none focus:border-emerald-500 font-tabular"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)] font-tabular"
             required
           />
         </div>
@@ -210,12 +210,12 @@ export function ActivityManualFormFields({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Distance */}
         <div>
-          <label className="block text-[10px] text-stone-400 uppercase font-semibold mb-1 flex items-center justify-between">
-            <span className="flex items-center gap-1 text-emerald-400">
+          <label className="block text-[10px] text-[var(--color-text-secondary)] uppercase font-semibold mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1 text-[var(--color-cycling)]">
               <MapPin className="w-3 h-3" />
               <span>Jarak Tempuh</span>
             </span>
-            <span className="text-[9px] text-stone-500">kilometer</span>
+            <span className="text-[9px] text-[var(--color-text-muted)]">kilometer</span>
           </label>
           <input
             type="number"
@@ -224,19 +224,19 @@ export function ActivityManualFormFields({
             value={distanceKm}
             onChange={(e) => setDistanceKm(e.target.value)}
             placeholder="0.00"
-            className="w-full px-3 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs font-tabular text-stone-200 focus:outline-none focus:border-emerald-500"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs font-tabular text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)]"
             required
           />
         </div>
 
         {/* Duration */}
         <div>
-          <label className="block text-[10px] text-stone-400 uppercase font-semibold mb-1 flex items-center justify-between">
-            <span className="flex items-center gap-1 text-stone-300">
-              <Clock className="w-3 h-3 text-emerald-400" />
+          <label className="block text-[10px] text-[var(--color-text-secondary)] uppercase font-semibold mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1 text-[var(--color-text-primary)]">
+              <Clock className="w-3 h-3 text-[var(--color-cycling)]" />
               <span>Durasi Waktu</span>
             </span>
-            <span className="text-[9px] text-stone-500">jam : mnt : dtk</span>
+            <span className="text-[9px] text-[var(--color-text-muted)]">jam : mnt : dtk</span>
           </label>
           <div className="grid grid-cols-3 gap-1 font-tabular">
             <input
@@ -245,7 +245,7 @@ export function ActivityManualFormFields({
               value={durationHours}
               onChange={(e) => setDurationHours(e.target.value)}
               placeholder="0h"
-              className="px-2 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs font-tabular text-stone-200 text-center focus:outline-none focus:border-emerald-500"
+              className="px-2 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs font-tabular text-[var(--color-text-primary)] text-center focus:outline-none focus:border-[var(--color-cycling)]"
             />
             <input
               type="number"
@@ -254,7 +254,7 @@ export function ActivityManualFormFields({
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(e.target.value)}
               placeholder="0m"
-              className="px-2 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs font-tabular text-stone-200 text-center focus:outline-none focus:border-emerald-500"
+              className="px-2 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs font-tabular text-[var(--color-text-primary)] text-center focus:outline-none focus:border-[var(--color-cycling)]"
               required
             />
             <input
@@ -264,19 +264,19 @@ export function ActivityManualFormFields({
               value={durationSeconds}
               onChange={(e) => setDurationSeconds(e.target.value)}
               placeholder="0s"
-              className="px-2 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs font-tabular text-stone-200 text-center focus:outline-none focus:border-emerald-500"
+              className="px-2 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs font-tabular text-[var(--color-text-primary)] text-center focus:outline-none focus:border-[var(--color-cycling)]"
             />
           </div>
         </div>
 
         {/* Elevation Gain */}
         <div>
-          <label className="block text-[10px] text-stone-400 uppercase font-semibold mb-1 flex items-center justify-between">
-            <span className="flex items-center gap-1 text-amber-400">
+          <label className="block text-[10px] text-[var(--color-text-secondary)] uppercase font-semibold mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1 text-[var(--color-running)]">
               <Mountain className="w-3 h-3" />
               <span>Elevasi Naik</span>
             </span>
-            <span className="text-[9px] text-stone-500">meter</span>
+            <span className="text-[9px] text-[var(--color-text-muted)]">meter</span>
           </label>
           <input
             type="number"
@@ -284,31 +284,31 @@ export function ActivityManualFormFields({
             value={elevationMeters}
             onChange={(e) => setElevationMeters(e.target.value)}
             placeholder="0"
-            className="w-full px-3 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs font-tabular text-stone-200 focus:outline-none focus:border-amber-500"
+            className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs font-tabular text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-running)]"
           />
         </div>
       </div>
 
       {/* Realtime Live Kinematics Strip */}
-      <div className="p-3 rounded-lg bg-[#111814] border border-[#27362c] flex items-center justify-between text-[11px]">
+      <div className="p-3 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] flex items-center justify-between text-[11px] shadow-xs">
         <div className="flex items-center gap-4">
           <div>
-            <span className="text-[9px] text-stone-400 block">Kecepatan Rata-rata</span>
-            <span className="font-bold text-emerald-300 font-tabular">{calculatedSpeedKmh} km/jam</span>
+            <span className="text-[9px] text-[var(--color-text-muted)] block">Kecepatan Rata-rata</span>
+            <span className="font-bold text-[var(--color-text-primary)] font-tabular">{calculatedSpeedKmh} km/jam</span>
           </div>
           <div>
-            <span className="text-[9px] text-stone-400 block">Pace Rata-rata</span>
-            <span className="font-bold text-amber-300 font-tabular">{calculatedPaceMinKm} /km</span>
+            <span className="text-[9px] text-[var(--color-text-muted)] block">Pace Rata-rata</span>
+            <span className="font-bold text-[var(--color-running)] font-tabular">{calculatedPaceMinKm} /km</span>
           </div>
         </div>
-        <div className="text-[10px] text-stone-500 italic">
+        <div className="text-[10px] text-[var(--color-text-muted)] italic">
           * Dihitung otomatis dari durasi &amp; jarak
         </div>
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-[10px] text-stone-400 uppercase font-semibold mb-1">
+        <label className="block text-[10px] text-[var(--color-text-secondary)] uppercase font-semibold mb-1">
           Catatan / Deskripsi Lapangan
         </label>
         <textarea
@@ -316,7 +316,7 @@ export function ActivityManualFormFields({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Tuliskan catatan rute, sensasi latihan, cuaca, nutrisi, atau hambatan teknis..."
-          className="w-full px-3 py-2 rounded-lg bg-[#121915] border border-[#2b3a30] text-xs text-stone-200 placeholder-stone-600 focus:outline-none focus:border-emerald-500"
+          className="w-full px-3 py-2 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-cycling)]"
         />
       </div>
     </div>

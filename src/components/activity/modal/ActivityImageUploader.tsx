@@ -85,13 +85,13 @@ export function ActivityImageUploader({
   };
 
   return (
-    <div className="p-4 rounded-xl bg-[#141b17] border border-[#27362d] space-y-3 font-mono">
-      <div className="flex items-center justify-between pb-1.5 border-b border-[#25332a]">
-        <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5">
-          <Paperclip className="w-3.5 h-3.5 text-[var(--color-cycling)] rotate-45" />
+    <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-3 font-mono shadow-xs">
+      <div className="flex items-center justify-between pb-1.5 border-b border-[var(--color-border)]">
+        <span className="text-xs text-[var(--color-cycling)] font-bold flex items-center gap-1.5">
+          <Paperclip className="w-3.5 h-3.5 rotate-45" />
           LAMPIRAN BUKTI TELEMETRI (OCR SCANNER)
         </span>
-        <span className="text-[10px] text-stone-400">
+        <span className="text-[10px] text-[var(--color-text-muted)]">
           Format: PNG, JPG, WEBP (Strava / Garmin)
         </span>
       </div>
@@ -104,49 +104,49 @@ export function ActivityImageUploader({
         className="hidden"
       />
 
-      {/* Upload Zone — Styled as a Polaroid / Clip-on photo box */}
+      {/* Upload Zone */}
       <div
         onClick={() => !isParsingImage && fileInputRef.current?.click()}
         className={`p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
           isParsingImage
-            ? "border-emerald-500 bg-[#16221b]"
+            ? "border-[var(--color-cycling)] bg-[var(--color-surface-muted)]"
             : imagePreview
-            ? "border-[#384c3f] bg-[#101713] hover:border-emerald-500"
-            : "border-[#2b3a31] bg-[#101713] hover:border-emerald-500 hover:bg-[#131b16]"
+            ? "border-[var(--color-border)] bg-[var(--color-surface-muted)] hover:border-[var(--color-cycling)]"
+            : "border-[var(--color-border)] bg-[var(--color-surface-muted)] hover:border-[var(--color-cycling)] hover:bg-[var(--color-surface-card)]"
         }`}
       >
         {isParsingImage ? (
           <div className="flex flex-col items-center gap-2 py-2">
-            <RefreshCw className="w-6 h-6 text-emerald-400 animate-spin" />
-            <span className="text-xs font-bold text-stone-200">
+            <RefreshCw className="w-6 h-6 text-[var(--color-cycling)] animate-spin" />
+            <span className="text-xs font-bold text-[var(--color-text-primary)]">
               Mengekstrak Kinematika dari Tangkapan Layar...
             </span>
-            <span className="text-[10px] text-stone-400">
+            <span className="text-[10px] text-[var(--color-text-muted)]">
               AI Vision memindai jarak, waktu tempuh, elevasi, dan pace
             </span>
           </div>
         ) : imagePreview ? (
           <div className="flex flex-col items-center gap-2">
-            <div className="p-1.5 bg-[#1b2520] rounded-lg border border-[#3b4e41] shadow-md">
+            <div className="p-1.5 bg-[var(--color-surface-card)] rounded-lg border border-[var(--color-border)] shadow-md">
               <img
                 src={imagePreview}
                 alt="Screenshot Telemetri"
                 className="max-h-36 rounded-md object-contain"
               />
             </div>
-            <span className="text-[10px] text-emerald-400 underline font-semibold flex items-center gap-1">
+            <span className="text-[10px] text-[var(--color-cycling)] underline font-semibold flex items-center gap-1">
               <Camera className="w-3 h-3" /> Rekatkan Tangkapan Layar Lain
             </span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1.5 py-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1b2520] border border-[#2f4035] flex items-center justify-center text-emerald-400 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)] shadow-xs">
               <Camera className="w-5 h-5" />
             </div>
-            <span className="text-xs font-semibold text-stone-200">
+            <span className="text-xs font-semibold text-[var(--color-text-primary)]">
               Klik untuk Merekatkan Foto / Screenshot Aktivitas
             </span>
-            <span className="text-[10px] text-stone-400 text-center max-w-sm">
+            <span className="text-[10px] text-[var(--color-text-muted)] text-center max-w-sm">
               Sistem akan membaca angka telemetri secara instan dan memasukkannya ke formulir buku
             </span>
           </div>
@@ -155,12 +155,12 @@ export function ActivityImageUploader({
 
       {/* OCR Success Feedback Banner */}
       {ocrSuccessMsg && (
-        <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-600/50 text-xs text-emerald-300 space-y-1">
+        <div className="p-3 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-xs text-[var(--color-cycling)] space-y-1">
           <div className="flex items-center gap-1.5 font-bold">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>Ekstraksi Selesai &amp; Ditempelkan ke Formulir!</span>
           </div>
-          <p className="text-[11px] text-stone-300 font-tabular pl-5.5">
+          <p className="text-[11px] text-[var(--color-text-primary)] font-tabular pl-5.5">
             {ocrSuccessMsg}
           </p>
         </div>
@@ -172,14 +172,14 @@ export function ActivityImageUploader({
           <button
             type="button"
             onClick={() => setShowRawText(!showRawText)}
-            className="text-[10px] text-stone-400 hover:text-stone-200 flex items-center gap-1 transition-colors cursor-pointer"
+            className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
           >
             <FileText className="w-3 h-3" />
             <span>Transkrip Teks Mentah (Raw OCR)</span>
             {showRawText ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
           {showRawText && (
-            <pre className="p-2.5 rounded-lg bg-[#0e1411] border border-[#28382e] text-[9.5px] text-stone-400 whitespace-pre-wrap max-h-24 overflow-y-auto">
+            <pre className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[9.5px] text-[var(--color-text-secondary)] whitespace-pre-wrap max-h-24 overflow-y-auto">
               {ocrRawText}
             </pre>
           )}
