@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { Camera, Sparkles, RefreshCw, FileText, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
+import { Camera, Sparkles, RefreshCw, FileText, CheckCircle2, ChevronDown, ChevronUp, Paperclip } from "lucide-react";
 
 interface ActivityImageUploaderProps {
   imagePreview: string | null;
@@ -85,14 +85,14 @@ export function ActivityImageUploader({
   };
 
   return (
-    <div className="p-4 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-3 font-mono">
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-[var(--color-text-primary)] font-bold flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-          IMAGE TELEMETRY PARSER (OCR)
+    <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-3 font-mono shadow-xs">
+      <div className="flex items-center justify-between pb-1.5 border-b border-[var(--color-border)]">
+        <span className="text-xs text-[var(--color-cycling)] font-bold flex items-center gap-1.5">
+          <Paperclip className="w-3.5 h-3.5 rotate-45" />
+          LAMPIRAN BUKTI TELEMETRI (OCR SCANNER)
         </span>
         <span className="text-[10px] text-[var(--color-text-muted)]">
-          Format: PNG, JPG, WEBP (Strava / Garmin / Apple Watch)
+          Format: PNG, JPG, WEBP (Strava / Garmin)
         </span>
       </div>
 
@@ -107,45 +107,47 @@ export function ActivityImageUploader({
       {/* Upload Zone */}
       <div
         onClick={() => !isParsingImage && fileInputRef.current?.click()}
-        className={`p-6 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
+        className={`p-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
           isParsingImage
-            ? "border-[var(--color-cycling)] bg-[var(--color-surface-card)]"
+            ? "border-[var(--color-cycling)] bg-[var(--color-surface-muted)]"
             : imagePreview
-            ? "border-[var(--color-border)] bg-[var(--color-surface-card)] hover:border-[var(--color-cycling)]"
-            : "border-[var(--color-border)] bg-[var(--color-surface-card)] hover:border-[var(--color-cycling)]"
+            ? "border-[var(--color-border)] bg-[var(--color-surface-muted)] hover:border-[var(--color-cycling)]"
+            : "border-[var(--color-border)] bg-[var(--color-surface-muted)] hover:border-[var(--color-cycling)] hover:bg-[var(--color-surface-card)]"
         }`}
       >
         {isParsingImage ? (
           <div className="flex flex-col items-center gap-2 py-2">
             <RefreshCw className="w-6 h-6 text-[var(--color-cycling)] animate-spin" />
             <span className="text-xs font-bold text-[var(--color-text-primary)]">
-              Mengekstrak Kinematika dari Gambar...
+              Mengekstrak Kinematika dari Tangkapan Layar...
             </span>
             <span className="text-[10px] text-[var(--color-text-muted)]">
-              Mendeteksi Jarak, Durasi, Elevasi, dan Kecepatan Sesi
+              AI Vision memindai jarak, waktu tempuh, elevasi, dan pace
             </span>
           </div>
         ) : imagePreview ? (
           <div className="flex flex-col items-center gap-2">
-            <img
-              src={imagePreview}
-              alt="Screenshot Telemetri"
-              className="max-h-36 rounded-md border border-[var(--color-border)] object-contain"
-            />
-            <span className="text-[10px] text-[var(--color-cycling)] underline font-semibold">
-              Ganti Gambar Screenshot Lain
+            <div className="p-1.5 bg-[var(--color-surface-card)] rounded-lg border border-[var(--color-border)] shadow-md">
+              <img
+                src={imagePreview}
+                alt="Screenshot Telemetri"
+                className="max-h-36 rounded-md object-contain"
+              />
+            </div>
+            <span className="text-[10px] text-[var(--color-cycling)] underline font-semibold flex items-center gap-1">
+              <Camera className="w-3 h-3" /> Rekatkan Tangkapan Layar Lain
             </span>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1.5 py-3">
-            <div className="w-10 h-10 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)]">
+            <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)] shadow-xs">
               <Camera className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold text-[var(--color-text-primary)]">
-              Klik untuk Unggah Screenshot Aktivitas
+              Klik untuk Merekatkan Foto / Screenshot Aktivitas
             </span>
-            <span className="text-[10px] text-[var(--color-text-muted)]">
-              AI Vision akan memindai angka jarak, durasi, dan elevasi otomatis
+            <span className="text-[10px] text-[var(--color-text-muted)] text-center max-w-sm">
+              Sistem akan membaca angka telemetri secara instan dan memasukkannya ke formulir buku
             </span>
           </div>
         )}
@@ -153,10 +155,10 @@ export function ActivityImageUploader({
 
       {/* OCR Success Feedback Banner */}
       {ocrSuccessMsg && (
-        <div className="p-3 rounded-md bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 text-xs text-[var(--color-cycling)] space-y-1">
+        <div className="p-3 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-xs text-[var(--color-cycling)] space-y-1">
           <div className="flex items-center gap-1.5 font-bold">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>Ekstraksi Telemetri Berhasil!</span>
+            <span>Ekstraksi Selesai &amp; Ditempelkan ke Formulir!</span>
           </div>
           <p className="text-[11px] text-[var(--color-text-primary)] font-tabular pl-5.5">
             {ocrSuccessMsg}
@@ -164,20 +166,20 @@ export function ActivityImageUploader({
         </div>
       )}
 
-      {/* OCR Raw Text Toggle (For Transparency) */}
+      {/* OCR Raw Text Toggle */}
       {ocrRawText && (
         <div className="space-y-1">
           <button
             type="button"
             onClick={() => setShowRawText(!showRawText)}
-            className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors"
+            className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] flex items-center gap-1 transition-colors cursor-pointer"
           >
             <FileText className="w-3 h-3" />
-            <span>Lihat Teks Mentah Hasil Ekstraksi (Raw OCR)</span>
+            <span>Transkrip Teks Mentah (Raw OCR)</span>
             {showRawText ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
           {showRawText && (
-            <pre className="p-2.5 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] text-[9.5px] text-[var(--color-text-muted)] whitespace-pre-wrap max-h-24 overflow-y-auto">
+            <pre className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[9.5px] text-[var(--color-text-secondary)] whitespace-pre-wrap max-h-24 overflow-y-auto">
               {ocrRawText}
             </pre>
           )}
