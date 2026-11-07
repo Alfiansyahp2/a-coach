@@ -204,6 +204,37 @@ export async function deleteActivity(
   return true;
 }
 
+export async function batchUpdateActivities(
+  ids: string[],
+  updates: { sport_type?: string },
+  userId: string = DEFAULT_USER_ID
+): Promise<number> {
+  if (ids.length === 0) return 0;
+  if (pgPool) {
+    const res = await pgPool.query(
+      `UPDATE activities SET
+        sport_type = COALESCE($1, sport_type),
+        updated_at = NOW()
+      WHERE id = ANY($2::uuid[]) AND user_id = $3
+      RETURNING id`,
+      [updates.sport_type || null, ids, userId]
+    );
+    return res.rowCount || 0;
+  }
+
+  const store = ensureLocalStore();
+  let count = 0;
+  for (const act of store.activities) {
+    if (ids.includes(act.id) && act.user_id === userId) {
+      if (updates.sport_type) act.sport_type = updates.sport_type as any;
+      act.updated_at = new Date().toISOString();
+      count++;
+    }
+  }
+  saveLocalStore(store);
+  return count;
+}
+
 export async function getActivities(
   userId: string = DEFAULT_USER_ID,
   filters?: { sportType?: string; limit?: number; afterDate?: string }
