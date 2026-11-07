@@ -35,6 +35,7 @@ export function AppHeader({ user, healthContext, streakWeeks }: AppHeaderProps) 
 
   const getSectionTitle = () => {
     if (pathname === "/") return "Overview Telemetri";
+    if (pathname.startsWith("/profile")) return "Profil Atlet & Kalibrasi Biometrik";
     if (pathname.startsWith("/goals")) return "Sasaran & Target Progresif";
     if (pathname.startsWith("/training")) return "Kalender & Periodisasi 12-Minggu";
     if (pathname.startsWith("/health")) return "Dossier Kesehatan & Beban Sendi";
@@ -83,27 +84,31 @@ export function AppHeader({ user, healthContext, streakWeeks }: AppHeaderProps) 
               variant="badge"
             />
 
-            <div className="hidden xl:flex items-center gap-2 pl-2 border-l border-[var(--color-border)]">
+            <Link
+              href="/profile"
+              title="Lihat & Kelola Profil Lengkap Atlet"
+              className="hidden xl:flex items-center gap-2 pl-2 border-l border-[var(--color-border)] hover:opacity-85 transition-opacity group cursor-pointer"
+            >
               {user.avatar_url ? (
                 <img
                   src={user.avatar_url}
                   alt={user.name}
-                  className="w-7 h-7 rounded-full border border-[var(--color-border)] object-cover shadow-xs"
+                  className="w-7 h-7 rounded-full border border-[var(--color-border)] group-hover:border-[var(--color-cycling)] object-cover shadow-xs transition-colors"
                 />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-xs font-mono font-bold text-[var(--color-cycling)]">
+                <div className="w-7 h-7 rounded-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] group-hover:border-[var(--color-cycling)] flex items-center justify-center text-xs font-mono font-bold text-[var(--color-cycling)] transition-colors">
                   {user.name.charAt(0)}
                 </div>
               )}
               <div className="text-left font-mono">
-                <div className="text-xs font-bold text-[var(--color-text-primary)] leading-none">
+                <div className="text-xs font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-cycling)] leading-none transition-colors">
                   {user.name}
                 </div>
                 <div className="text-[9px] text-[var(--color-cycling)] font-semibold leading-tight pt-0.5">
                   Calibrated
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         )}
 
