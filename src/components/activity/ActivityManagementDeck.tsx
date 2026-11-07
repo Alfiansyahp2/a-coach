@@ -151,15 +151,19 @@ export function ActivityManagementDeck({
     try {
       setBatchLoading(true);
 
-      const promises = selectedIds.map((id) =>
-        fetch(`/api/activities/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sport_type: batchSport }),
-        }).then((res) => res.json())
-      );
+      const res = await fetch("/api/activities/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activity_ids: selectedIds,
+          updates: { sport_type: batchSport },
+        }),
+      });
 
-      await Promise.all(promises);
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || "Batch update failed");
+      }
 
       // Update local state
       setActivities((prev) =>

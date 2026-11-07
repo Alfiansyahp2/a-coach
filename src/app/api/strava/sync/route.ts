@@ -9,7 +9,7 @@ import {
   getActivities,
 } from '@/lib/db';
 import { fetchAthleteActivities, getValidAccessToken } from '@/lib/strava';
-import { runAutoMatch } from '@/lib/matching';
+import { runAutoMatch } from '@/lib/domain/matching/matchingEngine';
 import { Activity } from '@/types';
 
 /**

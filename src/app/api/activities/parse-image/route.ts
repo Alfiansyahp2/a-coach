@@ -38,25 +38,84 @@ export async function POST(req: NextRequest) {
       path.join(process.cwd(), "scripts", "parse_activity_image.py"),
     ];
     const scriptPath = candidatePaths.find((p) => fs.existsSync(p)) || candidatePaths[0];
+    const pyBin = process.env.PYTHON_BIN || (process.platform === "win32" ? "python" : "python3");
 
-    // Execute Python OCR Script
-    const { stdout, stderr } = await execFileAsync("python", [scriptPath, tempFilePath], {
-      timeout: 30000,
-    });
+    let parsedResult: any = null;
 
-    if (stderr && stderr.trim().length > 0) {
-      console.warn("Python parser stderr:", stderr);
+    // Primary Attempt: Python Subprocess
+    try {
+      const { stdout, stderr } = await execFileAsync(pyBin, [scriptPath, tempFilePath], {
+        timeout: 30000,
+      });
+
+      if (stderr && stderr.trim().length > 0) {
+        console.warn("Python parser stderr:", stderr);
+      }
+
+      parsedResult = JSON.parse(stdout.trim());
+    } catch (pyErr) {
+      console.warn("Python OCR unavailable or failed, falling back to portable tesseract.js:", pyErr);
     }
 
-    let parsedResult: any = {};
-    try {
-      parsedResult = JSON.parse(stdout.trim());
-    } catch (parseErr) {
-      console.error("Failed to parse Python OCR output:", stdout);
-      return NextResponse.json(
-        { error: "Gagal memproses hasil OCR gambar", details: stdout },
-        { status: 500 }
-      );
+    // Fallback Attempt: Pure Node.js tesseract.js
+    if (!parsedResult || !parsedResult.success) {
+      try {
+        const Tesseract = await import("tesseract.js");
+        const { data: { text } } = await Tesseract.recognize(tempFilePath, "eng");
+
+        let distanceKm = 0;
+        const distMatch = text.match(/(\d+[.,]\d+)\s*(?:km|k\s*m)/i) || text.match(/distance\s*[:\s]*(\d+[.,]?\d*)/i);
+        if (distMatch) {
+          distanceKm = parseFloat(distMatch[1].replace(",", "."));
+        }
+
+        let movingTimeSec = 0;
+        const timeMatch = text.match(/(\d+)\s*h(?:our)?s?\s*(\d+)\s*m/i) || text.match(/(\d{1,2}):(\d{2}):(\d{2})/);
+        if (timeMatch) {
+          if (timeMatch[3]) {
+            movingTimeSec = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60 + parseInt(timeMatch[3], 10);
+          } else {
+            movingTimeSec = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60;
+          }
+        } else {
+          const minSecMatch = text.match(/(\d+)\s*m(?:in)?s?\s*(\d+)\s*s/i) || text.match(/(\d{1,2}):(\d{2})/);
+          if (minSecMatch) {
+            movingTimeSec = parseInt(minSecMatch[1], 10) * 60 + parseInt(minSecMatch[2], 10);
+          }
+        }
+
+        let elevM = 0;
+        const elevMatch = text.match(/elev(?:ation)?(?:\s*gain)?\s*[:\s]*(\d+)/i) || text.match(/(\d+)\s*m\s*(?:elev|gain)/i);
+        if (elevMatch) {
+          elevM = parseInt(elevMatch[1], 10);
+        }
+
+        let avgSpeedKmh = 0;
+        const speedMatch = text.match(/(\d+[.,]\d+)\s*km\/h/i) || text.match(/speed\s*[:\s]*(\d+[.,]?\d*)/i);
+        if (speedMatch) {
+          avgSpeedKmh = parseFloat(speedMatch[1].replace(",", "."));
+        } else if (distanceKm > 0 && movingTimeSec > 0) {
+          avgSpeedKmh = parseFloat(((distanceKm / movingTimeSec) * 3600).toFixed(1));
+        }
+
+        parsedResult = {
+          success: true,
+          sport_type: "Ride",
+          name: `Parsed Session (${distanceKm} km)`,
+          distance_km: distanceKm,
+          distance_meters: Math.round(distanceKm * 1000),
+          moving_time_seconds: movingTimeSec,
+          elevation_gain_meters: elevM,
+          average_speed_kmh: avgSpeedKmh,
+          raw_text: text,
+        };
+      } catch (tessErr) {
+        console.error("Both Python OCR and Tesseract.js failed:", tessErr);
+        return NextResponse.json(
+          { error: "Gagal memproses hasil OCR gambar", details: String(tessErr) },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({

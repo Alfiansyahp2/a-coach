@@ -7,6 +7,8 @@ import {
   saveWorkoutActivityMatch,
   deleteTrainingPlansByUserId,
   deleteScheduledWorkoutsByUserId,
+  getScheduledWorkouts,
+  updateScheduledWorkout,
   getFitnessGoals,
   upsertFitnessGoal,
   setPrimaryFitnessGoal,
@@ -68,9 +70,11 @@ export async function generateCoachTrainingFromDatabase(
 
   // Max recorded metrics from activities (Peak Single Session)
   const maxRideMeters = Math.max(0, ...rides.map((r) => Number(r.distance_meters || 0)));
-  const maxRideKm = Math.round((maxRideMeters / 1000) * 10) / 10; // e.g. 56.1 km
+  const maxRideKm = Math.round((maxRideMeters / 1000) * 10) / 10;
   const maxRunMeters = Math.max(0, ...runs.map((r) => Number(r.distance_meters || 0)));
-  const maxRunKm = Math.round((maxRunMeters / 1000) * 10) / 10; // e.g. 12.3 km
+  const maxRunKm = Math.round((maxRunMeters / 1000) * 10) / 10;
+  const totalActivityMeters = activities.reduce((acc, a) => acc + Number(a.distance_meters || 0), 0);
+  const totalActivityKm = Math.round((totalActivityMeters / 1000) * 10) / 10;
 
   const readiness = healthContext?.latestReadiness;
   const isRunningOnHold =
@@ -79,7 +83,7 @@ export async function generateCoachTrainingFromDatabase(
 
   const weeklyTrainingDays = 3;
 
-  // 2. Ensure foundational core goals exist with safe defaults
+  // 2. Ensure foundational core goals exist with grounded defaults
   const goal100k = await upsertFitnessGoal({
     id: '00000000-0000-0000-0000-000000000031',
     user_id: userId,
@@ -89,7 +93,7 @@ export async function generateCoachTrainingFromDatabase(
     priority: targetGoalId === '00000000-0000-0000-0000-000000000031' ? 1 : 1,
     target_event_name: 'Century Ride 100K MTB',
     target_value: 100, // 100 km single session
-    current_value: maxRideKm > 0 ? maxRideKm : 56.1, // 56.1 km single session baseline
+    current_value: maxRideKm > 0 ? maxRideKm : 0,
     start_date: '2026-09-01',
     target_date: '2027-03-31',
     is_achieved: maxRideKm >= 100,
@@ -105,7 +109,7 @@ export async function generateCoachTrainingFromDatabase(
     priority: targetGoalId === '00000000-0000-0000-0000-000000000032' ? 1 : 2,
     target_event_name: 'Marathon Return-to-Run (42.2K)',
     target_value: 42.2, // 42.2 km single session
-    current_value: maxRunKm > 0 ? maxRunKm : 12.3, // 12.3 km single session baseline
+    current_value: maxRunKm > 0 ? maxRunKm : 0,
     start_date: '2026-09-01',
     target_date: '2027-04-30',
     is_achieved: maxRunKm >= 42.2,
@@ -137,10 +141,10 @@ export async function generateCoachTrainingFromDatabase(
     priority: 2,
     target_event_name: '12-Week Endurance Accumulation',
     target_value: 400,
-    current_value: 79.5,
+    current_value: totalActivityKm > 0 ? totalActivityKm : 0,
     start_date: '2026-11-02',
     target_date: '2027-01-24',
-    is_achieved: false,
+    is_achieved: totalActivityKm >= 400,
     unit: 'km',
   });
 
@@ -162,13 +166,21 @@ export async function generateCoachTrainingFromDatabase(
 
   const metadata = getGoalMetadata(activeGoal);
 
-  // 4. Clean existing plans and workouts for fresh authoritative generation
-  await deleteScheduledWorkoutsByUserId(userId);
+  // 4. Non-destructive regeneration: preserve existing COMPLETED workouts & matches
+  const existingWorkouts = await getScheduledWorkouts(userId);
+  const existingCompleted = existingWorkouts.filter((w) => w.status === 'COMPLETED');
+
+  await deleteScheduledWorkoutsByUserId(userId, { preserveCompleted: true });
   await deleteTrainingPlansByUserId(userId);
 
   // 5. Create authoritative 12-Week Training Plan linked to the chosen goal
-  const planStartDate = '2026-11-02';
-  const planEndDate = '2027-01-24';
+  const planStartDate = activeGoal.start_date || '2026-11-02';
+  let planEndDate = activeGoal.target_date;
+  if (!planEndDate) {
+    const startD = new Date(planStartDate);
+    const endD = new Date(startD.getTime() + (12 * 7 - 1) * 86400000);
+    planEndDate = endD.toISOString().split('T')[0];
+  }
 
   const plan = await createTrainingPlan({
     user_id: userId,
@@ -180,14 +192,21 @@ export async function generateCoachTrainingFromDatabase(
     is_active: true,
   });
 
+  // Re-link existing completed workouts to the new plan
+  for (const cw of existingCompleted) {
+    await updateScheduledWorkout(cw.id, { plan_id: plan.id });
+    cw.plan_id = plan.id;
+  }
+
   // 6. Generate 12-Week Workouts customized to the active goal archetype
-  const workoutsToCreate = generateWorkoutsForGoal(activeGoal, userId, plan.id);
-  const historicalMatchedWorkouts = getHistoricalBenchmarkWorkouts(userId, plan.id, activities);
+  const workoutsToCreate = generateWorkoutsForGoal(activeGoal, userId, plan.id, planStartDate);
+  const historicalMatchedWorkouts =
+    existingCompleted.length > 0 ? [] : getHistoricalBenchmarkWorkouts(userId, plan.id, activities);
 
   // 7. Insert all workouts into DB
-  const createdWorkouts: ScheduledWorkout[] = [];
+  const createdWorkouts: ScheduledWorkout[] = [...existingCompleted];
 
-  // Historical completed workouts with correlation
+  // Historical completed workouts with correlation (seeded only if none exist yet)
   for (const item of historicalMatchedWorkouts) {
     const created = await createScheduledWorkout({
       ...item.workout,
@@ -220,8 +239,8 @@ export async function generateCoachTrainingFromDatabase(
     createdWorkouts.push(created);
   }
 
-  const roadTo100kProgressPct = Math.min(100, Math.round(((maxRideKm > 0 ? maxRideKm : 56.1) / 100) * 100));
-  const marathonRehabProgressPct = Math.min(100, Math.round(((maxRunKm > 0 ? maxRunKm : 12.3) / 42.195) * 100));
+  const roadTo100kProgressPct = maxRideKm > 0 ? Math.min(100, Math.round((maxRideKm / 100) * 100)) : 0;
+  const marathonRehabProgressPct = maxRunKm > 0 ? Math.min(100, Math.round((maxRunKm / 42.195) * 100)) : 0;
 
   return {
     plan,

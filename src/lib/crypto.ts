@@ -5,8 +5,14 @@ const IV_LENGTH = 16;
 const TAG_LENGTH = 16;
 
 function getEncryptionKey(): Buffer {
-  const secret = process.env.ENCRYPTION_SECRET || 'e4f9b8c3d2e1a0f9e8d7c6b5a4938271e0d9c8b7a69584736251403928172635';
-  return crypto.scryptSync(secret, 'strava-athlete-salt', 32);
+  const secret = process.env.ENCRYPTION_SECRET;
+  if (!secret || secret.trim().length < 32) {
+    throw new Error(
+      '[CRITICAL SECURITY EXCEPTION] ENCRYPTION_SECRET is not configured or is shorter than 32 characters in environment variables. Refusing to operate with an insecure or missing key.'
+    );
+  }
+  const salt = process.env.ENCRYPTION_SALT || 'a-coach-secure-cryptographic-salt-key-derivation';
+  return crypto.scryptSync(secret, salt, 32);
 }
 
 /**

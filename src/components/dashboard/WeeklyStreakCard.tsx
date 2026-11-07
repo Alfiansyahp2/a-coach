@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { Flame } from "lucide-react";
 import { Activity, ScheduledWorkout } from "@/types";
-import { calculateWeeklyStreak } from "@/lib/streakEngine";
+import { calculateWeeklyStreak } from "@/lib/domain/streak/streakEngine";
 
 interface WeeklyStreakCardProps {
   activities?: Activity[];

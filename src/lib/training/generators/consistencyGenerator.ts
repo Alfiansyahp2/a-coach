@@ -1,8 +1,12 @@
-import { GeneratedWorkoutDraft } from './types';
+import { GeneratedWorkoutDraft, resolveBaseTuesday } from './types';
 
-export function generateConsistencyWorkouts(userId: string, planId: string): GeneratedWorkoutDraft[] {
+export function generateConsistencyWorkouts(
+  userId: string,
+  planId: string,
+  startDate?: string | Date
+): GeneratedWorkoutDraft[] {
   const workouts: GeneratedWorkoutDraft[] = [];
-  const baseTuesdayDate = new Date('2026-11-03T00:00:00Z');
+  const baseTuesdayDate = resolveBaseTuesday(startDate);
 
   for (let w = 1; w <= 12; w++) {
     const weekOffsetDays = (w - 1) * 7;

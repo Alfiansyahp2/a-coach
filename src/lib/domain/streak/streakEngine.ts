@@ -210,21 +210,36 @@ export function calculateWeeklyStreak(
   workouts: ScheduledWorkout[] = [],
   referenceDate: Date = new Date()
 ): WeeklyStreakResult {
-  // 1. Gather all activity dates
+  // 1. Gather all activity dates with deduplication against completed workout slots
   const timestamps: number[] = [];
+  const loggedDateSet = new Set<string>();
 
   for (const act of activities) {
     if (act.start_date) {
       const t = new Date(act.start_date).getTime();
-      if (!isNaN(t)) timestamps.push(t);
+      if (!isNaN(t)) {
+        timestamps.push(t);
+        const d = new Date(act.start_date);
+        loggedDateSet.add(formatLocalDateKey(d));
+      }
     }
   }
 
-  // Also include COMPLETED workouts from the schedule if any
+  // Include COMPLETED workouts from the schedule ONLY if no activity was already logged on that calendar day
   for (const w of workouts) {
     if (w.status === 'COMPLETED' && w.scheduled_date) {
-      const t = new Date(w.scheduled_date).getTime();
-      if (!isNaN(t)) timestamps.push(t);
+      const wDateStr =
+        typeof w.scheduled_date === 'string'
+          ? w.scheduled_date.split('T')[0]
+          : formatLocalDateKey(new Date(w.scheduled_date));
+
+      if (!loggedDateSet.has(wDateStr)) {
+        const t = new Date(w.scheduled_date).getTime();
+        if (!isNaN(t)) {
+          timestamps.push(t);
+          loggedDateSet.add(wDateStr);
+        }
+      }
     }
   }
 
