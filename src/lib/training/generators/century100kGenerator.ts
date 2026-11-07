@@ -1,4 +1,4 @@
-import { GeneratedWorkoutDraft } from './types';
+import { GeneratedWorkoutDraft, resolveBaseTuesday } from './types';
 
 // Milestone progression for Sunday key long rides (W1 to W12)
 const SUNDAY_CENTURY_MILESTONES = [
@@ -16,9 +16,13 @@ const SUNDAY_CENTURY_MILESTONES = [
   { week: 12, km: 100.0, durMin: 220, deload: false, desc: 'PUNCAK CENTURY RIDE 100K MTB! Dituntaskan dalam 1x sesi continuous! 🏆' },
 ];
 
-export function generateCentury100kWorkouts(userId: string, planId: string): GeneratedWorkoutDraft[] {
+export function generateCentury100kWorkouts(
+  userId: string,
+  planId: string,
+  startDate?: string | Date
+): GeneratedWorkoutDraft[] {
   const workouts: GeneratedWorkoutDraft[] = [];
-  const baseTuesdayDate = new Date('2026-11-03T00:00:00Z');
+  const baseTuesdayDate = resolveBaseTuesday(startDate);
 
   for (let w = 1; w <= 12; w++) {
     const weekOffsetDays = (w - 1) * 7;

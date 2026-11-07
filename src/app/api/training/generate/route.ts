@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateCoachTrainingFromDatabase } from '@/lib/coachTrainingGenerator';
+import { generateCoachTrainingFromDatabase } from '@/lib/domain/coach/coachTrainingGenerator';
 import { DEFAULT_USER_ID } from '@/lib/db';
 
 export async function POST(request: Request) {

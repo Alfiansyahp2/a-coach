@@ -11,7 +11,13 @@ async function runTests() {
   const testImagePath = path.join('data', 'from_strava', 'ride', 'IMG_4167.PNG');
   
   if (fs.existsSync(testImagePath)) {
-    const ocrOutput = execSync(`python scripts/parse_activity_image.py "${testImagePath}"`).toString();
+    const candidatePaths = [
+      path.join('scripts', 'parsers', 'parse_activity_image.py'),
+      path.join('scripts', 'parse_activity_image.py'),
+    ];
+    const scriptPath = candidatePaths.find((p) => fs.existsSync(p)) || candidatePaths[0];
+    const pyBin = process.env.PYTHON_BIN || (process.platform === 'win32' ? 'python' : 'python3');
+    const ocrOutput = execSync(`"${pyBin}" "${scriptPath}" "${testImagePath}"`).toString();
     console.log('Parser Output:', ocrOutput);
     const parsed = JSON.parse(ocrOutput);
     if (parsed.success && parsed.distance_km > 0) {

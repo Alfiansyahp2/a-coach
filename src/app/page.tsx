@@ -11,16 +11,16 @@ import {
   getAuthoritativeHealthContext,
   DEFAULT_USER_ID,
 } from "@/lib/db";
-import { computeDashboardSummary } from "@/lib/analytics";
-import { generateTrainingInsights } from "@/lib/ai-coach";
-import { computePersonalRecords } from "@/lib/personalRecords";
-import { calculateWeeklyStreak } from "@/lib/streakEngine";
+import { computeDashboardSummary } from "@/lib/shared/analytics";
+import { generateTrainingInsights } from "@/lib/domain/coach/aiCoachEngine";
+import { computePersonalRecords } from "@/lib/domain/records/personalRecordsEngine";
+import { calculateWeeklyStreak } from "@/lib/domain/streak/streakEngine";
 import { formatDuration, formatPaceSeconds } from "@/lib/formatters";
 import { AppShell } from "@/components/layout/AppShell";
-import { StravaConnectCard } from "@/components/StravaConnectCard";
-import { ActivityFeed } from "@/components/ActivityFeed";
-import { MetricCard } from "@/components/MetricCard";
-import { VolumeProgressionChart } from "@/components/VolumeProgressionChart";
+import { StravaConnectCard } from "@/components/strava/StravaConnectCard";
+import { ActivityFeed } from "@/components/activity/ActivityFeed";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { VolumeProgressionChart } from "@/components/charts/VolumeProgressionChart";
 import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
 import { DashboardIntegrityStrip } from "@/components/dashboard/DashboardIntegrityStrip";
 import { DashboardTacticalDeck } from "@/components/dashboard/DashboardTacticalDeck";
@@ -56,17 +56,30 @@ async function DashboardTelemetry() {
   ]);
 
   const computedPrs = computePersonalRecords(activities, DEFAULT_USER_ID);
-  const displayPrs =
-    prs.length > 0
-      ? prs.map((p: any) => {
-          const m = computedPrs.find((c) => c.category === p.category);
-          return {
-            ...p,
-            subtext: p.subtext || m?.subtext,
-            activity_name: p.activity_name || m?.activity_name,
-          };
-        })
-      : computedPrs;
+  const displayPrs = (() => {
+    if (!prs || prs.length === 0) return computedPrs;
+    const dbEnhanced = prs.map((p: any) => {
+      const m = computedPrs.find(
+        (c) =>
+          c.category.toLowerCase().includes(p.category.toLowerCase()) ||
+          p.category.toLowerCase().includes(c.category.toLowerCase())
+      );
+      return {
+        ...p,
+        subtext: p.subtext || m?.subtext,
+        activity_name: p.activity_name || m?.activity_name,
+      };
+    });
+    const newComputed = computedPrs.filter(
+      (c) =>
+        !dbEnhanced.some(
+          (p: any) =>
+            c.category.toLowerCase().includes(p.category.toLowerCase()) ||
+            p.category.toLowerCase().includes(c.category.toLowerCase())
+        )
+    );
+    return [...dbEnhanced, ...newComputed];
+  })();
 
   const streak = calculateWeeklyStreak(activities, workouts);
   const summary = computeDashboardSummary(activities, workouts);

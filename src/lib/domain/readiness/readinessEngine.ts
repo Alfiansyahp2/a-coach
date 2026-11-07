@@ -160,8 +160,10 @@ export function evaluateTrainingReadiness(
         bikeGuidance += ' Maintain relaxed upright posture; avoid prolonged aggressive aero tuck.';
       }
       cyclingRestrictions = bikeGuidance;
+      const bestRideDist = cyclingResponses.find((r) => r.distance_km >= 20)?.distance_km;
+      const rideProofStr = bestRideDist ? `${bestRideDist.toFixed(1)} km` : 'verified distance rides';
       rationaleItems.push(
-        'Cycling is CONDITIONAL: Non-impact closed-chain pedaling was empirically tolerated on verified distance rides (e.g. 56.10 km with 0 pain during, after, next-day). Sprinting and steep climbing are restricted to avoid joint torque.'
+        `Cycling is CONDITIONAL: Non-impact closed-chain pedaling was empirically tolerated on verified distance rides (e.g. ${rideProofStr} with 0 pain during, after, next-day). Sprinting and steep climbing are restricted to avoid joint torque.`
       );
     } else {
       cyclingReadiness = 'CONDITIONAL';

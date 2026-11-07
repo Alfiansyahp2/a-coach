@@ -23,28 +23,14 @@ export async function GET() {
       flameStatusDescription: streak.flameStatusDescription,
     });
   } catch (error: any) {
-    console.warn('[Streak API Fallback Triggered]:', error.message);
-    return NextResponse.json({
-      success: true,
-      currentStreakWeeks: 9,
-      longestStreakWeeks: 9,
-      isFlameBurning: true,
-      isFlameAtRisk: false,
-      totalContributions: 34,
-      heatTier: {
-        stage: 1,
-        name: 'Api Merah',
-        minWeeks: 1,
-        maxWeeks: 9,
-        colorHex: '#EF4444',
-        glowRgba: 'rgba(239, 68, 68, 0.45)',
-        temperatureText: '~800°C',
-        description: 'Stage 1: Api Merah (~800°C) — Initial ember / least hot',
-        nextTierWeeks: 10,
-        weeksToNextTier: 1,
+    console.error('[Streak API Error]:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to calculate weekly streak',
+        message: error.message || 'Internal database or calculation error',
       },
-      flameStatusTitle: 'Stage 1: Api Merah (~800°C)',
-      flameStatusDescription: 'Streak aktif',
-    });
+      { status: 500 }
+    );
   }
 }

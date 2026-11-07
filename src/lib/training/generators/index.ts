@@ -62,20 +62,21 @@ export function getGoalMetadata(goal?: FitnessGoal | null): GoalGenerationMetada
 export function generateWorkoutsForGoal(
   goal: FitnessGoal | null | undefined,
   userId: string,
-  planId: string
+  planId: string,
+  startDate?: string | Date
 ): GeneratedWorkoutDraft[] {
   const archetype = detectGoalArchetype(goal);
 
   switch (archetype) {
     case 'MARATHON_REHAB':
-      return generateMarathonRehabWorkouts(userId, planId);
+      return generateMarathonRehabWorkouts(userId, planId, startDate);
     case 'CLIMBING_ELEVATION':
-      return generateClimbingWorkouts(userId, planId);
+      return generateClimbingWorkouts(userId, planId, startDate);
     case 'WEEKLY_CONSISTENCY':
-      return generateConsistencyWorkouts(userId, planId);
+      return generateConsistencyWorkouts(userId, planId, startDate);
     case 'CENTURY_100K':
     default:
-      return generateCentury100kWorkouts(userId, planId);
+      return generateCentury100kWorkouts(userId, planId, startDate);
   }
 }
 
