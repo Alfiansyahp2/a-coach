@@ -1,4 +1,4 @@
-import { GeneratedWorkoutDraft } from './types';
+import { GeneratedWorkoutDraft, resolveBaseTuesday } from './types';
 
 // Milestone progression for Sunday key running sessions (W1 to W12)
 const SUNDAY_RUNNING_MILESTONES = [
@@ -16,9 +16,13 @@ const SUNDAY_RUNNING_MILESTONES = [
   { week: 12, km: 15.0, durMin: 105, deload: false, paceSec: 415, desc: 'Puncak Fondasi Jarak Jauh Maraton: 15.0 km Kontinu Bebas Nyeri! Siap melangkah ke Half-Marathon! 🏆' },
 ];
 
-export function generateMarathonRehabWorkouts(userId: string, planId: string): GeneratedWorkoutDraft[] {
+export function generateMarathonRehabWorkouts(
+  userId: string,
+  planId: string,
+  startDate?: string | Date
+): GeneratedWorkoutDraft[] {
   const workouts: GeneratedWorkoutDraft[] = [];
-  const baseTuesdayDate = new Date('2026-11-03T00:00:00Z');
+  const baseTuesdayDate = resolveBaseTuesday(startDate);
 
   for (let w = 1; w <= 12; w++) {
     const weekOffsetDays = (w - 1) * 7;

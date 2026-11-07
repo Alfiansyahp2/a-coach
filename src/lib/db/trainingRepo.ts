@@ -117,15 +117,11 @@ export async function getScheduledWorkouts(
       query += ` AND scheduled_date <= $${params.length}`;
     }
     query += ' ORDER BY scheduled_date ASC';
-    try {
-      const res = await pgPool.query(query, params);
-      return res.rows.map((row) => ({
-        ...row,
-        scheduled_date: formatDateOnly(row.scheduled_date),
-      }));
-    } catch (err: any) {
-      console.warn("[PostgreSQL getScheduledWorkouts Error]:", err.message);
-    }
+    const res = await pgPool.query(query, params);
+    return res.rows.map((row) => ({
+      ...row,
+      scheduled_date: formatDateOnly(row.scheduled_date),
+    }));
   }
 
   const store = ensureLocalStore();
@@ -241,14 +237,24 @@ export async function deleteScheduledWorkout(id: string): Promise<boolean> {
   return store.scheduled_workouts.length < initialLen;
 }
 
-export async function deleteScheduledWorkoutsByUserId(userId: string = DEFAULT_USER_ID): Promise<void> {
+export async function deleteScheduledWorkoutsByUserId(
+  userId: string = DEFAULT_USER_ID,
+  options?: { preserveCompleted?: boolean }
+): Promise<void> {
   if (pgPool) {
-    await pgPool.query('DELETE FROM scheduled_workouts WHERE user_id = $1', [userId]);
+    if (options?.preserveCompleted) {
+      await pgPool.query("DELETE FROM scheduled_workouts WHERE user_id = $1 AND status != 'COMPLETED'", [userId]);
+    } else {
+      await pgPool.query('DELETE FROM scheduled_workouts WHERE user_id = $1', [userId]);
+    }
     return;
   }
   const store = ensureLocalStore();
-  const deletedIds = new Set(store.scheduled_workouts.filter((w) => w.user_id === userId).map((w) => w.id));
-  store.scheduled_workouts = store.scheduled_workouts.filter((w) => w.user_id !== userId);
+  const deletedWorkouts = store.scheduled_workouts.filter(
+    (w) => w.user_id === userId && (!options?.preserveCompleted || w.status !== 'COMPLETED')
+  );
+  const deletedIds = new Set(deletedWorkouts.map((w) => w.id));
+  store.scheduled_workouts = store.scheduled_workouts.filter((w) => !deletedIds.has(w.id));
   store.workout_activity_matches = store.workout_activity_matches.filter((m) => !deletedIds.has(m.workout_id));
   saveLocalStore(store);
 }

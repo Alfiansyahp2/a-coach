@@ -18,6 +18,78 @@ export async function getAthleteInjuries(userId: string = DEFAULT_USER_ID): Prom
   return store.athlete_injuries.filter((i) => i.user_id === userId);
 }
 
+export async function getAthleteInjuryById(
+  id: string,
+  userId: string = DEFAULT_USER_ID
+): Promise<AthleteInjury | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      'SELECT * FROM athlete_injuries WHERE id = $1 AND user_id = $2',
+      [id, userId]
+    );
+    if (!res.rows[0]) return null;
+    const r = res.rows[0];
+    return {
+      ...r,
+      previous_swelling: Boolean(r.previous_swelling),
+      estimated_injury_date: r.estimated_injury_date ? formatDateOnly(r.estimated_injury_date) : null,
+    };
+  }
+
+  const store = ensureLocalStore();
+  return store.athlete_injuries.find((i) => i.id === id && i.user_id === userId) || null;
+}
+
+export async function updateAthleteInjury(
+  id: string,
+  userId: string = DEFAULT_USER_ID,
+  updates: Partial<Pick<AthleteInjury, 'current_status' | 'recovery_notes' | 'clinician_restrictions' | 'functional_limitations' | 'medical_evaluation_status'>>
+): Promise<AthleteInjury | null> {
+  if (pgPool) {
+    const res = await pgPool.query(
+      `UPDATE athlete_injuries SET
+        current_status = COALESCE($1, current_status),
+        recovery_notes = COALESCE($2, recovery_notes),
+        clinician_restrictions = COALESCE($3, clinician_restrictions),
+        functional_limitations = COALESCE($4, functional_limitations),
+        medical_evaluation_status = COALESCE($5, medical_evaluation_status),
+        updated_at = NOW()
+      WHERE id = $6 AND user_id = $7
+      RETURNING *`,
+      [
+        updates.current_status ?? null,
+        updates.recovery_notes ?? null,
+        updates.clinician_restrictions ?? null,
+        updates.functional_limitations ?? null,
+        updates.medical_evaluation_status ?? null,
+        id,
+        userId,
+      ]
+    );
+    if (!res.rows[0]) return null;
+    const r = res.rows[0];
+    return {
+      ...r,
+      previous_swelling: Boolean(r.previous_swelling),
+      estimated_injury_date: r.estimated_injury_date ? formatDateOnly(r.estimated_injury_date) : null,
+    };
+  }
+
+  const store = ensureLocalStore();
+  const idx = store.athlete_injuries.findIndex((i) => i.id === id && i.user_id === userId);
+  if (idx === -1) return null;
+
+  const current = store.athlete_injuries[idx];
+  const updated: AthleteInjury = {
+    ...current,
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+  store.athlete_injuries[idx] = updated;
+  saveLocalStore(store);
+  return updated;
+}
+
 export async function createAthleteInjury(
   injury: Omit<AthleteInjury, 'id' | 'created_at' | 'updated_at'>
 ): Promise<AthleteInjury> {

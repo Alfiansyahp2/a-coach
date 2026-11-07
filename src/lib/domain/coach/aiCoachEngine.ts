@@ -45,15 +45,21 @@ export function generateTrainingInsights(
 
     // 0B. Cycling Coach Sport-Specific Guidance
     if (isCyclingConditional) {
+      const responses = healthContext?.recentResponses || [];
+      const bestRideDist = responses
+        .filter((resp) => resp.sport_type?.toLowerCase().includes('ride') && Number(resp.distance_km || 0) >= 20)
+        ?.at(0)?.distance_km;
+      const rideProofText = bestRideDist ? `${Number(bestRideDist).toFixed(1)} km` : 'verified ride sessions';
+
       insights.push({
         id: 'ins-health-cycling-conditional',
         type: 'weekly_plan_suggestion',
         severity: 'positive',
         title: 'Cycling Coach: Conditional Aerobic Endurance Authorized',
-        description: `Non-impact closed-chain cycling has demonstrated positive empirical tolerance (verified 56.10 km ride with 0 pain during, after, and no swelling). Permitted: Flat Zone 1-2 aerobic cadence sessions (<= 30 km, <= 60 mins). Restricted: Heavy out-of-saddle climbing and high-torque sprint intervals to protect joint structures.`,
+        description: `Non-impact closed-chain cycling has demonstrated positive empirical tolerance (verified ${rideProofText} ride with 0 pain during, after, and no swelling). Permitted: Flat Zone 1-2 aerobic cadence sessions (<= 30 km, <= 60 mins). Restricted: Heavy out-of-saddle climbing and high-torque sprint intervals to protect joint structures.`,
         grounded_data: {
           cyclingReadiness: r.cycling_readiness,
-          empiricalValidation: '56.10 km ride completed without pain or swelling',
+          empiricalValidation: `${rideProofText} ride completed without pain or swelling`,
           restrictions: r.cycling_restrictions,
         },
         created_at: new Date().toISOString(),
@@ -256,16 +262,18 @@ export function generateTrainingInsights(
   // 5A. Road to First 100 km Century Ride (Active Primary Engine)
   const maxRideMeters = Math.max(0, ...activities.filter(a => a.sport_type.toLowerCase().includes('ride')).map(r => Number(r.distance_meters || 0)));
   const maxRideKm = Math.round((maxRideMeters / 1000) * 10) / 10;
-  const centuryProgressPct = Math.min(100, Math.round(((maxRideKm > 0 ? maxRideKm : 56.1) / 100) * 100));
+  const centuryProgressPct = maxRideKm > 0 ? Math.min(100, Math.round((maxRideKm / 100) * 100)) : 0;
 
   insights.push({
     id: 'ins-goal-100k-century',
     type: 'weekly_plan_suggestion',
     severity: 'positive',
     title: `Cycling Coach: Road to 100 km First Century Ride (${centuryProgressPct}% Baseline Reached)`,
-    description: `Dengan rekor jarak 56.10 km yang terbukti bebas nyeri, fondasi aerobik Anda telah mencapai ${centuryProgressPct}% dari target 100 km Century Ride. Rekomendasi pelatih: Tingkatkan jarak akhir pekan secara bertahap (32 km -> 40 km -> 48 km -> 60 km -> 100 km). Pertahankan kadens putaran lancar >= 85 RPM pada medan datar dan prioritaskan asupan karbohidrat 40-60g/jam pada sesi > 90 menit.`,
+    description: maxRideKm > 0
+      ? `Dengan rekor jarak ${maxRideKm.toFixed(1)} km yang terbukti bebas nyeri, fondasi aerobik Anda telah mencapai ${centuryProgressPct}% dari target 100 km Century Ride. Rekomendasi pelatih: Tingkatkan jarak akhir pekan secara bertahap. Pertahankan kadens putaran lancar >= 85 RPM pada medan datar dan prioritaskan asupan karbohidrat 40-60g/jam pada sesi > 90 menit.`
+      : `Fondasi aerobik siap dimulai menuju target 100 km Century Ride. Rekomendasi pelatih: Mulai dari jarak pendek Zone 2 dan tingkatkan secara bertahap bebas nyeri.`,
     grounded_data: {
-      currentBestDistanceKm: maxRideKm > 0 ? maxRideKm : 56.1,
+      currentBestDistanceKm: maxRideKm > 0 ? maxRideKm : 0,
       targetCenturyDistanceKm: 100,
       completionPercentage: centuryProgressPct,
       recommendedZone: 'Zone 1-2 Flat Aerobic',

@@ -7,7 +7,8 @@ export function normalizeActivityRow(row: any): Activity {
   return {
     id: String(row.id),
     user_id: String(row.user_id),
-    strava_activity_id: Number(row.strava_activity_id),
+    strava_activity_id: row.strava_activity_id != null ? Number(row.strava_activity_id) : null,
+    is_manual: row.is_manual != null ? Boolean(row.is_manual) : (row.strava_activity_id == null),
     name: String(row.name || ''),
     sport_type: String(row.sport_type || 'Run'),
     start_date:
@@ -145,6 +146,95 @@ export async function updateActivity(
   return normalizeActivityRow(act);
 }
 
+export async function deleteActivity(
+  id: string,
+  userId: string = DEFAULT_USER_ID
+): Promise<boolean> {
+  if (pgPool) {
+    // 1. Find any matched workouts before deleting
+    const matchRes = await pgPool.query(
+      `SELECT workout_id FROM workout_activity_matches WHERE activity_id = $1`,
+      [id]
+    );
+    const matchedWorkoutIds = matchRes.rows.map((r) => r.workout_id);
+
+    // 2. Delete the activity
+    const res = await pgPool.query(
+      `DELETE FROM activities WHERE id = $1 AND user_id = $2 RETURNING id`,
+      [id, userId]
+    );
+    if (!res.rows[0]) return false;
+
+    // 3. For any previously matched workouts, check if they have other matches; if not, revert to PLANNED
+    for (const wId of matchedWorkoutIds) {
+      const remainingMatches = await pgPool.query(
+        `SELECT COUNT(*) FROM workout_activity_matches WHERE workout_id = $1`,
+        [wId]
+      );
+      if (parseInt(remainingMatches.rows[0].count, 10) === 0) {
+        await pgPool.query(
+          `UPDATE scheduled_workouts SET status = 'PLANNED', updated_at = NOW() WHERE id = $1 AND user_id = $2`,
+          [wId, userId]
+        );
+      }
+    }
+    return true;
+  }
+
+  const store = ensureLocalStore();
+  const initialLen = store.activities.length;
+  store.activities = store.activities.filter((a) => !(a.id === id && a.user_id === userId));
+  if (store.activities.length === initialLen) return false;
+
+  // Cleanup matches in local store
+  const matchedWorkouts = store.workout_activity_matches
+    .filter((m) => m.activity_id === id)
+    .map((m) => m.workout_id);
+  store.workout_activity_matches = store.workout_activity_matches.filter((m) => m.activity_id !== id);
+
+  for (const wId of matchedWorkouts) {
+    const hasOtherMatches = store.workout_activity_matches.some((m) => m.workout_id === wId);
+    if (!hasOtherMatches) {
+      const w = store.scheduled_workouts.find((sw) => sw.id === wId && sw.user_id === userId);
+      if (w) w.status = 'PLANNED';
+    }
+  }
+
+  saveLocalStore(store);
+  return true;
+}
+
+export async function batchUpdateActivities(
+  ids: string[],
+  updates: { sport_type?: string },
+  userId: string = DEFAULT_USER_ID
+): Promise<number> {
+  if (ids.length === 0) return 0;
+  if (pgPool) {
+    const res = await pgPool.query(
+      `UPDATE activities SET
+        sport_type = COALESCE($1, sport_type),
+        updated_at = NOW()
+      WHERE id = ANY($2::uuid[]) AND user_id = $3
+      RETURNING id`,
+      [updates.sport_type || null, ids, userId]
+    );
+    return res.rowCount || 0;
+  }
+
+  const store = ensureLocalStore();
+  let count = 0;
+  for (const act of store.activities) {
+    if (ids.includes(act.id) && act.user_id === userId) {
+      if (updates.sport_type) act.sport_type = updates.sport_type as any;
+      act.updated_at = new Date().toISOString();
+      count++;
+    }
+  }
+  saveLocalStore(store);
+  return count;
+}
+
 export async function getActivities(
   userId: string = DEFAULT_USER_ID,
   filters?: { sportType?: string; limit?: number; afterDate?: string }
@@ -166,12 +256,8 @@ export async function getActivities(
       params.push(filters.limit);
       query += ` LIMIT $${params.length}`;
     }
-    try {
-      const res = await pgPool.query(query, params);
-      return res.rows.map(normalizeActivityRow);
-    } catch (err: any) {
-      console.warn("[PostgreSQL getActivities Error]:", err.message);
-    }
+    const res = await pgPool.query(query, params);
+    return res.rows.map(normalizeActivityRow);
   }
 
   const store = ensureLocalStore();
@@ -199,15 +285,16 @@ export async function upsertActivity(
   activity: Omit<Activity, 'id' | 'created_at' | 'updated_at'>
 ): Promise<UpsertActivityResult> {
   const now = new Date().toISOString();
+  const isManual = activity.is_manual ?? (activity.strava_activity_id ? false : true);
   if (pgPool) {
     const query = `
       INSERT INTO activities (
-        user_id, strava_activity_id, name, sport_type, start_date, distance_meters,
+        user_id, strava_activity_id, is_manual, name, sport_type, start_date, distance_meters,
         moving_time_seconds, elapsed_time_seconds, elevation_gain_meters, average_speed_mps,
         max_speed_mps, average_heartrate, max_heartrate, average_cadence, average_watts,
         calories, raw_summary_polyline, description, updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW())
       ON CONFLICT (strava_activity_id) DO UPDATE SET
         name = EXCLUDED.name,
         sport_type = EXCLUDED.sport_type,
@@ -224,12 +311,14 @@ export async function upsertActivity(
         average_watts = EXCLUDED.average_watts,
         calories = EXCLUDED.calories,
         description = EXCLUDED.description,
+        is_manual = EXCLUDED.is_manual,
         updated_at = NOW()
       RETURNING *, (xmax = 0) AS is_created;
     `;
     const res = await pgPool.query(query, [
       activity.user_id,
-      activity.strava_activity_id,
+      activity.strava_activity_id || null,
+      isManual,
       activity.name,
       activity.sport_type,
       activity.start_date,
@@ -255,10 +344,14 @@ export async function upsertActivity(
   }
 
   const store = ensureLocalStore();
-  const existingIdx = store.activities.findIndex((a) => a.strava_activity_id === activity.strava_activity_id);
+  const existingIdx = activity.strava_activity_id
+    ? store.activities.findIndex((a) => a.strava_activity_id === activity.strava_activity_id)
+    : -1;
   const isCreated = existingIdx < 0;
   const act: Activity = {
     ...activity,
+    strava_activity_id: activity.strava_activity_id ?? null,
+    is_manual: isManual,
     id: existingIdx >= 0 ? store.activities[existingIdx].id : crypto.randomUUID(),
     created_at: existingIdx >= 0 ? store.activities[existingIdx].created_at : now,
     updated_at: now,
@@ -312,9 +405,6 @@ export async function createManualActivity(
   match: WorkoutActivityMatch | null;
   trainingResponse?: AthleteTrainingResponse | null;
 }> {
-  // Generate synthetic unique strava_activity_id for manual / parsed entries (bigint safe number)
-  const syntheticStravaId = Date.now() * 1000 + Math.floor(Math.random() * 1000);
-  
   const distance_meters = Number(params.distance_meters || 0);
   const moving_time_seconds = Number(params.moving_time_seconds || 0);
   const elapsed_time_seconds = Number(params.elapsed_time_seconds || moving_time_seconds);
@@ -327,7 +417,8 @@ export async function createManualActivity(
 
   const { activity } = await upsertActivity({
     user_id: userId,
-    strava_activity_id: syntheticStravaId,
+    strava_activity_id: null,
+    is_manual: true,
     name: params.name || 'Manual Workout Activity',
     sport_type: (params.sport_type || 'Ride') as any,
     start_date: params.start_date || new Date().toISOString(),
@@ -420,7 +511,7 @@ export async function createManualActivity(
       trainingResponse = await upsertAthleteTrainingResponse({
         user_id: userId,
         activity_id: activity.id,
-        strava_activity_id: syntheticStravaId,
+        strava_activity_id: null,
         sport_type: params.sport_type,
         distance_km: Number((distance_meters / 1000).toFixed(2)),
         duration_seconds: moving_time_seconds,

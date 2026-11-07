@@ -58,7 +58,8 @@ export interface StravaToken {
 export interface Activity {
   id: string;
   user_id: string;
-  strava_activity_id: number;
+  strava_activity_id?: number | null;
+  is_manual?: boolean;
   name: string;
   sport_type: SportType;
   start_date: string; // ISO string
