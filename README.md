@@ -1,14 +1,14 @@
 # a-coach
 
 > **High-Performance Athletic Telemetry, Injury-Aware Coaching & Adaptive Training Platform**  
-> Powered by **Next.js 16 (App Router)**, **React 19**, **PostgreSQL 16**, and integrated with the **Official Strava API v3**.
+> Powered by **Next.js 16 (App Router)**, **React 19**, **PostgreSQL 16**, operating with a device-independent **Manual-First Architecture**, multi-discipline telemetry engine, and optional **Official Strava API v3** bridge.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.4-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.3-blue?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Test%20Suites-58%2F58%20Passing-success?style=flat-square)](./scripts/)
+[![Tests](https://img.shields.io/badge/Test%20Suites-70%2F70%20Passing-success?style=flat-square)](./scripts/tests/)
 
 ---
 
@@ -129,16 +129,22 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 The platform includes comprehensive automated verification suites covering clinical logic, training progression, and gamified streak mechanics:
 
 ```bash
-# 1. Athlete Health & Injury-Aware Readiness Engine (32 tests)
-node scripts/test_athlete_health_system.js
+# 1. Athlete Health & Injury-Aware Readiness Engine (31 tests)
+node scripts/tests/test_athlete_health_system.js
 
 # 2. Coach Periodization & Telemetry Matching Suite (5 tests)
-node scripts/test_coach_training_system.js
+node scripts/tests/test_coach_training_system.js
 
 # 3. Weekly Training Streak & Flame Progression Suite (21 tests)
-node scripts/test_weekly_streak_system.js
+node scripts/tests/test_weekly_streak_system.js
 
-# 4. Strict TypeScript Compilation Check
+# 4. Goal-Driven Adaptive Periodization Engine (13 tests)
+node scripts/tests/test_goal_driven_training_engine.js
+
+# 5. Image OCR Parser & Activity Ingestion Flow
+node scripts/tests/test_add_activity_flow.js
+
+# 6. Strict TypeScript Compilation Check
 npx tsc --noEmit
 ```
 

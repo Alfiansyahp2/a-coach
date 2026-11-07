@@ -146,6 +146,64 @@ export async function updateActivity(
   return normalizeActivityRow(act);
 }
 
+export async function deleteActivity(
+  id: string,
+  userId: string = DEFAULT_USER_ID
+): Promise<boolean> {
+  if (pgPool) {
+    // 1. Find any matched workouts before deleting
+    const matchRes = await pgPool.query(
+      `SELECT workout_id FROM workout_activity_matches WHERE activity_id = $1`,
+      [id]
+    );
+    const matchedWorkoutIds = matchRes.rows.map((r) => r.workout_id);
+
+    // 2. Delete the activity
+    const res = await pgPool.query(
+      `DELETE FROM activities WHERE id = $1 AND user_id = $2 RETURNING id`,
+      [id, userId]
+    );
+    if (!res.rows[0]) return false;
+
+    // 3. For any previously matched workouts, check if they have other matches; if not, revert to PLANNED
+    for (const wId of matchedWorkoutIds) {
+      const remainingMatches = await pgPool.query(
+        `SELECT COUNT(*) FROM workout_activity_matches WHERE workout_id = $1`,
+        [wId]
+      );
+      if (parseInt(remainingMatches.rows[0].count, 10) === 0) {
+        await pgPool.query(
+          `UPDATE scheduled_workouts SET status = 'PLANNED', updated_at = NOW() WHERE id = $1 AND user_id = $2`,
+          [wId, userId]
+        );
+      }
+    }
+    return true;
+  }
+
+  const store = ensureLocalStore();
+  const initialLen = store.activities.length;
+  store.activities = store.activities.filter((a) => !(a.id === id && a.user_id === userId));
+  if (store.activities.length === initialLen) return false;
+
+  // Cleanup matches in local store
+  const matchedWorkouts = store.workout_activity_matches
+    .filter((m) => m.activity_id === id)
+    .map((m) => m.workout_id);
+  store.workout_activity_matches = store.workout_activity_matches.filter((m) => m.activity_id !== id);
+
+  for (const wId of matchedWorkouts) {
+    const hasOtherMatches = store.workout_activity_matches.some((m) => m.workout_id === wId);
+    if (!hasOtherMatches) {
+      const w = store.scheduled_workouts.find((sw) => sw.id === wId && sw.user_id === userId);
+      if (w) w.status = 'PLANNED';
+    }
+  }
+
+  saveLocalStore(store);
+  return true;
+}
+
 export async function getActivities(
   userId: string = DEFAULT_USER_ID,
   filters?: { sportType?: string; limit?: number; afterDate?: string }

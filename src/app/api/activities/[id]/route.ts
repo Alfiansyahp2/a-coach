@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateActivity, getActivityById, DEFAULT_USER_ID } from "@/lib/db";
+import { updateActivity, getActivityById, deleteActivity, DEFAULT_USER_ID } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function GET(
@@ -88,6 +88,34 @@ export async function PATCH(
     console.error("Error updating activity:", err);
     return NextResponse.json(
       { error: "Failed to update activity", message: err.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const deleted = await deleteActivity(id, DEFAULT_USER_ID);
+
+    if (!deleted) {
+      return NextResponse.json(
+        { error: "Activity not found or deletion failed" },
+        { status: 404 }
+      );
+    }
+
+    revalidatePath("/activities");
+    revalidatePath("/");
+
+    return NextResponse.json({ success: true, message: "Activity deleted successfully" });
+  } catch (err: any) {
+    console.error("Error deleting activity:", err);
+    return NextResponse.json(
+      { error: "Failed to delete activity", message: err.message },
       { status: 500 }
     );
   }
