@@ -1,25 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React from "react";
+import { User, AthleteProfile, AuthoritativeAthleteHealthContext } from "@/types";
 import {
   Heart,
   Pencil,
   X,
-  CheckCircle2,
-  AlertCircle,
-  Stethoscope,
-  Activity,
-  RefreshCw,
   User as UserIcon,
+  Activity,
+  Stethoscope,
+  AlertCircle,
+  CheckCircle2,
   Save,
+  RefreshCw,
 } from "lucide-react";
-import { User, AthleteProfile, AuthoritativeAthleteHealthContext } from "@/types";
 import { ProfileBiometricsTab } from "./profile/ProfileBiometricsTab";
 import { ProfileMedicalProceduresTab } from "./profile/ProfileMedicalProceduresTab";
+import { useAthleteProfileForm } from "./useAthleteProfileForm";
 
 interface EditAthleteProfileModalProps {
-  user?: Partial<User> | null;
+  user?: User | null;
   profile?: AthleteProfile | null;
   healthContext?: AuthoritativeAthleteHealthContext | null;
   variant?: "badge" | "button";
@@ -31,162 +31,18 @@ export function EditAthleteProfileModal({
   healthContext,
   variant = "badge",
 }: EditAthleteProfileModalProps) {
-  const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"biometrics" | "medical">("biometrics");
-
-  // Form states - Biometrics
-  const [name, setName] = useState<string>(user?.name || "Apex Athlete");
-  const [age, setAge] = useState<string>(String(profile?.age || 22));
-  const [restingHr, setRestingHr] = useState<string>(String(user?.resting_heart_rate || profile?.resting_heart_rate || 68));
-  const [heightCm, setHeightCm] = useState<string>(String(user?.height_cm || profile?.height_cm || 170));
-  const [weightKg, setWeightKg] = useState<string>(String(user?.weight_kg || profile?.weight_kg || 65));
-  const [trainingDays, setTrainingDays] = useState<number>(profile?.training_days_per_week || 3);
-
-  // Form states - Medical Procedures & Assessments
-  const ankleInjury = healthContext?.injuries.find((i) => i.body_region.toLowerCase().includes("ankle"));
-  const kneeInjury = healthContext?.injuries.find((i) => i.body_region.toLowerCase().includes("knee"));
-
-  const [ankleStatus, setAnkleStatus] = useState<string>(
-    ankleInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT"
-  );
-  const [kneeStatus, setKneeStatus] = useState<string>(
-    kneeInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT"
-  );
-
-  // New procedure form states
-  const [hasNewProcedure, setHasNewProcedure] = useState<boolean>(false);
-  const [procedureDate, setProcedureDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
-  const [providerType, setProviderType] = useState<string>("Physiotherapist");
-  const [providerName, setProviderName] = useState<string>("");
-  const [procedureDetails, setProcedureDetails] = useState<string>("");
-  const [clinicalFindings, setClinicalFindings] = useState<string>("");
-  const [clearanceGranted, setClearanceGranted] = useState<boolean>(false);
-
-  // Submission feedback
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  // Live BMI calculation
-  const numericWeight = parseFloat(weightKg) || 0;
-  const numericHeight = parseFloat(heightCm) || 0;
-  const calculatedBmi =
-    numericHeight > 0 && numericWeight > 0
-      ? (numericWeight / ((numericHeight / 100) * (numericHeight / 100))).toFixed(1)
-      : "22.5";
-
-  const handleOpen = () => {
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    setIsOpen(true);
-  };
-
-  const handleClose = () => {
-    if (!isSubmitting) {
-      setIsOpen(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
-    setSuccessMsg(null);
-    setIsSubmitting(true);
-
-    try {
-      // 1. Submit Biometric Updates
-      const bioPayload = {
-        name: name.trim() || undefined,
-        age: parseInt(age, 10) || undefined,
-        resting_heart_rate: parseInt(restingHr, 10) || undefined,
-        height_cm: parseFloat(heightCm) || undefined,
-        weight_kg: parseFloat(weightKg) || undefined,
-        training_days_per_week: trainingDays,
-      };
-
-      const bioRes = await fetch("/api/athlete/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bioPayload),
-      });
-
-      const bioText = await bioRes.text();
-      let bioData: any = {};
-      try {
-        bioData = bioText ? JSON.parse(bioText) : {};
-      } catch {
-        throw new Error(`Respon server tidak valid (${bioRes.status})`);
-      }
-
-      if (!bioRes.ok || !bioData.success) {
-        throw new Error(bioData.error || bioData.message || "Gagal memperbarui biometrik atlet.");
-      }
-
-      // 2. Submit Medical Procedure if updated or recorded
-      let medUpdated = false;
-      if (
-        hasNewProcedure ||
-        ankleStatus !== (ankleInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT") ||
-        kneeStatus !== (kneeInjury?.medical_evaluation_status || "PENDING_CLINICAL_ASSESSMENT")
-      ) {
-        const medPayload = {
-          injury_id: ankleInjury?.id || kneeInjury?.id || null,
-          assessment_date: procedureDate,
-          healthcare_provider_type: providerType,
-          provider_name: providerName.trim() || null,
-          clinical_findings: clinicalFindings.trim() || "Pemeriksaan klinis berkala & monitoring toleransi sendi.",
-          rehabilitation_protocol: procedureDetails.trim() || null,
-          clearance_granted: clearanceGranted,
-          ankle_status: ankleStatus,
-          knee_status: kneeStatus,
-        };
-
-        const medRes = await fetch("/api/athlete/medical-procedure", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(medPayload),
-        });
-
-        const medText = await medRes.text();
-        let medData: any = {};
-        try {
-          medData = medText ? JSON.parse(medText) : {};
-        } catch {
-          throw new Error(`Respon server medis tidak valid (${medRes.status})`);
-        }
-
-        if (!medRes.ok || !medData.success) {
-          throw new Error(medData.error || medData.message || "Gagal menyimpan prosedur medis.");
-        }
-        medUpdated = true;
-      }
-
-      setSuccessMsg(
-        medUpdated
-          ? "Biometrik & prosedur medis atlet berhasil diperbarui secara authoritative!"
-          : "Biometrik dasar atlet berhasil diperbarui!"
-      );
-
-      setTimeout(() => {
-        setIsOpen(false);
-        router.refresh();
-      }, 1200);
-    } catch (err: any) {
-      setErrorMsg(err.message || "Terjadi kesalahan saat menyimpan data.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const form = useAthleteProfileForm({
+    user,
+    profile,
+    healthContext,
+  });
 
   return (
     <>
       {/* TRIGGER VARIANT: COMPACT BADGE IN HEADER */}
       {variant === "badge" && (
         <button
-          onClick={handleOpen}
+          onClick={form.handleOpen}
           type="button"
           title="Klik untuk kalibrasi biometrik & status kesehatan"
           className="group relative flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] transition-all font-mono text-xs cursor-pointer shadow-xs"
@@ -240,7 +96,7 @@ export function EditAthleteProfileModal({
       {/* TRIGGER VARIANT: DEDICATED BUTTON */}
       {variant === "button" && (
         <button
-          onClick={handleOpen}
+          onClick={form.handleOpen}
           type="button"
           className="px-3.5 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] text-xs font-mono font-medium transition-colors flex items-center gap-1.5 shadow-xs"
         >
@@ -250,7 +106,7 @@ export function EditAthleteProfileModal({
       )}
 
       {/* MODAL DIALOG */}
-      {isOpen && (
+      {form.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
           <div
             className="w-full max-w-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden"
@@ -275,8 +131,8 @@ export function EditAthleteProfileModal({
                 </div>
               </div>
               <button
-                onClick={handleClose}
-                disabled={isSubmitting}
+                onClick={form.handleClose}
+                disabled={form.isSubmitting}
                 className="p-1.5 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-card)] border border-transparent hover:border-[var(--color-border)] transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -287,9 +143,9 @@ export function EditAthleteProfileModal({
             <div className="px-5 pt-3 pb-2 bg-[var(--color-surface-muted)] border-b border-[var(--color-border)] flex items-center gap-2 font-mono text-xs">
               <button
                 type="button"
-                onClick={() => setActiveTab("biometrics")}
+                onClick={() => form.setActiveTab("biometrics")}
                 className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
-                  activeTab === "biometrics"
+                  form.activeTab === "biometrics"
                     ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
                     : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
@@ -299,9 +155,9 @@ export function EditAthleteProfileModal({
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab("medical")}
+                onClick={() => form.setActiveTab("medical")}
                 className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 font-medium ${
-                  activeTab === "medical"
+                  form.activeTab === "medical"
                     ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold shadow-xs"
                     : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                 }`}
@@ -312,70 +168,70 @@ export function EditAthleteProfileModal({
             </div>
 
             {/* Scrollable Form Body */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
+            <form onSubmit={form.handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
               {/* Error Banner */}
-              {errorMsg && (
+              {form.errorMsg && (
                 <div className="p-3 rounded-md bg-[var(--color-alert-red)]/10 border border-[var(--color-alert-red)]/30 flex items-start gap-2.5 text-xs text-[var(--color-alert-red)] font-mono">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Peringatan: </span>
-                    {errorMsg}
+                    {form.errorMsg}
                   </div>
                 </div>
               )}
 
               {/* Success Banner */}
-              {successMsg && (
+              {form.successMsg && (
                 <div className="p-3 rounded-md bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 flex items-start gap-2.5 text-xs text-[var(--color-cycling)] font-mono">
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold">Berhasil: </span>
-                    {successMsg}
+                    {form.successMsg}
                   </div>
                 </div>
               )}
 
               {/* TAB 1: BIOMETRICS & PROFILE */}
-              {activeTab === "biometrics" && (
+              {form.activeTab === "biometrics" && (
                 <ProfileBiometricsTab
-                  name={name}
-                  setName={setName}
-                  age={age}
-                  setAge={setAge}
-                  restingHr={restingHr}
-                  setRestingHr={setRestingHr}
-                  heightCm={heightCm}
-                  setHeightCm={setHeightCm}
-                  weightKg={weightKg}
-                  setWeightKg={setWeightKg}
-                  calculatedBmi={calculatedBmi}
-                  trainingDays={trainingDays}
-                  setTrainingDays={setTrainingDays}
+                  name={form.name}
+                  setName={form.setName}
+                  age={form.age}
+                  setAge={form.setAge}
+                  restingHr={form.restingHr}
+                  setRestingHr={form.setRestingHr}
+                  heightCm={form.heightCm}
+                  setHeightCm={form.setHeightCm}
+                  weightKg={form.weightKg}
+                  setWeightKg={form.setWeightKg}
+                  calculatedBmi={form.calculatedBmi}
+                  trainingDays={form.trainingDays}
+                  setTrainingDays={form.setTrainingDays}
                 />
               )}
 
               {/* TAB 2: MEDICAL PROCEDURES & CLINICAL ASSESSMENTS */}
-              {activeTab === "medical" && (
+              {form.activeTab === "medical" && (
                 <ProfileMedicalProceduresTab
                   healthContext={healthContext}
-                  ankleStatus={ankleStatus}
-                  setAnkleStatus={setAnkleStatus}
-                  kneeStatus={kneeStatus}
-                  setKneeStatus={setKneeStatus}
-                  hasNewProcedure={hasNewProcedure}
-                  setHasNewProcedure={setHasNewProcedure}
-                  procedureDate={procedureDate}
-                  setProcedureDate={setProcedureDate}
-                  providerType={providerType}
-                  setProviderType={setProviderType}
-                  providerName={providerName}
-                  setProviderName={setProviderName}
-                  procedureDetails={procedureDetails}
-                  setProcedureDetails={setProcedureDetails}
-                  clinicalFindings={clinicalFindings}
-                  setClinicalFindings={setClinicalFindings}
-                  clearanceGranted={clearanceGranted}
-                  setClearanceGranted={setClearanceGranted}
+                  ankleStatus={form.ankleStatus}
+                  setAnkleStatus={form.setAnkleStatus}
+                  kneeStatus={form.kneeStatus}
+                  setKneeStatus={form.setKneeStatus}
+                  hasNewProcedure={form.hasNewProcedure}
+                  setHasNewProcedure={form.setHasNewProcedure}
+                  procedureDate={form.procedureDate}
+                  setProcedureDate={form.setProcedureDate}
+                  providerType={form.providerType}
+                  setProviderType={form.setProviderType}
+                  providerName={form.providerName}
+                  setProviderName={form.setProviderName}
+                  procedureDetails={form.procedureDetails}
+                  setProcedureDetails={form.setProcedureDetails}
+                  clinicalFindings={form.clinicalFindings}
+                  setClinicalFindings={form.setClinicalFindings}
+                  clearanceGranted={form.clearanceGranted}
+                  setClearanceGranted={form.setClearanceGranted}
                 />
               )}
 
@@ -383,8 +239,8 @@ export function EditAthleteProfileModal({
               <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-end gap-2.5 font-mono">
                 <button
                   type="button"
-                  onClick={handleClose}
-                  disabled={isSubmitting}
+                  onClick={form.handleClose}
+                  disabled={form.isSubmitting}
                   className="px-4 py-2 rounded-md text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors"
                 >
                   Batal
@@ -392,10 +248,10 @@ export function EditAthleteProfileModal({
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={form.isSubmitting}
                   className="px-5 py-2 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
                 >
-                  {isSubmitting ? (
+                  {form.isSubmitting ? (
                     <>
                       <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                       <span>MENYIMPAN...</span>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { DEFAULT_USER_ID, getFitnessGoals, createFitnessGoal, setPrimaryFitnessGoal } from '@/lib/db';
-import { generateCoachTrainingFromDatabase } from '@/lib/coachTrainingGenerator';
+import { generateCoachTrainingFromDatabase } from '@/lib/domain/coach/coachTrainingGenerator';
 
 export async function GET(request: Request) {
   try {

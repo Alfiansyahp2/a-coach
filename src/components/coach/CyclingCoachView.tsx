@@ -12,23 +12,14 @@ import {
 } from "@/types";
 import {
   Bike,
-  CheckCircle2,
   Gauge,
   Zap,
-  TrendingUp,
-  Activity as ActivityIcon,
-  Calendar,
-  ShieldCheck,
-  Heart,
-  ChevronRight,
-  ExternalLink,
-  Footprints,
 } from "lucide-react";
 import {
   formatDistance,
-  formatDuration,
-  formatDate,
 } from "@/lib/formatters";
+import { CoachClinicalBanner } from "./CoachClinicalBanner";
+import { CoachRecentSessionsList } from "./CoachRecentSessionsList";
 
 interface CyclingCoachViewProps {
   activities: Activity[];
@@ -42,9 +33,7 @@ interface CyclingCoachViewProps {
 
 export function CyclingCoachView({
   activities,
-  workouts,
   goals,
-  activePlan,
   healthContext,
   prs,
   onSwitchToRunning,
@@ -101,76 +90,44 @@ export function CyclingCoachView({
     Math.round((maxRideMeters / centuryGoal.target_value) * 100)
   );
 
-  // Cycling PRs
-  const cyclingPrs = prs.filter(
-    (p) =>
-      (p.sport_type || "").toLowerCase().includes("ride") ||
-      p.category === "Distance"
-  );
-
   return (
     <div className="space-y-6 font-mono">
       {/* 1. AUTHORIZED ENDURANCE STATUS & EMPIRICAL VALIDATION BANNER */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[var(--color-cycling)]/[0.06] border-2 border-[var(--color-cycling)]/40 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-          <div className="flex items-start gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-[var(--color-cycling)]/20 border border-[var(--color-cycling)]/40 flex items-center justify-center text-[var(--color-cycling)] shrink-0 shadow-xs">
-              <Bike className="w-6 h-6" />
-            </div>
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-cycling)]">
-                  Cycling Coach Prescription
-                </span>
-                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/20 text-[var(--color-cycling)] border border-[var(--color-cycling)]/40 tracking-wider">
-                  STATUS: CONDITIONAL AUTHORIZED (BEBAN AEROBIK AKTIF)
-                </span>
-              </div>
-              <h2 className="text-sm sm:text-base font-extrabold text-[var(--color-text-primary)]">
-                Beban Aerobik Putaran Tertutup (Closed-Chain) Aman &amp; Terbukti Bebas Nyeri
-              </h2>
-            </div>
-          </div>
-
-          <Link
-            href="/training"
-            className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-cycling)]/30 hover:border-[var(--color-cycling)] text-xs font-semibold text-[var(--color-cycling)] transition-all flex items-center gap-1.5 self-start shrink-0 shadow-xs"
-          >
-            <span>Buka Kalender 12-Minggu</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {/* Clinical Rationale & Empirical Proof */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
-          <div className="p-3 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-1">
-            <span className="text-[9.5px] font-bold text-[var(--color-text-muted)] uppercase block">
-              1. Bukti Empiris Toleransi Sendi
-            </span>
-            <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-              Telah tuntas menempuh sesi <strong>56.10 km</strong> dengan evaluasi <strong>0 nyeri</strong> selama latihan, sesudah latihan, dan <strong>tanpa pembengkakan</strong>.
-            </p>
-          </div>
-
-          <div className="p-3 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-1">
-            <span className="text-[9.5px] font-bold text-[var(--color-text-muted)] uppercase block">
-              2. Fisiologi Beban Tertutup
-            </span>
-            <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-              Gerakan kayuhan sepeda adalah *closed-chain* tanpa benturan tanah (*zero impact*), melatih kapasitas mitokondria jantung tanpa membebani ligamen pergelangan kaki.
-            </p>
-          </div>
-
-          <div className="p-3 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-1">
-            <span className="text-[9.5px] font-bold text-[var(--color-text-muted)] uppercase block">
-              3. Aturan Proteksi Tempurung Lutut
-            </span>
-            <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-              Wajib mempertahankan kadens tinggi <strong>85+ RPM</strong> dengan rasio gigi ringan di jalur datar. Hindari tanjakan bertorsi berat (*out-of-saddle grinding*).
-            </p>
-          </div>
-        </div>
-      </div>
+      <CoachClinicalBanner
+        icon={<Bike className="w-6 h-6" />}
+        badgeLabel="Cycling Coach Prescription"
+        badgeStatus="STATUS: CONDITIONAL AUTHORIZED (BEBAN AEROBIK AKTIF)"
+        badgeTone="cycling"
+        headline="Beban Aerobik Putaran Tertutup (Closed-Chain) Aman &amp; Terbukti Bebas Nyeri"
+        linkHref="/training"
+        linkText="Buka Kalender 12-Minggu"
+        rationales={[
+          {
+            title: "1. Bukti Empiris Toleransi Sendi",
+            description: (
+              <>
+                Telah tuntas menempuh sesi <strong>56.10 km</strong> dengan evaluasi <strong>0 nyeri</strong> selama latihan, sesudah latihan, dan <strong>tanpa pembengkakan</strong>.
+              </>
+            ),
+          },
+          {
+            title: "2. Fisiologi Beban Tertutup",
+            description: (
+              <>
+                Gerakan kayuhan sepeda adalah <em>closed-chain</em> tanpa benturan tanah (<em>zero impact</em>), melatih kapasitas mitokondria jantung tanpa membebani ligamen pergelangan kaki.
+              </>
+            ),
+          },
+          {
+            title: "3. Aturan Proteksi Tempurung Lutut",
+            description: (
+              <>
+                Wajib mempertahankan kadens tinggi <strong>85+ RPM</strong> dengan rasio gigi ringan di jalur datar. Hindari tanjakan bertorsi berat (<em>out-of-saddle grinding</em>).
+              </>
+            ),
+          },
+        ]}
+      />
 
       {/* 2. PRIMARY OBJECTIVE: ROAD TO 100 KM CENTURY RIDE & ZONE 2 GUIDELINE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -276,24 +233,20 @@ export function CyclingCoachView({
         </div>
       </div>
 
-      {/* 3. CYCLING TELEMETRY ARCHIVE (25 Sesi Strava Tercatat) */}
-      <div className="p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)]">
-              <ActivityIcon className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
-                Arsip Telemetri Sesi Sepeda Terverifikasi
-              </h3>
-              <span className="text-[10px] text-[var(--color-text-muted)]">
-                {cyclingActivities.length} Sesi Sepeda Strava Tersimpan di PostgreSQL 16
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs font-tabular">
+      {/* 3. CYCLING TELEMETRY ARCHIVE */}
+      <CoachRecentSessionsList
+        activities={cyclingActivities}
+        sportTone="cycling"
+        title="Arsip Telemetri Sesi Sepeda Terverifikasi"
+        subtitle={`${cyclingActivities.length} Sesi Sepeda Strava Tersimpan di PostgreSQL 16`}
+        speedMetricLabel="Avg Speed"
+        renderSpeedValue={(act) =>
+          act.moving_time_seconds > 0
+            ? `${((act.distance_meters / act.moving_time_seconds) * 3.6).toFixed(1)} km/h`
+            : "0.0 km/h"
+        }
+        headerSummaryNodes={
+          <>
             <span>
               Total Jarak: <strong className="text-[var(--color-text-primary)]">{formatDistance(totalCyclingDistanceMeters)}</strong>
             </span>
@@ -305,60 +258,10 @@ export function CyclingCoachView({
             <span>
               Kecepatan Avg: <strong className="text-[var(--color-cycling)]">{avgCyclingSpeedKmh} km/h</strong>
             </span>
-          </div>
-        </div>
-
-        {/* Cycling Sessions List */}
-        {cyclingActivities.length === 0 ? (
-          <div className="py-12 text-center text-xs text-[var(--color-text-muted)]">
-            Belum ada aktivitas sepeda yang tercatat.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {cyclingActivities.slice(0, 10).map((act) => (
-              <Link
-                key={act.id}
-                href={`/activities/${act.id}`}
-                className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)] hover:border-[var(--color-cycling)] transition-all space-y-2 block group shadow-xs"
-              >
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-[var(--color-text-primary)] group-hover:text-[var(--color-cycling)] transition-colors truncate">
-                    {act.name}
-                  </span>
-                  <span className="text-[10px] text-[var(--color-text-muted)] font-tabular shrink-0">
-                    {formatDate(act.start_date)}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2 text-center text-xs font-tabular pt-1">
-                  <div className="p-1.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)]">
-                    <span className="text-[8.5px] text-[var(--color-text-muted)] block">Jarak</span>
-                    <span className="font-bold text-[var(--color-text-primary)]">
-                      {formatDistance(act.distance_meters)}
-                    </span>
-                  </div>
-                  <div className="p-1.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)]">
-                    <span className="text-[8.5px] text-[var(--color-text-muted)] block">Avg Speed</span>
-                    <span className="font-bold text-[var(--color-cycling)]">
-                      {act.moving_time_seconds > 0
-                        ? ((act.distance_meters / act.moving_time_seconds) * 3.6).toFixed(1)
-                        : "0.0"}{" "}
-                      km/h
-                    </span>
-                  </div>
-                  <div className="p-1.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)]">
-                    <span className="text-[8.5px] text-[var(--color-text-muted)] block">Waktu</span>
-                    <span className="font-bold text-[var(--color-text-primary)]">
-                      {formatDuration(act.moving_time_seconds)}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+          </>
+        }
+        emptyText="Belum ada aktivitas sepeda yang tercatat."
+      />
     </div>
   );
 }
-

@@ -3,15 +3,6 @@
  * Endurance Performance Lab Design System
  */
 
-import {
-  Bike,
-  Footprints,
-  Waves,
-  Dumbbell,
-  Compass,
-  Activity as ActivityIcon,
-} from "lucide-react";
-import React from "react";
 import { Activity } from "@/types";
 
 export interface SportMeta {
