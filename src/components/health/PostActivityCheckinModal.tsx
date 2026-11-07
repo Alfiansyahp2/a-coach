@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { Activity } from "@/types";
 import {
   X,
@@ -9,13 +10,19 @@ import {
   Activity as ActivityIcon,
   ShieldAlert,
   Save,
+  ExternalLink,
+  Calendar,
+  Clock,
+  MapPin,
 } from "lucide-react";
+import { formatDate, formatDuration } from "@/lib/formatters";
 
 interface PostActivityCheckinModalProps {
   isOpen: boolean;
   onClose: () => void;
   recentActivities: Activity[];
   onCheckinSuccess?: () => void;
+  initialActivityId?: string;
 }
 
 export function PostActivityCheckinModal({
@@ -23,21 +30,21 @@ export function PostActivityCheckinModal({
   onClose,
   recentActivities,
   onCheckinSuccess,
+  initialActivityId,
 }: PostActivityCheckinModalProps) {
-  const [selectedActivityId, setSelectedActivityId] = useState<string>(
-    recentActivities[0]?.id || ""
-  );
-  const [sportType, setSportType] = useState<string>(
-    recentActivities[0]?.sport_type || "Run"
-  );
-  const [distanceKm, setDistanceKm] = useState<number>(
-    recentActivities[0]
-      ? Math.round((recentActivities[0].distance_meters / 1000) * 100) / 100
-      : 5.0
-  );
-  const [durationSec, setDurationSec] = useState<number>(
-    recentActivities[0]?.moving_time_seconds || 1800
-  );
+  // Sort activities strictly descending by start_date so the newest session is always at the very top
+  const sortedActivities = useMemo(() => {
+    return [...(recentActivities || [])].sort((a, b) => {
+      const timeA = new Date(a.start_date).getTime();
+      const timeB = new Date(b.start_date).getTime();
+      return timeB - timeA;
+    });
+  }, [recentActivities]);
+
+  const [selectedActivityId, setSelectedActivityId] = useState<string>("");
+  const [sportType, setSportType] = useState<string>("Run");
+  const [distanceKm, setDistanceKm] = useState<number>(5.0);
+  const [durationSec, setDurationSec] = useState<number>(1800);
 
   const [painDuring, setPainDuring] = useState<number>(0);
   const [painAfter, setPainAfter] = useState<number>(0);
@@ -52,11 +59,34 @@ export function PostActivityCheckinModal({
     text: string;
   } | null>(null);
 
+  // Sync state when modal opens or activities list updates
+  useEffect(() => {
+    if (isOpen && sortedActivities.length > 0) {
+      const targetId =
+        initialActivityId && sortedActivities.some((a) => a.id === initialActivityId)
+          ? initialActivityId
+          : selectedActivityId && sortedActivities.some((a) => a.id === selectedActivityId)
+          ? selectedActivityId
+          : sortedActivities[0]?.id || "";
+
+      setSelectedActivityId(targetId);
+      const act = sortedActivities.find((a) => a.id === targetId) || sortedActivities[0];
+      if (act) {
+        setSportType(act.sport_type);
+        setDistanceKm(Math.round((act.distance_meters / 1000) * 100) / 100);
+        setDurationSec(act.moving_time_seconds);
+      }
+    }
+  }, [isOpen, initialActivityId, sortedActivities]);
+
   if (!isOpen) return null;
+
+  const selectedActivity =
+    sortedActivities.find((a) => a.id === selectedActivityId) || sortedActivities[0];
 
   const handleActivitySelect = (actId: string) => {
     setSelectedActivityId(actId);
-    const act = recentActivities.find((a) => a.id === actId);
+    const act = sortedActivities.find((a) => a.id === actId);
     if (act) {
       setSportType(act.sport_type);
       setDistanceKm(Math.round((act.distance_meters / 1000) * 100) / 100);
@@ -88,26 +118,32 @@ export function PostActivityCheckinModal({
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(`Respon server tidak valid (${res.status})`);
+      }
+
       if (!res.ok || !data.success) {
-        throw new Error(data.message || data.error || "Check-in failed");
+        throw new Error(data.message || data.error || "Gagal mencatat check-in pasca sesi.");
       }
 
       setStatusMessage({
         type: "success",
-        text: "Check-in recorded! Sport-specific training readiness deterministically updated.",
+        text: "Check-in berhasil disimpan! Kesiapan latihan multi-sport telah diperbarui.",
       });
 
       setTimeout(() => {
         if (onCheckinSuccess) onCheckinSuccess();
         onClose();
-        // Trigger page refresh to update server components
         window.location.reload();
       }, 1200);
     } catch (err: any) {
       setStatusMessage({
         type: "error",
-        text: err.message || "Failed to submit check-in",
+        text: err.message || "Gagal mengirim formulir check-in.",
       });
     } finally {
       setIsSubmitting(false);
@@ -115,70 +151,132 @@ export function PostActivityCheckinModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-[#12151D] border border-[#1F2430] rounded-sm max-w-xl w-full p-5 space-y-4 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="bg-[var(--color-surface-card)] border border-[var(--color-border)] rounded-xl max-w-xl w-full p-5 space-y-4 shadow-2xl relative font-mono text-xs">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#1F2430]">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-sm bg-[#161922] border border-[#2D3547] flex items-center justify-center text-[#00F0FF]">
-              <ActivityIcon className="w-3.5 h-3.5" />
+            <div className="w-8 h-8 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)]">
+              <ActivityIcon className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-[#F0F2F5]">
-                Post-Activity Subjective Check-in
+              <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-[var(--color-text-primary)]">
+                Check-In Pasca Latihan
               </h3>
-              <span className="text-[10px] font-mono text-[#5A6272]">
-                Symptom Ingestion & Deterministic Readiness Update
+              <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
+                Evaluasi Respon Subjektif &amp; Penyesuaian Kesiapan
               </span>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-6 h-6 rounded-sm bg-[#161922] border border-[#1F2430] flex items-center justify-center text-[#9BA3AF] hover:text-white"
+            className="w-7 h-7 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Clinical Safety Alert Banner */}
-        <div className="p-3 rounded-sm bg-[#161922] border border-[#FF2A6D]/30 flex items-start gap-2.5 text-[11px] font-mono text-[#9BA3AF]">
-          <ShieldAlert className="w-4 h-4 text-[#FF2A6D] shrink-0 mt-0.5" />
+        <div className="p-3 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-alert-amber)]/30 flex items-start gap-2.5 text-[11px] font-mono text-[var(--color-text-secondary)]">
+          <ShieldAlert className="w-4 h-4 text-[var(--color-alert-amber)] shrink-0 mt-0.5" />
           <p>
-            <strong className="text-[#F0F2F5]">Safety Protocol:</strong> Data reported here directly gates future workout prescriptions. If you experience acute swelling, joint giving-way, or sharp weight-bearing pain, stop activity and seek medical evaluation.
+            <strong className="text-[var(--color-text-primary)]">Protokol Keselamatan:</strong> Data yang dilaporkan di sini langsung menentukan batas beban latihan sesi berikutnya. Hentikan latihan dan evaluasi bila timbul efusi atau nyeri akut.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
-          {/* Activity Selection */}
-          {recentActivities.length > 0 && (
-            <div>
-              <label className="block text-[10px] uppercase font-semibold text-[#9BA3AF] mb-1">
-                Link to Ingested Activity
-              </label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Activity Selection with Direct Link */}
+          {sortedActivities.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-[10px]">
+                <label className="uppercase font-bold text-[var(--color-text-secondary)] flex items-center gap-1.5">
+                  <ActivityIcon className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+                  <span>Pilih Aktivitas Terkait</span>
+                </label>
+                {selectedActivity && (
+                  <Link
+                    href={`/activities/${selectedActivity.id}`}
+                    target="_blank"
+                    className="text-[var(--color-cycling)] hover:underline font-bold flex items-center gap-1 transition-colors"
+                  >
+                    <span>Buka Aktivitas Langsung</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                )}
+              </div>
+
+              {/* Dropdown with chronologically sorted activities */}
               <select
                 value={selectedActivityId}
                 onChange={(e) => handleActivitySelect(e.target.value)}
-                className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1.5 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+                className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-md px-3 py-2 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)] text-xs font-mono"
               >
-                {recentActivities.slice(0, 8).map((act) => (
-                  <option key={act.id} value={act.id}>
-                    {act.name} ({act.sport_type} • {(act.distance_meters / 1000).toFixed(1)} km)
-                  </option>
-                ))}
+                {sortedActivities.map((act, idx) => {
+                  const dateStr = formatDate(act.start_date);
+                  const isTop = idx === 0;
+                  return (
+                    <option key={act.id} value={act.id}>
+                      {isTop ? "★ [TERBARU] " : ""}{dateStr ? `[${dateStr}] ` : ""}{act.name} ({act.sport_type} • {(act.distance_meters / 1000).toFixed(1)} km)
+                    </option>
+                  );
+                })}
               </select>
+
+              {/* Direct Activity Summary Card */}
+              {selectedActivity && (
+                <div className="p-3 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border shrink-0 ${
+                        selectedActivity.sport_type === "Ride"
+                          ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
+                          : "bg-[var(--color-running)]/15 text-[var(--color-running)] border-[var(--color-running)]/30"
+                      }`}>
+                        {selectedActivity.sport_type}
+                      </span>
+                      <span className="font-bold text-xs text-[var(--color-text-primary)] truncate">
+                        {selectedActivity.name}
+                      </span>
+                    </div>
+                    <div className="text-[10.5px] text-[var(--color-text-secondary)] flex flex-wrap items-center gap-x-3 gap-y-1 font-tabular">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-[var(--color-text-muted)]" />
+                        <span>{formatDate(selectedActivity.start_date)}</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-[var(--color-text-muted)]" />
+                        <span>{(selectedActivity.distance_meters / 1000).toFixed(2)} km</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-[var(--color-text-muted)]" />
+                        <span>{formatDuration(selectedActivity.moving_time_seconds)}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={`/activities/${selectedActivity.id}`}
+                    target="_blank"
+                    className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-semibold text-[10.5px] flex items-center justify-center gap-1.5 transition-all shrink-0 shadow-xs"
+                  >
+                    <span>Detail Aktivitas</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
           {/* Pain Telemetry Grid */}
-          <div className="p-3 bg-[#090A0F] border border-[#1F2430] rounded-sm space-y-3">
-            <span className="text-[10px] uppercase font-bold text-[#F0F2F5] tracking-wider block">
-              1. Pain Scale Telemetry (0 = None, 10 = Severe)
+          <div className="p-3.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg space-y-3">
+            <span className="text-[10px] uppercase font-bold text-[var(--color-text-primary)] tracking-wider block">
+              1. Skala Nyeri Sendi (0 = Tidak Ada, 10 = Nyeri Berat)
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                  During Activity
+                <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 font-semibold">
+                  Saat Sesi Latihan
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -187,17 +285,21 @@ export function PostActivityCheckinModal({
                     max="10"
                     value={painDuring}
                     onChange={(e) => setPainDuring(Number(e.target.value))}
-                    className="w-full accent-[#00F0FF]"
+                    className="w-full accent-[var(--color-cycling)]"
                   />
-                  <span className={`font-bold font-tabular text-sm w-5 text-right ${painDuring > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"}`}>
+                  <span
+                    className={`font-bold font-tabular text-sm w-5 text-right ${
+                      painDuring > 0 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"
+                    }`}
+                  >
                     {painDuring}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                  Immediately After
+                <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 font-semibold">
+                  Sesaat Pasca Sesi
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -206,17 +308,21 @@ export function PostActivityCheckinModal({
                     max="10"
                     value={painAfter}
                     onChange={(e) => setPainAfter(Number(e.target.value))}
-                    className="w-full accent-[#00F0FF]"
+                    className="w-full accent-[var(--color-cycling)]"
                   />
-                  <span className={`font-bold font-tabular text-sm w-5 text-right ${painAfter > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"}`}>
+                  <span
+                    className={`font-bold font-tabular text-sm w-5 text-right ${
+                      painAfter > 0 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"
+                    }`}
+                  >
                     {painAfter}
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                  Next-Day / Morning
+                <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 font-semibold">
+                  Keesokan Harinya
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -225,9 +331,13 @@ export function PostActivityCheckinModal({
                     max="10"
                     value={painNextDay}
                     onChange={(e) => setPainNextDay(Number(e.target.value))}
-                    className="w-full accent-[#00F0FF]"
+                    className="w-full accent-[var(--color-cycling)]"
                   />
-                  <span className={`font-bold font-tabular text-sm w-5 text-right ${painNextDay > 0 ? "text-[#FF2A6D]" : "text-[#10B981]"}`}>
+                  <span
+                    className={`font-bold font-tabular text-sm w-5 text-right ${
+                      painNextDay > 0 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"
+                    }`}
+                  >
                     {painNextDay}
                   </span>
                 </div>
@@ -236,33 +346,33 @@ export function PostActivityCheckinModal({
           </div>
 
           {/* Biological Circuit Breakers (Swelling & Instability) */}
-          <div className="p-3 bg-[#090A0F] border border-[#1F2430] rounded-sm space-y-2.5">
-            <span className="text-[10px] uppercase font-bold text-[#F0F2F5] tracking-wider block">
-              2. Structural Symptoms & Circuit Breakers
+          <div className="p-3.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg space-y-2.5">
+            <span className="text-[10px] uppercase font-bold text-[var(--color-text-primary)] tracking-wider block">
+              2. Indikator Biologis &amp; Pembatasan Keamanan
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="flex items-center justify-between p-2 rounded-sm bg-[#161922] border border-[#1F2430] cursor-pointer hover:border-[#2D3547]">
-                <span className="text-[11px] text-[#F0F2F5]">
-                  Joint Swelling Observed?
+              <label className="flex items-center justify-between p-2.5 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] cursor-pointer">
+                <span className="text-[11px] text-[var(--color-text-primary)]">
+                  Pembengkakan Sendi Teramati?
                 </span>
                 <input
                   type="checkbox"
                   checked={swelling}
                   onChange={(e) => setSwelling(e.target.checked)}
-                  className="w-4 h-4 accent-[#FF2A6D]"
+                  className="w-4 h-4 accent-[var(--color-alert-red)]"
                 />
               </label>
 
-              <label className="flex items-center justify-between p-2 rounded-sm bg-[#161922] border border-[#1F2430] cursor-pointer hover:border-[#2D3547]">
-                <span className="text-[11px] text-[#F0F2F5]">
-                  Joint Instability / Giving Way?
+              <label className="flex items-center justify-between p-2.5 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] cursor-pointer">
+                <span className="text-[11px] text-[var(--color-text-primary)]">
+                  Ketidakstabilan / Sendi Goyang?
                 </span>
                 <input
                   type="checkbox"
                   checked={instability}
                   onChange={(e) => setInstability(e.target.checked)}
-                  className="w-4 h-4 accent-[#FF2A6D]"
+                  className="w-4 h-4 accent-[var(--color-alert-red)]"
                 />
               </label>
             </div>
@@ -271,7 +381,7 @@ export function PostActivityCheckinModal({
           {/* RPE & Subjective Comments */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-1">
-              <label className="block text-[10px] text-[#9BA3AF] mb-1">
+              <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 font-semibold">
                 Perceived Exertion (RPE 1-10)
               </label>
               <input
@@ -281,20 +391,20 @@ export function PostActivityCheckinModal({
                 max="10"
                 value={rpe}
                 onChange={(e) => setRpe(Number(e.target.value))}
-                className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1 text-[#00F0FF] font-bold font-tabular focus:outline-none focus:border-[#00F0FF]"
+                className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-md px-3 py-1.5 text-[var(--color-cycling)] font-bold font-tabular focus:outline-none focus:border-[var(--color-cycling)]"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-[10px] text-[#9BA3AF] mb-1">
-                Subjective Athlete Notes
+              <label className="block text-[10px] text-[var(--color-text-secondary)] mb-1 font-semibold">
+                Catatan Subjektif Atlet
               </label>
               <input
                 type="text"
-                placeholder="e.g. Ankle felt stable during flat spin, slight knee stiffness on stairs"
+                placeholder="Contoh: Engkel stabil saat putaran flat, sedikit kaku lutut saat tangga"
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
-                className="w-full bg-[#090A0F] border border-[#1F2430] rounded-sm px-2.5 py-1 text-[#F0F2F5] focus:outline-none focus:border-[#00F0FF]"
+                className="w-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-md px-3 py-1.5 text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-cycling)]"
               />
             </div>
           </div>
@@ -302,10 +412,10 @@ export function PostActivityCheckinModal({
           {/* Status Message */}
           {statusMessage && (
             <div
-              className={`p-2.5 rounded-sm border text-[11px] flex items-center gap-2 ${
+              className={`p-3 rounded-md border text-[11px] flex items-center gap-2 ${
                 statusMessage.type === "success"
-                  ? "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/40"
-                  : "bg-[#FF2A6D]/15 text-[#FF2A6D] border-[#FF2A6D]/40"
+                  ? "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
+                  : "bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border-[var(--color-alert-red)]/30"
               }`}
             >
               {statusMessage.type === "success" ? (
@@ -318,22 +428,22 @@ export function PostActivityCheckinModal({
           )}
 
           {/* Submit Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#1F2430]">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[var(--color-border)]">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-3 py-1.5 rounded-sm bg-[#161922] border border-[#1F2430] text-[#9BA3AF] hover:text-white"
+              className="px-4 py-2 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors"
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-1.5 rounded-sm bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/40 font-semibold hover:bg-[#00F0FF]/25 transition-colors flex items-center gap-1.5"
+              className="px-5 py-2 rounded-md bg-[var(--color-cycling)] text-white font-bold hover:opacity-90 transition-all flex items-center gap-1.5 shadow-sm"
             >
               <Save className="w-3.5 h-3.5" />
-              {isSubmitting ? "Evaluating Readiness..." : "Save Check-in & Update"}
+              <span>{isSubmitting ? "Menyimpan Check-in..." : "Simpan Check-in"}</span>
             </button>
           </div>
         </form>
@@ -341,4 +451,3 @@ export function PostActivityCheckinModal({
     </div>
   );
 }
-

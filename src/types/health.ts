@@ -116,6 +116,7 @@ export interface AthleteTrainingResponse {
   user_id: string;
   activity_id?: string | null;
   strava_activity_id?: number | null;
+  pain_log_id?: string | null;
   sport_type: string;
   distance_km: number;
   duration_seconds: number;
@@ -186,6 +187,8 @@ export interface HealthAuditTrail {
   created_at: string;
 }
 
+import type { AthleteAvailability, AthleteEquipment, AthleteDailyWellness } from './index';
+
 export interface AuthoritativeAthleteHealthContext {
   profile: AthleteProfile | null;
   injuries: AthleteInjury[];
@@ -194,6 +197,9 @@ export interface AuthoritativeAthleteHealthContext {
   medicalAssessments: AthleteMedicalAssessment[];
   latestReadiness: AthleteTrainingReadiness | null;
   clinicianRestrictions: string[];
+  availability?: AthleteAvailability | null;
+  equipment?: AthleteEquipment[];
+  todayWellness?: AthleteDailyWellness | null;
 }
 
 export interface SafetyValidationResult {
