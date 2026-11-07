@@ -7,7 +7,8 @@ export function normalizeActivityRow(row: any): Activity {
   return {
     id: String(row.id),
     user_id: String(row.user_id),
-    strava_activity_id: Number(row.strava_activity_id),
+    strava_activity_id: row.strava_activity_id != null ? Number(row.strava_activity_id) : null,
+    is_manual: row.is_manual != null ? Boolean(row.is_manual) : (row.strava_activity_id == null),
     name: String(row.name || ''),
     sport_type: String(row.sport_type || 'Run'),
     start_date:
@@ -166,12 +167,8 @@ export async function getActivities(
       params.push(filters.limit);
       query += ` LIMIT $${params.length}`;
     }
-    try {
-      const res = await pgPool.query(query, params);
-      return res.rows.map(normalizeActivityRow);
-    } catch (err: any) {
-      console.warn("[PostgreSQL getActivities Error]:", err.message);
-    }
+    const res = await pgPool.query(query, params);
+    return res.rows.map(normalizeActivityRow);
   }
 
   const store = ensureLocalStore();
@@ -199,15 +196,16 @@ export async function upsertActivity(
   activity: Omit<Activity, 'id' | 'created_at' | 'updated_at'>
 ): Promise<UpsertActivityResult> {
   const now = new Date().toISOString();
+  const isManual = activity.is_manual ?? (activity.strava_activity_id ? false : true);
   if (pgPool) {
     const query = `
       INSERT INTO activities (
-        user_id, strava_activity_id, name, sport_type, start_date, distance_meters,
+        user_id, strava_activity_id, is_manual, name, sport_type, start_date, distance_meters,
         moving_time_seconds, elapsed_time_seconds, elevation_gain_meters, average_speed_mps,
         max_speed_mps, average_heartrate, max_heartrate, average_cadence, average_watts,
         calories, raw_summary_polyline, description, updated_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW())
       ON CONFLICT (strava_activity_id) DO UPDATE SET
         name = EXCLUDED.name,
         sport_type = EXCLUDED.sport_type,
@@ -224,12 +222,14 @@ export async function upsertActivity(
         average_watts = EXCLUDED.average_watts,
         calories = EXCLUDED.calories,
         description = EXCLUDED.description,
+        is_manual = EXCLUDED.is_manual,
         updated_at = NOW()
       RETURNING *, (xmax = 0) AS is_created;
     `;
     const res = await pgPool.query(query, [
       activity.user_id,
-      activity.strava_activity_id,
+      activity.strava_activity_id || null,
+      isManual,
       activity.name,
       activity.sport_type,
       activity.start_date,
@@ -255,10 +255,14 @@ export async function upsertActivity(
   }
 
   const store = ensureLocalStore();
-  const existingIdx = store.activities.findIndex((a) => a.strava_activity_id === activity.strava_activity_id);
+  const existingIdx = activity.strava_activity_id
+    ? store.activities.findIndex((a) => a.strava_activity_id === activity.strava_activity_id)
+    : -1;
   const isCreated = existingIdx < 0;
   const act: Activity = {
     ...activity,
+    strava_activity_id: activity.strava_activity_id ?? null,
+    is_manual: isManual,
     id: existingIdx >= 0 ? store.activities[existingIdx].id : crypto.randomUUID(),
     created_at: existingIdx >= 0 ? store.activities[existingIdx].created_at : now,
     updated_at: now,
@@ -312,9 +316,6 @@ export async function createManualActivity(
   match: WorkoutActivityMatch | null;
   trainingResponse?: AthleteTrainingResponse | null;
 }> {
-  // Generate synthetic unique strava_activity_id for manual / parsed entries (bigint safe number)
-  const syntheticStravaId = Date.now() * 1000 + Math.floor(Math.random() * 1000);
-  
   const distance_meters = Number(params.distance_meters || 0);
   const moving_time_seconds = Number(params.moving_time_seconds || 0);
   const elapsed_time_seconds = Number(params.elapsed_time_seconds || moving_time_seconds);
@@ -327,7 +328,8 @@ export async function createManualActivity(
 
   const { activity } = await upsertActivity({
     user_id: userId,
-    strava_activity_id: syntheticStravaId,
+    strava_activity_id: null,
+    is_manual: true,
     name: params.name || 'Manual Workout Activity',
     sport_type: (params.sport_type || 'Ride') as any,
     start_date: params.start_date || new Date().toISOString(),
@@ -420,7 +422,7 @@ export async function createManualActivity(
       trainingResponse = await upsertAthleteTrainingResponse({
         user_id: userId,
         activity_id: activity.id,
-        strava_activity_id: syntheticStravaId,
+        strava_activity_id: null,
         sport_type: params.sport_type,
         distance_km: Number((distance_meters / 1000).toFixed(2)),
         duration_seconds: moving_time_seconds,

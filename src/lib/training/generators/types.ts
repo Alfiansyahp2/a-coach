@@ -61,3 +61,26 @@ export function detectGoalArchetype(goal?: FitnessGoal | null): GoalArchetype {
   return 'CENTURY_100K';
 }
 
+/**
+ * Resolves the initial Tuesday for periodized 12-week schedule generation.
+ * If no startDate is provided, defaults safely to '2026-11-03' (Tuesday).
+ */
+export function resolveBaseTuesday(startDateInput?: string | Date): Date {
+  if (!startDateInput) return new Date('2026-11-03T00:00:00Z');
+  const d = typeof startDateInput === 'string'
+    ? new Date(startDateInput.includes('T') ? startDateInput : `${startDateInput}T00:00:00Z`)
+    : new Date(startDateInput.getTime());
+  const day = d.getUTCDay(); // 0 is Sunday, 1 is Monday, 2 is Tuesday
+  if (day === 1) {
+    // Input is Monday -> base Tuesday is next day (+1)
+    return new Date(d.getTime() + 86400000);
+  } else if (day === 2) {
+    // Input is Tuesday
+    return d;
+  }
+  // If another day, find the Tuesday of that week
+  const diff = (day === 0 ? 2 : 2 - day);
+  return new Date(d.getTime() + diff * 86400000);
+}
+
+

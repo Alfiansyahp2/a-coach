@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
       await createAthletePainLog({
         user_id: userId,
         injury_id: body.injury_id || null,
-        body_region: body.body_region || (body.sport_type === 'Run' ? 'Anterior Knees' : 'Right Ankle'),
-        side: body.side || (body.sport_type === 'Run' ? 'BILATERAL' : 'RIGHT'),
+        body_region: body.body_region?.trim() || 'General / Unspecified Region',
+        side: body.side?.trim().toUpperCase() || 'BILATERAL',
         pain_score: maxPain,
         pain_type: body.pain_type || 'ACHING',
         associated_activity: body.sport_type.toUpperCase(),
