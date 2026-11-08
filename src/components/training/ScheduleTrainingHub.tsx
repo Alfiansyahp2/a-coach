@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Activity,
   ScheduledWorkout,
@@ -14,6 +15,7 @@ import {
   RefreshCw,
   Grid,
   List,
+  ClipboardCheck,
 } from "lucide-react";
 import { AddActivityModal } from "@/components/AddActivityModal";
 import { formatDateOnly } from "@/lib/formatters";
@@ -261,6 +263,15 @@ export function ScheduleTrainingHub({
           </div>
 
           <AddActivityModal variant="button" />
+
+          <Link
+            href="/recap"
+            className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-card)] hover:bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] font-bold flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer"
+            title="Buka Rekap Telemetri Mingguan"
+          >
+            <ClipboardCheck className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+            <span className="hidden sm:inline">Rekap Mingguan</span>
+          </Link>
 
           <button
             onClick={handleRegenerate}

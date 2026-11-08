@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Calendar, Target, Trophy, Layers } from "lucide-react";
+import { Calendar, Target, Trophy, Layers, Activity as ActivityIcon } from "lucide-react";
 import { ScheduledWorkout, TrainingPlan, FitnessGoal, PersonalRecord, Activity } from "@/types";
+import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapTypes";
 import { DashboardScheduledWorkoutsCard } from "./DashboardScheduledWorkoutsCard";
 import { DashboardMacroGoalsCard } from "./DashboardMacroGoalsCard";
 import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
 import { WeeklyStreakCard } from "./WeeklyStreakCard";
+import { WeeklyRecapCard } from "@/components/analytics/WeeklyRecapCard";
 
 interface DashboardTacticalDeckProps {
   workouts: ScheduledWorkout[];
@@ -14,6 +16,7 @@ interface DashboardTacticalDeckProps {
   goals: FitnessGoal[];
   prs: PersonalRecord[];
   activities?: Activity[];
+  initialRecap?: WeeklyActivityAndInjuryRecap;
 }
 
 export function DashboardTacticalDeck({
@@ -22,8 +25,9 @@ export function DashboardTacticalDeck({
   goals,
   prs,
   activities = [],
+  initialRecap,
 }: DashboardTacticalDeckProps) {
-  const [activeTab, setActiveTab] = useState<"workouts" | "goals" | "prs">("workouts");
+  const [activeTab, setActiveTab] = useState<"workouts" | "goals" | "prs" | "recap">("workouts");
 
   return (
     <div className="space-y-4">
@@ -101,6 +105,27 @@ export function DashboardTacticalDeck({
                 {prs.length}
               </span>
             </button>
+
+            <button
+              onClick={() => setActiveTab("recap")}
+              className={`px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md transition-all flex items-center gap-1 text-[10px] sm:text-[10.5px] font-semibold whitespace-nowrap cursor-pointer ${
+                activeTab === "recap"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              <ActivityIcon className="w-3 h-3 text-[var(--color-cycling)] shrink-0" />
+              <span>Rekap</span>
+              <span
+                className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular ${
+                  activeTab === "recap"
+                    ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold"
+                    : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
+                }`}
+              >
+                1M
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -119,6 +144,10 @@ export function DashboardTacticalDeck({
 
       {activeTab === "prs" && (
         <PersonalRecordsDeck prs={prs} activities={activities} />
+      )}
+
+      {activeTab === "recap" && (
+        <WeeklyRecapCard initialRecap={initialRecap} />
       )}
     </div>
   );

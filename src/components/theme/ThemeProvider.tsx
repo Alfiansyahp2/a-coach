@@ -11,17 +11,17 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
+  theme: "dark",
   toggleTheme: () => {},
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check saved theme or system preference, default to light
+    // Check saved theme or system preference, default to dark (Graphite Obsidian)
     const saved = localStorage.getItem("endurance-lab-theme") as Theme | null;
     if (saved === "dark" || saved === "light") {
       setThemeState(saved);
@@ -31,9 +31,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.remove("dark");
       }
     } else {
-      // Default light mode as specified by Endurance Performance Lab specification
-      setThemeState("light");
-      document.documentElement.classList.remove("dark");
+      // Default to Dark Mode (Graphite Obsidian) for athletic telemetry aesthetic
+      setThemeState("dark");
+      document.documentElement.classList.add("dark");
     }
     setMounted(true);
   }, []);

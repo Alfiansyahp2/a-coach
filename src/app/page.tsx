@@ -25,6 +25,7 @@ import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
 import { DashboardIntegrityStrip } from "@/components/dashboard/DashboardIntegrityStrip";
 import { DashboardTacticalDeck } from "@/components/dashboard/DashboardTacticalDeck";
 import { DashboardAiInsightsDeck } from "@/components/dashboard/DashboardAiInsightsDeck";
+import { computeWeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapEngine";
 import { Gauge, RefreshCw, Zap } from "lucide-react";
 
 export const metadata = {
@@ -92,6 +93,14 @@ async function DashboardTelemetry() {
 
   const currentVolumeKm = summary.totalDistanceThisWeek / 1000;
   const targetWeek1Km = 18.0;
+
+  const weeklyRecap = computeWeeklyActivityAndInjuryRecap({
+    activities,
+    injuries: healthContext?.injuries || [],
+    painLogs: healthContext?.recentPainLogs || [],
+    trainingResponses: healthContext?.recentResponses || [],
+    scheduledWorkouts: workouts,
+  });
 
   return (
     <AppShell user={user} dbStatus={dbStatus} healthContext={healthContext} streakWeeks={streak.currentStreakWeeks}>
@@ -204,6 +213,7 @@ async function DashboardTelemetry() {
             goals={goals}
             prs={displayPrs}
             activities={activities}
+            initialRecap={weeklyRecap}
           />
         </div>
       </section>
