@@ -11,6 +11,19 @@ import {
   ActiveInjuryDossier,
 } from './weeklyRecapTypes';
 
+export function formatAnatomyLabel(side?: string | null, region?: string | null): string {
+  const cleanSide = side?.trim() || '';
+  const cleanRegion = region?.trim() || '';
+  if (!cleanSide) return cleanRegion;
+  if (!cleanRegion) return cleanSide;
+
+  // Prevent stutter like "RIGHT Right Ankle" or "LEFT Left Knee"
+  if (cleanRegion.toLowerCase().startsWith(cleanSide.toLowerCase())) {
+    return cleanRegion;
+  }
+  return `${cleanSide} ${cleanRegion}`;
+}
+
 export function aggregateWeeklyInjuries(
   injuries: AthleteInjury[],
   painLogs: AthletePainLog[],
@@ -21,17 +34,29 @@ export function aggregateWeeklyInjuries(
   const startMs = start.getTime();
   const endMs = end.getTime();
 
-  // 1. Cidera yang diperoleh / dilaporkan pada minggu ini
+  // 1. Cidera baru yang terjadi/diperoleh pada minggu ini
   const newInjuries: NewInjuryDossier[] = injuries
     .filter((inj) => {
-      const createdTime = new Date(inj.created_at).getTime();
       const estimatedTime = inj.estimated_injury_date
         ? new Date(inj.estimated_injury_date).getTime()
         : null;
 
-      const isCreatedThisWeek = createdTime >= startMs && createdTime <= endMs;
-      const isOccurredThisWeek = estimatedTime !== null && estimatedTime >= startMs && estimatedTime <= endMs;
-      return isCreatedThisWeek || isOccurredThisWeek;
+      if (estimatedTime !== null) {
+        return estimatedTime >= startMs && estimatedTime <= endMs;
+      }
+
+      // Jika tidak ada estimasi tanggal eksplisit, periksa apakah merupakan riwayat/cedera terdahulu
+      const isHistorical =
+        inj.timeframe_description &&
+        /(ago|riwayat|history|sebelumnya|chronic|months|years|bulan|tahun)/i.test(
+          inj.timeframe_description
+        );
+      if (isHistorical) {
+        return false;
+      }
+
+      const createdTime = new Date(inj.created_at).getTime();
+      return createdTime >= startMs && createdTime <= endMs;
     })
     .map((inj) => ({
       id: inj.id,
@@ -59,7 +84,7 @@ export function aggregateWeeklyInjuries(
 
   const affectedRegionsSet = new Set<string>();
   for (const inj of activeMonitoredInjuries) {
-    affectedRegionsSet.add(`${inj.side} ${inj.body_region}`.trim());
+    affectedRegionsSet.add(formatAnatomyLabel(inj.side, inj.body_region));
   }
 
   // 3. Telemetri Nyeri Mingguan (Pain Logs)
@@ -80,7 +105,7 @@ export function aggregateWeeklyInjuries(
     painScoreSum += score;
     if (score > peakPainScore) {
       peakPainScore = score;
-      peakPainLocation = `${log.side} ${log.body_region}`.trim();
+      peakPainLocation = formatAnatomyLabel(log.side, log.body_region);
     }
     if (log.swelling_present) swellingLogsCount++;
     if (log.joint_instability) instabilityLogsCount++;
