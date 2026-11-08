@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { connection } from "next/server";
 import { getActivities, createManualActivity, DEFAULT_USER_ID } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 
 export async function GET(req: NextRequest) {
+  await connection();
   try {
     const { searchParams } = new URL(req.url);
     const limit = Number(searchParams.get("limit")) || 50;
@@ -24,6 +26,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  await connection();
   try {
     const body = await req.json();
 

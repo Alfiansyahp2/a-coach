@@ -1,30 +1,48 @@
 import { NextRequest, NextResponse } from "next/server";
+import { connection } from "next/server";
 import {
   DEFAULT_USER_ID,
   getUser,
   getAthleteProfile,
   getAuthoritativeHealthContext,
+  getAthleteEquipment,
   updateUserProfile,
   recordMedicalProcedureAndAssessment,
 } from "@/lib/db";
+import { calculatePhysiologicalCapacities } from "@/lib/domain/physiology/heartRateZones";
 import { revalidatePath } from "next/cache";
 
 export async function GET(req: NextRequest) {
+  await connection();
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId") || DEFAULT_USER_ID;
 
-    const [user, profile, healthContext] = await Promise.all([
+    const [user, profile, healthContext, equipment] = await Promise.all([
       getUser(userId),
       getAthleteProfile(userId),
       getAuthoritativeHealthContext(userId),
+      getAthleteEquipment(userId),
     ]);
+
+    const capacities = calculatePhysiologicalCapacities({
+      age: profile?.age ?? 22,
+      height_cm: user?.height_cm ?? profile?.height_cm ?? 170.0,
+      weight_kg: user?.weight_kg ?? profile?.weight_kg ?? 65.0,
+      resting_heart_rate: user?.resting_heart_rate ?? profile?.resting_heart_rate ?? 68,
+      max_heart_rate: user?.max_heart_rate ?? 188,
+      ftp_watts: profile?.physiological_measurements?.ftp_watts ?? null,
+      vo2_max: profile?.physiological_measurements?.vo2_max ?? null,
+      running_threshold_pace_sec: profile?.physiological_measurements?.running_threshold_pace_sec ?? null,
+    });
 
     return NextResponse.json({
       success: true,
       user,
       profile,
       healthContext,
+      equipment,
+      capacities,
     });
   } catch (err: any) {
     console.error("Error fetching athlete profile:", err);
@@ -35,19 +53,30 @@ export async function GET(req: NextRequest) {
   }
 }
 
+export async function PUT(req: NextRequest) {
+  return POST(req);
+}
+
 export async function POST(req: NextRequest) {
+  await connection();
   try {
     const body = await req.json();
     const userId = body.user_id || DEFAULT_USER_ID;
 
-    // 1. Update basic biometric profile
+    // 1. Update basic biometric & athletic profile
     const profileResult = await updateUserProfile(userId, {
       name: body.name,
+      avatar_url: body.avatar_url,
       age: body.age != null ? Number(body.age) : undefined,
       height_cm: body.height_cm != null ? Number(body.height_cm) : undefined,
       weight_kg: body.weight_kg != null ? Number(body.weight_kg) : undefined,
       resting_heart_rate: body.resting_heart_rate != null ? Number(body.resting_heart_rate) : undefined,
+      max_heart_rate: body.max_heart_rate != null ? Number(body.max_heart_rate) : undefined,
       training_days_per_week: body.training_days_per_week != null ? Number(body.training_days_per_week) : undefined,
+      preferred_sports: body.preferred_sports,
+      training_experience: body.training_experience,
+      performance_objectives: body.performance_objectives,
+      physiological_measurements: body.physiological_measurements,
     });
 
     // 2. If medical procedure / assessment data is present
@@ -71,15 +100,28 @@ export async function POST(req: NextRequest) {
     }
 
     // Revalidate paths for instant client and SSR update
+    revalidatePath("/profile");
     revalidatePath("/");
     revalidatePath("/health");
     revalidatePath("/training");
     revalidatePath("/activities");
 
+    const capacities = calculatePhysiologicalCapacities({
+      age: profileResult.profile.age,
+      height_cm: profileResult.user.height_cm,
+      weight_kg: profileResult.user.weight_kg,
+      resting_heart_rate: profileResult.user.resting_heart_rate,
+      max_heart_rate: profileResult.user.max_heart_rate,
+      ftp_watts: profileResult.profile.physiological_measurements?.ftp_watts ?? null,
+      vo2_max: profileResult.profile.physiological_measurements?.vo2_max ?? null,
+      running_threshold_pace_sec: profileResult.profile.physiological_measurements?.running_threshold_pace_sec ?? null,
+    });
+
     return NextResponse.json({
       success: true,
       user: profileResult.user,
       profile: profileResult.profile,
+      capacities,
       medicalAssessment: medicalResult?.assessment || null,
       readiness: medicalResult?.readiness || null,
     });
@@ -91,4 +133,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

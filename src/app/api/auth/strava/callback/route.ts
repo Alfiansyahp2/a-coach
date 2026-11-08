@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { connection } from 'next/server';
 import { exchangeAuthorizationCode } from '@/lib/strava';
 import { encryptToken } from '@/lib/crypto';
 import { DEFAULT_USER_ID, saveStravaConnection, saveStravaTokens } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
+  await connection();
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const state = searchParams.get('state');
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest) {
     const tokenData = await exchangeAuthorizationCode(code);
 
     const scopesArray = scope ? scope.split(',') : ['read', 'activity:read_all'];
-    const connection = await saveStravaConnection(
+    const connectionRecord = await saveStravaConnection(
       DEFAULT_USER_ID,
       tokenData.athlete,
       scopesArray
@@ -38,13 +40,13 @@ export async function GET(request: NextRequest) {
 
     const expiresAt = new Date(tokenData.expires_at * 1000).toISOString();
     await saveStravaTokens(
-      connection.id,
+      connectionRecord.id,
       encryptToken(tokenData.access_token),
       encryptToken(tokenData.refresh_token),
       expiresAt
     );
 
-    const response = NextResponse.redirect(`${origin}/?connected=true&athlete=${encodeURIComponent(connection.athlete_name || 'Athlete')}`);
+    const response = NextResponse.redirect(`${origin}/?connected=true&athlete=${encodeURIComponent(connectionRecord.athlete_name || 'Athlete')}`);
     response.cookies.delete('strava_oauth_state');
     return response;
   } catch (err: any) {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { connection } from 'next/server';
 import {
   DEFAULT_USER_ID,
   getAthleteInjuries,
@@ -7,13 +8,14 @@ import {
   getAuthoritativeHealthContext,
   saveAthleteReadiness,
 } from '@/lib/db';
-import { evaluateTrainingReadiness } from '@/lib/readinessEngine';
+import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngine';
 
 /**
  * GET /api/athlete/injuries
  * Returns all recorded injuries for an athlete.
  */
 export async function GET(req: NextRequest) {
+  await connection();
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId') || DEFAULT_USER_ID;
@@ -34,6 +36,7 @@ export async function GET(req: NextRequest) {
  * and deterministically updates sport training readiness.
  */
 export async function POST(req: NextRequest) {
+  await connection();
   try {
     const body = await req.json();
     const userId = body.user_id || DEFAULT_USER_ID;
@@ -90,4 +93,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
