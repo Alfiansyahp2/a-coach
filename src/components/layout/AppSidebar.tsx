@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Activity,
   UserCircle,
+  ClipboardCheck,
 } from "lucide-react";
 
 interface NavItem {
@@ -29,6 +30,7 @@ const navItems: NavItem[] = [
   { name: "Overview", href: "/", icon: LayoutDashboard },
   { name: "Profil Atlet", href: "/profile", icon: UserCircle, badge: "PRO" },
   { name: "Kalender Latihan", href: "/training", icon: Calendar, badge: "12W" },
+  { name: "Rekap Mingguan", href: "/recap", icon: ClipboardCheck, badge: "1M" },
   { name: "Riwayat Aktivitas", href: "/activities", icon: FolderKanban, badge: "34" },
   { name: "Profil Kesehatan", href: "/health", icon: ShieldCheck, badge: "GATE" },
   { name: "Running Coach", href: "/coach/running", icon: Footprints, badge: "HOLD" },
