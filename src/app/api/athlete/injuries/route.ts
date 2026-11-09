@@ -8,7 +8,7 @@ import {
   getAuthoritativeHealthContext,
   saveAthleteReadiness,
 } from '@/lib/db';
-import { evaluateTrainingReadiness } from '@/lib/readinessEngine';
+import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngine';
 
 /**
  * GET /api/athlete/injuries

@@ -7,7 +7,7 @@ import {
   saveAthleteReadiness,
   logHealthAuditTrail,
 } from '@/lib/db';
-import { evaluateTrainingReadiness } from '@/lib/readinessEngine';
+import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngine';
 
 /**
  * POST /api/athlete/checkin
