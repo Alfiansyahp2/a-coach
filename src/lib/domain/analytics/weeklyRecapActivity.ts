@@ -1,5 +1,5 @@
 import { Activity, ScheduledWorkout } from '@/types';
-import { formatDuration, speedMpsToPace } from '@/lib/formatters';
+import { formatDuration, speedMpsToPace, formatDateOnly } from '@/lib/formatters';
 import {
   WeeklyActivityRecap,
   SportRecapBreakdown,
@@ -7,12 +7,6 @@ import {
 } from './weeklyRecapTypes';
 
 const INDO_DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-
-function getIsoDateOnly(dateVal: string | Date | undefined): string {
-  if (!dateVal) return '';
-  if (dateVal instanceof Date) return dateVal.toISOString().slice(0, 10);
-  return String(dateVal).slice(0, 10);
-}
 
 export function aggregateWeeklyActivities(
   activities: Activity[],
@@ -46,10 +40,10 @@ export function aggregateWeeklyActivities(
   for (let i = 0; i < 7; i++) {
     const currentD = new Date(start);
     currentD.setDate(start.getDate() + i);
-    const dateStr = currentD.toISOString().slice(0, 10);
+    const dateStr = formatDateOnly(currentD);
     const dayName = INDO_DAYS[currentD.getDay()];
 
-    const dayActs = weekActivities.filter((a) => getIsoDateOnly(a.start_date) === dateStr);
+    const dayActs = weekActivities.filter((a) => formatDateOnly(a.start_date) === dateStr);
     const dayDistKm = dayActs.reduce((acc, a) => acc + (a.distance_meters || 0) / 1000, 0);
     const dayDurSec = dayActs.reduce((acc, a) => acc + (a.moving_time_seconds || 0), 0);
 

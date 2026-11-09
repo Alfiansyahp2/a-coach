@@ -8,6 +8,7 @@ import {
   aggregateWeeklyInjuries,
   evaluateWeeklyClinicalCorrelation,
 } from './weeklyRecapInjury';
+import { formatDateOnly } from '@/lib/formatters';
 
 const INDO_MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
@@ -70,14 +71,16 @@ export function computeWeeklyActivityAndInjuryRecap(
   } = params;
 
   // 1. Tentukan Rentang Waktu Minggu (Senin 00:00:00 - Minggu 23:59:59)
-  let ref = referenceDate;
-  if (!ref && activities.length > 0) {
-    const timestamps = activities.map((a) => new Date(a.start_date).getTime());
-    const latestTime = Math.max(...timestamps);
-    ref = new Date(latestTime);
-  }
-
+  const ref = referenceDate || new Date();
   const { start, end } = getWeekBounds(ref);
+
+  const now = new Date();
+  const currentWeekMonday = getWeekBounds(now).start;
+  const isCurrentWeek = formatDateOnly(start) === formatDateOnly(currentWeekMonday);
+  const weeksAgo = Math.max(
+    0,
+    Math.round((currentWeekMonday.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000))
+  );
 
   const timeframe: WeeklyRecapTimeframe = {
     startDate: start.toISOString(),
@@ -86,6 +89,8 @@ export function computeWeeklyActivityAndInjuryRecap(
     endDateFormatted: formatIndoDate(end),
     label: `${formatIndoDate(start)} – ${formatIndoDate(end)}`,
     daysCount: 7,
+    isCurrentWeek,
+    weeksAgo,
   };
 
   // 2. Rekapitulasi Aktivitas Mingguan
