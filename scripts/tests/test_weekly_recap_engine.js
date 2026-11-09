@@ -163,6 +163,48 @@ it('Aggregates multi-sport sessions, paces, and daily breakdowns accurately', ()
   assert.strictEqual(rideStats.percentage_of_volume, 100);
 });
 
+it('Accurately matches weekend/Sunday activities without UTC timezone shift drop', () => {
+  const weekendActivities = [
+    {
+      id: 'act-sun',
+      user_id: 'user-1',
+      name: 'Sunday Morning Endurance Ride',
+      sport_type: 'Ride',
+      start_date: '2026-11-08T01:33:00.000Z', // Sunday Nov 8 (morning WIB)
+      distance_meters: 31440,
+      moving_time_seconds: 5520,
+      created_at: '2026-11-08T03:00:00Z',
+    },
+    {
+      id: 'act-sat',
+      user_id: 'user-1',
+      name: 'Saturday MTB Ride',
+      sport_type: 'Ride',
+      start_date: '2026-11-06T22:00:00.000Z', // Saturday Nov 7 05:00 AM WIB
+      distance_meters: 30000,
+      moving_time_seconds: 6300,
+      created_at: '2026-11-07T03:00:00Z',
+    },
+  ];
+
+  const recap = computeWeeklyActivityAndInjuryRecap({
+    activities: weekendActivities,
+    injuries: [],
+    referenceDate: '2026-11-08',
+  });
+
+  assert.strictEqual(recap.activity_summary.total_sessions, 2);
+  const sunEntry = recap.activity_summary.daily_breakdown.find((d) => d.day_name === 'Minggu');
+  assert.ok(sunEntry, 'Sunday entry must exist in daily breakdown');
+  assert.strictEqual(sunEntry.session_count, 1, 'Sunday must have 1 matched session');
+  assert.strictEqual(sunEntry.total_distance_km, 31.44);
+
+  const satEntry = recap.activity_summary.daily_breakdown.find((d) => d.day_name === 'Sabtu');
+  assert.ok(satEntry, 'Saturday entry must exist in daily breakdown');
+  assert.strictEqual(satEntry.session_count, 1, 'Saturday must have 1 matched session');
+  assert.strictEqual(satEntry.total_distance_km, 30);
+});
+
 // -----------------------------------------------------------------------------
 // 3. INJURY, PAIN TELEMETRY, & CLINICAL VERDICT
 // -----------------------------------------------------------------------------

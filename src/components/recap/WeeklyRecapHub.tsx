@@ -11,8 +11,10 @@ import {
   Clock,
   HeartPulse,
   FileSpreadsheet,
+  RotateCcw,
 } from "lucide-react";
 import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapTypes";
+import { formatDateOnly } from "@/lib/formatters";
 import { WeeklyRecapTimeline } from "./WeeklyRecapTimeline";
 import { WeeklyRecapPrescription } from "./WeeklyRecapPrescription";
 
@@ -23,20 +25,23 @@ interface WeeklyRecapHubProps {
 export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
   const [recap, setRecap] = useState<WeeklyActivityAndInjuryRecap>(initialRecap);
   const [loading, setLoading] = useState(false);
-  const [currentOffsetDays, setCurrentOffsetDays] = useState(0);
 
-  const fetchWeekRecap = async (offsetDays: number) => {
+  const navigateWeek = async (direction: -1 | 1 | 0) => {
     try {
       setLoading(true);
-      const targetDate = new Date();
-      targetDate.setDate(targetDate.getDate() + offsetDays);
-      const dateStr = targetDate.toISOString().slice(0, 10);
+      let targetDateStr: string;
+      if (direction === 0) {
+        targetDateStr = formatDateOnly(new Date());
+      } else {
+        const currentRef = new Date(recap.timeframe.startDate);
+        currentRef.setDate(currentRef.getDate() + direction * 7);
+        targetDateStr = formatDateOnly(currentRef);
+      }
 
-      const res = await fetch(`/api/athlete/weekly-recap?date=${dateStr}`);
+      const res = await fetch(`/api/athlete/weekly-recap?date=${targetDateStr}`);
       const data = await res.json();
       if (data.success && data.recap) {
         setRecap(data.recap);
-        setCurrentOffsetDays(offsetDays);
       }
     } catch (err) {
       console.error("Failed to fetch weekly recap:", err);
@@ -74,37 +79,82 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
           </div>
         </div>
 
-        {/* Kontrol Navigasi Minggu */}
+        {/* Kontrol Navigasi Siklus Mingguan */}
         <div className="flex items-center gap-1.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg p-1 text-xs shrink-0">
+          {/* Tombol Mundur ke Histori */}
           <button
-            onClick={() => fetchWeekRecap(currentOffsetDays - 7)}
+            onClick={() => navigateWeek(-1)}
             disabled={loading}
-            className="px-2.5 py-1.5 hover:bg-[var(--color-surface-card)] rounded-md text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1 font-bold"
+            className="px-2.5 py-1.5 hover:bg-[var(--color-surface-card)] rounded-md text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-all cursor-pointer disabled:opacity-40 flex items-center gap-1 font-bold"
+            title="Lihat rekap 1 minggu sebelumnya"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Minggu Lalu</span>
+            <span className="hidden sm:inline">Sebelumnya</span>
           </button>
+
+          {/* Indikator Status Siklus */}
+          {timeframe.isCurrentWeek ? (
+            <div className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] text-[var(--color-cycling)] border border-[var(--color-border)] shadow-xs font-bold flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-cycling)] animate-pulse" />
+              <span>Minggu Berjalan</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigateWeek(0)}
+              disabled={loading}
+              className="px-3 py-1.5 rounded-md bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30 hover:bg-[var(--color-alert-amber)]/20 transition-all font-bold flex items-center gap-1.5 cursor-pointer"
+              title="Kembali ke minggu berjalan saat ini"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>
+                {timeframe.weeksAgo === 1
+                  ? "1 Mgg Lalu"
+                  : `${timeframe.weeksAgo || 1} Mgg Lalu`}
+              </span>
+              <span className="text-[10px] opacity-75 hidden md:inline">(Reset)</span>
+            </button>
+          )}
+
+          {/* Tombol Maju (Hanya aktif jika sedang di masa lampau) */}
           <button
-            onClick={() => fetchWeekRecap(0)}
-            disabled={loading || currentOffsetDays === 0}
-            className={`px-3 py-1.5 rounded-md transition-all cursor-pointer font-bold ${
-              currentOffsetDays === 0
-                ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+            onClick={() => navigateWeek(1)}
+            disabled={loading || timeframe.isCurrentWeek}
+            className={`px-2.5 py-1.5 rounded-md transition-all flex items-center gap-1 font-bold ${
+              timeframe.isCurrentWeek
+                ? "text-[var(--color-text-muted)] opacity-30 cursor-not-allowed"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-card)] cursor-pointer"
             }`}
+            title={
+              timeframe.isCurrentWeek
+                ? "Masa depan belum memiliki data rekapitulasi"
+                : "Maju 1 minggu mendekati minggu berjalan"
+            }
           >
-            Minggu Ini
-          </button>
-          <button
-            onClick={() => fetchWeekRecap(currentOffsetDays + 7)}
-            disabled={loading}
-            className="px-2.5 py-1.5 hover:bg-[var(--color-surface-card)] rounded-md text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1 font-bold"
-          >
-            <span className="hidden sm:inline">Minggu Depan</span>
+            <span className="hidden sm:inline">Berikutnya</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
+
+      {/* Banner Rekomendasi Jika Minggu Berjalan Belum Ada Sesi */}
+      {timeframe.isCurrentWeek && act.total_sessions === 0 && (
+        <div className="p-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-card)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[var(--color-text-secondary)] shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-cycling)] animate-ping shrink-0" />
+            <span>
+              Siklus minggu berjalan baru dimulai ({timeframe.label}). Belum ada aktivitas yang dicatat minggu ini.
+            </span>
+          </div>
+          <button
+            onClick={() => navigateWeek(-1)}
+            disabled={loading}
+            className="px-3 py-1 rounded-md bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-[var(--color-cycling)] font-bold text-xs shrink-0 cursor-pointer transition-all flex items-center gap-1.5"
+          >
+            <span>Lihat Rekap Minggu Sebelumnya</span>
+            <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
+      )}
 
       {/* 2. Empat Kartu Metrik Utama (Hero Workload & Clinical Indicators) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
