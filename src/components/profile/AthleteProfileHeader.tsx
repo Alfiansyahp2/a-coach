@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { User, AthleteProfile, AuthoritativeAthleteHealthContext } from "@/types";
+import { getFlameHeatTier } from "@/lib/domain/streak/streakEngine";
 import {
   ShieldCheck,
   Flame,
@@ -31,6 +32,7 @@ export function AthleteProfileHeader({
 }: AthleteProfileHeaderProps) {
   const readiness = healthContext?.latestReadiness;
   const isReadinessConditional = readiness?.athlete_status === "ACTIVE_WITH_UNRESOLVED_SYMPTOMS";
+  const heatTier = getFlameHeatTier(streakWeeks, streakWeeks > 0);
 
   return (
     <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 sm:p-6 shadow-xs relative overflow-hidden">
@@ -101,10 +103,27 @@ export function AthleteProfileHeader({
         <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-[var(--color-border)]">
           {/* Status Badges Row */}
           <div className="flex items-center gap-2 flex-wrap font-mono text-xs">
-            {/* Streak Badge */}
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--color-running)]/10 text-[var(--color-running)] border border-[var(--color-running)]/30 font-bold shadow-xs">
-              <Flame className="w-3.5 h-3.5 fill-[var(--color-running)]" />
-              <span>{streakWeeks} MINGGU STREAK</span>
+            {/* Streak Badge with Thermodynamic Flame Heat Spectrum */}
+            <div
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold shadow-xs transition-colors border"
+              style={{
+                backgroundColor: `${heatTier.colorHex}15`,
+                color: heatTier.colorHex,
+                borderColor: `${heatTier.colorHex}40`,
+              }}
+              title={`${heatTier.description} • Suhu: ${heatTier.temperatureText}`}
+            >
+              <Flame
+                className="w-3.5 h-3.5"
+                style={{
+                  color: heatTier.colorHex,
+                  fill: heatTier.colorHex,
+                  filter: `drop-shadow(0 0 6px ${heatTier.glowRgba})`,
+                }}
+              />
+              <span className="font-tabular">
+                {streakWeeks} MINGGU • {heatTier.name.toUpperCase()} ({heatTier.temperatureText})
+              </span>
             </div>
 
             {/* Health Readiness Gate */}

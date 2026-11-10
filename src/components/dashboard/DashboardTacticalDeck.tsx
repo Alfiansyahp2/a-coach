@@ -56,7 +56,7 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("workouts")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer ${
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
               activeTab === "workouts"
                 ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
@@ -78,7 +78,7 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("goals")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer ${
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
               activeTab === "goals"
                 ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
@@ -100,7 +100,7 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("prs")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer ${
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
               activeTab === "prs"
                 ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
@@ -122,7 +122,7 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("recap")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer ${
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
               activeTab === "recap"
                 ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
