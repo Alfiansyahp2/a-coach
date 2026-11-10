@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Flame, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Flame } from "lucide-react";
 import { Activity, ScheduledWorkout } from "@/types";
 import { calculateWeeklyStreak, getFlameHeatTier } from "@/lib/domain/streak/streakEngine";
 
@@ -34,7 +34,7 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
   const streakOffset = streakCircumference - tierProgress * streakCircumference;
 
   return (
-    <div className="relative rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 font-mono shadow-xs transition-colors duration-200 space-y-3.5">
+    <div className="relative rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 font-mono shadow-xs transition-colors duration-200">
       {/* 3-Column Streak Metrics with Thermodynamic Flame Heat Spectrum */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3 items-center">
         {/* Left Column: Total Contributions / Activities */}
@@ -124,16 +124,11 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
             </div>
           </div>
 
-          <span
-            className="text-xs font-bold mt-1.5 transition-colors"
-            style={{ color: heatTier.colorHex }}
-          >
-            {heatTier.name} ({heatTier.temperatureText})
+          <span className="text-xs font-bold text-[var(--color-text-primary)] mt-1.5">
+            Streak Aktif
           </span>
 
-          <span
-            className="text-[10px] font-mono mt-0.5 truncate max-w-full font-semibold transition-colors duration-300 font-tabular text-[var(--color-text-secondary)]"
-          >
+          <span className="text-[10px] font-mono mt-0.5 truncate max-w-full font-semibold transition-colors duration-300 font-tabular text-[var(--color-text-secondary)]">
             {streak.currentStreakDateRange}
           </span>
         </div>
@@ -150,44 +145,6 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
             {streak.longestStreakDateRange}
           </span>
         </div>
-      </div>
-
-      {/* Thermodynamic Stage Progression Banner & Retention Health Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-lg bg-[var(--color-surface-muted)]/70 border border-[var(--color-border)] text-xs">
-        <div className="flex items-center gap-2">
-          {streak.isFlameBurning ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 text-[10px] font-bold">
-              <CheckCircle2 className="w-3 h-3" />
-              <span>SESI MINGGU INI TERCATAT</span>
-            </span>
-          ) : streak.isFlameAtRisk ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30 text-[10px] font-bold animate-pulse">
-              <AlertTriangle className="w-3 h-3" />
-              <span>SIAGA: SISA {streak.daysRemainingThisWeek} HARI</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-surface-card)] text-[var(--color-text-muted)] border border-[var(--color-border)] text-[10px] font-bold">
-              <span>API PADAM (0°C)</span>
-            </span>
-          )}
-
-          <span className="text-[11px] text-[var(--color-text-secondary)] font-medium truncate">
-            {streak.isFlameBurning
-              ? `${streak.currentStreakWeeks} minggu beruntun aktif membara`
-              : streak.isFlameAtRisk
-              ? `Latihan sebelum Senin agar ${heatTier.name} tidak padam`
-              : "Selesaikan 1 sesi minggu ini untuk menyalakan api"}
-          </span>
-        </div>
-
-        {heatTier.weeksToNextTier && (
-          <span
-            className="text-[10px] font-semibold font-tabular shrink-0 sm:text-right"
-            style={{ color: heatTier.colorHex }}
-          >
-            +{heatTier.weeksToNextTier} minggu → Tahap {heatTier.stage + 1}
-          </span>
-        )}
       </div>
     </div>
   );

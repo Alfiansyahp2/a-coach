@@ -122,7 +122,7 @@ export function AthleteProfileHeader({
                 }}
               />
               <span className="font-tabular">
-                {streakWeeks} MINGGU • {heatTier.name.toUpperCase()} ({heatTier.temperatureText})
+                {streakWeeks} MINGGU STREAK
               </span>
             </div>
 
