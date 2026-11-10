@@ -23,7 +23,10 @@ export function DashboardIntegrityStrip({
         <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-secondary)] shadow-xs">
           <ActivityIcon className="w-3.5 h-3.5 text-[var(--color-strava)]" />
           <span className="font-bold tracking-tight text-[11px]">STRAVA BRIDGE</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-endurance)] animate-pulse" />
+          <div className="relative flex items-center justify-center w-2 h-2">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-endurance)] animate-ping opacity-60 absolute" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-endurance)] relative" />
+          </div>
           <span className="text-[10px] text-[var(--color-endurance)] font-bold">ONLINE</span>
         </div>
 

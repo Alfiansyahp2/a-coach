@@ -30,14 +30,23 @@ export function AthleteHealthDirectives({ activeTab }: AthleteHealthDirectivesPr
               </span>
             </div>
 
-            {/* Capacity Bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[11px] font-mono">
-                <span className="text-[var(--color-text-secondary)]">Toleransi Benturan Sendi:</span>
-                <span className="text-[var(--color-alert-red)] font-bold font-tabular">0.0 km / Maks 0.0 km</span>
+            {/* Capacity Bar with Circular Readout */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
+                <svg className="w-10 h-10 -rotate-90 origin-center" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" className="stroke-[var(--color-surface-card)] fill-none" strokeWidth="3" />
+                  <circle cx="18" cy="18" r="14" stroke="var(--color-alert-red)" strokeWidth="3" strokeDasharray="88" strokeDashoffset="88" className="fill-none" />
+                </svg>
+                <Lock className="w-3.5 h-3.5 text-[var(--color-alert-red)] absolute" />
               </div>
-              <div className="w-full h-2 rounded-full bg-[var(--color-surface-card)] border border-[var(--color-border)] overflow-hidden">
-                <div className="h-full rounded-full bg-[var(--color-alert-red)] w-0" />
+              <div className="flex-1 space-y-1">
+                <div className="flex justify-between text-[11px] font-mono">
+                  <span className="text-[var(--color-text-secondary)]">Toleransi Benturan Sendi:</span>
+                  <span className="text-[var(--color-alert-red)] font-bold font-tabular">0.0 km / Maks 0.0 km</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[var(--color-surface-card)] border border-[var(--color-border)] overflow-hidden">
+                  <div className="h-full rounded-full bg-[var(--color-alert-red)] w-0" />
+                </div>
               </div>
             </div>
 
@@ -82,14 +91,33 @@ export function AthleteHealthDirectives({ activeTab }: AthleteHealthDirectivesPr
               </span>
             </div>
 
-            {/* Capacity Bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[11px] font-mono">
-                <span className="text-[var(--color-text-secondary)]">Toleransi Jarak Aman / Sesi:</span>
-                <span className="text-[var(--color-cycling)] font-bold font-tabular">Hingga 30.0 km</span>
+            {/* Capacity Bar with Circular Gauge */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
+                <svg className="w-10 h-10 -rotate-90 origin-center" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" className="stroke-[var(--color-surface-card)] fill-none" strokeWidth="3" />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="14"
+                    stroke="var(--color-cycling)"
+                    strokeWidth="3"
+                    strokeDasharray="88"
+                    strokeDashoffset="35.2"
+                    strokeLinecap="round"
+                    className="fill-none transition-[stroke-dashoffset] duration-700 ease-out"
+                  />
+                </svg>
+                <span className="text-[9px] font-black font-tabular text-[var(--color-cycling)] absolute">60%</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-[var(--color-surface-card)] border border-[var(--color-border)] overflow-hidden">
-                <div className="h-full rounded-full bg-[var(--color-cycling)] w-[60%] transition-all duration-500" />
+              <div className="flex-1 space-y-1">
+                <div className="flex justify-between text-[11px] font-mono">
+                  <span className="text-[var(--color-text-secondary)]">Toleransi Jarak Aman / Sesi:</span>
+                  <span className="text-[var(--color-cycling)] font-bold font-tabular">Hingga 30.0 km</span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[var(--color-surface-card)] border border-[var(--color-border)] overflow-hidden">
+                  <div className="h-full rounded-full bg-[var(--color-cycling)] w-[60%] transition-all duration-500" />
+                </div>
               </div>
             </div>
 

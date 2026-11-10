@@ -17,6 +17,17 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
 
   const { heatTier } = streak;
 
+  const tierProgress = useMemo(() => {
+    if (!heatTier.nextTierWeeks) return 1;
+    const range = heatTier.nextTierWeeks - heatTier.minWeeks;
+    if (range <= 0) return 1;
+    return Math.min(1, Math.max(0, (streak.currentStreakWeeks - heatTier.minWeeks) / range));
+  }, [heatTier, streak.currentStreakWeeks]);
+
+  const streakRingRadius = 32;
+  const streakCircumference = 2 * Math.PI * streakRingRadius;
+  const streakOffset = streakCircumference - tierProgress * streakCircumference;
+
   return (
     <div className="relative rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 font-mono shadow-xs transition-colors duration-200">
       {/* 3-Column Streak Metrics with Thermodynamic Flame Heat Spectrum */}
@@ -82,31 +93,37 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
               />
             </div>
 
-            {/* Circular Glowing Ring with Dual-Theme Contrast Well */}
-            <div
-              className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 flex items-center justify-center bg-[var(--color-surface-card)] shadow-xs transition-all duration-300"
-              style={{
-                borderColor: streak.isFlameBurning
-                  ? heatTier.colorHex
-                  : streak.isFlameAtRisk
-                  ? "var(--color-alert-amber)"
-                  : "var(--color-border)",
-                boxShadow: streak.isFlameBurning
-                  ? `0 0 16px ${heatTier.glowRgba}`
-                  : streak.isFlameAtRisk
-                  ? "0 0 10px rgba(229, 164, 66, 0.3)"
-                  : "none",
-              }}
-            >
-              <span
-                className="text-2xl sm:text-3xl font-black font-tabular tracking-tight transition-colors duration-300"
+            {/* Circular Glowing Ring with SVG Heat Tier Progress Arc */}
+            <div className="relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center">
+              <svg className="w-full h-full -rotate-90 origin-center absolute inset-0" viewBox="0 0 72 72">
+                <circle cx="36" cy="36" r={streakRingRadius} className="stroke-[var(--color-surface-card)] fill-none" strokeWidth="3" />
+                <circle
+                  cx="36"
+                  cy="36"
+                  r={streakRingRadius}
+                  stroke={streak.isFlameBurning ? heatTier.colorHex : "var(--color-border)"}
+                  strokeWidth="3.5"
+                  strokeDasharray={streakCircumference}
+                  strokeDashoffset={streakOffset}
+                  strokeLinecap="round"
+                  className="fill-none transition-[stroke-dashoffset] duration-700 ease-out"
+                />
+              </svg>
+              <div
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center bg-[var(--color-surface-card)] shadow-xs transition-all duration-300 z-10"
                 style={{
-                  color: streak.isFlameBurning ? heatTier.colorHex : "var(--color-text-primary)",
-                  textShadow: streak.isFlameBurning ? `0 0 12px ${heatTier.glowRgba}` : "none",
+                  boxShadow: streak.isFlameBurning ? `0 0 14px ${heatTier.glowRgba}` : "none",
                 }}
               >
-                {streak.currentStreakWeeks}
-              </span>
+                <span
+                  className="text-2xl sm:text-3xl font-black font-tabular tracking-tight transition-colors duration-300"
+                  style={{
+                    color: streak.isFlameBurning ? heatTier.colorHex : "var(--color-text-primary)",
+                  }}
+                >
+                  {streak.currentStreakWeeks}
+                </span>
+              </div>
             </div>
           </div>
 

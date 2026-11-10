@@ -46,6 +46,24 @@ export function WeeklyRecapWorkloadSection({ activitySummary: act }: WeeklyRecap
         </div>
       </div>
 
+      {/* Proportion Ratio Bar */}
+      {act.total_distance_km > 0 && (
+        <div className="w-full h-1.5 rounded-full bg-[var(--color-surface-muted)] overflow-hidden flex border border-[var(--color-border)]">
+          {act.sport_breakdown.map((s: SportRecapBreakdown) => {
+            const pct = Math.round((s.total_distance_km / Math.max(0.1, act.total_distance_km)) * 100);
+            const isRun = s.sport_type.toLowerCase().includes("run");
+            return (
+              <div
+                key={s.sport_type}
+                style={{ width: `${pct}%`, backgroundColor: isRun ? "var(--color-running)" : "var(--color-cycling)" }}
+                className="h-full transition-all duration-700 ease-out"
+                title={`${s.sport_type}: ${s.total_distance_km} km (${pct}%)`}
+              />
+            );
+          })}
+        </div>
+      )}
+
       {/* Rincian Cabang Olahraga */}
       <div className="space-y-1">
         {act.sport_breakdown.map((s: SportRecapBreakdown) => {
