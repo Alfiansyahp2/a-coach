@@ -12,8 +12,10 @@ import {
   ArrowUpRight,
   HeartPulse,
   Mountain,
+  RotateCcw,
 } from "lucide-react";
 import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapTypes";
+import { formatDateOnly } from "@/lib/formatters";
 import { WeeklyRecapDetailModal } from "./WeeklyRecapDetailModal";
 
 interface WeeklyRecapCardProps {
@@ -25,20 +27,24 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
   const [recap, setRecap] = useState<WeeklyActivityAndInjuryRecap | undefined>(initialRecap);
   const [loading, setLoading] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [currentOffsetDays, setCurrentOffsetDays] = useState(0);
 
-  const fetchWeekRecap = async (offsetDays: number) => {
+  const navigateWeek = async (direction: -1 | 1 | 0) => {
+    if (!recap) return;
     try {
       setLoading(true);
-      const targetDate = new Date();
-      targetDate.setDate(targetDate.getDate() + offsetDays);
-      const dateStr = targetDate.toISOString().slice(0, 10);
+      let targetDateStr: string;
+      if (direction === 0) {
+        targetDateStr = formatDateOnly(new Date());
+      } else {
+        const currentRef = new Date(recap.timeframe.startDate);
+        currentRef.setDate(currentRef.getDate() + direction * 7);
+        targetDateStr = formatDateOnly(currentRef);
+      }
 
-      const res = await fetch(`/api/athlete/weekly-recap?date=${dateStr}`);
+      const res = await fetch(`/api/athlete/weekly-recap?date=${targetDateStr}`);
       const data = await res.json();
       if (data.success && data.recap) {
         setRecap(data.recap);
-        setCurrentOffsetDays(offsetDays);
       }
     } catch (err) {
       console.error("Failed to fetch weekly recap:", err);
@@ -86,25 +92,38 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
           {/* Navigasi Minggu */}
           <div className="flex items-center gap-1 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg p-0.5 text-[10px] shrink-0">
             <button
-              onClick={() => fetchWeekRecap(currentOffsetDays - 7)}
+              onClick={() => navigateWeek(-1)}
               disabled={loading}
-              className="p-1 hover:bg-[var(--color-surface-card)] rounded text-[var(--color-text-secondary)] cursor-pointer disabled:opacity-50"
+              className="p-1 hover:bg-[var(--color-surface-card)] rounded text-[var(--color-text-secondary)] cursor-pointer disabled:opacity-40"
               title="Minggu Sebelumnya"
             >
               <ChevronLeft className="w-3 h-3" />
             </button>
             <button
-              onClick={() => fetchWeekRecap(0)}
-              disabled={loading || currentOffsetDays === 0}
-              className={`px-2 py-0.5 rounded cursor-pointer ${currentOffsetDays === 0 ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] font-bold shadow-2xs" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"}`}
+              onClick={() => navigateWeek(0)}
+              disabled={loading || timeframe.isCurrentWeek}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                timeframe.isCurrentWeek
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] font-bold shadow-2xs"
+                  : "bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] font-bold hover:text-[var(--color-text-primary)]"
+              }`}
+              title={timeframe.isCurrentWeek ? "Minggu Berjalan" : "Kembali ke Minggu Ini"}
             >
-              Minggu Ini
+              {timeframe.isCurrentWeek ? "Minggu Ini" : `${timeframe.weeksAgo || 1}M Lalu ↺`}
             </button>
             <button
-              onClick={() => fetchWeekRecap(currentOffsetDays + 7)}
-              disabled={loading}
-              className="p-1 hover:bg-[var(--color-surface-card)] rounded text-[var(--color-text-secondary)] cursor-pointer disabled:opacity-50"
-              title="Minggu Berikutnya"
+              onClick={() => navigateWeek(1)}
+              disabled={loading || timeframe.isCurrentWeek}
+              className={`p-1 rounded ${
+                timeframe.isCurrentWeek
+                  ? "text-[var(--color-text-muted)] opacity-30 cursor-not-allowed"
+                  : "hover:bg-[var(--color-surface-card)] text-[var(--color-text-secondary)] cursor-pointer"
+              }`}
+              title={
+                timeframe.isCurrentWeek
+                  ? "Masa depan belum memiliki data rekapitulasi"
+                  : "Minggu Berikutnya"
+              }
             >
               <ChevronRight className="w-3 h-3" />
             </button>
