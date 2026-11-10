@@ -109,3 +109,4 @@ Meneruskan data `user`, `dbStatus`, `healthContext`, `streakWeeks`, dan `activit
    - `src/components/layout/AppSidebar.tsx`: 211 baris (< 300)
    - `src/components/layout/sidebar/navConfig.ts`: 119 baris (< 300)
    - `src/components/layout/AppShell.tsx`: 56 baris (< 300)
+

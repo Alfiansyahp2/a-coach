@@ -27,7 +27,7 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
             {streak.totalContributions.toLocaleString()}
           </span>
           <span className="text-xs text-[var(--color-text-secondary)] font-medium mt-1">
-            Total Kontribusi
+            Total Aktivitas
           </span>
           <span className="text-[10px] text-[var(--color-text-muted)] font-mono mt-0.5 truncate max-w-full font-tabular">
             {streak.totalDateRange}
@@ -37,11 +37,10 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
         {/* Center Hero Column: Current Streak with Dynamic Thermodynamic Flame & Glowing Ring */}
         <div
           className="flex flex-col items-center justify-center p-3 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] relative text-center group cursor-default shadow-xs"
-          title={`${heatTier.description} • Suhu: ${heatTier.temperatureText}${
-            heatTier.weeksToNextTier
+          title={`${heatTier.description} • Suhu: ${heatTier.temperatureText}${heatTier.weeksToNextTier
               ? ` • ${heatTier.weeksToNextTier} minggu lagi menuju tahap ${heatTier.stage + 1}`
               : " (Puncak Konsistensi)"
-          }`}
+            }`}
         >
           <div className="relative flex items-center justify-center pt-2 pb-1">
             {/* Top Flame Icon Nestled at Apex with Thermodynamic Color */}
@@ -51,30 +50,29 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
                 borderColor: streak.isFlameBurning
                   ? heatTier.colorHex
                   : streak.isFlameAtRisk
-                  ? "#F97316"
-                  : "var(--color-border)",
+                    ? "#F97316"
+                    : "var(--color-border)",
                 boxShadow: streak.isFlameBurning
                   ? `0 0 12px ${heatTier.glowRgba}`
                   : streak.isFlameAtRisk
-                  ? "0 0 8px rgba(249, 115, 22, 0.4)"
-                  : "none",
+                    ? "0 0 8px rgba(249, 115, 22, 0.4)"
+                    : "none",
               }}
             >
               <Flame
-                className={`w-3.5 h-3.5 transition-all duration-300 ${
-                  streak.isFlameBurning ? "animate-pulse" : ""
-                }`}
+                className={`w-3.5 h-3.5 transition-all duration-300 ${streak.isFlameBurning ? "animate-pulse" : ""
+                  }`}
                 style={{
                   color: streak.isFlameBurning
                     ? heatTier.colorHex
                     : streak.isFlameAtRisk
-                    ? "#F97316"
-                    : "var(--color-text-muted)",
+                      ? "#F97316"
+                      : "var(--color-text-muted)",
                   fill: streak.isFlameBurning
                     ? heatTier.colorHex
                     : streak.isFlameAtRisk
-                    ? "#F97316"
-                    : "none",
+                      ? "#F97316"
+                      : "none",
                   filter: streak.isFlameBurning
                     ? `drop-shadow(0 0 8px ${heatTier.glowRgba})`
                     : "none",
@@ -89,13 +87,13 @@ export function WeeklyStreakCard({ activities = [], workouts = [] }: WeeklyStrea
                 borderColor: streak.isFlameBurning
                   ? heatTier.colorHex
                   : streak.isFlameAtRisk
-                  ? "#F97316"
-                  : "var(--color-border)",
+                    ? "#F97316"
+                    : "var(--color-border)",
                 boxShadow: streak.isFlameBurning
                   ? `0 0 18px ${heatTier.glowRgba}`
                   : streak.isFlameAtRisk
-                  ? "0 0 12px rgba(249, 115, 22, 0.3)"
-                  : "none",
+                    ? "0 0 12px rgba(249, 115, 22, 0.3)"
+                    : "none",
               }}
             >
               <span
