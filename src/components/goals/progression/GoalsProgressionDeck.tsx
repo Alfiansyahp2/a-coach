@@ -18,7 +18,7 @@ export function GoalsProgressionDeck({
   onActivateProgression,
 }: GoalsProgressionDeckProps) {
   return (
-    <section className="rounded-2xl bg-[var(--color-surface-card)] border-2 border-[var(--color-cycling)]/40 p-5 sm:p-6 space-y-5 shadow-xs relative overflow-hidden">
+    <section className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] border-t-2 border-t-[var(--color-cycling)] p-5 sm:p-6 space-y-5 shadow-xs relative overflow-hidden font-mono">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[var(--color-border)] pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">

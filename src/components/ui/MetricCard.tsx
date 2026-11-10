@@ -64,12 +64,29 @@ export function MetricCard({
     default: "bg-[var(--color-text-primary)]",
   };
 
+  const accentBorderStyles: Record<string, string> = {
+    volt: "border-t-[var(--color-endurance)]",
+    endurance: "border-t-[var(--color-endurance)]",
+    cyan: "border-t-[var(--color-cycling)]",
+    cycling: "border-t-[var(--color-cycling)]",
+    amber: "border-t-[var(--color-running)]",
+    running: "border-t-[var(--color-running)]",
+    crimson: "border-t-[var(--color-alert-red)]",
+    alert: "border-t-[var(--color-alert-red)]",
+    strava: "border-t-[var(--color-strava)]",
+    default: "border-t-[var(--color-border)]",
+  };
+
   const progressPct = targetProgress
     ? Math.min(100, Math.round((targetProgress.current / Math.max(1, targetProgress.target)) * 100))
     : null;
 
   return (
-    <div className="rounded-xl p-4 bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs transition-colors duration-200 flex flex-col justify-between">
+    <div
+      className={`rounded-xl p-4 bg-[var(--color-surface-card)] border border-[var(--color-border)] border-t-2 ${
+        accentBorderStyles[accentColor] || accentBorderStyles.default
+      } shadow-xs transition-colors duration-200 flex flex-col justify-between relative overflow-hidden`}
+    >
       {/* Label and Delta */}
       <div className="flex items-start justify-between gap-2">
         <span className="text-[11px] uppercase tracking-wider font-mono font-medium text-[var(--color-text-secondary)]">

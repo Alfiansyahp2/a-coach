@@ -33,7 +33,7 @@ export function AthleteProfileHeader({
   const isReadinessConditional = readiness?.athlete_status === "ACTIVE_WITH_UNRESOLVED_SYMPTOMS";
 
   return (
-    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 sm:p-6 shadow-xs relative overflow-hidden">
+    <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 sm:p-6 shadow-xs relative overflow-hidden">
       {/* Subtle athletic background glow */}
       <div className="absolute top-0 right-0 w-80 h-40 bg-[var(--color-cycling)]/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -46,10 +46,10 @@ export function AthleteProfileHeader({
               <img
                 src={user.avatar_url}
                 alt={user.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-[var(--color-border)] object-cover shadow-sm ring-2 ring-[var(--color-cycling)]/40"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border-2 border-[var(--color-border)] object-cover shadow-sm ring-2 ring-[var(--color-cycling)]/40"
               />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[var(--color-surface-muted)] border-2 border-[var(--color-border)] ring-2 ring-[var(--color-cycling)]/40 flex items-center justify-center font-mono font-black text-2xl text-[var(--color-cycling)] shadow-sm">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-[var(--color-surface-muted)] border-2 border-[var(--color-border)] ring-2 ring-[var(--color-cycling)]/40 flex items-center justify-center font-mono font-black text-2xl text-[var(--color-cycling)] shadow-sm">
                 {user.name.charAt(0)}
               </div>
             )}

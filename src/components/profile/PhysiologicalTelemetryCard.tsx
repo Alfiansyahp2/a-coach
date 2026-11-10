@@ -23,7 +23,7 @@ export function PhysiologicalTelemetryCard({
   const experience = profile?.training_experience || "INTERMEDIATE";
 
   return (
-    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 space-y-4 shadow-xs">
+    <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 space-y-4 shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div>

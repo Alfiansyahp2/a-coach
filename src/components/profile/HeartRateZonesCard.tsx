@@ -14,7 +14,7 @@ export function HeartRateZonesCard({ zones, rhr, maxHr }: HeartRateZonesCardProp
   const hrr = maxHr - rhr;
 
   return (
-    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 space-y-4 shadow-xs">
+    <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 space-y-4 shadow-xs">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--color-border)]">
         <div>

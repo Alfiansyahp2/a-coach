@@ -15,12 +15,12 @@ export function PrimaryGoalHeroSection({ primaryGoal }: PrimaryGoalHeroSectionPr
   const unit = primaryGoal.unit || (isKm ? "km" : "sesi");
 
   return (
-    <section className="rounded-2xl border-2 border-[var(--color-cycling)] bg-gradient-to-br from-[var(--color-cycling)]/15 via-[var(--color-surface-card)] to-[var(--color-surface-muted)]/60 p-5 sm:p-7 space-y-5 shadow-md relative overflow-hidden">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--color-border)]/80 pb-4">
+    <section className="rounded-xl border border-[var(--color-border)] border-t-2 border-t-[var(--color-cycling)] bg-[var(--color-surface-card)] p-5 sm:p-6 space-y-5 shadow-xs relative overflow-hidden font-mono">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--color-border)] pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] font-black px-3 py-1 rounded-full bg-[var(--color-cycling)] text-[var(--color-canvas)] uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
-              <Sparkles className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-[var(--color-cycling)] uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
+              <Target className="w-3.5 h-3.5" />
               <span>★ TARGET UTAMA YANG SEDANG DIPERJUANGKAN</span>
             </span>
             <span className="text-[11px] font-mono text-[var(--color-cycling)] font-bold">
