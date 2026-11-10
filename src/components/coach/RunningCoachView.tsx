@@ -2,25 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import {
-  Activity,
-  ScheduledWorkout,
-  FitnessGoal,
-  AuthoritativeAthleteHealthContext,
-  PersonalRecord,
-} from "@/types";
-import {
-  Footprints,
-  ShieldAlert,
-  Calendar,
-  Gauge,
-  ChevronRight,
-  Bike,
-} from "lucide-react";
-import {
-  formatDistance,
-  formatPaceSeconds,
-} from "@/lib/formatters";
+import { Activity, ScheduledWorkout, FitnessGoal, AuthoritativeAthleteHealthContext, PersonalRecord } from "@/types";
+import { Footprints, ShieldAlert, Calendar, Gauge, ChevronRight, Bike } from "lucide-react";
+import { formatDistance, formatPaceSeconds } from "@/lib/formatters";
 import { CoachClinicalBanner } from "./CoachClinicalBanner";
 import { CoachRecentSessionsList } from "./CoachRecentSessionsList";
 
@@ -149,7 +133,7 @@ export function RunningCoachView({
       {/* 2. RUNNING GOAL PROGRESSION & SAFETY CIRCUIT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left: Long-Term Marathon Goal Card */}
-        <div className="lg:col-span-6 p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4">
+        <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[var(--color-running)]/15 border border-[var(--color-running)]/30 flex items-center justify-center text-[var(--color-running)]">
@@ -199,7 +183,7 @@ export function RunningCoachView({
         </div>
 
         {/* Right: 4-Phase Return-to-Run (RTR) Protocol */}
-        <div className="lg:col-span-6 p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
+        <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
             <div className="flex items-center gap-2">
               <Gauge className="w-4 h-4 text-[var(--color-running)]" />

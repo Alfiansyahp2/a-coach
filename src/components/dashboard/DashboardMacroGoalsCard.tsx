@@ -24,7 +24,7 @@ export function DashboardMacroGoalsCard({
   );
 
   return (
-    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 space-y-4 shadow-xs">
+    <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 space-y-4 shadow-xs font-mono">
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div>
           <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-[var(--color-text-primary)] flex items-center gap-2">
@@ -64,10 +64,10 @@ export function DashboardMacroGoalsCard({
           : "var(--color-endurance)";
 
         return (
-          <div className="rounded-xl border-2 border-[var(--color-cycling)]/70 bg-gradient-to-br from-[var(--color-cycling)]/10 via-[var(--color-surface-card)] to-[var(--color-surface-muted)]/50 p-4 space-y-3 shadow-xs relative overflow-hidden">
+          <div className="rounded-xl border border-[var(--color-border)] border-t-2 border-t-[var(--color-cycling)] bg-[var(--color-surface-muted)]/60 p-4 space-y-3 shadow-xs relative overflow-hidden">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--color-cycling)] text-[var(--color-canvas)] uppercase tracking-wider flex items-center gap-1 shadow-xs">
-                <Sparkles className="w-3 h-3" />
+              <span className="font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-[var(--color-cycling)] uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                <Target className="w-3 h-3" />
                 <span>TARGET UTAMA (SASARAN INTI)</span>
               </span>
 

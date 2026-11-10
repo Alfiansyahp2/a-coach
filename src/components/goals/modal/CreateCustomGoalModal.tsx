@@ -50,7 +50,7 @@ export function CreateCustomGoalModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] w-full max-w-lg p-6 shadow-2xl space-y-4">
+      <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] w-full max-w-lg p-5 sm:p-6 shadow-2xl space-y-4">
         <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-3">
           <h3 className="font-sans font-bold text-base text-[var(--color-text-primary)] flex items-center gap-2">
             <Target className="w-4 h-4 text-[var(--color-cycling)]" />

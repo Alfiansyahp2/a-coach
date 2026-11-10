@@ -11,6 +11,7 @@ interface AppShellProps {
   dbStatus?: { type: string; connected: boolean };
   healthContext?: any;
   streakWeeks?: number;
+  activitiesCount?: number;
 }
 
 export function AppShell({
@@ -19,11 +20,18 @@ export function AppShell({
   dbStatus = { type: "PostgreSQL", connected: true },
   healthContext,
   streakWeeks,
+  activitiesCount,
 }: AppShellProps) {
   return (
     <div className="min-h-screen flex bg-[var(--color-canvas)] text-[var(--color-text-primary)] transition-colors duration-200">
       {/* 1. Left Athletic Rail Navigation */}
-      <AppSidebar />
+      <AppSidebar
+        user={user}
+        dbStatus={dbStatus}
+        healthContext={healthContext}
+        streakWeeks={streakWeeks}
+        activitiesCount={activitiesCount}
+      />
 
       {/* 2. Main Content & Header Column */}
       <div className="flex-1 flex flex-col min-w-0">

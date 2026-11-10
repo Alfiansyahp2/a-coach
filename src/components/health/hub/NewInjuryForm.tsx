@@ -131,7 +131,7 @@ export function NewInjuryForm({
   };
 
   return (
-    <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-alert-red)]/40 space-y-4 font-mono text-xs shadow-xs animate-in fade-in duration-200">
+    <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-alert-red)]/40 space-y-4 font-mono text-xs shadow-xs animate-in fade-in duration-200">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2.5">

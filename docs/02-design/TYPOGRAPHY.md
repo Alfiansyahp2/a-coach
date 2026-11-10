@@ -1,30 +1,56 @@
 # Typography & Tabular Metric Formatting
 
-**Status:** CONFIRMED  
-**Version:** 1.0  
-**Last Updated:** 2026-11-01  
-**Owner:** Design Systems Architect  
-**Related Documents:** [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md), [METRIC_DEFINITIONS.md](../05-domain-logic/METRIC_DEFINITIONS.md)
+**Status:** CONFIRMED & AUTHORITATIVE  
+**Version:** 2.5  
+**Last Updated:** 2026-11-10  
+**Owner:** Design Systems Architect & Lead Frontend Engineer  
+**Related Documents:** [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md), [ANTI_AI_SLOP.md](./ANTI_AI_SLOP.md)
 
 ---
 
 ## 1. Font Families
-* **Primary Sans (Headings & UI Chrome):** `Geist Sans`, `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `sans-serif`.
-* **Primary Monospace (Telemetry & Numbers):** `Geist Mono`, `SF Mono`, `Menlo`, `Consolas`, `monospace`.
 
-## 2. Strict Numerical Rule: Tabular Figures
-All numbers representing performance data (pace, distance, heart rate, elevation, durations, percentages) **MUST** use monospace tabular numbers:
+* **Primary Monospace (Telemetry, Performance Data & Book Headers):**  
+  `Geist Mono`, `ui-monospace`, `SFMono-Regular`, `Menlo`, `Monaco`, `Consolas`, `monospace`.
+* **Primary Sans (Descriptive Prose, Section Subtitles & Body):**  
+  `Geist Sans`, `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `Roboto`, `sans-serif`.
+
+---
+
+## 2. The Golden Rule of Numerical Readouts: Tabular Figures
+
+In sports telemetry, an athlete's eyes scan split times, paces, cadence, and heart rates rapidly. **Variable-width proportional numbers cause horizontal jitter**, making columns wobble when digits tick from `1` to `8`.
+
+Every single metric value in the platform **MUST** use:
+
 ```css
 .font-tabular {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
 ```
-*Rationale:* Without tabular numerals, changing digits causes jumping widths, destroying alignment in tables and split comparisons.
 
-## 3. Type Hierarchy Scale
-* **Display Metric:** `36px` / `font-bold` / `tracking-tight` / Geist Mono. (e.g. `10.42 km`).
-* **Section Heading:** `20px` / `font-semibold` / `tracking-tight` / Geist Sans.
-* **Card Title:** `14px` / `font-medium` / `text-text-secondary` / Uppercase tracking-wider.
-* **Data Unit Label:** `12px` / `font-normal` / `text-text-muted` (e.g. `min/km`).
-* **Body / Notes:** `14px` / `font-normal` / `leading-relaxed` / Geist Sans.
+Combined with `font-mono`, this guarantees absolute pixel stability across live updates and dashboard cards.
+
+---
+
+## 3. Typographic Hierarchy Scale
+
+| Role | Font Family | Size / Leading | Weight / Tracking | Example Usage |
+| :--- | :--- | :--- | :--- | :--- |
+| **Hero Telemetry** | `Geist Mono` | `32px` / `1.1` | `font-bold` / `tracking-tight` | `88.35 km`, `01:32:00` |
+| **Section Title** | `Geist Mono` | `18px` / `1.2` | `font-bold` / `tracking-tight` | `HALAMAN 14 • CHECK-IN PASCA LATIHAN` |
+| **Card / HUD Title** | `Geist Mono` | `13px` / `1.3` | `font-bold` / `tracking-wide` (Uppercase) | `PARAMETER & METRIK SESI` |
+| **Telemetry Label** | `Geist Sans` | `11px` / `1.4` | `font-semibold` / `uppercase tracking-wider` | `SKALA INTENSITAS RPE` |
+| **Secondary Data Unit**| `Geist Mono`| `11px` / `1.3` | `font-medium` | `km/jam`, `min/km`, `bpm` |
+| **Clinical Notes** | `Geist Sans` | `12px` / `1.5` | `font-normal` / `leading-relaxed` | Protokol keselamatan sendi |
+| **Micro Caption** | `Geist Mono` | `9.5px` / `1.2`| `font-mono` | `Target fisiologis Zone 2: RPE 3-4` |
+
+---
+
+## 4. Anti-AI-Slop Typography Checklist
+
+* ❌ **Forbidden:** Bizarre cursive display scripts or mixing 3+ unrelated font families.
+* ❌ **Forbidden:** Gigantic, low-density marketing headers ("Good Morning, Champion! 🌟") consuming vertical screen space.
+* ❌ **Forbidden:** Proportional numbers for stopwatch durations or split comparisons.
+* ✅ **Standard:** Clean, technical, glanceable typography that conveys discipline and telemetry precision.

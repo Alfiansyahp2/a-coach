@@ -20,7 +20,7 @@ interface TrainingResponsesTabProps {
 
 export function TrainingResponsesTab({ recentResponses }: TrainingResponsesTabProps) {
   return (
-    <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 font-mono shadow-xs">
+    <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 font-mono shadow-xs">
       {/* Tab Header & Telemetry Summary */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)] text-xs">
         <div>

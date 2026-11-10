@@ -25,6 +25,7 @@ import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
 import { DashboardIntegrityStrip } from "@/components/dashboard/DashboardIntegrityStrip";
 import { DashboardTacticalDeck } from "@/components/dashboard/DashboardTacticalDeck";
 import { DashboardAiInsightsDeck } from "@/components/dashboard/DashboardAiInsightsDeck";
+import { computeWeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapEngine";
 import { Gauge, RefreshCw, Zap } from "lucide-react";
 
 export const metadata = {
@@ -56,17 +57,30 @@ async function DashboardTelemetry() {
   ]);
 
   const computedPrs = computePersonalRecords(activities, DEFAULT_USER_ID);
-  const displayPrs =
-    prs.length > 0
-      ? prs.map((p: any) => {
-          const m = computedPrs.find((c) => c.category === p.category);
-          return {
-            ...p,
-            subtext: p.subtext || m?.subtext,
-            activity_name: p.activity_name || m?.activity_name,
-          };
-        })
-      : computedPrs;
+  const displayPrs = (() => {
+    if (!prs || prs.length === 0) return computedPrs;
+    const dbEnhanced = prs.map((p: any) => {
+      const m = computedPrs.find(
+        (c) =>
+          c.category.toLowerCase().includes(p.category.toLowerCase()) ||
+          p.category.toLowerCase().includes(c.category.toLowerCase())
+      );
+      return {
+        ...p,
+        subtext: p.subtext || m?.subtext,
+        activity_name: p.activity_name || m?.activity_name,
+      };
+    });
+    const newComputed = computedPrs.filter(
+      (c) =>
+        !dbEnhanced.some(
+          (p: any) =>
+            c.category.toLowerCase().includes(p.category.toLowerCase()) ||
+            p.category.toLowerCase().includes(c.category.toLowerCase())
+        )
+    );
+    return [...dbEnhanced, ...newComputed];
+  })();
 
   const streak = calculateWeeklyStreak(activities, workouts);
   const summary = computeDashboardSummary(activities, workouts);
@@ -80,8 +94,22 @@ async function DashboardTelemetry() {
   const currentVolumeKm = summary.totalDistanceThisWeek / 1000;
   const targetWeek1Km = 18.0;
 
+  const weeklyRecap = computeWeeklyActivityAndInjuryRecap({
+    activities,
+    injuries: healthContext?.injuries || [],
+    painLogs: healthContext?.recentPainLogs || [],
+    trainingResponses: healthContext?.recentResponses || [],
+    scheduledWorkouts: workouts,
+  });
+
   return (
-    <AppShell user={user} dbStatus={dbStatus} healthContext={healthContext} streakWeeks={streak.currentStreakWeeks}>
+    <AppShell
+      user={user}
+      dbStatus={dbStatus}
+      healthContext={healthContext}
+      streakWeeks={streak.currentStreakWeeks}
+      activitiesCount={activities.length}
+    >
       {/* 1. Precision Navigation & Telemetry Integrity Strip */}
       <DashboardIntegrityStrip
         dbStatus={dbStatus}
@@ -191,6 +219,7 @@ async function DashboardTelemetry() {
             goals={goals}
             prs={displayPrs}
             activities={activities}
+            initialRecap={weeklyRecap}
           />
         </div>
       </section>
