@@ -1,9 +1,9 @@
 import { pgPool, ensureLocalStore, saveLocalStore, DEFAULT_USER_ID, formatDateOnly } from '../client';
 import { Activity, ScheduledWorkout, WorkoutActivityMatch, AthleteTrainingResponse } from '@/types';
-import { getScheduledWorkouts, updateScheduledWorkout, saveWorkoutActivityMatch } from '../trainingRepo';
 import { upsertAthleteTrainingResponse } from '../healthRepo';
 import { normalizeActivityRow, UpsertActivityResult, CreateManualActivityParams } from './activityTypes';
 import { getActivityById } from './activityQueryRepo';
+import { correlateManualActivityWithWorkout } from './activityWorkoutCorrelator';
 
 export async function updateActivity(
   id: string,
@@ -252,145 +252,6 @@ export async function upsertActivity(
   };
 }
 
-export async function createManualActivity(
-  userId: string = DEFAULT_USER_ID,
-  params: CreateManualActivityParams
-): Promise<{
-  activity: Activity;
-  matchedWorkout: ScheduledWorkout | null;
-  match: WorkoutActivityMatch | null;
-  trainingResponse?: AthleteTrainingResponse | null;
-}> {
-  const distance_meters = Number(params.distance_meters || 0);
-  const moving_time_seconds = Number(params.moving_time_seconds || 0);
-  const elapsed_time_seconds = Number(params.elapsed_time_seconds || moving_time_seconds);
-  const elevation_gain_meters = Number(params.elevation_gain_meters || 0);
-  
-  let average_speed_mps = params.average_speed_mps;
-  if (!average_speed_mps && moving_time_seconds > 0 && distance_meters > 0) {
-    average_speed_mps = Number((distance_meters / moving_time_seconds).toFixed(2));
-  }
+export { createManualActivity } from './manualActivityRepo';
 
-  const { activity } = await upsertActivity({
-    user_id: userId,
-    strava_activity_id: null,
-    is_manual: true,
-    name: params.name || 'Manual Workout Activity',
-    sport_type: (params.sport_type || 'Ride') as any,
-    start_date: params.start_date || new Date().toISOString(),
-    distance_meters,
-    moving_time_seconds,
-    elapsed_time_seconds,
-    elevation_gain_meters,
-    average_speed_mps: average_speed_mps || 0,
-    max_speed_mps: params.max_speed_mps !== undefined && params.max_speed_mps !== null ? params.max_speed_mps : undefined,
-    average_heartrate: params.average_heartrate || null,
-    max_heartrate: params.max_heartrate || null,
-    average_cadence: params.average_cadence || null,
-    average_watts: params.average_watts || null,
-    calories: params.calories || null,
-    description: params.description || null,
-  });
-
-  // Attempt workout correlation
-  let matchedWorkout: ScheduledWorkout | null = null;
-  let match: WorkoutActivityMatch | null = null;
-
-  try {
-    const workouts = await getScheduledWorkouts(userId);
-    const activityDate = formatDateOnly(params.start_date);
-
-    if (params.workout_id) {
-      matchedWorkout = workouts.find((w) => w.id === params.workout_id) || null;
-    } else {
-      // Find matching planned or missed workout on the same day
-      const candidateWorkouts = workouts.filter((w) => {
-        const wDate = formatDateOnly(w.scheduled_date);
-        return wDate === activityDate && (w.status === 'PLANNED' || w.status === 'MISSED');
-      });
-
-      if (candidateWorkouts.length > 0) {
-        // Match by sport type if possible
-        const normSport = (params.sport_type || '').toLowerCase();
-        const sameSport = candidateWorkouts.find((w) => {
-          const wCategory = (w.workout_category || '').toLowerCase();
-          return (
-            (normSport.includes('ride') && (wCategory.includes('ride') || wCategory.includes('cycl'))) ||
-            (normSport.includes('run') && (wCategory.includes('run') || wCategory.includes('lari'))) ||
-            wCategory === normSport
-          );
-        });
-        matchedWorkout = sameSport || candidateWorkouts[0];
-      }
-    }
-
-    if (matchedWorkout) {
-      let completionPercentage = 100;
-      if (matchedWorkout.target_distance_meters && matchedWorkout.target_distance_meters > 0) {
-        completionPercentage = Math.min(200, Math.round((distance_meters / matchedWorkout.target_distance_meters) * 100));
-      } else if (matchedWorkout.target_duration_seconds && matchedWorkout.target_duration_seconds > 0) {
-        completionPercentage = Math.min(200, Math.round((moving_time_seconds / matchedWorkout.target_duration_seconds) * 100));
-      }
-
-      const distDelta = distance_meters - (matchedWorkout.target_distance_meters || 0);
-      const durDelta = moving_time_seconds - (matchedWorkout.target_duration_seconds || 0);
-
-      match = await saveWorkoutActivityMatch({
-        workout_id: matchedWorkout.id,
-        activity_id: activity.id,
-        is_manual_match: true,
-        completion_percentage: completionPercentage,
-        distance_delta_meters: distDelta,
-        duration_delta_seconds: durDelta,
-        pace_delta_seconds_per_km: 0,
-      });
-
-      await updateScheduledWorkout(matchedWorkout.id, {
-        status: 'COMPLETED',
-      });
-      matchedWorkout.status = 'COMPLETED';
-    }
-  } catch (matchErr) {
-    console.warn('Failed to correlate workout with manual activity:', matchErr);
-  }
-
-  // Record athlete training response if check-in metrics provided
-  let trainingResponse: AthleteTrainingResponse | null = null;
-  if (
-    params.rpe_score != null ||
-    params.pain_during_activity != null ||
-    params.pain_after_activity != null ||
-    params.swelling_observed != null ||
-    params.athlete_comments != null
-  ) {
-    try {
-      trainingResponse = await upsertAthleteTrainingResponse({
-        user_id: userId,
-        activity_id: activity.id,
-        strava_activity_id: null,
-        sport_type: params.sport_type,
-        distance_km: Number((distance_meters / 1000).toFixed(2)),
-        duration_seconds: moving_time_seconds,
-        rpe_score: params.rpe_score ?? null,
-        pain_during_activity: params.pain_during_activity ?? 0,
-        pain_after_activity: params.pain_after_activity ?? 0,
-        pain_next_day: params.pain_next_day ?? null,
-        swelling_observed: Boolean(params.swelling_observed),
-        instability_observed: Boolean(params.instability_observed),
-        fatigue_response: (params.rpe_score ?? 0) >= 8 ? 'HIGH' : (params.rpe_score ?? 0) >= 5 ? 'NORMAL' : 'LOW',
-        athlete_comments: params.athlete_comments || params.description || null,
-        checkin_completed_at: new Date().toISOString(),
-      });
-    } catch (respErr) {
-      console.warn('Failed to save athlete training response:', respErr);
-    }
-  }
-
-  return {
-    activity,
-    matchedWorkout,
-    match,
-    trainingResponse,
-  };
-}
 

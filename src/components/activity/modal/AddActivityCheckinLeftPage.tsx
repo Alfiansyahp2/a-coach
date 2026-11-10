@@ -116,7 +116,17 @@ export function AddActivityCheckinLeftPage(props: AddActivityCheckinLeftPageProp
               <div key={field.label} className="p-2 rounded bg-[var(--color-surface-muted)]/70 border border-[var(--color-border)]">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[9.5px] text-[var(--color-text-secondary)] font-semibold">{field.label}</span>
-                  <span className={`font-bold font-tabular text-xs ${field.value > 0 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"}`}>{field.value}</span>
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center font-bold font-tabular text-[10px] shrink-0 transition-colors duration-200 ${
+                      field.value === 0
+                        ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/40"
+                        : field.value <= 3
+                        ? "bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/40"
+                        : "bg-[var(--color-alert-red)]/20 text-[var(--color-alert-red)] border border-[var(--color-alert-red)] animate-pulse"
+                    }`}
+                  >
+                    {field.value}
+                  </div>
                 </div>
                 <input
                   type="range"

@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:python": ".\\python_engine\\.venv\\Scripts\\uvicorn main:app --app-dir python_engine --host 127.0.0.1 --port 8000 --reload",
+    "dev:all": "concurrently -n next,python -c cyan,yellow \"next dev\" \".\\python_engine\\.venv\\Scripts\\uvicorn main:app --app-dir python_engine --host 127.0.0.1 --port 8000 --reload\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -13,6 +15,7 @@
     "test:health": "node scripts/tests/test_athlete_health_system.js",
     "test:coach": "node scripts/tests/test_coach_training_system.js",
     "test:streak": "node scripts/tests/test_weekly_streak_system.js",
+    "test:python": ".\\python_engine\\.venv\\Scripts\\python.exe -m pytest python_engine/tests",
     "db:audit": "node scripts/maintenance/audit_database_schema.cjs"
   },
   "dependencies": {
@@ -30,6 +33,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.5",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "tailwindcss": "^4",
