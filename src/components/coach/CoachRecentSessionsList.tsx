@@ -38,7 +38,7 @@ export function CoachRecentSessionsList({
   const displayList = activities.slice(0, maxSessions);
 
   return (
-    <div className="p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4">
+    <div className="p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2.5">
           <div className={`w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center ${iconTextClass}`}>

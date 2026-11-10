@@ -103,7 +103,13 @@ async function DashboardTelemetry() {
   });
 
   return (
-    <AppShell user={user} dbStatus={dbStatus} healthContext={healthContext} streakWeeks={streak.currentStreakWeeks}>
+    <AppShell
+      user={user}
+      dbStatus={dbStatus}
+      healthContext={healthContext}
+      streakWeeks={streak.currentStreakWeeks}
+      activitiesCount={activities.length}
+    >
       {/* 1. Precision Navigation & Telemetry Integrity Strip */}
       <DashboardIntegrityStrip
         dbStatus={dbStatus}

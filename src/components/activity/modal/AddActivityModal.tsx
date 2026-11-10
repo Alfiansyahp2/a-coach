@@ -3,17 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ScheduledWorkout } from "@/types";
-import {
-  X,
-  BookOpen,
-  Check,
-  RefreshCw,
-  PenLine,
-} from "lucide-react";
-import { ActivityManualFormFields } from "./ActivityManualFormFields";
-import { ActivityHealthCheckinFields } from "./ActivityHealthCheckinFields";
+import { X, BookOpen, Layers } from "lucide-react";
 import { useAddActivityForm } from "./useAddActivityForm";
 import { AddActivityLeftPage } from "./AddActivityLeftPage";
+import { AddActivityRightPage } from "./AddActivityRightPage";
+import { AddActivityCheckinLeftPage } from "./AddActivityCheckinLeftPage";
+import { AddActivityInjuryRightPage } from "./AddActivityInjuryRightPage";
 
 interface AddActivityModalProps {
   variant?: "button" | "outline" | "compact";
@@ -45,8 +40,16 @@ export function AddActivityModal({
 
   const modalDialog = form.isOpen ? (
     <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 sm:p-4 lg:p-6 bg-black/60 dark:bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
-      {/* Top Bar Floating Controls */}
+      {/* Top Floating Controls */}
       <div className="absolute top-3 right-4 sm:right-6 z-[100000] flex items-center gap-2">
+        {/* Step Indicator */}
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs font-mono text-[var(--color-text-secondary)] shadow-lg">
+          <Layers className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+          <span>
+            {form.step === 1 ? "Lembar 1: Log & Formulir (Hal 12-13)" : "Lembar 2: Check-in & Evaluasi (Hal 14-15)"}
+          </span>
+        </div>
+
         <button
           onClick={form.handleClose}
           disabled={form.isSubmitting || form.isParsingImage}
@@ -72,8 +75,21 @@ export function AddActivityModal({
           <div className="w-3 h-1 bg-amber-300 dark:bg-amber-400/60 rounded-full" />
         </div>
 
+        {/* Global Toast Error / Success notification */}
+        {form.errorMsg && (
+          <div className="mb-2 px-3 py-2 rounded-lg bg-[var(--color-alert-red)]/15 border border-[var(--color-alert-red)]/40 text-[var(--color-alert-red)] text-xs font-mono flex items-center justify-between">
+            <span>{form.errorMsg}</span>
+            <button onClick={() => form.setErrorMsg(null)} className="underline text-[10px] cursor-pointer">Tutup</button>
+          </div>
+        )}
+        {form.successMsg && (
+          <div className="mb-2 px-3 py-2 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-[var(--color-cycling)] text-xs font-mono flex items-center justify-between">
+            <span>{form.successMsg}</span>
+          </div>
+        )}
+
         {/* Form Container */}
-        <form onSubmit={form.handleSubmit} className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 flex flex-col min-h-0">
           <div
             className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl overflow-hidden relative shadow-inner"
             style={{
@@ -81,74 +97,35 @@ export function AddActivityModal({
               borderWidth: "1px",
             }}
           >
-            {/* 📖 HALAMAN KIRI (LEFT PAGE): Telemetri, Foto OCR & Kinematika */}
-            <AddActivityLeftPage
-              errorMsg={form.errorMsg}
-              successMsg={form.successMsg}
-              startDate={form.startDate}
-              imagePreview={form.imagePreview}
-              setImagePreview={form.setImagePreview}
-              isParsingImage={form.isParsingImage}
-              setIsParsingImage={form.setIsParsingImage}
-              ocrSuccessMsg={form.ocrSuccessMsg}
-              setOcrSuccessMsg={form.setOcrSuccessMsg}
-              ocrRawText={form.ocrRawText}
-              setOcrRawText={form.setOcrRawText}
-              setErrorMsg={form.setErrorMsg}
-              handleTelemetryExtracted={form.handleTelemetryExtracted}
-              numericDistanceKm={form.numericDistanceKm}
-              totalDurationSeconds={form.totalDurationSeconds}
-              durationHours={form.durationHours}
-              durationMinutes={form.durationMinutes}
-              durationSeconds={form.durationSeconds}
-              calculatedSpeedKmh={form.calculatedSpeedKmh}
-              calculatedPaceMinKm={form.calculatedPaceMinKm}
-            />
+            {form.step === 1 ? (
+              <>
+                {/* 📖 HALAMAN KIRI (LEFT PAGE): Telemetri, Foto OCR & Kinematika */}
+                <AddActivityLeftPage
+                  errorMsg={form.errorMsg}
+                  successMsg={form.successMsg}
+                  startDate={form.startDate}
+                  imagePreview={form.imagePreview}
+                  setImagePreview={form.setImagePreview}
+                  isParsingImage={form.isParsingImage}
+                  setIsParsingImage={form.setIsParsingImage}
+                  ocrSuccessMsg={form.ocrSuccessMsg}
+                  setOcrSuccessMsg={form.setOcrSuccessMsg}
+                  ocrRawText={form.ocrRawText}
+                  setOcrRawText={form.setOcrRawText}
+                  setErrorMsg={form.setErrorMsg}
+                  handleTelemetryExtracted={form.handleTelemetryExtracted}
+                  numericDistanceKm={form.numericDistanceKm}
+                  totalDurationSeconds={form.totalDurationSeconds}
+                  durationHours={form.durationHours}
+                  durationMinutes={form.durationMinutes}
+                  durationSeconds={form.durationSeconds}
+                  calculatedSpeedKmh={form.calculatedSpeedKmh}
+                  calculatedPaceMinKm={form.calculatedPaceMinKm}
+                />
 
-            {/* 📖 HALAMAN KANAN (RIGHT PAGE): Formulir Manual & Audit Klinis */}
-            <div
-              className="flex flex-col relative overflow-y-auto p-5 sm:p-6 transition-colors duration-200"
-              style={{
-                backgroundColor: "var(--color-book-page-right)",
-                backgroundImage: `
-                  linear-gradient(to right, var(--color-book-margin) 1px, transparent 1px),
-                  linear-gradient(to bottom, var(--color-book-line) 1px, transparent 1px)
-                `,
-                backgroundSize: "100% 100%, 100% 28px",
-                backgroundPosition: "38px 0, 0 8px",
-              }}
-            >
-              {/* Nomor Halaman Kanan & Target Sesi */}
-              <div
-                className="flex items-center justify-between pb-3 mb-4 border-b text-xs font-mono text-[var(--color-text-secondary)]"
-                style={{ borderColor: "var(--color-border)" }}
-              >
-                <span className="flex items-center gap-1.5 text-[var(--color-running)] font-bold">
-                  <PenLine className="w-3.5 h-3.5" />
-                  HALAMAN 13 • FORMULIR &amp; AUDIT SENDI
-                </span>
-                {defaultWorkout ? (
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 text-[var(--color-cycling)] font-bold">
-                    Target: {defaultWorkout.workout_category}
-                  </span>
-                ) : (
-                  <span className="text-[10px] text-[var(--color-text-muted)]">Sesi Bebas Mandiri</span>
-                )}
-              </div>
-
-              {/* Header Halaman Kanan */}
-              <div className="mb-4">
-                <h3 className="text-base sm:text-lg font-bold font-mono text-[var(--color-text-primary)] tracking-tight flex items-center gap-2">
-                  <span>PARAMETER &amp; EVALUASI KESEHATAN</span>
-                </h3>
-                <p className="text-xs text-[var(--color-text-secondary)] font-mono mt-0.5">
-                  Lengkapi nama sesi, intensitas RPE Borg CR10, serta kontrol nyeri sendi.
-                </p>
-              </div>
-
-              {/* Form Isian Input Manual */}
-              <div className="space-y-4 mb-4">
-                <ActivityManualFormFields
+                {/* 📖 HALAMAN KANAN (RIGHT PAGE): Formulir Manual */}
+                <AddActivityRightPage
+                  defaultWorkout={defaultWorkout}
                   sportType={form.sportType}
                   setSportType={form.setSportType}
                   name={form.name}
@@ -169,54 +146,62 @@ export function AddActivityModal({
                   setDescription={form.setDescription}
                   calculatedSpeedKmh={form.calculatedSpeedKmh}
                   calculatedPaceMinKm={form.calculatedPaceMinKm}
+                  isSubmitting={form.isSubmitting}
+                  isParsingImage={form.isParsingImage}
+                  onNextStep={form.handleNextStep}
+                  onClose={form.handleClose}
                 />
-
-                {/* Audit Medis Sendi & RPE */}
-                <ActivityHealthCheckinFields
-                  rpeScore={form.rpeScore}
-                  setRpeScore={form.setRpeScore}
-                  painScale={form.painScale}
-                  setPainScale={form.setPainScale}
+              </>
+            ) : (
+              <>
+                {/* 📖 HALAMAN 14 (LEFT PAGE): Check-in Pasca Latihan (Gambar 2) */}
+                <AddActivityCheckinLeftPage
+                  sportType={form.sportType}
+                  name={form.name}
+                  startDate={form.startDate}
+                  numericDistanceKm={form.numericDistanceKm}
+                  totalDurationSeconds={form.totalDurationSeconds}
+                  durationHours={form.durationHours}
+                  durationMinutes={form.durationMinutes}
+                  durationSeconds={form.durationSeconds}
+                  calculatedSpeedKmh={form.calculatedSpeedKmh}
+                  calculatedPaceMinKm={form.calculatedPaceMinKm}
+                  painDuring={form.painDuring}
+                  setPainDuring={form.setPainDuring}
+                  painAfter={form.painAfter}
+                  setPainAfter={form.setPainAfter}
+                  painNextDay={form.painNextDay}
+                  setPainNextDay={form.setPainNextDay}
                   swellingObserved={form.swellingObserved}
                   setSwellingObserved={form.setSwellingObserved}
                   instabilityObserved={form.instabilityObserved}
                   setInstabilityObserved={form.setInstabilityObserved}
+                  rpeScore={form.rpeScore}
+                  setRpeScore={form.setRpeScore}
+                  subjectiveNotes={form.subjectiveNotes}
+                  setSubjectiveNotes={form.setSubjectiveNotes}
                 />
-              </div>
 
-              {/* Footer Halaman Kanan */}
-              <div
-                className="mt-auto pt-4 border-t-2 flex items-center justify-between font-mono"
-                style={{ borderColor: "var(--color-border)" }}
-              >
-                <button
-                  type="button"
-                  onClick={form.handleClose}
-                  disabled={form.isSubmitting || form.isParsingImage}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)] transition-colors cursor-pointer"
-                >
-                  Batal / Tutup Lembaran
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={form.isSubmitting || form.isParsingImage}
-                  className="px-6 py-2.5 rounded-lg bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
-                >
-                  {form.isSubmitting ? (
-                    <>
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>MENULIS KE JURNAL...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4" />
-                      <span>TULIS KE BUKU JURNAL</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
+                {/* 📖 HALAMAN 15 (RIGHT PAGE): Evaluasi Insiden & Cedera Baru */}
+                <AddActivityInjuryRightPage
+                  hasNewInjury={form.hasNewInjury}
+                  setHasNewInjury={form.setHasNewInjury}
+                  injuryRegion={form.injuryRegion}
+                  setInjuryRegion={form.setInjuryRegion}
+                  injurySide={form.injurySide}
+                  setInjurySide={form.setInjurySide}
+                  injurySeverity={form.injurySeverity}
+                  setInjurySeverity={form.setInjurySeverity}
+                  injuryMechanism={form.injuryMechanism}
+                  setInjuryMechanism={form.setInjuryMechanism}
+                  injuryNotes={form.injuryNotes}
+                  setInjuryNotes={form.setInjuryNotes}
+                  isSubmitting={form.isSubmitting}
+                  onPrevStep={form.handlePrevStep}
+                  onSubmit={form.handleSubmit}
+                />
+              </>
+            )}
 
             {/* Garis Lipatan Tengah Buku */}
             <div
@@ -227,14 +212,13 @@ export function AddActivityModal({
               }}
             />
           </div>
-        </form>
+        </div>
       </div>
     </div>
   ) : null;
 
   return (
     <>
-      {/* Trigger Buttons */}
       {variant === "button" && (
         <button
           onClick={form.handleOpen}

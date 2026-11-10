@@ -287,13 +287,17 @@ export function PostActivityCheckinModal({
                     onChange={(e) => setPainDuring(Number(e.target.value))}
                     className="w-full accent-[var(--color-cycling)]"
                   />
-                  <span
-                    className={`font-bold font-tabular text-sm w-5 text-right ${
-                      painDuring > 0 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center font-bold font-tabular text-xs shrink-0 transition-all duration-200 ${
+                      painDuring === 0
+                        ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/40"
+                        : painDuring <= 3
+                        ? "bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/40"
+                        : "bg-[var(--color-alert-red)]/20 text-[var(--color-alert-red)] border border-[var(--color-alert-red)] animate-pulse"
                     }`}
                   >
                     {painDuring}
-                  </span>
+                  </div>
                 </div>
               </div>
 
@@ -310,13 +314,17 @@ export function PostActivityCheckinModal({
                     onChange={(e) => setPainAfter(Number(e.target.value))}
                     className="w-full accent-[var(--color-cycling)]"
                   />
-                  <span
-                    className={`font-bold font-tabular text-sm w-5 text-right ${
-                      painAfter > 0 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center font-bold font-tabular text-xs shrink-0 transition-all duration-200 ${
+                      painAfter === 0
+                        ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/40"
+                        : painAfter <= 3
+                        ? "bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/40"
+                        : "bg-[var(--color-alert-red)]/20 text-[var(--color-alert-red)] border border-[var(--color-alert-red)] animate-pulse"
                     }`}
                   >
                     {painAfter}
-                  </span>
+                  </div>
                 </div>
               </div>
 
@@ -333,13 +341,17 @@ export function PostActivityCheckinModal({
                     onChange={(e) => setPainNextDay(Number(e.target.value))}
                     className="w-full accent-[var(--color-cycling)]"
                   />
-                  <span
-                    className={`font-bold font-tabular text-sm w-5 text-right ${
-                      painNextDay > 0 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center font-bold font-tabular text-xs shrink-0 transition-all duration-200 ${
+                      painNextDay === 0
+                        ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/40"
+                        : painNextDay <= 3
+                        ? "bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/40"
+                        : "bg-[var(--color-alert-red)]/20 text-[var(--color-alert-red)] border border-[var(--color-alert-red)] animate-pulse"
                     }`}
                   >
                     {painNextDay}
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
