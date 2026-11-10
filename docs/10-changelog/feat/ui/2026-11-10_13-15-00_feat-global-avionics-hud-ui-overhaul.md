@@ -107,3 +107,4 @@ Pengguna menginginkan agar **seluruh antarmuka aplikasi secara komprehensif**—
 | **Batas Garis Arsitektur Bersih** | Semua berkas $\le 300$ baris | **100% Terpenuhi** |
 | **Harmonisasi Dual-Theme** | Dark (Graphite) & Light (Chalk Lab) | **100% Bebas Hardcoded Hex** |
 | **Pembersihan AI-Slop** | Nol `rounded-2xl` pada data cards, nol `Sparkles` | **100% Standar Avionics HUD v2.5** |
+

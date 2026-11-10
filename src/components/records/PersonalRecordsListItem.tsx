@@ -62,3 +62,4 @@ export function PersonalRecordsListItem({ pr, isRun }: PersonalRecordsListItemPr
     </Link>
   );
 }
+

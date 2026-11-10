@@ -58,3 +58,4 @@ export function PersonalRecordsHeroCard({ pr, isRun }: PersonalRecordsHeroCardPr
     </Link>
   );
 }
+
