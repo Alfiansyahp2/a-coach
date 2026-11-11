@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getActivities, getScheduledWorkouts, DEFAULT_USER_ID } from '@/lib/db';
-import { calculateWeeklyStreak } from '@/lib/domain/streak/streakEngine';
+import { computeStreakViaPython } from '@/lib/api/pythonClient';
 
 export async function GET() {
   try {
@@ -9,7 +9,7 @@ export async function GET() {
       getScheduledWorkouts(DEFAULT_USER_ID),
     ]);
 
-    const streak = calculateWeeklyStreak(activities, workouts);
+    const streak = await computeStreakViaPython(activities, workouts);
 
     return NextResponse.json({
       success: true,

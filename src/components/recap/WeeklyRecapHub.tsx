@@ -17,6 +17,7 @@ import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecap
 import { formatDateOnly } from "@/lib/formatters";
 import { WeeklyRecapTimeline } from "./WeeklyRecapTimeline";
 import { WeeklyRecapPrescription } from "./WeeklyRecapPrescription";
+import { WeeklyRecapProMetricsSection } from "@/components/analytics/WeeklyRecapProMetricsSection";
 
 interface WeeklyRecapHubProps {
   initialRecap: WeeklyActivityAndInjuryRecap;
@@ -235,6 +236,11 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
           </p>
         </div>
       </div>
+
+      {/* Analisis Fisiologis & Polarisasi 80/20 Pro Level */}
+      {recap.pro_metrics && (
+        <WeeklyRecapProMetricsSection proMetrics={recap.pro_metrics} />
+      )}
 
       {/* 4. Rincian Dua Kolom: Timeline 7 Hari (Kiri) vs Status Cidera & Preskripsi (Kanan) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
