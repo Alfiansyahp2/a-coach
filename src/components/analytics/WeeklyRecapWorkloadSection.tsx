@@ -2,13 +2,17 @@
 
 import React from "react";
 import { Clock, Mountain } from "lucide-react";
-import { WeeklyActivityRecap, SportRecapBreakdown } from "@/lib/domain/analytics/weeklyRecapTypes";
+import { WeeklyActivityRecap, SportRecapBreakdown, WeeklyProMetrics } from "@/lib/domain/analytics/weeklyRecapTypes";
 
 interface WeeklyRecapWorkloadSectionProps {
   activitySummary: WeeklyActivityRecap;
+  proMetrics?: WeeklyProMetrics;
 }
 
-export function WeeklyRecapWorkloadSection({ activitySummary: act }: WeeklyRecapWorkloadSectionProps) {
+export function WeeklyRecapWorkloadSection({
+  activitySummary: act,
+  proMetrics,
+}: WeeklyRecapWorkloadSectionProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-[11px]">
@@ -45,6 +49,18 @@ export function WeeklyRecapWorkloadSection({ activitySummary: act }: WeeklyRecap
           <div className="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider mt-0.5">Elevasi</div>
         </div>
       </div>
+
+      {/* Pro Physiological Load (Foster sRPE & TSS) */}
+      {proMetrics && (
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[var(--color-surface-muted)]/80 border border-[var(--color-border)] text-[10px]">
+          <span className="text-[var(--color-text-secondary)] font-medium">Beban Fisiologis:</span>
+          <div className="flex items-center gap-2.5 font-bold font-tabular">
+            <span className="text-[var(--color-cycling)]">{proMetrics.foster_srpe_load} AU sRPE</span>
+            <span className="text-[var(--color-text-muted)]">•</span>
+            <span className="text-[var(--color-text-primary)]">{proMetrics.weekly_tss} TSS</span>
+          </div>
+        </div>
+      )}
 
       {/* Proportion Ratio Bar */}
       {act.total_distance_km > 0 && (
