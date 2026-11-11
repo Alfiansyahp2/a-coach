@@ -1,72 +1,128 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-surface-canvas: #090a0f;
-  --color-surface-card: #12151d;
-  --color-surface-elevated: #161922;
-  --color-surface-highlight: #1c212e;
-  --color-border-subtle: #1f2430;
-  --color-border-medium: #2d3547;
-  --color-text-primary: #f0f2f5;
-  --color-text-secondary: #9ba3af;
-  --color-text-muted: #5a6272;
-  --color-accent-volt: #d4ff00;
-  --color-accent-cyan: #00f0ff;
-  --color-accent-amber: #ff9500;
-  --color-accent-crimson: #ff2a6d;
-  --color-accent-strava: #fc4c02;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), Menlo, Monaco, Consolas, monospace;
+
+  --color-canvas: var(--color-canvas);
+  --color-surface-card: var(--color-surface-card);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-border-hairline: var(--color-border);
+  --color-border-subtle: var(--color-border-subtle);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-endurance: var(--color-endurance);
+  --color-cycling: var(--color-cycling);
+  --color-running: var(--color-running);
+  --color-alert-red: var(--color-alert-red);
+  --color-alert-amber: var(--color-alert-amber);
+  --color-strava: #fc4c02;
 }
 
 :root {
-  --background: #090a0f;
-  --foreground: #f0f2f5;
-  --surface-canvas: #090a0f;
-  --surface-card: #12151d;
-  --surface-elevated: #161922;
-  --surface-highlight: #1c212e;
-  --border-subtle: #1f2430;
-  --border-medium: #2d3547;
-  --text-primary: #f0f2f5;
-  --text-secondary: #9ba3af;
-  --text-muted: #5a6272;
-  --accent-volt: #d4ff00;
-  --accent-cyan: #00f0ff;
-  --accent-amber: #ff9500;
-  --accent-crimson: #ff2a6d;
-  --accent-strava: #fc4c02;
+  /* =========================================================================
+     LIGHT THEME: CHALK LAB (Default Starting Point)
+     Precision sports science instrument aesthetic on tactile chalk surface
+     ========================================================================= */
+  --color-canvas: #F3F4EF;
+  --color-surface-card: #FFFFFF;
+  --color-surface-muted: #E8EAE3;
+  --color-surface-elevated: #FFFFFF;
+  --color-border: #D8DBD0;
+  --color-border-subtle: #E2E5DC;
+
+  --color-text-primary: #171C19;
+  --color-text-secondary: #5C635E;
+  --color-text-muted: #8A928C;
+
+  --color-endurance: #B9DC72;
+  --color-cycling: #4D947B;
+  --color-running: #D98757;
+  --color-alert-red: #D65F58;
+  --color-alert-amber: #E5A442;
+
+  /* Open Book Aesthetics - Light Mode (Ivory Field Journal) */
+  --color-book-cover: #E2E5DC;
+  --color-book-cover-border: #C6CCC0;
+  --color-book-page-left: #FAFBF8;
+  --color-book-page-right: #F5F7F0;
+  --color-book-line: rgba(0, 0, 0, 0.05);
+  --color-book-margin: rgba(214, 95, 88, 0.35);
+  --color-book-crease-start: rgba(0, 0, 0, 0.04);
+  --color-book-crease-mid: rgba(0, 0, 0, 0.18);
+}
+
+.dark {
+  /* =========================================================================
+     DARK THEME: GRAPHITE OBSIDIAN
+     Deep graphite environment with calibrated high-contrast athletic accents
+     ========================================================================= */
+  --color-canvas: #111513;
+  --color-surface-card: #171C19;
+  --color-surface-muted: #1F2622;
+  --color-surface-elevated: #232B26;
+  --color-border: #2C3530;
+  --color-border-subtle: #232B26;
+
+  --color-text-primary: #F3F4EF;
+  --color-text-secondary: #A6AFA8;
+  --color-text-muted: #646E67;
+
+  --color-endurance: #C5E87D;
+  --color-cycling: #5FB395;
+  --color-running: #E59A6D;
+  --color-alert-red: #E2726B;
+  --color-alert-amber: #F0B359;
+
+  /* Open Book Aesthetics - Dark Mode (Obsidian Leather Journal) */
+  --color-book-cover: #0A0F0C;
+  --color-book-cover-border: #233228;
+  --color-book-page-left: #121814;
+  --color-book-page-right: #141B16;
+  --color-book-line: rgba(95, 179, 149, 0.06);
+  --color-book-margin: rgba(226, 114, 107, 0.35);
+  --color-book-crease-start: rgba(0, 0, 0, 0.5);
+  --color-book-crease-mid: rgba(0, 0, 0, 0.85);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   min-height: 100vh;
 }
 
-/* Strict Athletic Tabular Numerals (docs/02-design/TYPOGRAPHY.md) */
+/* Strict Tabular Numerals for Athletic Telemetry */
 .font-tabular {
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
 }
 
 /* Precision Hairline Focus Ring */
 *:focus-visible {
-  outline: 2px solid var(--accent-volt);
+  outline: 2px solid var(--color-endurance);
   outline-offset: 1px;
 }
 
-/* Sleek Obsidian Scrollbar */
+/* Sleek Minimalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #090a0f;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f2430;
-  border-radius: 3px;
+  background: var(--color-border);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2d3547;
+  background: var(--color-text-muted);
 }

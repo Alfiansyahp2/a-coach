@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { connection } from 'next/server';
 import { DEFAULT_USER_ID, getAuthoritativeHealthContext } from '@/lib/db';
 
 /**
@@ -6,9 +7,9 @@ import { DEFAULT_USER_ID, getAuthoritativeHealthContext } from '@/lib/db';
  * Returns the centralized, authoritative athlete health, injury, and readiness context.
  */
 export async function GET(req: NextRequest) {
+  await connection();
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId') || DEFAULT_USER_ID;
+    const userId = req.nextUrl.searchParams.get('userId') || DEFAULT_USER_ID;
 
     const healthContext = await getAuthoritativeHealthContext(userId);
 
@@ -24,4 +25,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-

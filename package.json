@@ -4,11 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:python": ".\\python_engine\\.venv\\Scripts\\uvicorn main:app --app-dir python_engine --host 127.0.0.1 --port 8000 --reload",
+    "dev:all": "concurrently -n next,python -c cyan,yellow \"next dev\" \".\\python_engine\\.venv\\Scripts\\uvicorn main:app --app-dir python_engine --host 127.0.0.1 --port 8000 --reload\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node scripts/seed.js",
-    "import:strava": "python scripts/process_strava_images.py && node scripts/seed_imported_activities.js"
+    "seed": "node scripts/seed/seed.js",
+    "seed:personal": "node scripts/seed/seed_athlete_health.js",
+    "import:strava": "python scripts/parsers/process_strava_images.py && node scripts/seed/seed_imported_activities.js",
+    "test:health": "node scripts/tests/test_athlete_health_system.js",
+    "test:coach": "node scripts/tests/test_coach_training_system.js",
+    "test:streak": "node scripts/tests/test_weekly_streak_system.js",
+    "test:python": ".\\python_engine\\.venv\\Scripts\\python.exe -m pytest python_engine/tests",
+    "db:audit": "node scripts/maintenance/audit_database_schema.cjs"
   },
   "dependencies": {
     "dotenv": "^18.0.9",
@@ -25,6 +33,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.5",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "tailwindcss": "^4",

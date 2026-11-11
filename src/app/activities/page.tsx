@@ -1,41 +1,35 @@
 import React, { Suspense } from "react";
-import Link from "next/link";
 import { connection } from "next/server";
-import { getActivities, getUser, DEFAULT_USER_ID } from "@/lib/db";
+import { getActivities, getUser, getDatabaseStatus, DEFAULT_USER_ID } from "@/lib/db";
 import { ActivityManagementDeck } from "@/components/ActivityManagementDeck";
-import {
-  ArrowLeft,
-  Calendar,
-  FolderKanban,
-  ShieldCheck,
-  RefreshCw,
-  Heart,
-} from "lucide-react";
+import { AppShell } from "@/components/layout/AppShell";
+import { RefreshCw } from "lucide-react";
 
 export const metadata = {
-  title: "Activity Management & Grouping Hub | a-coach",
+  title: "Activity Management & Registry | ENDURANCE PERFORMANCE LAB",
   description: "Manajemen pengelompokan aktivitas, kategorisasi sesi, dan kalibrasi telemetri atletik.",
 };
 
-async function ActivityManagementContent() {
+async function ActivitiesContent() {
   await connection();
-  const [activities, user] = await Promise.all([
+  const [activities, user, dbStatus] = await Promise.all([
     getActivities(DEFAULT_USER_ID, { limit: 200 }),
     getUser(DEFAULT_USER_ID),
+    getDatabaseStatus(),
   ]);
 
   return (
-    <div className="space-y-6">
+    <AppShell user={user} dbStatus={dbStatus} activitiesCount={activities.length}>
       <ActivityManagementDeck activities={activities} />
-    </div>
+    </AppShell>
   );
 }
 
-function ActivityManagementSkeleton() {
+function ActivitiesSkeleton() {
   return (
-    <div className="py-24 flex flex-col items-center justify-center gap-3 text-[#9BA3AF]">
-      <RefreshCw className="w-5 h-5 animate-spin text-[#00F0FF]" />
-      <span className="text-xs font-mono uppercase tracking-wider text-[#5A6272]">
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-muted)] py-24 flex flex-col items-center justify-center gap-3 font-mono">
+      <RefreshCw className="w-5 h-5 animate-spin text-[var(--color-cycling)]" />
+      <span className="text-xs uppercase tracking-wider">
         Memuat Registry Aktivitas & Data Pengelompokan...
       </span>
     </div>
@@ -44,62 +38,8 @@ function ActivityManagementSkeleton() {
 
 export default function ActivitiesPage() {
   return (
-    <div className="min-h-screen bg-[#090A0F] text-[#F0F2F5] flex flex-col font-sans selection:bg-[#00F0FF]/30 selection:text-white">
-      {/* Precision Top Navigation Header */}
-      <header className="border-b border-[#1F2430] bg-[#090A0F]/90 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-xs font-medium text-[#9BA3AF] hover:text-white px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] transition-colors font-mono"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Dashboard</span>
-            </Link>
-
-            <div className="h-4 w-px bg-[#1F2430]" />
-
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm tracking-tight text-white font-mono">
-                a-coach
-              </span>
-              <span className="text-[9px] font-mono tracking-wider px-1.5 py-0.5 rounded-sm bg-[#12151D] text-[#00F0FF] border border-[#1F2430]">
-                REGISTRY & GROUPING
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-3 text-xs font-mono">
-            <Link
-              href="/training"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#D4FF00] text-[#9BA3AF] hover:text-[#D4FF00] transition-colors font-medium"
-            >
-              <Calendar className="w-3.5 h-3.5 text-[#D4FF00]" />
-              <span className="hidden sm:inline">Jadwal</span> Latihan
-            </Link>
-            <Link
-              href="/health"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#12151D] border border-[#1F2430] hover:border-[#FF2A6D] text-[#9BA3AF] hover:text-[#FF2A6D] transition-colors font-medium"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#FF2A6D]" />
-              <span className="hidden sm:inline">Profil</span> Kesehatan
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 w-full">
-        <Suspense fallback={<ActivityManagementSkeleton />}>
-          <ActivityManagementContent />
-        </Suspense>
-      </main>
-
-      {/* Technical Stoic Footer */}
-      <footer className="border-t border-[#1F2430] py-4 text-center text-[11px] text-[#5A6272] font-mono">
-        a-coach • Activity Categorization & Telemetry Management Hub • Next.js 16 + PostgreSQL 16
-      </footer>
-    </div>
+    <Suspense fallback={<ActivitiesSkeleton />}>
+      <ActivitiesContent />
+    </Suspense>
   );
 }
-
