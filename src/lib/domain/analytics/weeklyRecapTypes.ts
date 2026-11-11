@@ -12,8 +12,10 @@ export interface WeeklyRecapTimeframe {
   endDate: string; // ISO string (UTC)
   startDateFormatted: string; // e.g. "02 Nov 2026"
   endDateFormatted: string; // e.g. "08 Nov 2026"
-  label: string; // e.g. "02 Nov - 08 Nov 2026"
+  label: string; // e.g. "02 Nov – 08 Nov 2026"
   daysCount: number; // 7
+  isCurrentWeek?: boolean;
+  weeksAgo?: number;
 }
 
 export interface SportRecapBreakdown {
