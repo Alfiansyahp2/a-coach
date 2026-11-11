@@ -5,6 +5,8 @@ from python_engine.domain.physiology.models import (
     DecouplingInput,
     DecouplingResponse,
     TRIMPCalculationInput,
+    WeeklyProRecapPayload,
+    WeeklyProRecapResponse,
 )
 from python_engine.domain.physiology.banister_engine import (
     calculate_pmc,
@@ -12,6 +14,9 @@ from python_engine.domain.physiology.banister_engine import (
 )
 from python_engine.domain.physiology.decoupling_engine import (
     calculate_session_debrief,
+)
+from python_engine.domain.physiology.weekly_recap_calculator import (
+    compute_weekly_pro_recap,
 )
 
 router = APIRouter(prefix="/calculate/coach", tags=["Coach & Physiology"])
@@ -44,3 +49,17 @@ def compute_session_trimp(payload: TRIMPCalculationInput):
     """
     return {"trimp": calculate_trimp(payload)}
 
+
+@router.post("/weekly-recap", response_model=WeeklyProRecapResponse)
+def compute_pro_weekly_recap(payload: WeeklyProRecapPayload) -> WeeklyProRecapResponse:
+    """
+    Computes Pro-Level Weekly Recap: Foster sRPE, Weekly TSS, Seiler 80/20 polarization,
+    Week-over-Week delta, and Musculoskeletal Impact Strain.
+    """
+    return compute_weekly_pro_recap(
+        curr_sessions=payload.current_week_activities,
+        prev_sessions=payload.prev_week_activities,
+        profile=payload.profile,
+        peak_pain=payload.peak_pain_score,
+        has_swelling=payload.has_swelling,
+    )

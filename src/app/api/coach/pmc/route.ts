@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, connection } from 'next/server';
 import { getActivities, DEFAULT_USER_ID } from '@/lib/db';
 import { computePMCViaPython } from '@/lib/api/coachPythonClient';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: Request) {
+  await connection();
   try {
     const { searchParams } = new URL(request.url);
     const days = parseInt(searchParams.get('days') || '42', 10);

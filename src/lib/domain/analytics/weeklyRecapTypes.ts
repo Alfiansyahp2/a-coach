@@ -126,11 +126,42 @@ export interface WeeklyClinicalVerdict {
   actionable_recommendations: string[];
 }
 
+export interface WeeklyProMetrics {
+  foster_srpe_load: number;
+  weekly_tss: number;
+  training_monotony: number;
+  training_strain: number;
+  polarization: {
+    low_zone_pct: number;
+    moderate_zone_pct: number;
+    high_zone_pct: number;
+    is_optimal_polarized: boolean;
+    classification: string;
+    verdict: string;
+  };
+  wow_delta: {
+    distance_change_pct: number;
+    tss_change_pct: number;
+    safety_flag: string;
+    interpretation: string;
+  };
+  musculoskeletal: {
+    impact_running_pct: number;
+    non_impact_cycling_pct: number;
+    joint_safety_rating: string;
+    pain_gradient_note: string;
+  };
+  periodization_phase: string;
+  pro_coach_verdict: string;
+  next_week_bridge_advice: string;
+}
+
 export interface WeeklyActivityAndInjuryRecap {
   timeframe: WeeklyRecapTimeframe;
   activity_summary: WeeklyActivityRecap;
   injury_summary: WeeklyInjuryRecap;
   clinical_verdict: WeeklyClinicalVerdict;
+  pro_metrics?: WeeklyProMetrics;
 }
 
 export interface ComputeWeeklyRecapParams {
@@ -141,4 +172,3 @@ export interface ComputeWeeklyRecapParams {
   scheduledWorkouts?: ScheduledWorkout[];
   referenceDate?: Date | string;
 }
-

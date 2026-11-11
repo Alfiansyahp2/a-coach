@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
 
@@ -20,6 +20,7 @@ class SessionLoadInput(BaseModel):
     avg_power: Optional[float] = Field(default=None, ge=0)
     avg_speed_mps: Optional[float] = Field(default=None, ge=0)
     sport_type: str = Field(default="Ride")
+    rpe: Optional[float] = Field(default=None, ge=1, le=10)
 
 
 class PMCDataPoint(BaseModel):
@@ -82,3 +83,50 @@ class DecouplingResponse(BaseModel):
     coach_debrief_feedback: str
     corrective_tactical_advice: str
 
+
+# =========================================================================
+# PRO WEEKLY RECAP MODELS
+# =========================================================================
+
+class PolarizationBreakdown(BaseModel):
+    low_zone_pct: float = Field(..., description="Zone 1-2 percentage (Aerobic Foundation)")
+    moderate_zone_pct: float = Field(..., description="Zone 3 percentage (Tempo / Sweetspot)")
+    high_zone_pct: float = Field(..., description="Zone 4-5 percentage (Threshold / Anaerobic)")
+    is_optimal_polarized: bool
+    classification: str
+    verdict: str
+
+
+class WoWDelta(BaseModel):
+    distance_change_pct: float
+    tss_change_pct: float
+    safety_flag: str  # SAFE | MODERATE_SURGE | SPIKE_WARNING
+    interpretation: str
+
+
+class MusculoskeletalStrain(BaseModel):
+    impact_running_pct: float
+    non_impact_cycling_pct: float
+    joint_safety_rating: str
+    pain_gradient_note: str
+
+
+class WeeklyProRecapPayload(BaseModel):
+    current_week_activities: List[SessionLoadInput] = Field(default_factory=list)
+    prev_week_activities: List[SessionLoadInput] = Field(default_factory=list)
+    profile: Optional[AthletePhysiologyProfile] = None
+    peak_pain_score: int = Field(default=0, ge=0, le=10)
+    has_swelling: bool = Field(default=False)
+
+
+class WeeklyProRecapResponse(BaseModel):
+    foster_srpe_load: float
+    weekly_tss: float
+    training_monotony: float
+    training_strain: float
+    polarization: PolarizationBreakdown
+    wow_delta: WoWDelta
+    musculoskeletal: MusculoskeletalStrain
+    periodization_phase: str  # BASE_BUILD | PROGRESSIVE_OVERLOAD | PEAK_WEEK | DELOAD_RECOVERY
+    pro_coach_verdict: str
+    next_week_bridge_advice: str

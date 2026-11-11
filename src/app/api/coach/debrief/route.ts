@@ -1,10 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, connection } from 'next/server';
 import { getActivityById } from '@/lib/db';
 import { computeDebriefViaPython } from '@/lib/api/coachPythonClient';
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: Request) {
+  await connection();
   try {
     const body = await request.json();
     const { activity_id, pain_during = 0, pain_after = 0, swelling = false } = body;
