@@ -33,4 +33,5 @@ The **Endurance Performance Lab Design System** is an unapologetically rigorous,
 | [INTERACTION_AND_MOTION.md](./INTERACTION_AND_MOTION.md) | **v2.5** | 150ms utilitarian feedback, page-turning transitions, and banned bouncy animations. |
 | [RESPONSIVE_DESIGN.md](./RESPONSIVE_DESIGN.md) | **v2.5** | Multi-viewport breakpoints, mobile book folding, and centered sidebar toggle. |
 | [ACCESSIBILITY.md](./ACCESSIBILITY.md) | **v2.5** | WCAG 2.1 AA dual-theme contrast ratios, keyboard focus trapping, and clinical aria labels. |
+| [CALENDAR_UI_DESIGN_VARIANTS_SPECIFICATION.md](./CALENDAR_UI_DESIGN_VARIANTS_SPECIFICATION.md) | **v3.0** | Master specification for 5+ interchangeable athletic calendar models (Month Grid, Week Agenda, Kinetic Bubble, Field Journal, Gantt PMC). |
 
