@@ -14,9 +14,13 @@ import { MacroObjectivesStrip } from "./MacroObjectivesStrip";
 import { Zone2PacingGuidelinePanel } from "./Zone2PacingGuidelinePanel";
 import { WorkoutDossierModal } from "./WorkoutDossierModal";
 import { buildCalendarWeeks } from "./calendarBuilder";
-import { CalendarCommandBar } from "./navigation/CalendarCommandBar";
+import { CalendarCommandBar, CalendarViewModel } from "./navigation/CalendarCommandBar";
 import { TrainingMonthGridView } from "./views/TrainingMonthGridView";
 import { TrainingWeekAgendaView } from "./views/TrainingWeekAgendaView";
+import { TrainingKineticBubbleView } from "./views/TrainingKineticBubbleView";
+import { TrainingFieldJournalView } from "./views/TrainingFieldJournalView";
+import { TrainingPeriodizationGanttView } from "./views/TrainingPeriodizationGanttView";
+import { TrainingMicroHUDView } from "./views/TrainingMicroHUDView";
 import { TrainingWorkoutListView } from "./views/TrainingWorkoutListView";
 
 interface ScheduleTrainingHubProps {
@@ -38,8 +42,8 @@ export function ScheduleTrainingHub({
   initialTodayDate,
   initialActivities = [],
 }: ScheduleTrainingHubProps) {
-  // Primary view mode: "month" (Default true month grid), "week" (Spacious agenda), or "list"
-  const [viewMode, setViewMode] = useState<"month" | "week" | "list">("month");
+  // Multi-view model preference: default to month_grid or load from localStorage
+  const [viewMode, setViewMode] = useState<CalendarViewModel>("month_grid");
   const [filter, setFilter] = useState<"ALL" | "RUNNING" | "CYCLING" | "REHAB" | "COMPLETED">("ALL");
   const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false);
 
@@ -53,6 +57,10 @@ export function ScheduleTrainingHub({
 
   useEffect(() => {
     setTodayStr(formatDateOnly(new Date()));
+    const saved = localStorage.getItem("athlete_calendar_view_preference") as CalendarViewModel;
+    if (saved && ["month_grid", "week_agenda", "kinetic_bubbles", "field_journal", "periodization", "micro_hud", "list"].includes(saved)) {
+      setViewMode(saved);
+    }
   }, []);
 
   const isRunningCategory = (cat: string) =>
@@ -166,7 +174,7 @@ export function ScheduleTrainingHub({
 
   return (
     <div className="space-y-4 font-mono">
-      {/* 1. Sleek Unified Command Bar (Replaces 5 bulky stacked panels) */}
+      {/* 1. Sleek Unified Command Bar with 7 Interchangeable Models Selector */}
       <CalendarCommandBar
         initialPlan={initialPlan}
         viewMode={viewMode}
@@ -188,8 +196,8 @@ export function ScheduleTrainingHub({
         </div>
       )}
 
-      {/* 3. The Hero: Active Calendar View */}
-      {viewMode === "month" ? (
+      {/* 3. The Hero: Active Calendar Model Rendering */}
+      {viewMode === "month_grid" ? (
         <TrainingMonthGridView
           initialWorkouts={initialWorkouts}
           activities={initialActivities}
@@ -199,7 +207,7 @@ export function ScheduleTrainingHub({
           onSelectWorkout={handleSelectWorkout}
           onSelectActivity={handleSelectActivity}
         />
-      ) : viewMode === "week" ? (
+      ) : viewMode === "week_agenda" ? (
         <TrainingWeekAgendaView
           weeks={allWeeks}
           todayStr={todayStr}
@@ -207,6 +215,35 @@ export function ScheduleTrainingHub({
           onSelectActivity={handleSelectActivity}
           isRunningCategory={isRunningCategory}
           healthContext={healthContext}
+        />
+      ) : viewMode === "kinetic_bubbles" ? (
+        <TrainingKineticBubbleView
+          weeks={allWeeks}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
+        />
+      ) : viewMode === "field_journal" ? (
+        <TrainingFieldJournalView
+          weeks={allWeeks}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
+        />
+      ) : viewMode === "periodization" ? (
+        <TrainingPeriodizationGanttView
+          weeks={allWeeks}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
+        />
+      ) : viewMode === "micro_hud" ? (
+        <TrainingMicroHUDView
+          weeks={allWeeks}
+          todayStr={todayStr}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
         />
       ) : (
         <TrainingWorkoutListView

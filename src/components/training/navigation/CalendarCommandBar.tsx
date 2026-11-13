@@ -15,13 +15,23 @@ import {
   ShieldAlert,
   ChevronDown,
   ChevronUp,
+  LayoutGrid,
 } from "lucide-react";
 import { AddActivityModal } from "@/components/AddActivityModal";
 
+export type CalendarViewModel =
+  | "month_grid"
+  | "week_agenda"
+  | "kinetic_bubbles"
+  | "field_journal"
+  | "periodization"
+  | "micro_hud"
+  | "list";
+
 interface CalendarCommandBarProps {
   initialPlan: TrainingPlan | null;
-  viewMode: "month" | "week" | "list";
-  setViewMode: (mode: "month" | "week" | "list") => void;
+  viewMode: CalendarViewModel;
+  setViewMode: (mode: CalendarViewModel) => void;
   filter: "ALL" | "RUNNING" | "CYCLING" | "REHAB" | "COMPLETED";
   onSelectFilter: (filter: "ALL" | "RUNNING" | "CYCLING" | "REHAB" | "COMPLETED") => void;
   healthContext: AuthoritativeAthleteHealthContext | null;
@@ -45,6 +55,13 @@ export function CalendarCommandBar({
 }: CalendarCommandBarProps) {
   const readiness = healthContext?.latestReadiness;
   const isRunningOnHold = readiness && (readiness.running_readiness === "ON_HOLD" || readiness.running_readiness === "REQUIRES_CLINICAL_REVIEW");
+
+  const handleSelectViewMode = (mode: CalendarViewModel) => {
+    setViewMode(mode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("athlete_calendar_view_preference", mode);
+    }
+  };
 
   return (
     <div className="p-3 sm:p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs font-mono text-xs space-y-3">
@@ -70,46 +87,25 @@ export function CalendarCommandBar({
           </div>
         </div>
 
-        {/* Center: Sleek View Mode Switcher */}
-        <div className="flex items-center p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs self-start lg:self-center">
-          <button
-            type="button"
-            onClick={() => setViewMode("month")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
-              viewMode === "month"
-                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            }`}
+        {/* Center: Multi-Model View Switcher Dropdown */}
+        <div className="flex items-center gap-1.5 self-start lg:self-center">
+          <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] flex items-center gap-1">
+            <LayoutGrid className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+            <span>MODEL UI:</span>
+          </span>
+          <select
+            value={viewMode}
+            onChange={(e) => handleSelectViewMode(e.target.value as CalendarViewModel)}
+            className="bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none focus:border-[var(--color-cycling)] cursor-pointer shadow-xs"
           >
-            <Grid className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-            <span>Bulan</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setViewMode("week")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
-              viewMode === "week"
-                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            }`}
-          >
-            <Columns className="w-3.5 h-3.5 text-[var(--color-endurance)]" />
-            <span>Minggu</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setViewMode("list")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all cursor-pointer ${
-              viewMode === "list"
-                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            }`}
-          >
-            <List className="w-3.5 h-3.5 text-[var(--color-running)]" />
-            <span>Agenda</span>
-          </button>
+            <option value="month_grid">⊞ 1. Grid Bulan (WKO / TrainingPeaks)</option>
+            <option value="week_agenda">▥ 2. Agenda Minggu (Garmin Cockpit)</option>
+            <option value="kinetic_bubbles">◉ 3. Gelembung Kinetik (Strava Flow)</option>
+            <option value="field_journal">📖 4. Buku Jurnal Lapangan (Field Journal)</option>
+            <option value="periodization">☷ 5. Garis Waktu Makro (Gantt &amp; PMC)</option>
+            <option value="micro_hud">⌨️ 6. Micro-HUD (Keyboard Minimalist)</option>
+            <option value="list">☰ 7. Daftar Kronologis Sesi</option>
+          </select>
         </div>
 
         {/* Right: Quick Action Modals */}
@@ -195,4 +191,3 @@ export function CalendarCommandBar({
     </div>
   );
 }
-
