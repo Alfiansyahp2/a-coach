@@ -5,9 +5,6 @@ import Link from "next/link";
 import { TrainingPlan, AuthoritativeAthleteHealthContext } from "@/types";
 import {
   Calendar as CalendarIcon,
-  Grid,
-  Columns,
-  List,
   ClipboardCheck,
   Bike,
   Footprints,
@@ -15,9 +12,9 @@ import {
   ShieldAlert,
   ChevronDown,
   ChevronUp,
-  LayoutGrid,
 } from "lucide-react";
 import { AddActivityModal } from "@/components/AddActivityModal";
+import { CalendarViewModelSelector } from "./CalendarViewModelSelector";
 
 export type CalendarViewModel =
   | "month_grid"
@@ -66,59 +63,49 @@ export function CalendarCommandBar({
   return (
     <div className="p-3 sm:p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs font-mono text-xs space-y-3">
       {/* Row 1: Brand & View Switcher & Actions */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2 border-b border-[var(--color-border)]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2.5 border-b border-[var(--color-border)]">
         {/* Left: Program Branding */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)]">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)] shrink-0">
             <CalendarIcon className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xs uppercase font-bold tracking-wider text-[var(--color-text-primary)]">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xs uppercase font-bold tracking-wider text-[var(--color-text-primary)] truncate">
                 {initialPlan?.title || "Program Periodisasi 12-Minggu Zone 2"}
               </h1>
-              <span className="text-[8px] px-2 py-0.2 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold uppercase">
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold uppercase tracking-wider shrink-0">
                 Active Macrocycle
               </span>
             </div>
-            <span className="text-[10px] text-[var(--color-text-secondary)]">
+            <span className="text-[10px] text-[var(--color-text-secondary)] truncate block">
               MTB Zone 2 (RPE 3–4) • Puasa Senin &amp; Kamis Terproteksi
             </span>
           </div>
         </div>
 
-        {/* Center: Multi-Model View Switcher Dropdown */}
-        <div className="flex items-center gap-1.5 self-start lg:self-center">
-          <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] flex items-center gap-1">
-            <LayoutGrid className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-            <span>MODEL UI:</span>
-          </span>
-          <select
-            value={viewMode}
-            onChange={(e) => handleSelectViewMode(e.target.value as CalendarViewModel)}
-            className="bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)] rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none focus:border-[var(--color-cycling)] cursor-pointer shadow-xs"
-          >
-            <option value="month_grid">⊞ 1. Grid Bulan (WKO / TrainingPeaks)</option>
-            <option value="week_agenda">▥ 2. Agenda Minggu (Garmin Cockpit)</option>
-            <option value="kinetic_bubbles">◉ 3. Gelembung Kinetik (Strava Flow)</option>
-            <option value="field_journal">📖 4. Buku Jurnal Lapangan (Field Journal)</option>
-            <option value="periodization">☷ 5. Garis Waktu Makro (Gantt &amp; PMC)</option>
-            <option value="micro_hud">⌨️ 6. Micro-HUD (Keyboard Minimalist)</option>
-            <option value="list">☰ 7. Daftar Kronologis Sesi</option>
-          </select>
-        </div>
+        {/* Right: Controls & Actions */}
+        <div className="flex items-center gap-2 sm:gap-2.5 self-start lg:self-center shrink-0 flex-wrap sm:flex-nowrap">
+          {/* Custom Modern View Mode Selector */}
+          <CalendarViewModelSelector
+            viewMode={viewMode}
+            onSelectViewMode={handleSelectViewMode}
+          />
 
-        {/* Right: Quick Action Modals */}
-        <div className="flex items-center gap-2 self-start lg:self-center">
-          <AddActivityModal variant="button" />
-          <Link
-            href="/recap"
-            className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] font-bold flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer"
-            title="Buka Rekap Telemetri Mingguan"
-          >
-            <ClipboardCheck className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-            <span className="hidden sm:inline">Rekap</span>
-          </Link>
+          <div className="h-4 w-px bg-[var(--color-border)] hidden sm:block" />
+
+          {/* Quick Action Modals */}
+          <div className="flex items-center gap-2 shrink-0">
+            <AddActivityModal variant="button" />
+            <Link
+              href="/recap"
+              className="px-3 py-1.5 rounded-md bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] font-bold flex items-center gap-1.5 transition-all shadow-xs shrink-0 whitespace-nowrap cursor-pointer"
+              title="Buka Rekap Telemetri Mingguan"
+            >
+              <ClipboardCheck className="w-3.5 h-3.5 text-[var(--color-cycling)] shrink-0" />
+              <span className="hidden sm:inline">Rekap</span>
+            </Link>
+          </div>
         </div>
       </div>
 

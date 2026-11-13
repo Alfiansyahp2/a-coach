@@ -40,19 +40,23 @@ Seluruh kode sumber dirancang dengan modularitas tinggi, mematuhi standar *Clean
 - **Orkestrasi Rendering Dinamis**:
   Mendelegasikan rendering secara modular ke masing-masing komponen tampilan berdasarkan model aktif tanpa adanya kebocoran logika ataupun duplikasi kode.
 
-#### 2. [`CalendarCommandBar.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/components/training/navigation/CalendarCommandBar.tsx) (180 baris)
-- **Dropdown Pemilih Model Kalender Terpadu**:
-  Menggantikan deretan tombol statis sebelumnya dengan kontrol *select dropdown* bergaya avionik monospaced (`font-mono text-xs`) yang rapi dan hemat ruang layar horizontal.
-- **Penyimpanan Otomatis (*Auto-save Handler*)**:
-  Fungsi `handleSelectViewMode(mode)` langsung menulis preferensi baru ke `localStorage.setItem("athlete_calendar_view_preference", mode)` saat atlet mengganti pilihan model di bilah navigasi.
-- **Pill Status Klinis & Aksi Cepat**:
-  Mempertahankan indikator status kesiapan klinis lari/sepeda serta tombol pintas pencatatan aktivitas langsung (`AddActivityModal`) dan navigasi ke rekap mingguan.
+#### 2. [`CalendarCommandBar.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/components/training/navigation/CalendarCommandBar.tsx) (166 baris)
+- **Desain Ulang Baris Utama (*Command Deck Header*)**:
+  Mengeliminasi dropdown HTML `<select>` bawaan browser yang kaku dan menggantikannya dengan integrasi modul `CalendarViewModelSelector` yang membuka menu popover interaktif bergaya obsidian avionics.
+- **Pembersihan Tipografi & Alignment**:
+  Menyempurnakan tata letak judul program makrosiklus, pill status *Active Macrocycle*, dan tombol aksi cepat agar sejajar rapi di layar lebar maupun kecil.
+
+#### 3. [`AddActivityModal.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/components/activity/modal/AddActivityModal.tsx) (240 baris)
+- **Pencegahan Bungkus Baris (*Whitespace No-Wrap Fix*)**:
+  Menambahkan kelas `whitespace-nowrap shrink-0` pada tombol trigger `variant="button"`, mencegah label `+ TAMBAH AKTIVITAS` terputus menjadi dua baris pada layout bar kalender.
 
 ---
 
 ### B. Berkas Komponen Baru (*New Modules / Untracked Files*)
 
-#### 1. Model 3: Gelembung Kinetik (*Strava Kinetic Bubble Matrix*)
+#### 1. Pemilih Model Kalender Popover Modern
+- [`CalendarViewModelSelector.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/components/training/navigation/CalendarViewModelSelector.tsx) (187 baris):
+  Komponen popover dropdown kustom dengan ikon Lucide spesifik untuk setiap model, badge kategori, deskripsi singkat tujuan atletik, indikator aktif centang `✓`, dan penutupan otomatis saat klik di luar area (*click-outside listener*).
 - [`TrainingKineticBubbleView.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/components/training/views/TrainingKineticBubbleView.tsx) (117 baris):
   Mengubah matriks kalender menjadi visualisasi gelembung sirkular berbasis volume durasi/jarak. Dilengkapi dengan navigasi fokus minggu dan filter status.
 - [`KineticDayBubble.tsx`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/src/components/training/kinetic/KineticDayBubble.tsx) (102 baris):
