@@ -147,10 +147,12 @@ export function MonthDayCell({
         )}
       </div>
 
-      {/* 3. Micro Footer */}
-      <div className="text-[8px] text-[var(--color-text-muted)] text-right pt-0.5">
-        {hasActivities ? `${day.activities.length} sesi dicatat` : hasWorkouts ? "Terjadwal" : ""}
-      </div>
+      {/* 3. Micro Footer (Only shown when multiple activities exist) */}
+      {day.activities.length > 1 && (
+        <div className="text-[8px] text-[var(--color-text-muted)] text-right pt-0.5 font-tabular">
+          {day.activities.length} sesi dicatat
+        </div>
+      )}
     </div>
   );
 }

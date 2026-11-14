@@ -56,27 +56,27 @@ export function TrainingFieldJournalView({
             type="button"
             onClick={() => canGoPrev && setActiveWeekIdx(activeWeekIdx - 1)}
             disabled={!canGoPrev}
-            className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
               canGoPrev
                 ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] cursor-pointer"
                 : "opacity-40 cursor-not-allowed border-[var(--color-border)] text-[var(--color-text-muted)]"
             }`}
           >
             <ChevronLeft className="w-3.5 h-3.5" />
-            <span>Balik Lembar Sebelumnya</span>
+            <span>Lembar Lalu</span>
           </button>
 
           <button
             type="button"
             onClick={() => canGoNext && setActiveWeekIdx(activeWeekIdx + 1)}
             disabled={!canGoNext}
-            className={`px-3 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1.5 rounded-lg border flex items-center gap-1 transition-all ${
               canGoNext
                 ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] cursor-pointer"
                 : "opacity-40 cursor-not-allowed border-[var(--color-border)] text-[var(--color-text-muted)]"
             }`}
           >
-            <span>Lembar Selanjutnya</span>
+            <span>Lembar Lanjut</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
 
