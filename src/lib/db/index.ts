@@ -8,6 +8,7 @@ export * from './healthRepo';
 export * from './availabilityRepo';
 export * from './equipmentRepo';
 export * from './wellnessRepo';
+export * from './sportRepo';
 
 import * as client from './client';
 import * as userRepo from './userRepo';
@@ -19,6 +20,7 @@ import * as healthRepo from './healthRepo';
 import * as availabilityRepo from './availabilityRepo';
 import * as equipmentRepo from './equipmentRepo';
 import * as wellnessRepo from './wellnessRepo';
+import * as sportRepo from './sportRepo';
 
 const db = {
   ...client,
@@ -31,6 +33,7 @@ const db = {
   ...availabilityRepo,
   ...equipmentRepo,
   ...wellnessRepo,
+  ...sportRepo,
 };
 
 export default db;

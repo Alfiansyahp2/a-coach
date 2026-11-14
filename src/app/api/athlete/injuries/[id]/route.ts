@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connection } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import {
-  DEFAULT_USER_ID,
   getAthleteInjuryById,
   updateAthleteInjury,
   logHealthAuditTrail,
@@ -10,6 +9,7 @@ import {
   saveAthleteReadiness,
 } from '@/lib/db';
 import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngine';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 /**
  * GET /api/athlete/injuries/[id]
@@ -23,7 +23,9 @@ export async function GET(
   try {
     const { id } = await params;
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId') || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, searchParams.get('userId'));
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const injury = await getAthleteInjuryById(id, userId);
     if (!injury) {
@@ -55,7 +57,9 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await req.json();
-    const userId = body.user_id || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, body.user_id);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const existing = await getAthleteInjuryById(id, userId);
     if (!existing) {

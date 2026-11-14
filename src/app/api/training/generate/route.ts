@@ -1,19 +1,23 @@
 import { NextResponse } from 'next/server';
 import { generateCoachTrainingFromDatabase } from '@/lib/domain/coach/coachTrainingGenerator';
-import { DEFAULT_USER_ID } from '@/lib/db';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 export async function POST(request: Request) {
   try {
-    let userId = DEFAULT_USER_ID;
+    let requestedUserId: string | undefined = undefined;
     let goalId: string | undefined = undefined;
 
     try {
       const body = await request.json();
-      if (body?.user_id) userId = body.user_id;
+      if (body?.user_id) requestedUserId = body.user_id;
       if (body?.goal_id) goalId = body.goal_id;
     } catch {
       // Body is optional
     }
+
+    const auth = verifyUserAuthorization(request, requestedUserId);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const result = await generateCoachTrainingFromDatabase(userId, goalId);
 

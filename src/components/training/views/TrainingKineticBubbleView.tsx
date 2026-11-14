@@ -32,7 +32,7 @@ export function TrainingKineticBubbleView({
             <span>Strava Kinetic Bubble Matrix • 12-Minggu Momentum</span>
           </h2>
           <span className="text-[10px] text-[var(--color-text-secondary)]">
-            Diameter lingkaran sebanding dengan durasi latihan. Hover gelembung untuk melihat rincian telemetri.
+            Matriks ritme volume 12-minggu. Skala radius sebanding durasi sesi latihan.
           </span>
         </div>
 

@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateActivity, getActivityById, deleteActivity, DEFAULT_USER_ID } from "@/lib/db";
+import { updateActivity, getActivityById, deleteActivity } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { verifyUserAuthorization } from "@/lib/auth/authGuard";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
     const { id } = await params;
-    const activity = await getActivityById(id, DEFAULT_USER_ID);
+    const activity = await getActivityById(id, auth.userId);
 
     if (!activity) {
       return NextResponse.json(
@@ -32,6 +35,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
     const { id } = await params;
     const body = await req.json();
 
@@ -70,7 +75,7 @@ export async function PATCH(
       updates.elevation_gain_meters = body.elevation_gain_meters;
     }
 
-    const updated = await updateActivity(id, DEFAULT_USER_ID, updates);
+    const updated = await updateActivity(id, auth.userId, updates);
 
     if (!updated) {
       return NextResponse.json(
@@ -98,8 +103,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
     const { id } = await params;
-    const deleted = await deleteActivity(id, DEFAULT_USER_ID);
+    const deleted = await deleteActivity(id, auth.userId);
 
     if (!deleted) {
       return NextResponse.json(

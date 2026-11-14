@@ -65,13 +65,16 @@ export function CalendarCommandBar({
       {/* Row 1: Brand & View Switcher & Actions */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-2.5 border-b border-[var(--color-border)]">
         {/* Left: Program Branding */}
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0 max-w-full lg:max-w-[480px] xl:max-w-[580px]">
           <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)] shrink-0">
             <CalendarIcon className="w-4 h-4" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xs uppercase font-bold tracking-wider text-[var(--color-text-primary)] truncate">
+              <h1
+                className="text-xs uppercase font-bold tracking-wider text-[var(--color-text-primary)] truncate max-w-[260px] sm:max-w-[340px] md:max-w-[400px]"
+                title={initialPlan?.title || "Program Periodisasi 12-Minggu Zone 2"}
+              >
                 {initialPlan?.title || "Program Periodisasi 12-Minggu Zone 2"}
               </h1>
               <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold uppercase tracking-wider shrink-0">

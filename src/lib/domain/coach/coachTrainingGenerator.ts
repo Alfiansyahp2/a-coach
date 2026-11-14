@@ -174,7 +174,14 @@ export async function generateCoachTrainingFromDatabase(
   await deleteTrainingPlansByUserId(userId);
 
   // 5. Create authoritative 12-Week Training Plan linked to the chosen goal
-  const planStartDate = activeGoal.start_date || '2026-11-02';
+  let planStartDate = activeGoal.start_date;
+  if (!planStartDate) {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = (day === 0 ? -6 : 1) - day;
+    const currentMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMonday);
+    planStartDate = `${currentMonday.getFullYear()}-${String(currentMonday.getMonth() + 1).padStart(2, '0')}-${String(currentMonday.getDate()).padStart(2, '0')}`;
+  }
   let planEndDate = activeGoal.target_date;
   if (!planEndDate) {
     const startD = new Date(planStartDate);

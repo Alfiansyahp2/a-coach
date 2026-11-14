@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DEFAULT_USER_ID, recordMedicalProcedureAndAssessment } from "@/lib/db";
+import { recordMedicalProcedureAndAssessment } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { verifyUserAuthorization } from "@/lib/auth/authGuard";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const userId = body.user_id || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, body.user_id);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const result = await recordMedicalProcedureAndAssessment(userId, {
       assessment_date: body.assessment_date || body.procedure_date || new Date().toISOString().split("T")[0],
