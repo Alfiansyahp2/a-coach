@@ -8,6 +8,7 @@ import {
   aggregateWeeklyInjuries,
   evaluateWeeklyClinicalCorrelation,
 } from './weeklyRecapInjury';
+import { computeLocalWeeklyProMetrics } from './weeklyRecapProCalculator';
 import { formatDateOnly } from '@/lib/formatters';
 
 const INDO_MONTHS = [
@@ -116,11 +117,21 @@ export function computeWeeklyActivityAndInjuryRecap(
     injurySummary
   );
 
+  // 5. Metrik Fisiologis Level PRO (Foster sRPE, Seiler 80/20, WoW Delta, Monotony)
+  const proMetrics = computeLocalWeeklyProMetrics(
+    activities,
+    start,
+    end,
+    painLogs,
+    trainingResponses
+  );
+
   return {
     timeframe,
     activity_summary: activitySummary,
     injury_summary: injurySummary,
     clinical_verdict: clinicalVerdict,
+    pro_metrics: proMetrics,
   };
 }
 

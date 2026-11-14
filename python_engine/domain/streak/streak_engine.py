@@ -6,158 +6,29 @@ from .models import (
     FlameHeatTierModel,
     WeeklyStreakResponse,
 )
+from .date_utils import (
+    MONTH_NAMES,
+    parse_date,
+    get_monday_of_week,
+    get_sunday_of_week,
+    format_local_date_key,
+    format_month_day,
+    format_month_day_year,
+)
+from .tiers import get_flame_heat_tier
 
-MONTH_NAMES = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+# Re-exports for backwards compatibility
+__all__ = [
+    "MONTH_NAMES",
+    "parse_date",
+    "get_monday_of_week",
+    "get_sunday_of_week",
+    "format_local_date_key",
+    "format_month_day",
+    "format_month_day_year",
+    "get_flame_heat_tier",
+    "calculate_weekly_streak",
 ]
-
-
-def parse_date(date_input: Any) -> Optional[datetime]:
-    if not date_input:
-        return None
-    if isinstance(date_input, datetime):
-        return date_input
-    if isinstance(date_input, str):
-        # Handle ISO strings like 2026-11-08T01:33:00.000Z or 2026-11-08
-        clean_str = date_input.replace("Z", "+00:00") if date_input.endswith("Z") else date_input
-        try:
-            return datetime.fromisoformat(clean_str)
-        except ValueError:
-            try:
-                return datetime.strptime(clean_str.split("T")[0], "%Y-%m-%d")
-            except ValueError:
-                return None
-    return None
-
-
-def get_monday_of_week(d: datetime) -> datetime:
-    # d.weekday(): Monday is 0, Sunday is 6
-    diff = d.weekday()
-    monday = d - timedelta(days=diff)
-    return datetime(monday.year, monday.month, monday.day, 0, 0, 0, 0, tzinfo=d.tzinfo)
-
-
-def get_sunday_of_week(monday: datetime) -> datetime:
-    sunday = monday + timedelta(days=6)
-    return datetime(sunday.year, sunday.month, sunday.day, 23, 59, 59, 999999, tzinfo=monday.tzinfo)
-
-
-def format_local_date_key(d: datetime) -> str:
-    return d.strftime("%Y-%m-%d")
-
-
-def format_month_day(d: datetime) -> str:
-    return f"{MONTH_NAMES[d.month - 1]} {d.day}"
-
-
-def format_month_day_year(d: datetime) -> str:
-    return f"{MONTH_NAMES[d.month - 1]} {d.day}, {d.year}"
-
-
-def get_flame_heat_tier(streak_weeks: int, is_flame_burning: bool = True) -> FlameHeatTierModel:
-    if streak_weeks <= 0 or not is_flame_burning:
-        return FlameHeatTierModel(
-            stage=0,
-            name="Api Padam",
-            minWeeks=0,
-            maxWeeks=0,
-            colorHex="#5A6272",
-            glowRgba="rgba(90, 98, 114, 0.2)",
-            temperatureText="0°C",
-            description="Api padam — selesaikan 1 sesi minggu ini untuk menyalakan api",
-            nextTierWeeks=1,
-            weeksToNextTier=1,
-        )
-
-    # Stage 1 (1–9 Weeks): Api Merah (#EF4444, ~800°C)
-    if streak_weeks < 10:
-        return FlameHeatTierModel(
-            stage=1,
-            name="Api Merah",
-            minWeeks=1,
-            maxWeeks=9,
-            colorHex="#EF4444",
-            glowRgba="rgba(239, 68, 68, 0.5)",
-            temperatureText="~800°C",
-            description="Stage 1: Api Merah (~800°C) — Initial ember / least hot",
-            nextTierWeeks=10,
-            weeksToNextTier=10 - streak_weeks,
-        )
-
-    # Stage 2 (10–19 Weeks): Api Oranye (#F97316, ~1,100°C)
-    if streak_weeks < 20:
-        return FlameHeatTierModel(
-            stage=2,
-            name="Api Oranye",
-            minWeeks=10,
-            maxWeeks=19,
-            colorHex="#F97316",
-            glowRgba="rgba(249, 115, 22, 0.5)",
-            temperatureText="~1,100°C",
-            description="Stage 2: Api Oranye (~1,100°C) — Sustained flame / medium heat",
-            nextTierWeeks=20,
-            weeksToNextTier=20 - streak_weeks,
-        )
-
-    # Stage 3 (20–29 Weeks): Api Kuning Emas (#EAB308, ~1,300°C)
-    if streak_weeks < 30:
-        return FlameHeatTierModel(
-            stage=3,
-            name="Api Kuning Emas",
-            minWeeks=20,
-            maxWeeks=29,
-            colorHex="#EAB308",
-            glowRgba="rgba(234, 179, 8, 0.5)",
-            temperatureText="~1,300°C",
-            description="Stage 3: Api Kuning Emas (~1,300°C) — High heat consistency",
-            nextTierWeeks=30,
-            weeksToNextTier=30 - streak_weeks,
-        )
-
-    # Stage 4 (30–39 Weeks): Api Putih Terang (#F8FAFC, ~1,500°C)
-    if streak_weeks < 40:
-        return FlameHeatTierModel(
-            stage=4,
-            name="Api Putih Terang",
-            minWeeks=30,
-            maxWeeks=39,
-            colorHex="#F8FAFC",
-            glowRgba="rgba(248, 250, 252, 0.65)",
-            temperatureText="~1,500°C",
-            description="Stage 4: Api Putih Terang (~1,500°C) — White-hot intensity",
-            nextTierWeeks=40,
-            weeksToNextTier=40 - streak_weeks,
-        )
-
-    # Stage 5 (40–49 Weeks): Api Biru Cyan (#00F0FF, ~1,800°C)
-    if streak_weeks < 50:
-        return FlameHeatTierModel(
-            stage=5,
-            name="Api Biru Cyan",
-            minWeeks=40,
-            maxWeeks=49,
-            colorHex="#00F0FF",
-            glowRgba="rgba(0, 240, 255, 0.65)",
-            temperatureText="~1,800°C",
-            description="Stage 5: Api Biru Cyan (~1,800°C) — Pure gas combustion / hottest flame",
-            nextTierWeeks=50,
-            weeksToNextTier=50 - streak_weeks,
-        )
-
-    # Stage 6 (50+ Weeks): Api Ungu Plasma (#C084FC, >2,200°C)
-    return FlameHeatTierModel(
-        stage=6,
-        name="Api Ungu Plasma",
-        minWeeks=50,
-        maxWeeks=None,
-        colorHex="#C084FC",
-        glowRgba="rgba(192, 132, 252, 0.7)",
-        temperatureText=">2,200°C",
-        description="Stage 6: Api Ungu Plasma (>2,200°C) — Cosmic plasma peak",
-        nextTierWeeks=None,
-        weeksToNextTier=None,
-    )
 
 
 def calculate_weekly_streak(
@@ -246,7 +117,6 @@ def calculate_weekly_streak(
     is_flame_at_risk = not is_flame_burning and prev_week_key in active_weeks_map
 
     # Days remaining in current week until Sunday 23:59:59
-    # Python weekday(): Monday is 0, Sunday is 6
     ref_weekday = ref_dt.weekday()
     days_remaining = 0 if ref_weekday == 6 else 6 - ref_weekday
 
@@ -353,4 +223,3 @@ def calculate_weekly_streak(
         activeWeeksCount=active_weeks_count,
         heatTier=heat_tier,
     )
-
