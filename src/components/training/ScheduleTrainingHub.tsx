@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import {
   Activity,
   ScheduledWorkout,
@@ -10,23 +9,19 @@ import {
   WorkoutActivityMatch,
   AuthoritativeAthleteHealthContext,
 } from "@/types";
-import {
-  Calendar as CalendarIcon,
-  RefreshCw,
-  Grid,
-  List,
-  ClipboardCheck,
-} from "lucide-react";
-import { AddActivityModal } from "@/components/AddActivityModal";
 import { formatDateOnly } from "@/lib/formatters";
 import { MacroObjectivesStrip } from "./MacroObjectivesStrip";
 import { Zone2PacingGuidelinePanel } from "./Zone2PacingGuidelinePanel";
 import { WorkoutDossierModal } from "./WorkoutDossierModal";
 import { buildCalendarWeeks } from "./calendarBuilder";
-import { TrainingPhaseAndFilterToolbar } from "./filters/TrainingPhaseAndFilterToolbar";
-import { TrainingCalendarGridView } from "./views/TrainingCalendarGridView";
+import { CalendarCommandBar, CalendarViewModel } from "./navigation/CalendarCommandBar";
+import { TrainingMonthGridView } from "./views/TrainingMonthGridView";
+import { TrainingWeekAgendaView } from "./views/TrainingWeekAgendaView";
+import { TrainingKineticBubbleView } from "./views/TrainingKineticBubbleView";
+import { TrainingFieldJournalView } from "./views/TrainingFieldJournalView";
+import { TrainingPeriodizationGanttView } from "./views/TrainingPeriodizationGanttView";
+import { TrainingMicroHUDView } from "./views/TrainingMicroHUDView";
 import { TrainingWorkoutListView } from "./views/TrainingWorkoutListView";
-import { ScheduleTrainingHeader } from "./ScheduleTrainingHeader";
 
 interface ScheduleTrainingHubProps {
   initialPlan: TrainingPlan | null;
@@ -43,49 +38,30 @@ export function ScheduleTrainingHub({
   initialWorkouts,
   initialGoals,
   matches,
+  healthContext,
   initialTodayDate,
   initialActivities = [],
 }: ScheduleTrainingHubProps) {
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
-  const [selectedPhase, setSelectedPhase] = useState<"ALL" | "PHASE_1" | "PHASE_2" | "PHASE_3">("ALL");
+  // Multi-view model preference: default to month_grid or load from localStorage
+  const [viewMode, setViewMode] = useState<CalendarViewModel>("month_grid");
   const [filter, setFilter] = useState<"ALL" | "RUNNING" | "CYCLING" | "REHAB" | "COMPLETED">("ALL");
+  const [isGuidelinesOpen, setIsGuidelinesOpen] = useState(false);
+
   const [selectedWorkout, setSelectedWorkout] = useState<ScheduledWorkout | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [selectedCustomMatch, setSelectedCustomMatch] = useState<WorkoutActivityMatch | null>(null);
-  const [isRegenerating, setIsRegenerating] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
 
-  // Dynamic current date resolution (synchronizes with real-world date, e.g. "2026-11-04")
   const [todayStr, setTodayStr] = useState<string>(
     () => initialTodayDate || formatDateOnly(new Date())
   );
 
   useEffect(() => {
     setTodayStr(formatDateOnly(new Date()));
-  }, []);
-
-  const handleRegenerate = async () => {
-    setIsRegenerating(true);
-    setMessage(null);
-    try {
-      const res = await fetch("/api/training/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Gagal sinkronisasi rencana latihan");
-      }
-      setMessage("Program 12-Minggu Zone 2 berhasil dikalibrasi ulang dari database!");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (err: any) {
-      setMessage(`Error: ${err.message}`);
-    } finally {
-      setIsRegenerating(false);
+    const saved = localStorage.getItem("athlete_calendar_view_preference") as CalendarViewModel;
+    if (saved && ["month_grid", "week_agenda", "kinetic_bubbles", "field_journal", "periodization", "micro_hud", "list"].includes(saved)) {
+      setViewMode(saved);
     }
-  };
+  }, []);
 
   const isRunningCategory = (cat: string) =>
     cat.toLowerCase().includes("run") || cat.toLowerCase().includes("lari");
@@ -99,12 +75,8 @@ export function ScheduleTrainingHub({
     return true;
   });
 
-  const completedCount = initialWorkouts.filter((w) => w.status === "COMPLETED").length;
   const runningCount = initialWorkouts.filter((w) => isRunningCategory(w.workout_category)).length;
   const cyclingCount = initialWorkouts.filter((w) => w.workout_category === "Cycling").length;
-  const rehabCount = initialWorkouts.filter(
-    (w) => w.workout_category === "Cross Training" || w.workout_category === "Strength Training"
-  ).length;
 
   const allWeeks = buildCalendarWeeks(
     initialWorkouts,
@@ -113,14 +85,6 @@ export function ScheduleTrainingHub({
     todayStr,
     isRunningCategory
   );
-
-  // Filter weeks by phase
-  const displayedWeeks = allWeeks.filter((w) => {
-    if (selectedPhase === "PHASE_1") return w.phaseNumber === 1;
-    if (selectedPhase === "PHASE_2") return w.phaseNumber === 2;
-    if (selectedPhase === "PHASE_3") return w.phaseNumber === 3;
-    return true;
-  });
 
   const selectedMatch = selectedWorkout
     ? matches.find((m) => m.workout_id === selectedWorkout.id)
@@ -146,7 +110,6 @@ export function ScheduleTrainingHub({
     const existingWorkout = initialWorkouts.find(
       (w) => formatDateOnly(w.scheduled_date) === actDate
     );
-
     const isRun = (act.sport_type || "").toLowerCase().includes("run");
     const isCycling =
       (act.sport_type || "").toLowerCase().includes("ride") ||
@@ -179,9 +142,7 @@ export function ScheduleTrainingHub({
         target_distance_meters: act.distance_meters,
         target_duration_seconds: act.moving_time_seconds,
         target_intensity: "Zone 2 • Sesi Tercatat",
-        description: act.name
-          ? `${act.name} (Tercatat via Strava / Manual)`
-          : "Sesi aktivitas tersinkronisasi.",
+        description: act.name ? `${act.name} (Tercatat via Strava / Manual)` : "Sesi aktivitas tersinkronisasi.",
         status: "COMPLETED",
         created_at: act.created_at || act.start_date,
         updated_at: act.updated_at || act.start_date,
@@ -212,52 +173,77 @@ export function ScheduleTrainingHub({
     : false;
 
   return (
-    <div className="space-y-6">
-      {/* 1. Header Strip: Active 12-Week Plan & Macro Calibration */}
-      <ScheduleTrainingHeader
+    <div className="space-y-4 font-mono">
+      {/* 1. Sleek Unified Command Bar with 7 Interchangeable Models Selector */}
+      <CalendarCommandBar
         initialPlan={initialPlan}
         viewMode={viewMode}
         setViewMode={setViewMode}
-        handleRegenerate={handleRegenerate}
-        isRegenerating={isRegenerating}
+        filter={filter}
+        onSelectFilter={setFilter}
+        healthContext={healthContext}
+        isGuidelinesOpen={isGuidelinesOpen}
+        onToggleGuidelines={() => setIsGuidelinesOpen(!isGuidelinesOpen)}
+        cyclingCount={cyclingCount}
+        runningCount={runningCount}
       />
 
-
-      {message && (
-        <div className="p-3 rounded-lg bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 text-xs font-mono text-[var(--color-cycling)] font-semibold">
-          {message}
+      {/* 2. Collapsible Macro Objectives & Zone 2 Guidelines Drawer */}
+      {isGuidelinesOpen && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          <MacroObjectivesStrip goals={initialGoals} plan={initialPlan} />
+          <Zone2PacingGuidelinePanel />
         </div>
       )}
 
-      {/* 2. Macro Objectives Progress Bar Strip */}
-      <MacroObjectivesStrip goals={initialGoals} plan={initialPlan} />
-
-      {/* 3. Zone 2 Endurance Pacing & Parameter Guide Banner */}
-      <Zone2PacingGuidelinePanel />
-
-      {/* 4. Phase Switcher & Sport Type Filter Toolbar */}
-      <TrainingPhaseAndFilterToolbar
-        selectedPhase={selectedPhase}
-        onSelectPhase={setSelectedPhase}
-        displayedWeeksCount={displayedWeeks.length}
-        filter={filter}
-        onSelectFilter={setFilter}
-        totalWorkoutsCount={initialWorkouts.length}
-        cyclingCount={cyclingCount}
-        runningCount={runningCount}
-        rehabCount={rehabCount}
-        completedCount={completedCount}
-        filteredCount={filteredWorkouts.length}
-      />
-
-      {/* 5. Active View Rendering: Calendar Grid vs Linear List */}
-      {viewMode === "calendar" ? (
-        <TrainingCalendarGridView
-          displayedWeeks={displayedWeeks}
+      {/* 3. The Hero: Active Calendar Model Rendering */}
+      {viewMode === "month_grid" ? (
+        <TrainingMonthGridView
+          initialWorkouts={initialWorkouts}
+          activities={initialActivities}
+          filter={filter}
+          todayStr={todayStr}
+          isRunningCategory={isRunningCategory}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+        />
+      ) : viewMode === "week_agenda" ? (
+        <TrainingWeekAgendaView
+          weeks={allWeeks}
+          todayStr={todayStr}
           onSelectWorkout={handleSelectWorkout}
           onSelectActivity={handleSelectActivity}
           isRunningCategory={isRunningCategory}
+          healthContext={healthContext}
+        />
+      ) : viewMode === "kinetic_bubbles" ? (
+        <TrainingKineticBubbleView
+          weeks={allWeeks}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
+        />
+      ) : viewMode === "field_journal" ? (
+        <TrainingFieldJournalView
+          weeks={allWeeks}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
+        />
+      ) : viewMode === "periodization" ? (
+        <TrainingPeriodizationGanttView
+          weeks={allWeeks}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
+        />
+      ) : viewMode === "micro_hud" ? (
+        <TrainingMicroHUDView
+          weeks={allWeeks}
           todayStr={todayStr}
+          onSelectWorkout={handleSelectWorkout}
+          onSelectActivity={handleSelectActivity}
+          isRunningCategory={isRunningCategory}
         />
       ) : (
         <TrainingWorkoutListView
@@ -268,7 +254,7 @@ export function ScheduleTrainingHub({
         />
       )}
 
-      {/* 6. Workout Detail Modal */}
+      {/* 4. Workout Dossier Modal */}
       {selectedWorkout && (
         <WorkoutDossierModal
           workout={selectedWorkout}

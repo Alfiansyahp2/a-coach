@@ -73,6 +73,7 @@ Uncompromising visual art direction designed to prevent generic, repetitive SaaS
 * [**RESPONSIVE_DESIGN.md**](./02-design/RESPONSIVE_DESIGN.md) — Breakpoints from 375px mobile to 1440px desktop.
 * [**ACCESSIBILITY.md**](./02-design/ACCESSIBILITY.md) — WCAG 2.1 AA compliance and screen reader guidelines.
 * [**DESIGN_REVIEW_CHECKLIST.md**](./02-design/DESIGN_REVIEW_CHECKLIST.md) — Mandatory visual review gate before feature merge.
+* [**CALENDAR_UI_DESIGN_VARIANTS_SPECIFICATION.md**](./02-design/CALENDAR_UI_DESIGN_VARIANTS_SPECIFICATION.md) — Master specification for 5+ interchangeable athletic calendar models (Month Grid, Week Agenda, Kinetic Bubble, Field Journal, Gantt PMC).
 
 ---
 
