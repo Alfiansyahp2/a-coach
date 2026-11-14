@@ -230,4 +230,5 @@ export interface SyncLog {
 }
 
 export * from './health';
+export * from './coach';
 

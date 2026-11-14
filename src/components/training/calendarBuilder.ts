@@ -1,6 +1,8 @@
 import { Activity, ScheduledWorkout } from "@/types";
 import { formatDateOnly } from "@/lib/formatters";
 
+export type DaySparkStatus = "COMPLETED" | "MISSED" | "TODAY" | "PLANNED" | "FASTING" | "BUFFER" | "REST";
+
 export interface CalendarDay {
   dateStr: string;
   dayNumber: number;
@@ -10,6 +12,7 @@ export interface CalendarDay {
   isToday: boolean;
   workouts: ScheduledWorkout[];
   activities: Activity[];
+  status: DaySparkStatus;
 }
 
 export interface CalendarWeek {
@@ -32,9 +35,15 @@ export interface CalendarWeek {
   completedDurationSeconds: number;
   targetAchievedPct: number;
   isCurrentWeek: boolean;
+  completedWorkoutsCount: number;
+  totalWorkoutsCount: number;
+  completionRatePct: number;
+  estimatedWeeklyTss: number;
+  sparklineDays: Array<{ dateStr: string; label: string; status: DaySparkStatus }>;
 }
 
 export const FULL_DAY_NAMES = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+export const SHORT_DAY_INITIALS = ["S", "S", "R", "K", "J", "S", "M"];
 export const SHORT_MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
 
 export const WEEK_CONFIGS = [
@@ -52,10 +61,6 @@ export const WEEK_CONFIGS = [
   { weekNum: 12, phase: 3, label: "Minggu 12 (18 – 24 Jan 2027)", focus: "Fase 3: Deload Week 2 & Konsolidasi Akhir 12 Minggu", isDeload: true, minTargetKm: 32 },
 ];
 
-/**
- * Builds 12 structured calendar weeks (Nov 02, 2026 to Jan 24, 2027)
- * Seamlessly integrates planned workouts AND recorded activities into daily cards and weekly mileage.
- */
 export function buildCalendarWeeks(
   initialWorkouts: ScheduledWorkout[],
   activities: Activity[] = [],
@@ -74,8 +79,10 @@ export function buildCalendarWeeks(
     let runningDist = 0;
     let scheduledDur = 0;
     let completedDur = 0;
+    let weekTss = 0;
+    let completedCount = 0;
+    let plannedCount = 0;
 
-    // Base date: Monday, Nov 02, 2026
     const baseStart = new Date(2026, 10, 2 + wIdx * 7);
 
     for (let d = 0; d < 7; d++) {
@@ -85,56 +92,69 @@ export function buildCalendarWeeks(
       const dayNumber = curDate.getDate();
       const dateStr = `${y}-${m}-${String(dayNumber).padStart(2, "0")}`;
       const monthName = SHORT_MONTH_NAMES[curDate.getMonth()];
+      const isToday = dateStr === todayStr;
+      const isPastDay = Boolean(todayStr && dateStr < todayStr && !isToday);
 
-      // Filter scheduled workouts for this day
       const dayWorkouts = initialWorkouts.filter((wo) => {
         const wDate = formatDateOnly(wo.scheduled_date);
-        const matchDate = wDate === dateStr;
-        if (!matchDate) return false;
+        if (wDate !== dateStr) return false;
         if (filter === "RUNNING") return isRunningCategory(wo.workout_category);
         if (filter === "CYCLING") return wo.workout_category === "Cycling";
-        if (filter === "REHAB")
-          return wo.workout_category === "Cross Training" || wo.workout_category === "Strength Training";
+        if (filter === "REHAB") return wo.workout_category === "Cross Training" || wo.workout_category === "Strength Training";
         if (filter === "COMPLETED") return wo.status === "COMPLETED";
         return true;
       });
 
-      // Filter recorded Strava/manual activities for this day
       const dayActivities = activities.filter((act) => {
         const actDate = formatDateOnly(act.start_date);
-        const matchDate = actDate === dateStr;
-        if (!matchDate) return false;
+        if (actDate !== dateStr) return false;
         const sport = (act.sport_type || "").toLowerCase();
         if (filter === "RUNNING") return isRunningCategory(sport);
         if (filter === "CYCLING") return sport.includes("ride") || sport.includes("cycl");
-        if (filter === "REHAB")
-          return sport.includes("cross") || sport.includes("strength") || sport.includes("weight") || sport.includes("workout");
+        if (filter === "REHAB") return sport.includes("cross") || sport.includes("strength") || sport.includes("weight") || sport.includes("workout");
         return true;
       });
 
-      // Accumulate scheduled planned workouts
+      plannedCount += dayWorkouts.length;
       for (const wo of dayWorkouts) {
         const dist = Number(wo.target_distance_meters || 0);
         scheduledDist += dist;
-        if (isRunningCategory(wo.workout_category)) {
-          runningDist += dist;
-        } else if (wo.workout_category === "Cycling") {
-          cyclingDist += dist;
-        }
+        if (isRunningCategory(wo.workout_category)) runningDist += dist;
+        else if (wo.workout_category === "Cycling") cyclingDist += dist;
         scheduledDur += Number(wo.target_duration_seconds || 0);
       }
 
-      // Accumulate completed activities
+      const hasDoneSession = dayActivities.length > 0 || dayWorkouts.some((w) => w.status === "COMPLETED");
+      if (hasDoneSession && (dayWorkouts.length > 0 || dayActivities.length > 0)) {
+        completedCount++;
+      }
+
       for (const act of dayActivities) {
         const dist = Number(act.distance_meters || 0);
         completedDist += dist;
         const sport = (act.sport_type || "").toLowerCase();
-        if (isRunningCategory(sport)) {
-          runningDist += dist;
-        } else if (sport.includes("ride") || sport.includes("cycl")) {
-          cyclingDist += dist;
-        }
-        completedDur += Number(act.moving_time_seconds || 0);
+        if (isRunningCategory(sport)) runningDist += dist;
+        else if (sport.includes("ride") || sport.includes("cycl")) cyclingDist += dist;
+        const dur = Number(act.moving_time_seconds || 0);
+        completedDur += dur;
+        // Estimate TSS: ~55 TSS per hour for Zone 2
+        weekTss += Math.round((dur / 3600) * 55);
+      }
+
+      // Determine day spark status
+      let dayStatus: DaySparkStatus = "REST";
+      if (hasDoneSession) {
+        dayStatus = "COMPLETED";
+      } else if (isToday) {
+        dayStatus = "TODAY";
+      } else if (dayWorkouts.length > 0 && isPastDay) {
+        dayStatus = "MISSED";
+      } else if (dayWorkouts.length > 0) {
+        dayStatus = "PLANNED";
+      } else if (d === 0 || d === 3) {
+        dayStatus = "FASTING";
+      } else if (d === 5) {
+        dayStatus = "BUFFER";
       }
 
       days.push({
@@ -143,17 +163,24 @@ export function buildCalendarWeeks(
         monthName,
         dayOfWeek: d,
         dayName: FULL_DAY_NAMES[d],
-        isToday: dateStr === todayStr,
+        isToday,
         workouts: dayWorkouts,
         activities: dayActivities,
+        status: dayStatus,
       });
     }
 
     const minDistanceMeters = conf.minTargetKm * 1000;
-    // Effective progress tracks actual completed distance if activities exist, or completed workouts
     const effectiveProgressMeters = completedDist > 0 ? completedDist : scheduledDist;
     const targetAchievedPct = Math.round((effectiveProgressMeters / minDistanceMeters) * 100);
     const isCurrentWeek = days.some((d) => d.isToday);
+    const completionRatePct = plannedCount > 0 ? Math.round((completedCount / plannedCount) * 100) : 0;
+
+    const sparklineDays = days.map((d, i) => ({
+      dateStr: d.dateStr,
+      label: SHORT_DAY_INITIALS[i],
+      status: d.status,
+    }));
 
     weeks.push({
       weekNumber: conf.weekNum,
@@ -175,6 +202,11 @@ export function buildCalendarWeeks(
       completedDurationSeconds: completedDur,
       targetAchievedPct,
       isCurrentWeek,
+      completedWorkoutsCount: completedCount,
+      totalWorkoutsCount: plannedCount,
+      completionRatePct,
+      estimatedWeeklyTss: weekTss,
+      sparklineDays,
     });
   }
 

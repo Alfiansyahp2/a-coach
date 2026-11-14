@@ -73,6 +73,7 @@ Uncompromising visual art direction designed to prevent generic, repetitive SaaS
 * [**RESPONSIVE_DESIGN.md**](./02-design/RESPONSIVE_DESIGN.md) — Breakpoints from 375px mobile to 1440px desktop.
 * [**ACCESSIBILITY.md**](./02-design/ACCESSIBILITY.md) — WCAG 2.1 AA compliance and screen reader guidelines.
 * [**DESIGN_REVIEW_CHECKLIST.md**](./02-design/DESIGN_REVIEW_CHECKLIST.md) — Mandatory visual review gate before feature merge.
+* [**CALENDAR_UI_DESIGN_VARIANTS_SPECIFICATION.md**](./02-design/CALENDAR_UI_DESIGN_VARIANTS_SPECIFICATION.md) — Master specification for 5+ interchangeable athletic calendar models (Month Grid, Week Agenda, Kinetic Bubble, Field Journal, Gantt PMC).
 
 ---
 
@@ -192,10 +193,8 @@ Reusable audit frameworks and technical debt tracking.
 
 Historical audit of system iterations, code evolution, and architectural changes.
 
-* [**2026-11-01_20-44-00_feat-strava-oauth-handshake.md**](./10-changelog/2026-11-01_20-44-00_feat-strava-oauth-handshake.md) — Strava OAuth 2.0 PKCE handshake, status & disconnect endpoints, and interactive dashboard UI.
-* [**2026-11-01_20-12-00_docs-enterprise-readme-and-database-seeding.md**](./10-changelog/2026-11-01_20-12-00_docs-enterprise-readme-and-database-seeding.md) — Enterprise README standardization, PostgreSQL seed script, and database configuration.
-* [**2026-11-01_19-46-00_feat-core-foundation-schema-strava-oauth-and-domain-logic.md**](./10-changelog/2026-11-01_19-46-00_feat-core-foundation-schema-strava-oauth-and-domain-logic.md) — Comprehensive changelog: Database schema, AES-256-GCM crypto, Strava API v3 OAuth, matching engine, and domain logic.
-* [**CHANGELOG.md**](./10-changelog/CHANGELOG.md) — Master changelog register and release notes.
+* [**README.md**](./10-changelog/README.md) — Master engineering changelog index and 74-record ecosystem catalog.
+* [**CHANGELOG.md**](./10-changelog/CHANGELOG.md) — Master foundation v1.0.0 changelog register and release notes.
 
 ---
 

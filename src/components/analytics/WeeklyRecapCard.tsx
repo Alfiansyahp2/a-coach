@@ -129,7 +129,7 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
         </div>
 
         {/* 2. Beban Kerja Fisik (Modular Component) */}
-        <WeeklyRecapWorkloadSection activitySummary={act} />
+        <WeeklyRecapWorkloadSection activitySummary={act} proMetrics={recap.pro_metrics} />
 
         {/* 3. Status Sendi, Nyeri & Pemulihan (Joint & Pain Telemetry) */}
         <div className="space-y-2 pt-1 border-t border-[var(--color-border-subtle)]">

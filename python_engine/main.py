@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from python_engine.api.streak_router import router as streak_router
+from python_engine.api.coach_router import router as coach_router
 
 app = FastAPI(
     title="A-Coach Sports Science & Telemetry Engine",
@@ -23,6 +24,7 @@ app.add_middleware(
 
 # Mount domain calculation routers
 app.include_router(streak_router)
+app.include_router(coach_router)
 
 
 @app.get("/health")
