@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 75 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 76 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -21,7 +21,7 @@ docs/10-changelog/
 ├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (9 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
     ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (32 berkas)
-    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (16 berkas)
+    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (17 berkas)
     ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (5 berkas)
     ├── training/                # 🚴 Kalender Latihan & AI Coach Engine (3 berkas)
     ├── health/                  # 🩺 Profil Kesehatan & Kesiapan Klinis (2 berkas)
@@ -52,7 +52,8 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 
 ---
 
-### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 16 Berkas
+### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 17 Berkas
+- [`2026-11-14_08-16-00_feat-backend-full-stack-audit-complete-bola-and-sport-persistence.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-14_08-16-00_feat-backend-full-stack-audit-complete-bola-and-sport-persistence.md) — Penyelesaian 100% remediasi audit: BOLA defense, session auth guard kriptografis, & persistensi tabel sport_types.
 - [`2026-11-14_07-55-00_feat-backend-full-stack-audit-remediation-and-p0-p1-validation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-14_07-55-00_feat-backend-full-stack-audit-remediation-and-p0-p1-validation.md) — Remediasi temuan audit P0/P1, integrasi basis data riil, & validasi 97 tes lulus.
 - [`2026-11-11_05-35-00_feat-python-sports-science-engine-and-streak-thermodynamics-decoupling.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-11_05-35-00_feat-python-sports-science-engine-and-streak-thermodynamics-decoupling.md) — FastAPI micro-engine mandiri port 8000 & termodinamika streak.
 - [`2026-11-09_20-45-00_feat-weekly-recap-engine-audit-and-timezone-remediation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-09_20-45-00_feat-weekly-recap-engine-audit-and-timezone-remediation.md) — Audit timezone UTC+7 & batas minggu retrospektif.

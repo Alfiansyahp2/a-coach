@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connection } from "next/server";
-import { getActivities, createManualActivity, DEFAULT_USER_ID } from "@/lib/db";
+import { getActivities, createManualActivity } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { verifyUserAuthorization } from "@/lib/auth/authGuard";
 
 export async function GET(req: NextRequest) {
   await connection();
   try {
     const { searchParams } = new URL(req.url);
+    const auth = verifyUserAuthorization(req, searchParams.get("userId"));
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
+
     const limit = Number(searchParams.get("limit")) || 50;
     const sportType = searchParams.get("sport_type") || undefined;
 
-    const activities = await getActivities(DEFAULT_USER_ID, {
+    const activities = await getActivities(userId, {
       limit,
       sportType,
     });
@@ -29,6 +34,9 @@ export async function POST(req: NextRequest) {
   await connection();
   try {
     const body = await req.json();
+    const auth = verifyUserAuthorization(req, body.user_id);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     if (!body.name || !body.sport_type) {
       return NextResponse.json(
@@ -37,7 +45,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await createManualActivity(DEFAULT_USER_ID, {
+    const result = await createManualActivity(userId, {
       name: body.name.trim(),
       sport_type: body.sport_type.trim(),
       start_date: body.start_date || new Date().toISOString(),

@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
-import { DEFAULT_USER_ID, getFitnessGoals, createFitnessGoal, setPrimaryFitnessGoal } from '@/lib/db';
+import { getFitnessGoals, createFitnessGoal, setPrimaryFitnessGoal } from '@/lib/db';
 import { generateCoachTrainingFromDatabase } from '@/lib/domain/coach/coachTrainingGenerator';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 export async function GET(request: Request) {
   try {
-    const goals = await getFitnessGoals(DEFAULT_USER_ID);
+    const auth = verifyUserAuthorization(request);
+    if (!auth.authorized) return auth.response!;
+    const goals = await getFitnessGoals(auth.userId);
     return NextResponse.json({ success: true, data: goals });
   } catch (error: any) {
     console.error('Error fetching fitness goals:', error);
@@ -18,7 +21,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const userId = body?.user_id || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(request, body?.user_id);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
     const action = body?.action || (body?.goal_id ? 'set_primary' : 'create');
 
     if (action === 'set_primary') {

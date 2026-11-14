@@ -4,12 +4,16 @@ import path from "path";
 import os from "os";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { verifyUserAuthorization } from "@/lib/auth/authGuard";
 
 const execFileAsync = promisify(execFile);
 
 export async function POST(req: NextRequest) {
   let tempFilePath: string | null = null;
   try {
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
+
     const formData = await req.formData();
     const file = (formData.get("image") || formData.get("file")) as File | null;
 

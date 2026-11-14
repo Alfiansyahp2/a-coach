@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connection } from "next/server";
 import {
-  DEFAULT_USER_ID,
   getUser,
   getAthleteProfile,
   getAuthoritativeHealthContext,
@@ -11,12 +10,15 @@ import {
 } from "@/lib/db";
 import { calculatePhysiologicalCapacities } from "@/lib/domain/physiology/heartRateZones";
 import { revalidatePath } from "next/cache";
+import { verifyUserAuthorization } from "@/lib/auth/authGuard";
 
 export async function GET(req: NextRequest) {
   await connection();
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId") || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, searchParams.get("userId"));
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const [user, profile, healthContext, equipment] = await Promise.all([
       getUser(userId),
@@ -61,7 +63,9 @@ export async function POST(req: NextRequest) {
   await connection();
   try {
     const body = await req.json();
-    const userId = body.user_id || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, body.user_id);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     // 1. Update basic biometric & athletic profile
     const profileResult = await updateUserProfile(userId, {

@@ -1,10 +1,15 @@
-import { NextResponse } from 'next/server';
-import { DEFAULT_USER_ID, disconnectStrava, getStravaConnection } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import { disconnectStrava, getStravaConnection } from '@/lib/db';
 import { deauthorizeStrava, getValidAccessToken } from '@/lib/strava';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    const connection = await getStravaConnection(DEFAULT_USER_ID);
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
+
+    const connection = await getStravaConnection(userId);
 
     if (!connection) {
       return NextResponse.json(
@@ -24,7 +29,7 @@ export async function POST() {
     }
 
     // Purge local connection and tokens
-    await disconnectStrava(DEFAULT_USER_ID);
+    await disconnectStrava(userId);
 
     return NextResponse.json({
       success: true,
@@ -37,4 +42,3 @@ export async function POST() {
     );
   }
 }
-
