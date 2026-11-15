@@ -182,48 +182,51 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
 
       {/* 2. Historical Weeks Quick-Selector Pills */}
       {availableWeeks.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-thin">
-          <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold shrink-0 flex items-center gap-1">
-            <Calendar className="w-3 h-3 text-[var(--color-cycling)]" />
-            <span>PILIH SIKLUS:</span>
+        <div className="flex items-center gap-2 p-1.5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
+          <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold shrink-0 flex items-center gap-1.5 pl-1.5 pr-1">
+            <Calendar className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+            <span className="hidden sm:inline">PILIH SIKLUS:</span>
+            <span className="sm:hidden">SIKLUS:</span>
           </span>
-          {availableWeeks.slice(0, 6).map((w) => {
-            const isSelected = w.startDate === timeframe.startDate.split("T")[0];
-            return (
-              <button
-                key={w.startDate}
-                onClick={() => fetchRecap(w.startDate, scope)}
-                disabled={loading}
-                className={`px-2.5 py-1 rounded-lg shrink-0 transition-all font-tabular flex items-center gap-1.5 cursor-pointer text-xs ${
-                  isSelected
-                    ? "bg-[var(--color-cycling)] text-[var(--color-canvas)] font-bold shadow-xs"
-                    : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)]"
-                }`}
-              >
-                {w.isCurrentWeek ? (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                ) : w.isCompletedWeek ? (
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                ) : null}
-                <span>
-                  {w.isCurrentWeek
-                    ? "Minggu Berjalan"
-                    : w.isCompletedWeek
-                    ? "1 Mgg Lalu (Tuntas)"
-                    : `${w.weeksAgo} Mgg Lalu`}
-                </span>
-                {w.sessionCount > 0 && (
-                  <span
-                    className={`text-[9px] px-1 py-0.2 rounded font-bold ${
-                      isSelected ? "bg-black/25 text-white" : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
-                    }`}
-                  >
-                    {w.sessionCount} sesi ({w.totalDistanceKm}km)
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 pr-1 scroll-smooth">
+            {availableWeeks.slice(0, 6).map((w) => {
+              const isSelected = w.startDate === timeframe.startDate.split("T")[0];
+              return (
+                <button
+                  key={w.startDate}
+                  onClick={() => fetchRecap(w.startDate, scope)}
+                  disabled={loading}
+                  className={`px-2.5 py-1 rounded-lg shrink-0 transition-all font-tabular flex items-center gap-1.5 cursor-pointer text-xs ${
+                    isSelected
+                      ? "bg-[var(--color-cycling)] text-[var(--color-canvas)] font-bold shadow-xs"
+                      : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)]"
+                  }`}
+                >
+                  {w.isCurrentWeek ? (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                  ) : w.isCompletedWeek ? (
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                  ) : null}
+                  <span>
+                    {w.isCurrentWeek
+                      ? "Minggu Berjalan"
+                      : w.isCompletedWeek
+                      ? "1 Mgg Lalu (Tuntas)"
+                      : `${w.weeksAgo} Mgg Lalu`}
                   </span>
-                )}
-              </button>
-            );
-          })}
+                  {w.sessionCount > 0 && (
+                    <span
+                      className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                        isSelected ? "bg-black/25 text-white" : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
+                      }`}
+                    >
+                      {w.sessionCount} sesi ({w.totalDistanceKm}km)
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 

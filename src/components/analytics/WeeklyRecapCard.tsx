@@ -149,7 +149,7 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
 
         {/* Quick Historical Weeks Pills */}
         {recap.availableWeeks && recap.availableWeeks.length > 0 && (
-          <div className="flex items-center gap-1 overflow-x-auto pb-0.5 text-[9.5px]">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-0.5 text-[9.5px]">
             <span className="text-[9px] uppercase text-[var(--color-text-muted)] font-bold shrink-0">
               Siklus:
             </span>
