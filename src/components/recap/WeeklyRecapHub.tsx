@@ -7,17 +7,20 @@ import {
   ShieldCheck,
   ShieldAlert,
   AlertTriangle,
-  Activity as ActivityIcon,
-  Clock,
-  HeartPulse,
   FileSpreadsheet,
-  RotateCcw,
+  CheckCircle2,
+  Calendar,
 } from "lucide-react";
-import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapTypes";
+import {
+  WeeklyActivityAndInjuryRecap,
+  RecapScope,
+} from "@/lib/domain/analytics/weeklyRecapTypes";
 import { formatDateOnly } from "@/lib/formatters";
 import { WeeklyRecapTimeline } from "./WeeklyRecapTimeline";
 import { WeeklyRecapPrescription } from "./WeeklyRecapPrescription";
 import { WeeklyRecapProMetricsSection } from "@/components/analytics/WeeklyRecapProMetricsSection";
+import { MultiWeekMesocycleDeck } from "./MultiWeekMesocycleDeck";
+import { WeeklyRecapHeroCards } from "./WeeklyRecapHeroCards";
 
 interface WeeklyRecapHubProps {
   initialRecap: WeeklyActivityAndInjuryRecap;
@@ -25,21 +28,15 @@ interface WeeklyRecapHubProps {
 
 export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
   const [recap, setRecap] = useState<WeeklyActivityAndInjuryRecap>(initialRecap);
+  const [scope, setScope] = useState<RecapScope>("1_WEEK");
   const [loading, setLoading] = useState(false);
 
-  const navigateWeek = async (direction: -1 | 1 | 0) => {
+  const fetchRecap = async (targetDateStr?: string, targetScope?: RecapScope) => {
     try {
       setLoading(true);
-      let targetDateStr: string;
-      if (direction === 0) {
-        targetDateStr = formatDateOnly(new Date());
-      } else {
-        const currentRef = new Date(recap.timeframe.startDate);
-        currentRef.setDate(currentRef.getDate() + direction * 7);
-        targetDateStr = formatDateOnly(currentRef);
-      }
-
-      const res = await fetch(`/api/athlete/weekly-recap?date=${targetDateStr}`);
+      const s = targetScope || scope;
+      const d = targetDateStr || formatDateOnly(new Date(recap.timeframe.startDate));
+      const res = await fetch(`/api/athlete/weekly-recap?date=${d}&scope=${s}&autoMonday=false`);
       const data = await res.json();
       if (data.success && data.recap) {
         setRecap(data.recap);
@@ -51,13 +48,52 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
     }
   };
 
+  const navigateWeek = async (direction: -1 | 1 | 0) => {
+    let targetDateStr: string;
+    if (direction === 0) {
+      targetDateStr = formatDateOnly(new Date());
+    } else {
+      const currentRef = new Date(recap.timeframe.startDate);
+      currentRef.setDate(currentRef.getDate() + direction * 7);
+      targetDateStr = formatDateOnly(currentRef);
+    }
+    await fetchRecap(targetDateStr, scope);
+  };
+
+  const handleScopeChange = async (newScope: RecapScope) => {
+    setScope(newScope);
+    await fetchRecap(undefined, newScope);
+  };
+
   const { timeframe, activity_summary: act, injury_summary: inj, clinical_verdict: verdict } = recap;
   const isCaution = verdict.status === "CAUTION";
   const isSuspended = verdict.status === "SUSPENDED";
+  const availableWeeks = recap.availableWeeks || [];
 
   return (
     <div className="space-y-6 font-mono">
-      {/* 1. Header Toolbar: Identitas Halaman & Navigasi Siklus Mingguan */}
+      {/* 0. Banner Otomatisasi Siklus Tuntas (Senin 00:00) */}
+      {recap.isMondayAutoCompleted && (
+        <div className="p-3.5 rounded-xl bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 flex items-center justify-between gap-3 text-xs shadow-xs">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-4 h-4 text-[var(--color-cycling)] shrink-0" />
+            <div>
+              <strong className="text-[var(--color-cycling)] block">Otomatisasi Siklus Tuntas (Senin 00:00)</strong>
+              <span className="text-[11px] text-[var(--color-text-secondary)]">
+                Menampilkan evaluasi lengkap minggu lalu yang telah tuntas ({timeframe.label}). Klik &quot;Minggu Berjalan&quot; untuk beralih ke sesi minggu baru.
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => navigateWeek(0)}
+            className="px-3 py-1 rounded-lg bg-[var(--color-surface-card)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] border border-[var(--color-border)] text-[10px] font-bold shrink-0 cursor-pointer"
+          >
+            Lihat Minggu Berjalan →
+          </button>
+        </div>
+      )}
+
+      {/* 1. Header Toolbar & Kontrol Scope Multi-Minggu */}
       <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
@@ -67,150 +103,139 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-sm uppercase tracking-wider font-bold text-[var(--color-text-primary)]">
-                  REKAP MINGGUAN AKTIVITAS &amp; CIDERA
+                  REKAP TELEMETRI AKTIVITAS &amp; CIDERA
                 </h1>
                 <span className="text-[9.5px] px-2.5 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold uppercase tracking-wider">
-                  Siklus Telemetri 7 Hari
+                  {scope === "4_WEEKS" ? "Mesosiklus 1 Bulan" : scope === "2_WEEKS" ? "Blok 2-Minggu" : "Siklus 7 Hari"}
                 </span>
               </div>
               <span className="text-[11px] text-[var(--color-text-secondary)] block">
-                {timeframe.label} • {act.active_days_count} Hari Aktif / {act.rest_days_count} Hari Pemulihan
+                {timeframe.label} • {act.active_days_count} Hari Aktif / {act.rest_days_count} Pemulihan
               </span>
             </div>
           </div>
         </div>
 
-        {/* Kontrol Navigasi Siklus Mingguan */}
-        <div className="flex items-center gap-1.5 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg p-1 text-xs shrink-0">
-          {/* Tombol Mundur ke Histori */}
-          <button
-            onClick={() => navigateWeek(-1)}
-            disabled={loading}
-            className="px-2.5 py-1.5 hover:bg-[var(--color-surface-card)] rounded-md text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-all cursor-pointer disabled:opacity-40 flex items-center gap-1 font-bold"
-            title="Lihat rekap 1 minggu sebelumnya"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Sebelumnya</span>
-          </button>
-
-          {/* Indikator Status Siklus */}
-          {timeframe.isCurrentWeek ? (
-            <div className="px-3 py-1.5 rounded-md bg-[var(--color-surface-card)] text-[var(--color-cycling)] border border-[var(--color-border)] shadow-xs font-bold flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-cycling)] animate-pulse" />
-              <span>Minggu Berjalan</span>
-            </div>
-          ) : (
+        {/* Kontrol Navigasi & Scope */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          {/* Scope Selector Tabs */}
+          <div className="flex items-center gap-1 p-1 bg-[var(--color-surface-muted)] rounded-lg border border-[var(--color-border)] text-xs">
             <button
-              onClick={() => navigateWeek(0)}
+              onClick={() => handleScopeChange("1_WEEK")}
               disabled={loading}
-              className="px-3 py-1.5 rounded-md bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30 hover:bg-[var(--color-alert-amber)]/20 transition-all font-bold flex items-center gap-1.5 cursor-pointer"
-              title="Kembali ke minggu berjalan saat ini"
+              className={`px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
+                scope === "1_WEEK"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
             >
-              <RotateCcw className="w-3 h-3" />
-              <span>
-                {timeframe.weeksAgo === 1
-                  ? "1 Mgg Lalu"
-                  : `${timeframe.weeksAgo || 1} Mgg Lalu`}
-              </span>
-              <span className="text-[10px] opacity-75 hidden md:inline">(Reset)</span>
+              1 Minggu
             </button>
-          )}
+            <button
+              onClick={() => handleScopeChange("2_WEEKS")}
+              disabled={loading}
+              className={`px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
+                scope === "2_WEEKS"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              2 Minggu
+            </button>
+            <button
+              onClick={() => handleScopeChange("4_WEEKS")}
+              disabled={loading}
+              className={`px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
+                scope === "4_WEEKS"
+                  ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
+            >
+              1 Bulan
+            </button>
+          </div>
 
-          {/* Tombol Maju (Hanya aktif jika sedang di masa lampau) */}
-          <button
-            onClick={() => navigateWeek(1)}
-            disabled={loading || timeframe.isCurrentWeek}
-            className={`px-2.5 py-1.5 rounded-md transition-all flex items-center gap-1 font-bold ${
-              timeframe.isCurrentWeek
-                ? "text-[var(--color-text-muted)] opacity-30 cursor-not-allowed"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-card)] cursor-pointer"
-            }`}
-            title={
-              timeframe.isCurrentWeek
-                ? "Masa depan belum memiliki data rekapitulasi"
-                : "Maju 1 minggu mendekati minggu berjalan"
-            }
-          >
-            <span className="hidden sm:inline">Berikutnya</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          {/* Stepper Minggu Sebelumnya/Berikutnya */}
+          <div className="flex items-center gap-1 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg p-1 text-xs">
+            <button
+              onClick={() => navigateWeek(-1)}
+              disabled={loading}
+              className="p-1.5 hover:bg-[var(--color-surface-card)] rounded text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] cursor-pointer disabled:opacity-40"
+              title="Minggu Sebelumnya"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <span className="px-2 text-[11px] font-bold text-[var(--color-text-primary)] font-tabular">
+              {timeframe.isCurrentWeek ? "Minggu Ini" : `${timeframe.weeksAgo || 1} Mgg Lalu`}
+            </span>
+            <button
+              onClick={() => navigateWeek(1)}
+              disabled={loading || timeframe.isCurrentWeek}
+              className="p-1.5 hover:bg-[var(--color-surface-card)] rounded text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Minggu Berikutnya"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Banner Rekomendasi Jika Minggu Berjalan Belum Ada Sesi */}
-      {timeframe.isCurrentWeek && act.total_sessions === 0 && (
-        <div className="p-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-card)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[var(--color-text-secondary)] shadow-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-cycling)] animate-ping shrink-0" />
-            <span>
-              Siklus minggu berjalan baru dimulai ({timeframe.label}). Belum ada aktivitas yang dicatat minggu ini.
-            </span>
-          </div>
-          <button
-            onClick={() => navigateWeek(-1)}
-            disabled={loading}
-            className="px-3 py-1 rounded-md bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-[var(--color-cycling)] font-bold text-xs shrink-0 cursor-pointer transition-all flex items-center gap-1.5"
-          >
-            <span>Lihat Rekap Minggu Sebelumnya</span>
-            <ChevronRight className="w-3 h-3" />
-          </button>
+      {/* 2. Historical Weeks Quick-Selector Pills */}
+      {availableWeeks.length > 0 && (
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-thin">
+          <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold shrink-0 flex items-center gap-1">
+            <Calendar className="w-3 h-3 text-[var(--color-cycling)]" />
+            <span>PILIH SIKLUS:</span>
+          </span>
+          {availableWeeks.slice(0, 6).map((w) => {
+            const isSelected = w.startDate === timeframe.startDate.split("T")[0];
+            return (
+              <button
+                key={w.startDate}
+                onClick={() => fetchRecap(w.startDate, scope)}
+                disabled={loading}
+                className={`px-2.5 py-1 rounded-lg shrink-0 transition-all font-tabular flex items-center gap-1.5 cursor-pointer text-xs ${
+                  isSelected
+                    ? "bg-[var(--color-cycling)] text-[var(--color-canvas)] font-bold shadow-xs"
+                    : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)]"
+                }`}
+              >
+                {w.isCurrentWeek ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                ) : w.isCompletedWeek ? (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+                ) : null}
+                <span>
+                  {w.isCurrentWeek
+                    ? "Minggu Berjalan"
+                    : w.isCompletedWeek
+                    ? "1 Mgg Lalu (Tuntas)"
+                    : `${w.weeksAgo} Mgg Lalu`}
+                </span>
+                {w.sessionCount > 0 && (
+                  <span
+                    className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                      isSelected ? "bg-black/25 text-white" : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
+                    }`}
+                  >
+                    {w.sessionCount} sesi ({w.totalDistanceKm}km)
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      {/* 2. Empat Kartu Metrik Utama (Hero Workload & Clinical Indicators) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-1">
-          <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--color-text-muted)] flex items-center justify-between">
-            <span>Total Jarak</span>
-            <ActivityIcon className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold font-tabular text-[var(--color-text-primary)]">
-            {act.total_distance_km} <span className="text-xs font-normal text-[var(--color-text-muted)]">km</span>
-          </div>
-          <div className="text-[10px] text-[var(--color-text-secondary)]">{act.total_sessions} sesi latihan tercatat</div>
-        </div>
+      {/* 3. Multi-Week Mesocycle Deck (Rendered when scope is 2_WEEKS or 4_WEEKS) */}
+      {(scope === "2_WEEKS" || scope === "4_WEEKS") && recap.multiWeekRollup && (
+        <MultiWeekMesocycleDeck rollup={recap.multiWeekRollup} />
+      )}
 
-        <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-1">
-          <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--color-text-muted)] flex items-center justify-between">
-            <span>Durasi &amp; Kalori</span>
-            <Clock className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold font-tabular text-[var(--color-text-primary)]">
-            {act.formatted_duration}
-          </div>
-          <div className="text-[10px] text-[var(--color-text-secondary)]">
-            {act.total_calories > 0 ? `${act.total_calories} kcal` : "Aerobik Zone 2"}
-          </div>
-        </div>
+      {/* 4. Empat Kartu Metrik Utama Mingguan */}
+      <WeeklyRecapHeroCards activitySummary={act} injurySummary={inj} />
 
-        <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-1">
-          <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--color-text-muted)] flex items-center justify-between">
-            <span>Telemetri Nyeri</span>
-            <HeartPulse className="w-3.5 h-3.5 text-[var(--color-alert-amber)]" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold font-tabular text-[var(--color-text-primary)]">
-            {inj.pain_telemetry.average_pain_score} <span className="text-xs font-normal text-[var(--color-text-muted)]">/ 10</span>
-          </div>
-          <div className="text-[10px] text-[var(--color-text-secondary)]">
-            Puncak: {inj.pain_telemetry.peak_pain_score}/10 ({inj.pain_telemetry.peak_pain_location || "Aman"})
-          </div>
-        </div>
-
-        <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-1">
-          <div className="text-[10px] uppercase font-bold tracking-wider text-[var(--color-text-muted)] flex items-center justify-between">
-            <span>Toleransi Beban</span>
-            <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-endurance)]" />
-          </div>
-          <div className="text-xl sm:text-2xl font-bold font-tabular text-[var(--color-cycling)]">
-            {inj.training_responses_summary.pain_free_sessions_count} <span className="text-xs font-normal text-[var(--color-text-muted)]">Bebas Nyeri</span>
-          </div>
-          <div className="text-[10px] text-[var(--color-text-secondary)]">
-            {inj.new_injuries_count === 0 ? "0 Insiden Baru" : `${inj.new_injuries_count} Cidera Baru`}
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Banner Protokol Keselamatan Sendi & Korelasi Klinis */}
+      {/* 5. Banner Protokol Keselamatan Sendi & Korelasi Klinis */}
       <div
         className={`p-4 rounded-xl border text-xs leading-relaxed flex items-start gap-3 shadow-xs ${
           isSuspended
@@ -237,12 +262,12 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
         </div>
       </div>
 
-      {/* Analisis Fisiologis & Polarisasi 80/20 Pro Level */}
+      {/* 6. Analisis Fisiologis & Polarisasi 80/20 Pro Level */}
       {recap.pro_metrics && (
         <WeeklyRecapProMetricsSection proMetrics={recap.pro_metrics} />
       )}
 
-      {/* 4. Rincian Dua Kolom: Timeline 7 Hari (Kiri) vs Status Cidera & Preskripsi (Kanan) */}
+      {/* 7. Rincian Dua Kolom: Timeline 7 Hari (Kiri) vs Status Cidera & Preskripsi (Kanan) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7">
           <WeeklyRecapTimeline
