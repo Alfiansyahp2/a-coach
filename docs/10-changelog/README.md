@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 76 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 77 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -35,9 +35,10 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 32 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 33 Berkas
 Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 - **Kalender Multi-Model & Command Deck**:
+  - [`2026-11-15_10-40-00_feat-tactical-deck-goals-telemetry-and-unlock-banner-remediation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-15_10-40-00_feat-tactical-deck-goals-telemetry-and-unlock-banner-remediation.md) — Remediasi bug pembagian 1000 telemetri sasaran & spanduk kontekstual.
   - [`2026-11-14_07-26-00_feat-minimalist-view-selector-labels-and-number-cleanup.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-14_07-26-00_feat-minimalist-view-selector-labels-and-number-cleanup.md) — Perampingan selektor model kalender & eliminasi badge berlebih.
   - [`2026-11-14_07-22-00_feat-training-calendar-ui-audit-and-quick-wins-refinements.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-14_07-22-00_feat-training-calendar-ui-audit-and-quick-wins-refinements.md) — Audit holistik 4 tindakan penyempurnaan cepat.
   - [`2026-11-13_18-25-00_feat-multi-model-calendar-suite-kinetic-journal-gantt-and-micro-hud.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-13_18-25-00_feat-multi-model-calendar-suite-kinetic-journal-gantt-and-micro-hud.md) — Implementasi 7 model kalender atletik terpadu.
