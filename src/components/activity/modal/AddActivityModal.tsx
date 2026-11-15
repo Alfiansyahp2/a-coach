@@ -222,9 +222,9 @@ export function AddActivityModal({
       {variant === "button" && (
         <button
           onClick={form.handleOpen}
-          className="px-3.5 py-1.5 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-semibold font-mono tracking-tight transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+          className="px-3.5 py-1.5 rounded-md bg-[var(--color-cycling)] hover:opacity-90 text-white text-xs font-semibold font-mono tracking-tight transition-all flex items-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap shrink-0"
         >
-          <BookOpen className="w-4 h-4 stroke-[2.2]" />
+          <BookOpen className="w-4 h-4 stroke-[2.2] shrink-0" />
           <span>+ TAMBAH AKTIVITAS</span>
         </button>
       )}

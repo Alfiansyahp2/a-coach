@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connection } from 'next/server';
-import { DEFAULT_USER_ID, getAuthoritativeHealthContext } from '@/lib/db';
+import { getAuthoritativeHealthContext } from '@/lib/db';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 /**
  * GET /api/athlete/health-context
@@ -9,7 +10,9 @@ import { DEFAULT_USER_ID, getAuthoritativeHealthContext } from '@/lib/db';
 export async function GET(req: NextRequest) {
   await connection();
   try {
-    const userId = req.nextUrl.searchParams.get('userId') || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, req.nextUrl.searchParams.get('userId'));
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const healthContext = await getAuthoritativeHealthContext(userId);
 

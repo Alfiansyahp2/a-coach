@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connection } from 'next/server';
-import { DEFAULT_USER_ID } from '@/lib/db/client';
 import { getActivities } from '@/lib/db/activityRepo';
 import {
   getAthleteInjuries,
@@ -9,13 +8,16 @@ import {
 } from '@/lib/db/healthRepo';
 import { getScheduledWorkouts } from '@/lib/db/trainingRepo';
 import { computeWeeklyActivityAndInjuryRecap } from '@/lib/domain/analytics/weeklyRecapEngine';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 export async function GET(req: NextRequest) {
   await connection();
   try {
     const { searchParams } = new URL(req.url);
     const dateParam = searchParams.get('date') || undefined;
-    const userId = searchParams.get('user_id') || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, searchParams.get('user_id') || searchParams.get('userId'));
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const [activities, injuries, painLogs, trainingResponses, scheduledWorkouts] =
       await Promise.all([

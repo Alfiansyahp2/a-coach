@@ -15,7 +15,9 @@
     "test:health": "node scripts/tests/test_athlete_health_system.js",
     "test:coach": "node scripts/tests/test_coach_training_system.js",
     "test:streak": "node scripts/tests/test_weekly_streak_system.js",
+    "test:bola": "npx tsx scripts/tests/test_bola_authorization.js",
     "test:python": ".\\python_engine\\.venv\\Scripts\\python.exe -m pytest python_engine/tests",
+    "test:all": "npm run test:health && npm run test:coach && npm run test:streak && npm run test:bola && npm run test:python",
     "db:audit": "node scripts/maintenance/audit_database_schema.cjs"
   },
   "dependencies": {
