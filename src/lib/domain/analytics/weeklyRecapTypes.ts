@@ -6,6 +6,14 @@ import {
   ScheduledWorkout,
   SportType,
 } from '@/types';
+import {
+  TacticalBridgePrescription,
+  BiologicalAdaptationCardData,
+  DeloadCelebration,
+  DualLoadTelemetry,
+} from './weeklyRecapBridgeTypes';
+
+export * from './weeklyRecapBridgeTypes';
 
 export interface WeeklyRecapTimeframe {
   startDate: string; // ISO string (UTC)
@@ -154,6 +162,10 @@ export interface WeeklyProMetrics {
   periodization_phase: string;
   pro_coach_verdict: string;
   next_week_bridge_advice: string;
+  tactical_bridge?: TacticalBridgePrescription;
+  biological_adaptation?: BiologicalAdaptationCardData;
+  deload_info?: DeloadCelebration;
+  dual_load?: DualLoadTelemetry;
 }
 
 export type RecapScope = '1_WEEK' | '2_WEEKS' | '4_WEEKS';

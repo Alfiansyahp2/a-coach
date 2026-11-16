@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 78 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 79 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -74,7 +74,9 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 
 ---
 
-### D. Rekap Analitik & Rekor Personal ([`feat/personal-record/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/)) — 7 Berkas
+### D. Rekap Analitik & Rekor Personal ([`feat/personal-record/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/)) — 8 Berkas
+- [`2026-11-16_09-15-00_feat-sports-science-prescriptive-bridge-and-deload-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/2026-11-16_09-15-00_feat-sports-science-prescriptive-bridge-and-deload-engine.md) — Implementasi 5 pilar sains olahraga: Jembatan Preskriptif, Pengenalan Deload Otomatis, Momen Refleksi Senin 00:00, Rapor Adaptasi Biologis, dan Hukum Validitas Ganda.
+
 - [`2026-11-16_02-05-00_feat-recap-selector-ui-refinement-and-pr-sync-remediation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/2026-11-16_02-05-00_feat-recap-selector-ui-refinement-and-pr-sync-remediation.md) — Penyempurnaan tampilan selektor siklus, eliminasi native scrollbar, dan sinkronisasi 8 rekor personal ke PostgreSQL.
 
 - [`2026-11-15_11-00-00_feat-multi-week-and-monthly-mesocycle-recap-engine-with-monday-midnight-automation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/2026-11-15_11-00-00_feat-multi-week-and-monthly-mesocycle-recap-engine-with-monday-midnight-automation.md) — Mesin rekap multi-minggu & mesosiklus 1-bulan dengan otomatisasi transisi Senin 00:00.

@@ -120,6 +120,75 @@ test('Recap orchestrator returns available historical weeks and rollup', () => {
   assert.strictEqual(recap.multiWeekRollup.totalSessions, 4);
 });
 
+// 5. Sports Science Prescriptive Bridge, Dual-Load & Deload Engine
+console.log('\n--- 5. Sports Science Prescriptive Bridge, Dual-Load & Deload Engine ---');
+
+test('Computes Tactical Bridge Prescription with Safe KM Quota and Mandatory Rest Days', () => {
+  const recap = computeWeeklyActivityAndInjuryRecap({
+    activities: mockActivities,
+    injuries: [],
+    painLogs: [],
+    trainingResponses: [],
+    scheduledWorkouts: [],
+    referenceDate: '2026-11-15',
+    scope: '1_WEEK',
+  });
+
+  const pro = recap.pro_metrics;
+  assert(pro, 'pro_metrics must exist');
+  assert(pro.tactical_bridge, 'tactical_bridge must be computed');
+  assert(pro.tactical_bridge.safe_km_quota.total_max_km > 0, 'safe km quota must be positive');
+  assert(pro.tactical_bridge.mandatory_rest_days.count >= 1, 'mandatory rest days must be >= 1');
+  assert(pro.tactical_bridge.target_hr_zones.zone1_2_aerobic_min_pct >= 75, 'aerobic target >= 75%');
+  assert(typeof pro.tactical_bridge.clinical_recovery_action === 'string', 'clinical recovery action must exist');
+});
+
+test('Computes Dual-Load Telemetry coupling External Load with Internal Metabolic Strain', () => {
+  const recap = computeWeeklyActivityAndInjuryRecap({
+    activities: mockActivities,
+    injuries: [],
+    painLogs: [],
+    trainingResponses: [],
+    scheduledWorkouts: [],
+    referenceDate: '2026-11-15',
+    scope: '1_WEEK',
+  });
+
+  const dual = recap.pro_metrics.dual_load;
+  assert(dual, 'dual_load must exist');
+  assert.strictEqual(dual.external_distance_km, 95.4);
+  assert(dual.internal_srpe_load_au > 0, 'Foster sRPE must be positive');
+  assert(dual.internal_tss > 0, 'TSS must be positive');
+  assert(dual.internal_cost_ratio_au_per_km > 0, 'Cost ratio AU/km must be computed');
+  assert(typeof dual.efficiency_verdict === 'string', 'efficiency verdict must exist');
+});
+
+test('Recognizes Deload Week as Planned Supercompensation (Not Laziness or Failure)', () => {
+  // Deload activities: volume drops ~30% compared to previous week (58.3 km down to ~35 km)
+  const deloadActivities = [
+    { id: 'd1', start_date: '2026-11-14T10:00:00Z', distance_meters: 20000, moving_time_seconds: 2400, average_heartrate: 130 },
+    { id: 'd2', start_date: '2026-11-11T09:00:00Z', distance_meters: 15000, moving_time_seconds: 1800, average_heartrate: 125 },
+    // Previous week had 58.3 km
+    { id: 'p1', start_date: '2026-11-06T10:00:00Z', distance_meters: 31400, moving_time_seconds: 3600, average_heartrate: 130 },
+    { id: 'p2', start_date: '2026-11-03T10:00:00Z', distance_meters: 26900, moving_time_seconds: 3600, average_heartrate: 128 },
+  ];
+
+  const recap = computeWeeklyActivityAndInjuryRecap({
+    activities: deloadActivities,
+    injuries: [],
+    painLogs: [],
+    trainingResponses: [],
+    referenceDate: '2026-11-15',
+    scope: '1_WEEK',
+  });
+
+  const deload = recap.pro_metrics.deload_info;
+  assert(deload, 'deload_info must exist');
+  assert.strictEqual(deload.is_deload_week, true, 'Deload week must be detected');
+  assert(deload.volume_reduction_pct >= 15, 'Volume reduction must be >= 15%');
+  assert(deload.scientific_rationale.includes('BUKAN kemalasan'), 'Must celebrate deload positively');
+});
+
 console.log('\n======================================================================');
 console.log(`🏁 TEST RESULTS: ${passed} PASSED, 0 FAILED`);
 console.log('======================================================================\n');

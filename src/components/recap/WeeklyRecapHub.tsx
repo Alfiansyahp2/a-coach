@@ -21,6 +21,8 @@ import { WeeklyRecapPrescription } from "./WeeklyRecapPrescription";
 import { WeeklyRecapProMetricsSection } from "@/components/analytics/WeeklyRecapProMetricsSection";
 import { MultiWeekMesocycleDeck } from "./MultiWeekMesocycleDeck";
 import { WeeklyRecapHeroCards } from "./WeeklyRecapHeroCards";
+import { WeeklyRecapTacticalBridge } from "./WeeklyRecapTacticalBridge";
+import { WeeklyRecapDeloadBanner } from "./WeeklyRecapDeloadBanner";
 
 interface WeeklyRecapHubProps {
   initialRecap: WeeklyActivityAndInjuryRecap;
@@ -72,25 +74,32 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
 
   return (
     <div className="space-y-6 font-mono">
-      {/* 0. Banner Otomatisasi Siklus Tuntas (Senin 00:00) */}
+      {/* 0. Banner Momen Refleksi Siklus Tuntas (Senin 00:00) */}
       {recap.isMondayAutoCompleted && (
-        <div className="p-3.5 rounded-xl bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 flex items-center justify-between gap-3 text-xs shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="w-4 h-4 text-[var(--color-cycling)] shrink-0" />
+        <div className="p-4 rounded-xl bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
+          <div className="flex items-start gap-2.5">
+            <CheckCircle2 className="w-5 h-5 text-[var(--color-cycling)] shrink-0 mt-0.5" />
             <div>
-              <strong className="text-[var(--color-cycling)] block">Otomatisasi Siklus Tuntas (Senin 00:00)</strong>
-              <span className="text-[11px] text-[var(--color-text-secondary)]">
-                Menampilkan evaluasi lengkap minggu lalu yang telah tuntas ({timeframe.label}). Klik &quot;Minggu Berjalan&quot; untuk beralih ke sesi minggu baru.
+              <strong className="text-[var(--color-cycling)] text-xs block">
+                Senin Dini Hari: Waktu Refleksi Biologis, Bukan Kertas Kosong
+              </strong>
+              <span className="text-[11px] text-[var(--color-text-secondary)] block mt-0.5 leading-relaxed">
+                Secara psikologis, blok 7 hari baru tuntas di Minggu malam ({timeframe.label}) dengan total {act.total_sessions} sesi ({act.total_distance_km} km). Evaluasi ini disajikan agar Anda dapat menyerap hasil adaptasi tubuh sebelum disambut siklus baru.
               </span>
             </div>
           </div>
           <button
             onClick={() => navigateWeek(0)}
-            className="px-3 py-1 rounded-lg bg-[var(--color-surface-card)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] border border-[var(--color-border)] text-[10px] font-bold shrink-0 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-card)] text-[var(--color-text-primary)] hover:border-[var(--color-cycling)] border border-[var(--color-border)] text-xs font-bold shrink-0 cursor-pointer shadow-2xs"
           >
-            Lihat Minggu Berjalan →
+            Mulai Siklus Baru →
           </button>
         </div>
+      )}
+
+      {/* Banner Deload Superkompensasi (Jika Siklus Deload Terdeteksi) */}
+      {recap.pro_metrics?.deload_info && (
+        <WeeklyRecapDeloadBanner deload={recap.pro_metrics.deload_info} />
       )}
 
       {/* 1. Header Toolbar & Kontrol Scope Multi-Minggu */}
@@ -118,44 +127,23 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
 
         {/* Kontrol Navigasi & Scope */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-          {/* Scope Selector Tabs */}
           <div className="flex items-center gap-1 p-1 bg-[var(--color-surface-muted)] rounded-lg border border-[var(--color-border)] text-xs">
-            <button
-              onClick={() => handleScopeChange("1_WEEK")}
-              disabled={loading}
-              className={`px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
-                scope === "1_WEEK"
-                  ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
-                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-              }`}
-            >
-              1 Minggu
-            </button>
-            <button
-              onClick={() => handleScopeChange("2_WEEKS")}
-              disabled={loading}
-              className={`px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
-                scope === "2_WEEKS"
-                  ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
-                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-              }`}
-            >
-              2 Minggu
-            </button>
-            <button
-              onClick={() => handleScopeChange("4_WEEKS")}
-              disabled={loading}
-              className={`px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
-                scope === "4_WEEKS"
-                  ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
-                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-              }`}
-            >
-              1 Bulan
-            </button>
+            {(["1_WEEK", "2_WEEKS", "4_WEEKS"] as const).map((sc) => (
+              <button
+                key={sc}
+                onClick={() => handleScopeChange(sc)}
+                disabled={loading}
+                className={`px-2.5 py-1 rounded-md transition-all font-bold cursor-pointer ${
+                  scope === sc
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] shadow-xs border border-[var(--color-border)]"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                }`}
+              >
+                {sc === "1_WEEK" ? "1 Minggu" : sc === "2_WEEKS" ? "2 Minggu" : "1 Bulan"}
+              </button>
+            ))}
           </div>
 
-          {/* Stepper Minggu Sebelumnya/Berikutnya */}
           <div className="flex items-center gap-1 bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg p-1 text-xs">
             <button
               onClick={() => navigateWeek(-1)}
@@ -180,7 +168,7 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
         </div>
       </div>
 
-      {/* 2. Historical Weeks Quick-Selector Pills */}
+      {/* 2. Historical Weeks Quick-Selector Pills (Zero-Scrollbar) */}
       {availableWeeks.length > 0 && (
         <div className="flex items-center gap-2 p-1.5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs">
           <span className="text-[10px] uppercase text-[var(--color-text-muted)] font-bold shrink-0 flex items-center gap-1.5 pl-1.5 pr-1">
@@ -188,7 +176,7 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
             <span className="hidden sm:inline">PILIH SIKLUS:</span>
             <span className="sm:hidden">SIKLUS:</span>
           </span>
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 pr-1 scroll-smooth">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5 pr-1 scroll-smooth">
             {availableWeeks.slice(0, 6).map((w) => {
               const isSelected = w.startDate === timeframe.startDate.split("T")[0];
               return (
@@ -230,15 +218,24 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
         </div>
       )}
 
-      {/* 3. Multi-Week Mesocycle Deck (Rendered when scope is 2_WEEKS or 4_WEEKS) */}
+      {/* 3. Multi-Week Mesocycle Deck */}
       {(scope === "2_WEEKS" || scope === "4_WEEKS") && recap.multiWeekRollup && (
         <MultiWeekMesocycleDeck rollup={recap.multiWeekRollup} />
       )}
 
-      {/* 4. Empat Kartu Metrik Utama Mingguan */}
-      <WeeklyRecapHeroCards activitySummary={act} injurySummary={inj} />
+      {/* 4. Empat Kartu Adaptasi Biologis & Validitas Ganda */}
+      <WeeklyRecapHeroCards
+        activitySummary={act}
+        injurySummary={inj}
+        proMetrics={recap.pro_metrics}
+      />
 
-      {/* 5. Banner Protokol Keselamatan Sendi & Korelasi Klinis */}
+      {/* 5. Jembatan Preskriptif Taktis Minggu Depan */}
+      {recap.pro_metrics?.tactical_bridge && (
+        <WeeklyRecapTacticalBridge prescription={recap.pro_metrics.tactical_bridge} />
+      )}
+
+      {/* 6. Banner Protokol Keselamatan Sendi & Korelasi Klinis */}
       <div
         className={`p-4 rounded-xl border text-xs leading-relaxed flex items-start gap-3 shadow-xs ${
           isSuspended
@@ -265,12 +262,12 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
         </div>
       </div>
 
-      {/* 6. Analisis Fisiologis & Polarisasi 80/20 Pro Level */}
+      {/* 7. Analisis Fisiologis & Polarisasi 80/20 Pro Level */}
       {recap.pro_metrics && (
         <WeeklyRecapProMetricsSection proMetrics={recap.pro_metrics} />
       )}
 
-      {/* 7. Rincian Dua Kolom: Timeline 7 Hari (Kiri) vs Status Cidera & Preskripsi (Kanan) */}
+      {/* 8. Rincian Dua Kolom: Timeline 7 Hari (Kiri) vs Status Cidera & Preskripsi (Kanan) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-7">
           <WeeklyRecapTimeline
@@ -282,6 +279,7 @@ export function WeeklyRecapHub({ initialRecap }: WeeklyRecapHubProps) {
           <WeeklyRecapPrescription
             injurySummary={inj}
             clinicalVerdict={verdict}
+            tacticalBridge={recap.pro_metrics?.tactical_bridge}
           />
         </div>
       </div>

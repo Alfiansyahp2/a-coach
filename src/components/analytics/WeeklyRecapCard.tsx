@@ -131,25 +131,25 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
           </div>
         </div>
 
-        {/* Banner Otomatisasi Siklus Tuntas (Senin 00:00) */}
+        {/* Banner Refleksi Siklus Tuntas (Senin 00:00) */}
         {recap.isMondayAutoCompleted && (
-          <div className="p-2 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 flex items-center justify-between gap-2 text-[10px]">
+          <div className="p-2.5 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 flex items-center justify-between gap-2 text-[10.5px]">
             <span className="text-[var(--color-cycling)] font-semibold flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-              <span>Otomatis Senin 00:00: Menampilkan rekap tuntas minggu lalu ({timeframe.label})</span>
+              <span>Senin Dini Hari: Refleksi Biologis Siklus Tuntas ({timeframe.label})</span>
             </span>
             <button
               onClick={() => navigateWeek(0)}
-              className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold cursor-pointer hover:border-[var(--color-cycling)]"
+              className="text-[9px] px-2 py-0.5 rounded bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold cursor-pointer hover:border-[var(--color-cycling)]"
             >
               Minggu Baru →
             </button>
           </div>
         )}
 
-        {/* Quick Historical Weeks Pills */}
+        {/* Quick Historical Weeks Pills (Zero-Scrollbar) */}
         {recap.availableWeeks && recap.availableWeeks.length > 0 && (
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pb-0.5 text-[9.5px]">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-0.5 text-[9.5px]">
             <span className="text-[9px] uppercase text-[var(--color-text-muted)] font-bold shrink-0">
               Siklus:
             </span>
