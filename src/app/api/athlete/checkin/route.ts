@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, connection } from 'next/server';
 import {
   upsertAthleteTrainingResponse,
   createAthletePainLog,
@@ -15,6 +15,7 @@ import { verifyUserAuthorization } from '@/lib/auth/authGuard';
  * and triggers a deterministic recalculation of sport-specific training readiness.
  */
 export async function POST(req: NextRequest) {
+  await connection();
   try {
     const body = await req.json();
     const auth = verifyUserAuthorization(req, body.user_id);

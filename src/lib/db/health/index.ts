@@ -8,7 +8,7 @@ import {
   AuthoritativeAthleteHealthContext,
   MedicalEvaluationStatus,
 } from '@/types';
-import { evaluateTrainingReadiness } from '@/lib/readinessEngine';
+import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngine';
 
 import { getAthleteProfile, upsertAthleteProfile } from './athleteProfileRepo';
 import { getAthleteInjuries, createAthleteInjury } from './injuryRepo';

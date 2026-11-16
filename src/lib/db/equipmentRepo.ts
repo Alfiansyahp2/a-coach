@@ -6,39 +6,79 @@ export async function getAthleteEquipment(
   sportType?: string
 ): Promise<AthleteEquipment[]> {
   if (pgPool) {
-    let query = 'SELECT * FROM athlete_equipment WHERE user_id = $1';
+    let query = `
+      SELECT
+        e.*,
+        COALESCE(
+          (
+            SELECT SUM(a.distance_meters)
+            FROM activities a
+            WHERE a.user_id = e.user_id
+              AND (
+                (e.sport_type = 'Ride' AND (a.sport_type ILIKE '%ride%' OR a.sport_type ILIKE '%cycl%'))
+                OR
+                (e.sport_type = 'Run' AND a.sport_type ILIKE '%run%')
+                OR
+                (LOWER(e.sport_type) = LOWER(a.sport_type))
+              )
+          ),
+          0
+        ) AS dynamic_activity_meters
+      FROM athlete_equipment e
+      WHERE e.user_id = $1
+    `;
     const params: any[] = [userId];
     if (sportType) {
-      query += ' AND (sport_type = $2 OR sport_type = \'All\')';
+      query += ' AND (e.sport_type = $2 OR e.sport_type = \'All\')';
       params.push(sportType);
     }
-    query += ' ORDER BY is_active DESC, accumulated_distance_meters DESC';
+    query += ' ORDER BY e.is_active DESC, e.accumulated_distance_meters DESC';
     const res = await pgPool.query(query, params);
-    return res.rows.map((r) => ({
-      id: r.id,
-      user_id: r.user_id,
-      sport_type: r.sport_type,
-      name: r.name,
-      brand: r.brand || '',
-      model: r.model || '',
-      accumulated_distance_meters: Number(r.accumulated_distance_meters || 0),
-      max_recommended_distance_meters: Number(r.max_recommended_distance_meters || 800000),
-      gear_type: r.gear_type || 'RUNNING_SHOES',
-      is_active: Boolean(r.is_active),
-      is_retired: Boolean(r.is_retired),
-      notes: r.notes || '',
-      created_at: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
-      updated_at: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
-    }));
+    return res.rows.map((r) => {
+      const dbDist = Number(r.accumulated_distance_meters || 0);
+      const dynDist = Number(r.dynamic_activity_meters || 0);
+      const finalDist = dynDist > 0 ? dynDist : dbDist;
+      return {
+        id: r.id,
+        user_id: r.user_id,
+        sport_type: r.sport_type,
+        name: r.name,
+        brand: r.brand || '',
+        model: r.model || '',
+        accumulated_distance_meters: finalDist,
+        max_recommended_distance_meters: Number(r.max_recommended_distance_meters || 800000),
+        gear_type: r.gear_type || 'RUNNING_SHOES',
+        is_active: Boolean(r.is_active),
+        is_retired: Boolean(r.is_retired),
+        notes: r.notes || '',
+        created_at: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+        updated_at: r.updated_at instanceof Date ? r.updated_at.toISOString() : String(r.updated_at),
+      };
+    });
   }
 
   const store = ensureLocalStore();
   const list = ((store as any).athlete_equipment || []) as AthleteEquipment[];
-  return list.filter((e) => {
-    if (e.user_id !== userId) return false;
-    if (sportType && e.sport_type !== sportType && e.sport_type !== 'All') return false;
-    return true;
-  });
+  const acts = store.activities || [];
+  return list
+    .filter((e) => {
+      if (e.user_id !== userId) return false;
+      if (sportType && e.sport_type !== sportType && e.sport_type !== 'All') return false;
+      return true;
+    })
+    .map((e) => {
+      const matchingDist = acts
+        .filter((a) => {
+          if (e.sport_type === 'Ride') return (a.sport_type || '').toLowerCase().includes('ride') || (a.sport_type || '').toLowerCase().includes('cycl');
+          if (e.sport_type === 'Run') return (a.sport_type || '').toLowerCase().includes('run');
+          return (a.sport_type || '').toLowerCase() === (e.sport_type || '').toLowerCase();
+        })
+        .reduce((sum, a) => sum + Number(a.distance_meters || 0), 0);
+      return {
+        ...e,
+        accumulated_distance_meters: matchingDist > 0 ? matchingDist : e.accumulated_distance_meters,
+      };
+    });
 }
 
 export async function upsertEquipment(

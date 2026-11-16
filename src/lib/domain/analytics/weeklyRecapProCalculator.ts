@@ -1,5 +1,12 @@
 import { Activity, AthletePainLog, AthleteTrainingResponse } from '@/types';
+import { getDayIndexMondayZero } from '@/lib/shared/dateUtils';
 import { WeeklyProMetrics } from './weeklyRecapTypes';
+import {
+  computeDualLoadTelemetry,
+  computeDeloadCelebration,
+  computeBiologicalAdaptationStatus,
+  computeTacticalBridgePrescription,
+} from './weeklyRecapBridgeCalculator';
 
 export function computeLocalWeeklyProMetrics(
   activities: Activity[],
@@ -50,7 +57,7 @@ export function computeLocalWeeklyProMetrics(
     weeklyTss += sessionTss;
 
     const d = new Date(a.start_date);
-    const dayIdx = (d.getDay() + 6) % 7; // Monday = 0
+    const dayIdx = getDayIndexMondayZero(d);
     dailyLoads[dayIdx] += sessionTss;
   }
 
@@ -120,6 +127,12 @@ export function computeLocalWeeklyProMetrics(
     ...trainingResponses.map((r) => Math.max(r.pain_during_activity || 0, r.pain_after_activity || 0))
   );
 
+  const swellingCount =
+    painLogs.filter((p) => p.swelling_present).length +
+    trainingResponses.filter((r) => r.swelling_observed).length;
+
+  const deloadInfo = computeDeloadCelebration(distDelta, peakPain);
+
   let jointRating = 'OPTIMAL_TOLERANCE';
   let painNote = 'Toleransi sendi stabil tanpa pembengkakan.';
   if (peakPain >= 4) {
@@ -130,16 +143,56 @@ export function computeLocalWeeklyProMetrics(
     painNote = 'Disiplin proteksi sempurna: 100% volume pada sepeda non-impak (engkel & lutut aman).';
   }
 
-  // 6. Periodization Phase
+  // 6. Periodization Phase & Deload Recognition
   let phase = 'BASE_BUILD';
   let bridge = 'Fondasi aerobik bertambah kokoh. Pertahankan Long Ride akhir pekan di Zone 2.';
-  if (wowFlag === 'DELOAD_DETECTED') {
+  if (deloadInfo.is_deload_week) {
     phase = 'DELOAD_RECOVERY';
-    bridge = 'Fase deload berhasil diserap. Minggu depan siap memulai blok progresif baru.';
+    wowFlag = 'DELOAD_DETECTED';
+    wowInterp = deloadInfo.scientific_rationale;
+    bridge = 'Fase deload berhasil diserap untuk pemulihan glikogen dan perbaikan jaringan sendi. Minggu depan siap memulai blok progresif baru.';
   } else if (weeklyTss > 300) {
     phase = 'PEAK_WEEK';
     bridge = 'Volume puncak tercapai. Siapkan 1 minggu pemulihan aktif setelah blok ini.';
   }
+
+  // 7. Biological Adaptation & Tactical Bridge Calculations
+  const dualLoad = computeDualLoadTelemetry(
+    currDist,
+    totalDuration,
+    totalSrpe,
+    weeklyTss,
+    lowPct
+  );
+
+  const biologicalAdaptation = computeBiologicalAdaptationStatus(
+    lowPct,
+    modPct,
+    monotony,
+    strain,
+    peakPain,
+    swellingCount,
+    deloadInfo.is_deload_week
+  );
+
+  const tacticalBridge = computeTacticalBridgePrescription(
+    {
+      currentDistanceKm: currDist,
+      prevDistanceKm: prevDist,
+      totalMovingSeconds: totalDuration,
+      fosterSrpe: totalSrpe,
+      weeklyTss,
+      monotony,
+      strain,
+      lowZonePct: lowPct,
+      modZonePct: modPct,
+      highZonePct: highPct,
+      distDeltaPct: distDelta,
+      peakPain,
+      swellingCount,
+    },
+    deloadInfo.is_deload_week
+  );
 
   return {
     foster_srpe_load: Math.round(totalSrpe),
@@ -171,6 +224,10 @@ export function computeLocalWeeklyProMetrics(
     periodization_phase: phase,
     pro_coach_verdict: `Rekap Mingguan Pro: Total TSS ${Math.round(weeklyTss)} (${Math.round(totalSrpe)} AU sRPE). Polarisasi ${lowPct}% Z1-2. ${painNote}`,
     next_week_bridge_advice: bridge,
+    tactical_bridge: tacticalBridge,
+    biological_adaptation: biologicalAdaptation,
+    deload_info: deloadInfo,
+    dual_load: dualLoad,
   };
 }
 

@@ -54,7 +54,7 @@ export function computeVolumeProgression(
   const minTime = Math.min(...dates);
   const latestActivityTime = Math.max(...dates);
 
-  let buckets: VolumeBucket[] = [];
+  const buckets: VolumeBucket[] = [];
 
   // MODE 1: ALL-TIME (Weekly Aggregated Progression across entire dataset)
   if (timeframe === "all") {

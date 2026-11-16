@@ -26,20 +26,10 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
   const [loading, setLoading] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  const navigateWeek = async (direction: -1 | 1 | 0) => {
-    if (!recap) return;
+  const navigateToDate = async (targetDateStr: string) => {
     try {
       setLoading(true);
-      let targetDateStr: string;
-      if (direction === 0) {
-        targetDateStr = formatDateOnly(new Date());
-      } else {
-        const currentRef = new Date(recap.timeframe.startDate);
-        currentRef.setDate(currentRef.getDate() + direction * 7);
-        targetDateStr = formatDateOnly(currentRef);
-      }
-
-      const res = await fetch(`/api/athlete/weekly-recap?date=${targetDateStr}`);
+      const res = await fetch(`/api/athlete/weekly-recap?date=${targetDateStr}&scope=1_WEEK&autoMonday=false`);
       const data = await res.json();
       if (data.success && data.recap) {
         setRecap(data.recap);
@@ -49,6 +39,19 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const navigateWeek = async (direction: -1 | 1 | 0) => {
+    if (!recap) return;
+    let targetDateStr: string;
+    if (direction === 0) {
+      targetDateStr = formatDateOnly(new Date());
+    } else {
+      const currentRef = new Date(recap.timeframe.startDate);
+      currentRef.setDate(currentRef.getDate() + direction * 7);
+      targetDateStr = formatDateOnly(currentRef);
+    }
+    await navigateToDate(targetDateStr);
   };
 
   if (!recap) {
@@ -128,6 +131,57 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
           </div>
         </div>
 
+        {/* Banner Refleksi Siklus Tuntas (Senin 00:00) */}
+        {recap.isMondayAutoCompleted && (
+          <div className="p-2.5 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 flex items-center justify-between gap-2 text-[10.5px]">
+            <span className="text-[var(--color-cycling)] font-semibold flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+              <span>Senin Dini Hari: Refleksi Biologis Siklus Tuntas ({timeframe.label})</span>
+            </span>
+            <button
+              onClick={() => navigateWeek(0)}
+              className="text-[9px] px-2 py-0.5 rounded bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold cursor-pointer hover:border-[var(--color-cycling)]"
+            >
+              Minggu Baru →
+            </button>
+          </div>
+        )}
+
+        {/* Quick Historical Weeks Pills (Zero-Scrollbar) */}
+        {recap.availableWeeks && recap.availableWeeks.length > 0 && (
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-0.5 text-[9.5px]">
+            <span className="text-[9px] uppercase text-[var(--color-text-muted)] font-bold shrink-0">
+              Siklus:
+            </span>
+            {recap.availableWeeks.slice(0, 5).map((w) => {
+              const isSelected = w.startDate === timeframe.startDate.split("T")[0];
+              return (
+                <button
+                  key={w.startDate}
+                  onClick={() => navigateToDate(w.startDate)}
+                  disabled={loading}
+                  className={`px-2 py-0.5 rounded text-[9.5px] shrink-0 transition-all font-tabular flex items-center gap-1 cursor-pointer ${
+                    isSelected
+                      ? "bg-[var(--color-cycling)] text-[var(--color-canvas)] font-bold shadow-2xs"
+                      : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-card)] border border-[var(--color-border)]"
+                  }`}
+                >
+                  <span>
+                    {w.isCurrentWeek
+                      ? "Minggu Ini"
+                      : w.isCompletedWeek
+                      ? "1M Lalu (Tuntas)"
+                      : `${w.weeksAgo}M Lalu`}
+                  </span>
+                  {w.sessionCount > 0 && (
+                    <span className="opacity-80 font-normal">({w.sessionCount})</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* 2. Beban Kerja Fisik (Modular Component) */}
         <WeeklyRecapWorkloadSection activitySummary={act} proMetrics={recap.pro_metrics} />
 
@@ -150,32 +204,16 @@ export function WeeklyRecapCard({ initialRecap }: WeeklyRecapCardProps) {
           </div>
 
           <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--color-surface-muted)]/60 border border-[var(--color-border-subtle)]">
-              <div className="text-base sm:text-lg font-bold text-[var(--color-text-primary)] font-tabular">
-                {inj.pain_telemetry.average_pain_score} <span className="text-[10px] font-normal text-[var(--color-text-muted)]">/10</span>
+            {[
+              { val: `${inj.pain_telemetry.average_pain_score} /10`, label: "Rata Nyeri", color: "text-[var(--color-text-primary)]" },
+              { val: `${inj.pain_telemetry.peak_pain_score} /10`, label: "Puncak Nyeri", color: inj.pain_telemetry.peak_pain_score >= 4 ? "text-[var(--color-alert-amber)]" : "text-[var(--color-text-primary)]" },
+              { val: inj.training_responses_summary.pain_free_sessions_count, label: "Sesi Bebas Nyeri", color: "text-[var(--color-cycling)]" },
+            ].map((m, idx) => (
+              <div key={idx} className="p-2 sm:p-2.5 rounded-lg bg-[var(--color-surface-muted)]/60 border border-[var(--color-border-subtle)]">
+                <div className={`text-base sm:text-lg font-bold font-tabular ${m.color}`}>{m.val}</div>
+                <div className="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider mt-0.5">{m.label}</div>
               </div>
-              <div className="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider mt-0.5">Rata Nyeri</div>
-            </div>
-
-            <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--color-surface-muted)]/60 border border-[var(--color-border-subtle)]">
-              <div
-                className={`text-base sm:text-lg font-bold font-tabular ${
-                  inj.pain_telemetry.peak_pain_score >= 4
-                    ? "text-[var(--color-alert-amber)]"
-                    : "text-[var(--color-text-primary)]"
-                }`}
-              >
-                {inj.pain_telemetry.peak_pain_score} <span className="text-[10px] font-normal text-[var(--color-text-muted)]">/10</span>
-              </div>
-              <div className="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider mt-0.5">Puncak Nyeri</div>
-            </div>
-
-            <div className="p-2 sm:p-2.5 rounded-lg bg-[var(--color-surface-muted)]/60 border border-[var(--color-border-subtle)]">
-              <div className="text-base sm:text-lg font-bold text-[var(--color-cycling)] font-tabular">
-                {inj.training_responses_summary.pain_free_sessions_count}
-              </div>
-              <div className="text-[9px] text-[var(--color-text-muted)] uppercase tracking-wider mt-0.5">Sesi Bebas Nyeri</div>
-            </div>
+            ))}
           </div>
 
           {/* Area yang Dimonitor */}

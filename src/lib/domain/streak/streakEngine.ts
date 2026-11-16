@@ -154,7 +154,7 @@ export function calculateWeeklyStreak(
     const endWeekData = activeWeeksMap.get(startCheckKey)!;
     currentStreakEndDate = endWeekData.latestDate;
 
-    let cursorMonday = new Date(endWeekData.monday.getTime());
+    const cursorMonday = new Date(endWeekData.monday.getTime());
 
     while (true) {
       const k = formatLocalDateKey(cursorMonday);
@@ -179,7 +179,7 @@ export function calculateWeeklyStreak(
     const startWeekData = activeWeeksMap.get(startKey)!;
 
     let streakLen = 1;
-    let earliest = startWeekData.earliestDate;
+    const earliest = startWeekData.earliestDate;
     let latest = startWeekData.latestDate;
     let cursorMonday = new Date(startWeekData.monday.getTime());
 

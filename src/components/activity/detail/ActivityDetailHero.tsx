@@ -1,5 +1,5 @@
 import React from "react";
-import { EditActivityModal } from "@/components/EditActivityModal";
+import { EditActivityModal } from "@/components/activity/modal/EditActivityModal";
 import { formatDistance, formatDate } from "@/lib/formatters";
 import { Calendar, Clock } from "lucide-react";
 import { Activity } from "@/types";

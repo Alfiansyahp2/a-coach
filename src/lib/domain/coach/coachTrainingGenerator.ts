@@ -14,7 +14,6 @@ import {
   setPrimaryFitnessGoal,
 } from '@/lib/db';
 import {
-  Activity,
   TrainingPlan,
   ScheduledWorkout,
   FitnessGoal,
@@ -59,10 +58,9 @@ export async function generateCoachTrainingFromDatabase(
   targetGoalId?: string
 ): Promise<GeneratedCoachTrainingResult> {
   // 1. Fetch real grounded database assets
-  const [activities, healthContext, existingGoals] = await Promise.all([
+  const [activities, healthContext] = await Promise.all([
     getActivities(userId, { limit: 100 }),
     getAuthoritativeHealthContext(userId),
-    getFitnessGoals(userId),
   ]);
 
   const rides = activities.filter((a) => a.sport_type.toLowerCase().includes('ride'));

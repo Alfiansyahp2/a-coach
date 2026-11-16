@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Target, ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
 import { FitnessGoal } from "@/types";
 
+import { DashboardSecondaryGoalItem } from "./DashboardSecondaryGoalItem";
+
 interface DashboardMacroGoalsCardProps {
   goals: FitnessGoal[];
 }
@@ -210,68 +212,14 @@ export function DashboardMacroGoalsCard({ goals }: DashboardMacroGoalsCardProps)
           </div>
 
           <div className="space-y-2.5">
-            {secondaryGoals.map((g) => {
-              const cur = Number(g.current_value);
-              const tgt = Number(g.target_value);
-              const pct = Math.min(100, Math.round((cur / Math.max(1, tgt)) * 100));
-              const isAchieved = g.is_achieved || pct >= 100;
-              const colorToken = getGoalColor(g.title);
-
-              return (
-                <Link
-                  key={g.id}
-                  href="/goals"
-                  className="block p-3 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)]/60 hover:border-[var(--color-cycling)]/60 transition-all duration-200 space-y-1.5 hover:bg-[var(--color-surface-muted)] group"
-                >
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-[var(--color-text-primary)] font-semibold flex items-center gap-2 truncate">
-                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colorToken }} />
-                      <span className="group-hover:text-[var(--color-cycling)] transition-colors truncate">
-                        {g.title}
-                      </span>
-                    </span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {isAchieved && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[var(--color-cycling)]/20 text-[var(--color-cycling)] font-bold">
-                          TERCAPAI
-                        </span>
-                      )}
-                      <span
-                        className="font-tabular font-extrabold text-[11px]"
-                        style={{ color: isAchieved ? "var(--color-cycling)" : colorToken }}
-                      >
-                        {pct}%
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="w-full h-1.5 bg-[var(--color-surface-card)] rounded-full overflow-hidden border border-[var(--color-border)]">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        backgroundColor: isAchieved ? "var(--color-cycling)" : colorToken,
-                        width: `${pct}%`,
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--color-text-muted)]">
-                    <span>
-                      Tercapai:{" "}
-                      <strong className="text-[var(--color-text-secondary)] font-tabular">
-                        {formatGoalMetric(cur, g.unit, false)}
-                      </strong>
-                    </span>
-                    <span>
-                      Target:{" "}
-                      <strong className="text-[var(--color-text-primary)] font-tabular">
-                        {formatGoalMetric(tgt, g.unit, true)}
-                      </strong>
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+            {secondaryGoals.map((g) => (
+              <DashboardSecondaryGoalItem
+                key={g.id}
+                goal={g}
+                formatGoalMetric={formatGoalMetric}
+                getGoalColor={getGoalColor}
+              />
+            ))}
           </div>
         </div>
       )}
