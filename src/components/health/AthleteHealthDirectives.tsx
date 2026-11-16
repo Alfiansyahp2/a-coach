@@ -11,9 +11,10 @@ import {
 
 interface AthleteHealthDirectivesProps {
   activeTab: "overview" | "directives" | "risks";
+  maxVerifiedRideKm?: number;
 }
 
-export function AthleteHealthDirectives({ activeTab }: AthleteHealthDirectivesProps) {
+export function AthleteHealthDirectives({ activeTab, maxVerifiedRideKm = 62.4 }: AthleteHealthDirectivesProps) {
   if (activeTab === "overview") {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -136,14 +137,14 @@ export function AthleteHealthDirectives({ activeTab }: AthleteHealthDirectivesPr
             </div>
 
             <p className="text-xs font-mono text-[var(--color-text-secondary)] mt-3 leading-relaxed bg-[var(--color-surface-card)] p-3 rounded-lg border border-[var(--color-border)]">
-              <strong className="text-[var(--color-cycling)]">Toleransi Empiris Terverifikasi:</strong> Sesi sepeda 56.10 km tuntas dengan skor nyeri 0/10 dan tanpa pembengkakan sendi. Sangat aman menjaga daya tahan aerobik dengan kayuhan ringan.
+              <strong className="text-[var(--color-cycling)]">Toleransi Empiris Terverifikasi:</strong> Sesi sepeda {maxVerifiedRideKm.toFixed(1)} km tuntas dengan skor nyeri 0/10 dan tanpa pembengkakan sendi. Sangat aman menjaga daya tahan aerobik dengan kayuhan ringan.
             </p>
           </div>
 
           <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between text-xs font-mono text-[var(--color-text-muted)]">
             <span className="flex items-center gap-1.5 text-[var(--color-cycling)] font-semibold">
               <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-              56.10 km: Bebas Nyeri &amp; Bengkak
+              {maxVerifiedRideKm.toFixed(1)} km: Bebas Nyeri &amp; Bengkak
             </span>
             <span className="text-[var(--color-text-secondary)] font-medium">Hindari Tanjakan Berdiri / Sprint</span>
           </div>

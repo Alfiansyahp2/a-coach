@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const dateParam = searchParams.get('date') || undefined;
+    const scopeParam = (searchParams.get('scope') as '1_WEEK' | '2_WEEKS' | '4_WEEKS') || '1_WEEK';
+    const autoMondayParam = searchParams.get('autoMonday') !== 'false';
     const auth = verifyUserAuthorization(req, searchParams.get('user_id') || searchParams.get('userId'));
     if (!auth.authorized) return auth.response!;
     const userId = auth.userId;
@@ -35,6 +37,8 @@ export async function GET(req: NextRequest) {
       trainingResponses,
       scheduledWorkouts,
       referenceDate: dateParam,
+      scope: scopeParam,
+      autoMonday: autoMondayParam,
     });
 
     return NextResponse.json({

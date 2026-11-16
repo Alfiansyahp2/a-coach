@@ -173,11 +173,35 @@ export function WeeklyRecapDetailModal({ recap, onClose }: WeeklyRecapDetailModa
             </div>
           </div>
 
-          {/* Section 3: Rekomendasi Preskriptif Coach */}
+          {/* Section 3: Jembatan Preskriptif & Rekomendasi Coach */}
           <div className="space-y-2 pt-1 border-t border-[var(--color-border-subtle)]">
             <h4 className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
-              Instruksi Preskripsi Minggu Depan
+              Jembatan Preskriptif Taktis Minggu Depan
             </h4>
+
+            {recap.pro_metrics?.tactical_bridge && (
+              <div className="p-2.5 rounded bg-[var(--color-surface-muted)]/60 border border-[var(--color-border)] grid grid-cols-3 gap-2 text-center text-[10px]">
+                <div>
+                  <span className="text-[9px] text-[var(--color-text-muted)] block uppercase">Batas Aman</span>
+                  <strong className="text-[var(--color-cycling)] font-tabular text-xs">
+                    {recap.pro_metrics.tactical_bridge.safe_km_quota.total_max_km} km
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-[9px] text-[var(--color-text-muted)] block uppercase">Istirahat Wajib</span>
+                  <strong className="text-cyan-400 font-tabular text-xs">
+                    {recap.pro_metrics.tactical_bridge.mandatory_rest_days.count} Hari
+                  </strong>
+                </div>
+                <div>
+                  <span className="text-[9px] text-[var(--color-text-muted)] block uppercase">Target Zona</span>
+                  <strong className="text-[var(--color-endurance)] font-tabular text-xs">
+                    &ge;{recap.pro_metrics.tactical_bridge.target_hr_zones.zone1_2_aerobic_min_pct}% Z1–2
+                  </strong>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
               <div className="p-2 rounded bg-[var(--color-surface-muted)]/40 border border-[var(--color-border-subtle)]">
                 <div className="font-bold text-[var(--color-running)] uppercase mb-0.5">Cabang Lari</div>
