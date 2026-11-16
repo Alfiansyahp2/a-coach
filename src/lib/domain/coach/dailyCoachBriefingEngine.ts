@@ -46,7 +46,7 @@ export function generateDailyCoachBriefing(
           : 'Selamat Malam';
 
   // 1. Clinical Circuit Breaker (Highest Priority)
-  if (hasSwelling || maxRecentPain >= 4) {
+  if (hasSwelling || maxRecentPain >= 4 || (hasActiveInjury && maxRecentPain >= 3)) {
     return {
       greeting: `${timeGreeting}, Atlet!`,
       todayStatus: '🚨 SAFETY INTERVENTION: PROTOKOL PROTEKSI AKTIF',

@@ -1,4 +1,4 @@
-import { Activity, ScheduledWorkout } from '@/types';
+import { Activity } from '@/types';
 import {
   RecapScope,
   MultiWeekRollupSummary,

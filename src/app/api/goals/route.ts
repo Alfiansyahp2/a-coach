@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, connection } from 'next/server';
 import { getFitnessGoals, createFitnessGoal, setPrimaryFitnessGoal } from '@/lib/db';
 import { generateCoachTrainingFromDatabase } from '@/lib/domain/coach/coachTrainingGenerator';
 import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 export async function GET(request: Request) {
+  await connection();
   try {
     const auth = verifyUserAuthorization(request);
     if (!auth.authorized) return auth.response!;
@@ -19,6 +20,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  await connection();
   try {
     const body = await request.json();
     const auth = verifyUserAuthorization(request, body?.user_id);

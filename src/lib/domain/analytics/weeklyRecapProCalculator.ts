@@ -1,4 +1,5 @@
 import { Activity, AthletePainLog, AthleteTrainingResponse } from '@/types';
+import { getDayIndexMondayZero } from '@/lib/shared/dateUtils';
 import { WeeklyProMetrics } from './weeklyRecapTypes';
 import {
   computeDualLoadTelemetry,
@@ -56,7 +57,7 @@ export function computeLocalWeeklyProMetrics(
     weeklyTss += sessionTss;
 
     const d = new Date(a.start_date);
-    const dayIdx = (d.getDay() + 6) % 7; // Monday = 0
+    const dayIdx = getDayIndexMondayZero(d);
     dailyLoads[dayIdx] += sessionTss;
   }
 

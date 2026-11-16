@@ -10,7 +10,7 @@ import {
   List,
   ClipboardCheck,
 } from "lucide-react";
-import { AddActivityModal } from "@/components/AddActivityModal";
+import { AddActivityModal } from "@/components/activity/modal/AddActivityModal";
 
 interface ScheduleTrainingHeaderProps {
   initialPlan: TrainingPlan | null;

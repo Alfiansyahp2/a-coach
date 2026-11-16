@@ -6,7 +6,7 @@ import { ScheduledWorkout, TrainingPlan, FitnessGoal, PersonalRecord, Activity }
 import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapTypes";
 import { DashboardScheduledWorkoutsCard } from "./DashboardScheduledWorkoutsCard";
 import { DashboardMacroGoalsCard } from "./DashboardMacroGoalsCard";
-import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
+import { PersonalRecordsDeck } from "@/components/records/PersonalRecordsDeck";
 import { WeeklyStreakCard } from "./WeeklyStreakCard";
 import { WeeklyRecapCard } from "@/components/analytics/WeeklyRecapCard";
 
