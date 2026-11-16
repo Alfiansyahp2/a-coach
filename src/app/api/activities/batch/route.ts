@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connection } from "next/server";
 import { revalidatePath } from "next/cache";
-import { batchUpdateActivities, DEFAULT_USER_ID } from "@/lib/db";
+import { batchUpdateActivities } from "@/lib/db";
+import { verifyUserAuthorization } from "@/lib/auth/authGuard";
 
 /**
  * POST /api/activities/batch
@@ -10,6 +11,8 @@ import { batchUpdateActivities, DEFAULT_USER_ID } from "@/lib/db";
 export async function POST(req: NextRequest) {
   await connection();
   try {
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
     const body = await req.json();
     const ids = Array.isArray(body.activity_ids) ? body.activity_ids : [];
     const updates = body.updates || {};
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const updatedCount = await batchUpdateActivities(ids, updates, DEFAULT_USER_ID);
+    const updatedCount = await batchUpdateActivities(ids, updates, auth.userId);
 
     revalidatePath("/activities");
     revalidatePath("/");
