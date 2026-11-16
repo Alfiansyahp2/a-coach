@@ -48,12 +48,12 @@ export function GoalRegistryCard({
 
   return (
     <div
-      className={`rounded-2xl bg-[var(--color-surface-card)] border p-5 space-y-4 shadow-xs transition-all duration-200 ${
+      className={`rounded-xl bg-[var(--color-surface-card)] border p-4 sm:p-5 space-y-4 shadow-xs transition-all duration-200 font-mono ${
         isPrimaryGoal
-          ? "border-2 border-[var(--color-cycling)]/80 shadow-sm"
+          ? "border-[var(--color-border)] border-t-2 border-t-[var(--color-cycling)]"
           : isAchieved
-          ? "border-[var(--color-cycling)]/60 bg-[var(--color-surface-card)]"
-          : "border-[var(--color-border)] hover:border-[var(--color-border)]/90"
+          ? "border-[var(--color-border)] border-t-2 border-t-[var(--color-cycling)]"
+          : "border-[var(--color-border)] hover:border-[var(--color-text-secondary)]"
       }`}
     >
       {/* Header */}

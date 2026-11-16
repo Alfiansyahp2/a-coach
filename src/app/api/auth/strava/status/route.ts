@@ -1,10 +1,15 @@
-import { NextResponse, connection } from 'next/server';
+import { NextRequest, NextResponse, connection } from 'next/server';
 import { getStravaConfig } from '@/lib/strava';
-import { DEFAULT_USER_ID, getStravaConnection } from '@/lib/db';
+import { getStravaConnection } from '@/lib/db';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   await connection();
   try {
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
+
     const config = getStravaConfig();
 
     if (!config.isConfigured) {
@@ -16,7 +21,7 @@ export async function GET() {
       });
     }
 
-    const connection = await getStravaConnection(DEFAULT_USER_ID);
+    const connection = await getStravaConnection(userId);
 
     if (!connection || !connection.is_active) {
       return NextResponse.json({
@@ -46,4 +51,3 @@ export async function GET() {
     );
   }
 }
-

@@ -132,7 +132,7 @@ export function CyclingCoachView({
       {/* 2. PRIMARY OBJECTIVE: ROAD TO 100 KM CENTURY RIDE & ZONE 2 GUIDELINE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left: 100km Century Ride Progress Card */}
-        <div className="lg:col-span-6 p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4">
+        <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-[var(--color-cycling)]/15 border border-[var(--color-cycling)]/30 flex items-center justify-center text-[var(--color-cycling)]">
@@ -191,7 +191,7 @@ export function CyclingCoachView({
         </div>
 
         {/* Right: Zone 2 Pacing & Biomechanics Guideline */}
-        <div className="lg:col-span-6 p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
+        <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
           <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
             <div className="flex items-center gap-2">
               <Gauge className="w-4 h-4 text-[var(--color-cycling)]" />

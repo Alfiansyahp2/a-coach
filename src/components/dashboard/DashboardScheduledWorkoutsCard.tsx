@@ -13,7 +13,7 @@ export function DashboardScheduledWorkoutsCard({
   activePlan,
 }: DashboardScheduledWorkoutsCardProps) {
   return (
-    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 space-y-3.5 shadow-xs">
+    <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 space-y-3.5 shadow-xs font-mono">
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div>
           <h3 className="text-xs uppercase font-mono tracking-wider font-bold text-[var(--color-text-primary)] flex items-center gap-2">

@@ -1,15 +1,22 @@
-import { NextResponse } from 'next/server';
-import { getActivities, getScheduledWorkouts, DEFAULT_USER_ID } from '@/lib/db';
-import { calculateWeeklyStreak } from '@/lib/domain/streak/streakEngine';
+import { NextRequest, NextResponse, connection } from 'next/server';
+import { getActivities, getScheduledWorkouts } from '@/lib/db';
+import { computeStreakViaPython } from '@/lib/api/pythonClient';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  await connection();
   try {
+    const { searchParams } = new URL(req.url);
+    const auth = verifyUserAuthorization(req, searchParams.get('userId'));
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
+
     const [activities, workouts] = await Promise.all([
-      getActivities(DEFAULT_USER_ID),
-      getScheduledWorkouts(DEFAULT_USER_ID),
+      getActivities(userId),
+      getScheduledWorkouts(userId),
     ]);
 
-    const streak = calculateWeeklyStreak(activities, workouts);
+    const streak = await computeStreakViaPython(activities, workouts);
 
     return NextResponse.json({
       success: true,

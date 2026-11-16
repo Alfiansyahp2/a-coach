@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  DEFAULT_USER_ID,
   getStravaConnection,
   getLatestActivityDate,
   getLastSyncLog,
@@ -11,17 +10,22 @@ import {
 import { fetchAthleteActivities, getValidAccessToken } from '@/lib/strava';
 import { runAutoMatch } from '@/lib/domain/matching/matchingEngine';
 import { Activity } from '@/types';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 /**
  * GET /api/strava/sync
  * Returns sync telemetry: last sync log, latest activity timestamp, total activities
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const connection = await getStravaConnection(DEFAULT_USER_ID);
-    const lastSync = await getLastSyncLog(DEFAULT_USER_ID);
-    const latestActivityDate = await getLatestActivityDate(DEFAULT_USER_ID);
-    const allActivities = await getActivities(DEFAULT_USER_ID, { limit: 1 });
+    const auth = verifyUserAuthorization(req);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
+
+    const connection = await getStravaConnection(userId);
+    const lastSync = await getLastSyncLog(userId);
+    const latestActivityDate = await getLatestActivityDate(userId);
+    const allActivities = await getActivities(userId, { limit: 1 });
 
     return NextResponse.json({
       isConnected: Boolean(connection && connection.is_active),
@@ -44,10 +48,13 @@ export async function GET() {
  * runs auto-matching, and logs execution to sync_logs table.
  */
 export async function POST(req: NextRequest) {
+  const auth = verifyUserAuthorization(req);
+  if (!auth.authorized) return auth.response!;
+  const userId = auth.userId;
   const startedAt = new Date().toISOString();
 
   // 1. Verify Strava connection
-  const connection = await getStravaConnection(DEFAULT_USER_ID);
+  const connection = await getStravaConnection(userId);
   if (!connection || !connection.is_active) {
     return NextResponse.json(
       {
@@ -64,7 +71,7 @@ export async function POST(req: NextRequest) {
     const accessToken = await getValidAccessToken(connection.id);
 
     // 3. Determine incremental sync timestamp
-    const latestDateStr = await getLatestActivityDate(DEFAULT_USER_ID);
+    const latestDateStr = await getLatestActivityDate(userId);
     let afterTimestamp: number;
 
     if (latestDateStr) {

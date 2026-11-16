@@ -201,8 +201,31 @@ function computePRs(activities, userId) {
 
 async function main() {
   const userId = '00000000-0000-0000-0000-000000000001';
-  const activitiesPath = path.join(__dirname, '..', 'data', 'imported_activities.json');
-  const activities = JSON.parse(fs.readFileSync(activitiesPath, 'utf8'));
+  let activities = [];
+
+  const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:admin123@localhost:5432/sport_training';
+  let client = null;
+
+  try {
+    client = new Client({ connectionString: dbUrl });
+    await client.connect();
+    const res = await client.query(
+      'SELECT * FROM activities WHERE user_id = $1 ORDER BY start_date ASC',
+      [userId]
+    );
+    activities = res.rows;
+  } catch (e) {
+    console.warn('Could not query PostgreSQL for activities:', e.message);
+    client = null;
+  }
+
+  if (activities.length === 0) {
+    const storePath = path.join(__dirname, '..', '.data', 'store.json');
+    if (fs.existsSync(storePath)) {
+      const store = JSON.parse(fs.readFileSync(storePath, 'utf8'));
+      activities = store.activities || [];
+    }
+  }
 
   const prs = computePRs(activities, userId);
   console.log(`Computed ${prs.length} Ground-Truth Multi-Sport Personal Records:`);
@@ -212,10 +235,7 @@ async function main() {
     );
   });
 
-  if (process.env.DATABASE_URL) {
-    const client = new Client({ connectionString: process.env.DATABASE_URL });
-    await client.connect();
-
+  if (client) {
     // Ensure sport_type column exists
     await client.query(`
       ALTER TABLE personal_records ADD COLUMN IF NOT EXISTS sport_type VARCHAR(20) DEFAULT 'Run';

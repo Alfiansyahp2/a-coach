@@ -103,8 +103,14 @@ export function getThermodynamicStageConfig(streakWeeks: number) {
   };
 }
 
-export function NavbarStreakBadge({ initialWeeks = 9 }: NavbarStreakBadgeProps) {
-  const [weeks, setWeeks] = useState<number>(initialWeeks);
+export function NavbarStreakBadge({ initialWeeks }: NavbarStreakBadgeProps) {
+  const [weeks, setWeeks] = useState<number>(initialWeeks ?? 10);
+
+  useEffect(() => {
+    if (typeof initialWeeks === "number") {
+      setWeeks(initialWeeks);
+    }
+  }, [initialWeeks]);
 
   useEffect(() => {
     let isMounted = true;

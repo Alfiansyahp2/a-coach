@@ -147,3 +147,6 @@ export function aggregateVolumeProgression(
     totalKm: Math.round(data.totalKm * 100) / 100,
   }));
 }
+
+export * from '@/lib/domain/analytics/weeklyRecapEngine';
+

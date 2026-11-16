@@ -53,7 +53,7 @@ export function CoachClinicalBanner({
   }[badgeTone];
 
   return (
-    <div className={`p-5 sm:p-6 rounded-2xl border-2 shadow-sm space-y-4 ${toneClasses.container}`}>
+    <div className={`p-5 sm:p-6 rounded-xl border-2 shadow-sm space-y-4 ${toneClasses.container}`}>
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
         <div className="flex items-start gap-3.5">
           <div className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 shadow-xs ${toneClasses.iconBox}`}>

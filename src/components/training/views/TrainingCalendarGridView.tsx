@@ -1,8 +1,13 @@
-import React, { useMemo } from "react";
-import { formatDuration } from "@/lib/formatters";
+"use client";
+
+import React, { useState, useMemo } from "react";
 import { CalendarDayCard } from "../CalendarDayCard";
 import { CalendarWeek } from "../calendarBuilder";
-import { ScheduledWorkout, Activity } from "@/types";
+import { ScheduledWorkout, Activity, AuthoritativeAthleteHealthContext } from "@/types";
+import { CalendarWeekRowHeader } from "./CalendarWeekRowHeader";
+import { CalendarFocusWeekNavigator } from "./CalendarFocusWeekNavigator";
+import { CalendarClinicalReadinessStrip } from "./CalendarClinicalReadinessStrip";
+import { Eye, Layers, Compass } from "lucide-react";
 
 interface TrainingCalendarGridViewProps {
   displayedWeeks: CalendarWeek[];
@@ -10,6 +15,7 @@ interface TrainingCalendarGridViewProps {
   onSelectActivity?: (activity: Activity) => void;
   isRunningCategory: (category: string) => boolean;
   todayStr?: string;
+  healthContext?: AuthoritativeAthleteHealthContext | null;
 }
 
 const DAY_HEADERS = [
@@ -28,18 +34,111 @@ export function TrainingCalendarGridView({
   onSelectActivity,
   isRunningCategory,
   todayStr,
+  healthContext,
 }: TrainingCalendarGridViewProps) {
+  // Calendar sub-mode: "focus" (1 week at a time) or "all" (full 12-week grid)
+  const [calendarSubMode, setCalendarSubMode] = useState<"focus" | "all">("all");
+  const [collapsedWeeks, setCollapsedWeeks] = useState<Record<number, boolean>>({});
+
   const currentDayIndex = useMemo(() => {
     if (!todayStr) return -1;
     const parts = todayStr.split("-").map(Number);
     if (parts.length !== 3) return -1;
     const d = new Date(parts[0], parts[1] - 1, parts[2]);
-    return (d.getDay() + 6) % 7; // Monday = 0, ..., Wednesday = 2, Sunday = 6
+    return (d.getDay() + 6) % 7; // Monday = 0, ..., Sunday = 6
   }, [todayStr]);
 
+  const currentWeekIdx = useMemo(() => {
+    return displayedWeeks.findIndex((w) => w.isCurrentWeek);
+  }, [displayedWeeks]);
+
+  const [focusWeekIdx, setFocusWeekIdx] = useState<number>(() => {
+    return currentWeekIdx !== -1 ? currentWeekIdx : 0;
+  });
+
+  const toggleCollapse = (weekNum: number) => {
+    setCollapsedWeeks((prev) => ({ ...prev, [weekNum]: !prev[weekNum] }));
+  };
+
+  const handleJumpToToday = () => {
+    if (currentWeekIdx !== -1) {
+      setFocusWeekIdx(currentWeekIdx);
+      if (calendarSubMode === "all") {
+        const el = document.getElementById(`cal-day-${todayStr}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    }
+  };
+
+  const weeksToRender = calendarSubMode === "focus"
+    ? [displayedWeeks[focusWeekIdx] || displayedWeeks[0]].filter(Boolean)
+    : displayedWeeks;
+
   return (
-    <div className="space-y-6 font-mono">
-      {/* Day Names Header Row (Mon - Sun) */}
+    <div className="space-y-4 font-mono">
+      {/* 1. Clinical Readiness & Safety HUD */}
+      <CalendarClinicalReadinessStrip healthContext={healthContext || null} />
+
+      {/* 2. Calendar View Density Controller Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] text-xs shadow-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase mr-1">Tampilan:</span>
+          <button
+            type="button"
+            onClick={() => setCalendarSubMode("all")}
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              calendarSubMode === "all"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] font-bold border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+            <span>Grid Semua Minggu</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setCalendarSubMode("focus");
+              if (currentWeekIdx !== -1) setFocusWeekIdx(currentWeekIdx);
+            }}
+            className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+              calendarSubMode === "focus"
+                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] font-bold border border-[var(--color-border)] shadow-xs"
+                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5 text-[var(--color-running)]" />
+            <span>Fokus Minggu Ini</span>
+          </button>
+        </div>
+
+        {todayStr && (
+          <button
+            type="button"
+            onClick={handleJumpToToday}
+            className="px-3 py-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:border-[var(--color-cycling)] text-[var(--color-text-primary)] border border-[var(--color-border)] font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer shadow-xs"
+          >
+            <Compass className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+            <span>Lompat ke Hari Ini</span>
+          </button>
+        )}
+      </div>
+
+      {/* 3. Focus Week Navigator (When Focus Mode is Active) */}
+      {calendarSubMode === "focus" && (
+        <CalendarFocusWeekNavigator
+          weeks={displayedWeeks}
+          selectedWeekIdx={focusWeekIdx}
+          onSelectWeekIdx={setFocusWeekIdx}
+          onJumpToCurrentWeek={handleJumpToToday}
+          currentWeekIdx={currentWeekIdx}
+        />
+      )}
+
+      {/* 4. Day Names Header Row (Mon - Sun) */}
       <div className="hidden md:grid grid-cols-7 gap-2 text-center text-xs font-bold text-[var(--color-text-muted)] pb-1 border-b border-[var(--color-border)]">
         {DAY_HEADERS.map((col, idx) => {
           const isTodayColumn = currentDayIndex === idx;
@@ -62,10 +161,9 @@ export function TrainingCalendarGridView({
         })}
       </div>
 
-      {/* Weeks Loop */}
-      {displayedWeeks.map((week) => {
-        const effectiveDist = week.completedDistanceMeters > 0 ? week.completedDistanceMeters : week.scheduledDistanceMeters;
-        const effectiveKm = (effectiveDist / 1000).toFixed(1);
+      {/* 5. Render Weeks */}
+      {weeksToRender.map((week) => {
+        const isCollapsed = Boolean(collapsedWeeks[week.weekNumber]);
 
         return (
           <div
@@ -74,106 +172,33 @@ export function TrainingCalendarGridView({
               week.isDeload
                 ? "border-purple-500/40 bg-purple-500/[0.03]"
                 : week.isCurrentWeek
-                ? "border-[var(--color-cycling)]/40 ring-1 ring-[var(--color-cycling)]/20"
+                ? "border-[var(--color-cycling)]/40 ring-1 ring-[var(--color-cycling)]/25"
                 : "border-[var(--color-border)]"
             }`}
           >
-            {/* Week Row Header */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
-              <div className="space-y-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      week.isDeload ? "bg-purple-500" : "bg-[var(--color-cycling)]"
-                    }`}
-                  />
-                  <span className="text-xs font-bold uppercase text-[var(--color-text-primary)]">
-                    {week.weekLabel}
-                  </span>
-                  {week.isCurrentWeek && (
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-semibold tracking-wider">
-                      MINGGU AKTIF
-                    </span>
-                  )}
-                  <span className="text-[10px] text-[var(--color-cycling)] px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/10 border border-[var(--color-cycling)]/30 font-semibold">
-                    {week.focusTitle}
-                  </span>
-                  {week.isDeload && (
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300 border border-purple-500/30">
-                      DELOAD WEEK
-                    </span>
-                  )}
-                  {effectiveDist >= week.minDistanceMeters ? (
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30">
-                      ✓ TARGET TERCAPAI ({week.targetAchievedPct}%)
-                    </span>
-                  ) : (
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-alert-amber)]/15 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30">
-                      PROGRES ({week.targetAchievedPct}%)
-                    </span>
-                  )}
-                </div>
-
-                {/* Weekly Mileage Target vs Scheduled Breakdown */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] text-[var(--color-text-secondary)] font-tabular">
-                  <span>
-                    Target Minimal: <strong className="text-[var(--color-text-primary)] font-bold">{week.minTargetKm} km</strong>
-                  </span>
-                  <span>•</span>
-                  <span>
-                    Total Terjadwal: <strong className="text-[var(--color-text-primary)] font-bold">{(week.scheduledDistanceMeters / 1000).toFixed(1)} km</strong>
-                  </span>
-                  <span>•</span>
-                  <span className="text-[var(--color-text-muted)]">
-                    (Sepeda MTB: <strong className="text-[var(--color-cycling)]">{(week.cyclingDistanceMeters / 1000).toFixed(1)} km</strong>
-                    {week.runningDistanceMeters > 0 && (
-                      <> • Lari: <strong className="text-[var(--color-running)]">{(week.runningDistanceMeters / 1000).toFixed(1)} km</strong></>
-                    )})
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 text-xs">
-                {/* Mini Progress Bar for Weekly Target Mileage */}
-                <div className="space-y-1 text-right">
-                  <div className="flex items-center justify-between gap-3 text-[9.5px] text-[var(--color-text-muted)] font-tabular">
-                    <span>Progres Jarak:</span>
-                    <span className="font-bold text-[var(--color-text-primary)]">{effectiveKm} / {week.minTargetKm} km</span>
-                  </div>
-                  <div className="w-32 h-2 bg-[var(--color-surface-muted)] rounded-full border border-[var(--color-border)] overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        week.isDeload
-                          ? "bg-purple-500"
-                          : week.targetAchievedPct >= 100
-                          ? "bg-[var(--color-cycling)]"
-                          : "bg-[var(--color-endurance)]"
-                      }`}
-                      style={{ width: `${Math.min(100, week.targetAchievedPct)}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="text-[11px] text-[var(--color-text-muted)] pl-2 border-l border-[var(--color-border)] font-tabular">
-                  <span>Durasi: <strong className="text-[var(--color-text-primary)]">{formatDuration(week.totalDurationSeconds)}</strong></span>
-                </div>
-              </div>
-            </div>
+            <CalendarWeekRowHeader
+              week={week}
+              isCollapsed={isCollapsed}
+              onToggleCollapse={() => toggleCollapse(week.weekNumber)}
+            />
 
             {/* 7 Days Grid for this week */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-2">
-              {week.days.map((day: any) => (
-                <CalendarDayCard
-                  key={day.dateStr}
-                  day={day}
-                  minTargetKm={week.minTargetKm}
-                  todayStr={todayStr}
-                  onSelectWorkout={onSelectWorkout}
-                  onSelectActivity={onSelectActivity}
-                  isRunningCategory={isRunningCategory}
-                />
-              ))}
-            </div>
+            {!isCollapsed && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-2">
+                {week.days.map((day) => (
+                  <CalendarDayCard
+                    key={day.dateStr}
+                    day={day}
+                    minTargetKm={week.minTargetKm}
+                    todayStr={todayStr}
+                    onSelectWorkout={onSelectWorkout}
+                    onSelectActivity={onSelectActivity}
+                    isRunningCategory={isRunningCategory}
+                    healthContext={healthContext}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         );
       })}

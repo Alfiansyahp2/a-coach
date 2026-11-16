@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Activity,
   CheckCircle2,
@@ -10,182 +10,28 @@ import {
   ChevronUp,
   ShieldCheck,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { StravaSetupGuide } from "./StravaSetupGuide";
 import { StravaConnectedView } from "./StravaConnectedView";
-
-interface StravaAthlete {
-  id: number;
-  name: string;
-  username: string | null;
-  avatar: string | null;
-  scopes: string[];
-  connectedAt: string;
-}
-
-interface StravaStatusResponse {
-  isConfigured: boolean;
-  isConnected: boolean;
-  athlete: StravaAthlete | null;
-  message?: string;
-}
+import { useStravaConnect } from "./useStravaConnect";
 
 export function StravaConnectCard() {
-  const router = useRouter();
-  const [status, setStatus] = useState<StravaStatusResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [disconnecting, setDisconnecting] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [syncTelemetry, setSyncTelemetry] = useState<{
-    lastSync: any;
-    latestActivityDate: string | null;
-  } | null>(null);
-  const [banner, setBanner] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-
-  // Fetch current status and sync telemetry
-  const fetchStatus = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/auth/strava/status");
-      const data = await res.json();
-      setStatus(data);
-
-      if (data.isConnected) {
-        try {
-          const syncRes = await fetch("/api/strava/sync");
-          if (syncRes.ok) {
-            const syncData = await syncRes.json();
-            setSyncTelemetry(syncData);
-          }
-        } catch (syncErr) {
-          console.error("Failed to load sync telemetry:", syncErr);
-        }
-      }
-    } catch (err: any) {
-      console.error("Failed to fetch Strava status:", err);
-      setStatus({
-        isConfigured: false,
-        isConnected: false,
-        athlete: null,
-        message: "Failed to communicate with server",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSync = async () => {
-    try {
-      setSyncing(true);
-      const res = await fetch("/api/strava/sync", { method: "POST" });
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setBanner({
-          type: "success",
-          message: `Synced ${data.fetched} activities (${data.created} new, ${data.updated} updated, ${data.matched} matched with planned workouts).`,
-        });
-        const syncRes = await fetch("/api/strava/sync");
-        if (syncRes.ok) {
-          const syncData = await syncRes.json();
-          setSyncTelemetry(syncData);
-        }
-        router.refresh();
-      } else {
-        setBanner({
-          type: "error",
-          message:
-            data.message || "Failed to synchronize activities from Strava.",
-        });
-      }
-    } catch (err: any) {
-      setBanner({
-        type: "error",
-        message: err.message || "An error occurred while syncing with Strava.",
-      });
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStatus();
-
-    // Parse query params for redirect feedback
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("connected") === "true") {
-        const athleteName = params.get("athlete") || "Athlete";
-        setBanner({
-          type: "success",
-          message: `Successfully connected to Strava as ${athleteName}!`,
-        });
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      } else if (params.get("error")) {
-        const reason = params.get("reason") || params.get("error");
-        setBanner({
-          type: "error",
-          message: `Strava authentication failed: ${decodeURIComponent(
-            reason || ""
-          )}`,
-        });
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      }
-    }
-  }, []);
-
-  const handleDisconnect = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to disconnect your Strava account? Local tokens will be revoked and cleared."
-      )
-    ) {
-      return;
-    }
-
-    try {
-      setDisconnecting(true);
-      const res = await fetch("/api/auth/strava/disconnect", {
-        method: "POST",
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        setBanner({
-          type: "success",
-          message: "Strava account disconnected and token revoked.",
-        });
-        await fetchStatus();
-      } else {
-        setBanner({
-          type: "error",
-          message: data.message || "Failed to disconnect account.",
-        });
-      }
-    } catch (err: any) {
-      setBanner({
-        type: "error",
-        message: err.message || "An unexpected error occurred.",
-      });
-    } finally {
-      setDisconnecting(false);
-    }
-  };
+  const {
+    status,
+    loading,
+    disconnecting,
+    syncing,
+    syncTelemetry,
+    banner,
+    setBanner,
+    isGuideOpen,
+    setIsGuideOpen,
+    fetchStatus,
+    handleSync,
+    handleDisconnect,
+  } = useStravaConnect();
 
   return (
-    <div className="w-full rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 transition-all shadow-xs">
+    <div className="w-full rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-4 sm:p-5 transition-all shadow-xs">
       {/* Notification Banner */}
       {banner && (
         <div
@@ -203,9 +49,9 @@ export function StravaConnectCard() {
           <span className="flex-1">{banner.message}</span>
           <button
             onClick={() => setBanner(null)}
-            className="text-[10px] opacity-70 hover:opacity-100 uppercase tracking-wider font-semibold ml-2"
+            className="text-[10px] opacity-70 hover:opacity-100 uppercase tracking-wider font-semibold ml-2 cursor-pointer"
           >
-            Dismiss
+            Tutup
           </button>
         </div>
       )}
@@ -213,13 +59,13 @@ export function StravaConnectCard() {
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[var(--color-strava)]/10 border border-[var(--color-strava)]/30 flex items-center justify-center text-[var(--color-strava)] shrink-0 shadow-xs">
+          <div className="w-9 h-9 rounded-lg bg-[var(--color-strava)]/10 border border-[var(--color-strava)]/30 flex items-center justify-center text-[var(--color-strava)] shrink-0 shadow-xs">
             <Activity className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xs sm:text-sm font-semibold text-[var(--color-text-primary)] tracking-tight">
-                Strava API v3 Integration
+                Integrasi Strava API v3
               </h2>
               {!loading && (
                 <span
@@ -234,18 +80,18 @@ export function StravaConnectCard() {
                   {status?.isConnected ? (
                     <>
                       <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-cycling)] animate-pulse" />
-                      Active Link
+                      Tersambung
                     </>
                   ) : status?.isConfigured ? (
-                    "Disconnected"
+                    "Terputus"
                   ) : (
-                    "Config Required"
+                    "Konfigurasi Wajib"
                   )}
                 </span>
               )}
             </div>
             <p className="text-[11px] text-[var(--color-text-muted)] hidden sm:block font-mono">
-              OAuth 2.0 PKCE Handshake &amp; Telemetry Bridge
+              OAuth 2.0 PKCE Handshake &amp; Telemetri Sinkron
             </p>
           </div>
         </div>
@@ -255,28 +101,20 @@ export function StravaConnectCard() {
           {!status?.isConfigured && !loading && (
             <button
               onClick={() => setIsGuideOpen(!isGuideOpen)}
-              className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors flex items-center gap-1 cursor-pointer"
             >
               <span>{isGuideOpen ? "Tutup Panduan" : "Panduan Setup"}</span>
-              {isGuideOpen ? (
-                <ChevronUp className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
-              )}
+              {isGuideOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
           )}
 
           <button
             onClick={fetchStatus}
             disabled={loading}
-            title="Re-check configuration"
-            className="p-1.5 rounded-lg text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors disabled:opacity-50"
+            title="Periksa Ulang Konfigurasi"
+            className="p-1.5 rounded-lg text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] bg-[var(--color-surface-muted)] border border-[var(--color-border)] transition-colors disabled:opacity-50 cursor-pointer"
           >
-            <RefreshCw
-              className={`w-3.5 h-3.5 ${
-                loading ? "animate-spin text-[var(--color-strava)]" : ""
-              }`}
-            />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-[var(--color-strava)]" : ""}`} />
           </button>
         </div>
       </div>
@@ -286,13 +124,10 @@ export function StravaConnectCard() {
         {loading ? (
           <div className="flex items-center justify-center py-8 gap-3 text-xs font-mono text-[var(--color-text-muted)]">
             <RefreshCw className="w-4 h-4 animate-spin text-[var(--color-strava)]" />
-            <span>Checking Strava OAuth connection state...</span>
+            <span>Memeriksa status integrasi Strava OAuth...</span>
           </div>
         ) : !status?.isConfigured ? (
-          <StravaSetupGuide
-            isGuideOpen={isGuideOpen}
-            setIsGuideOpen={setIsGuideOpen}
-          />
+          <StravaSetupGuide isGuideOpen={isGuideOpen} setIsGuideOpen={setIsGuideOpen} />
         ) : status?.isConnected && status.athlete ? (
           <StravaConnectedView
             athlete={status.athlete}
@@ -305,9 +140,7 @@ export function StravaConnectCard() {
         ) : (
           <div className="space-y-4">
             <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed font-mono">
-              Authorize connection with your Strava profile to synchronize GPS
-              tracks, heart rate streams, power wattages, and cadence for planned
-              workout comparisons.
+              Otorisasikan koneksi profil Strava Anda untuk menyinkronkan rute GPS, detak jantung, daya watt, dan kadensi ke dalam buku jurnal telemetri latihan.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -316,14 +149,12 @@ export function StravaConnectCard() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-strava)] hover:opacity-90 text-white font-medium text-xs tracking-wide transition-all active:scale-[0.98] font-mono shadow-xs"
               >
                 <Activity className="w-4 h-4" />
-                <span>Connect with Strava</span>
+                <span>Hubungkan dengan Strava</span>
               </a>
 
               <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-muted)] font-mono">
                 <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-                <span>
-                  Encrypted via AES-256-GCM. Read-only permissions requested.
-                </span>
+                <span>Enkripsi AES-256-GCM. Izin read-only terverifikasi.</span>
               </div>
             </div>
           </div>

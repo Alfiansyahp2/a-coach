@@ -47,12 +47,12 @@ export function DashboardAiInsightsDeck({
   const secondaryInsights = filteredInsights.filter((i) => i.id !== heroInsight?.id);
 
   return (
-    <section className="relative rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs overflow-hidden">
+    <section className="relative rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] border-t-2 border-t-[var(--color-cycling)] shadow-xs overflow-hidden font-mono">
       {/* Dossier Header */}
       <div className="p-4 sm:p-5 border-b border-[var(--color-border)] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)] shrink-0 shadow-xs relative">
-            <Sparkles className="w-5 h-5 text-[var(--color-cycling)]" />
+          <div className="w-10 h-10 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)] shrink-0 shadow-xs relative">
+            <Activity className="w-5 h-5 text-[var(--color-cycling)]" />
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--color-endurance)] ring-2 ring-[var(--color-surface-card)]" />
           </div>
           <div>

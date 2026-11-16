@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connection } from 'next/server';
 import {
-  DEFAULT_USER_ID,
   getAthleteInjuries,
   createAthleteInjury,
   logHealthAuditTrail,
@@ -9,6 +8,7 @@ import {
   saveAthleteReadiness,
 } from '@/lib/db';
 import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngine';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 /**
  * GET /api/athlete/injuries
@@ -18,7 +18,9 @@ export async function GET(req: NextRequest) {
   await connection();
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get('userId') || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, searchParams.get('userId'));
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     const injuries = await getAthleteInjuries(userId);
     return NextResponse.json({ success: true, injuries });
@@ -39,7 +41,9 @@ export async function POST(req: NextRequest) {
   await connection();
   try {
     const body = await req.json();
-    const userId = body.user_id || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, body.user_id);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     if (!body.body_region || !body.side || !body.injury_mechanism || !body.timeframe_description) {
       return NextResponse.json(

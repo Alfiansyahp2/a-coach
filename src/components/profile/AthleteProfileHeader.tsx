@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { User, AthleteProfile, AuthoritativeAthleteHealthContext } from "@/types";
+import { getFlameHeatTier } from "@/lib/domain/streak/streakEngine";
 import {
   ShieldCheck,
   Flame,
@@ -31,9 +32,10 @@ export function AthleteProfileHeader({
 }: AthleteProfileHeaderProps) {
   const readiness = healthContext?.latestReadiness;
   const isReadinessConditional = readiness?.athlete_status === "ACTIVE_WITH_UNRESOLVED_SYMPTOMS";
+  const heatTier = getFlameHeatTier(streakWeeks, streakWeeks > 0);
 
   return (
-    <div className="rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 sm:p-6 shadow-xs relative overflow-hidden">
+    <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 sm:p-6 shadow-xs relative overflow-hidden">
       {/* Subtle athletic background glow */}
       <div className="absolute top-0 right-0 w-80 h-40 bg-[var(--color-cycling)]/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -46,10 +48,10 @@ export function AthleteProfileHeader({
               <img
                 src={user.avatar_url}
                 alt={user.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border-2 border-[var(--color-border)] object-cover shadow-sm ring-2 ring-[var(--color-cycling)]/40"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border-2 border-[var(--color-border)] object-cover shadow-sm ring-2 ring-[var(--color-cycling)]/40"
               />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[var(--color-surface-muted)] border-2 border-[var(--color-border)] ring-2 ring-[var(--color-cycling)]/40 flex items-center justify-center font-mono font-black text-2xl text-[var(--color-cycling)] shadow-sm">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-[var(--color-surface-muted)] border-2 border-[var(--color-border)] ring-2 ring-[var(--color-cycling)]/40 flex items-center justify-center font-mono font-black text-2xl text-[var(--color-cycling)] shadow-sm">
                 {user.name.charAt(0)}
               </div>
             )}
@@ -101,10 +103,27 @@ export function AthleteProfileHeader({
         <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-[var(--color-border)]">
           {/* Status Badges Row */}
           <div className="flex items-center gap-2 flex-wrap font-mono text-xs">
-            {/* Streak Badge */}
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--color-running)]/10 text-[var(--color-running)] border border-[var(--color-running)]/30 font-bold shadow-xs">
-              <Flame className="w-3.5 h-3.5 fill-[var(--color-running)]" />
-              <span>{streakWeeks} MINGGU STREAK</span>
+            {/* Streak Badge with Thermodynamic Flame Heat Spectrum */}
+            <div
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold shadow-xs transition-colors border"
+              style={{
+                backgroundColor: `${heatTier.colorHex}15`,
+                color: heatTier.colorHex,
+                borderColor: `${heatTier.colorHex}40`,
+              }}
+              title={`${heatTier.description} • Suhu: ${heatTier.temperatureText}`}
+            >
+              <Flame
+                className="w-3.5 h-3.5"
+                style={{
+                  color: heatTier.colorHex,
+                  fill: heatTier.colorHex,
+                  filter: `drop-shadow(0 0 6px ${heatTier.glowRgba})`,
+                }}
+              />
+              <span className="font-tabular">
+                {streakWeeks} MINGGU STREAK
+              </span>
             </div>
 
             {/* Health Readiness Gate */}

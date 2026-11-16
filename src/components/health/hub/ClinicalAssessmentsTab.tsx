@@ -59,7 +59,7 @@ export function ClinicalAssessmentsTab({ context }: ClinicalAssessmentsTabProps)
   const progressPercent = Math.round((completedCount / rtrMilestones.length) * 100);
 
   return (
-    <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-5 font-mono shadow-xs">
+    <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-5 font-mono shadow-xs">
       {/* Tab Header & Overall Assessment Status */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)] text-xs">
         <div>

@@ -19,7 +19,7 @@ async function ActivitiesContent() {
   ]);
 
   return (
-    <AppShell user={user} dbStatus={dbStatus}>
+    <AppShell user={user} dbStatus={dbStatus} activitiesCount={activities.length}>
       <ActivityManagementDeck activities={activities} />
     </AppShell>
   );

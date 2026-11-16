@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Activity,
   ScheduledWorkout,
@@ -8,10 +8,14 @@ import {
   FitnessGoal,
   AuthoritativeAthleteHealthContext,
   PersonalRecord,
+  PMCResponse,
 } from "@/types";
 import { CoachHeaderStrip } from "./CoachHeaderStrip";
 import { RunningCoachView } from "./RunningCoachView";
 import { CyclingCoachView } from "./CyclingCoachView";
+import { CoachDailyBriefingCard } from "./CoachDailyBriefingCard";
+import { PerformanceManagementChart } from "./PerformanceManagementChart";
+import { generateDailyCoachBriefing } from "@/lib/domain/coach/dailyCoachBriefingEngine";
 
 interface CoachHubProps {
   initialMode?: "running" | "cycling";
@@ -33,6 +37,36 @@ export function CoachHub({
   prs,
 }: CoachHubProps) {
   const [currentMode, setCurrentMode] = useState<"running" | "cycling">(initialMode);
+  const [pmc, setPmc] = useState<PMCResponse | null>(null);
+  const [loadingPmc, setLoadingPmc] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadPmc() {
+      try {
+        const res = await fetch("/api/coach/pmc?days=42");
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.success && data.pmc) {
+            setPmc(data.pmc);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load PMC via API:", err);
+      } finally {
+        if (isMounted) setLoadingPmc(false);
+      }
+    }
+    loadPmc();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const briefing = useMemo(() => {
+    const todayWorkout = workouts.find((w) => w.status === "PLANNED");
+    return generateDailyCoachBriefing(pmc, healthContext, todayWorkout);
+  }, [pmc, healthContext, workouts]);
 
   return (
     <div className="space-y-6">
@@ -42,7 +76,13 @@ export function CoachHub({
         onSelectMode={setCurrentMode}
       />
 
-      {/* 2. Specialized Coach View */}
+      {/* 2. Real-World Coach Daily Tactical Briefing & Auto-Regulation */}
+      <CoachDailyBriefingCard briefing={briefing} />
+
+      {/* 3. Performance Management Chart (Banister Impulse Model CTL/ATL/TSB) */}
+      <PerformanceManagementChart pmc={pmc} isLoading={loadingPmc} />
+
+      {/* 4. Specialized Coach View (Running or Cycling) */}
       {currentMode === "running" ? (
         <RunningCoachView
           activities={activities}
@@ -66,4 +106,3 @@ export function CoachHub({
     </div>
   );
 }
-

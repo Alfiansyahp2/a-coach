@@ -11,7 +11,7 @@ interface CoachHeaderStripProps {
 
 export function CoachHeaderStrip({ currentMode, onSelectMode }: CoachHeaderStripProps) {
   return (
-    <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4 font-mono">
+    <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-4 font-mono">
       {/* Top Meta Line: Identity & Safety Boundary */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--color-border)] text-xs">
         <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">

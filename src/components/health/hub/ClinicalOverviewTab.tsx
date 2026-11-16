@@ -33,7 +33,7 @@ export function ClinicalOverviewTab({ profile, context }: ClinicalOverviewTabPro
   return (
     <div className="space-y-4">
       {/* 1. Physical Baseline Matrix */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 font-mono shadow-xs">
+      <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 font-mono shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-cycling)]">
@@ -142,7 +142,7 @@ export function ClinicalOverviewTab({ profile, context }: ClinicalOverviewTabPro
       </div>
 
       {/* 2. Physiological Unknowns / Laboratory Sensor Thresholds */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 font-mono shadow-xs">
+      <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 font-mono shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-2">
             <Heart className="w-4 h-4 text-[var(--color-cycling)]" />
