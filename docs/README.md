@@ -127,6 +127,7 @@ Endurance sports science, athletic metric mathematics, and AI grounding boundari
 * [**RECOVERY_LOGIC.md**](./05-domain-logic/RECOVERY_LOGIC.md) — What can and cannot be inferred from activity telemetry.
 * [**GOAL_CALCULATION.md**](./05-domain-logic/GOAL_CALCULATION.md) — Monthly mileage and weekly frequency completion algorithms.
 * [**PERSONAL_RECORDS.md**](./05-domain-logic/PERSONAL_RECORDS.md) — Distance benchmark validation (1K, 5K, 10K, Half, Full).
+* [**SPORTS_SCIENCE_RECAP_PHILOSOPHY_AND_APPLICATION_BLUEPRINT.md**](./05-domain-logic/SPORTS_SCIENCE_RECAP_PHILOSOPHY_AND_APPLICATION_BLUEPRINT.md) — Authoritative sports science recap framework, 10 physiological research syntheses, and application blueprint.
 * [**AI_DECISION_BOUNDARIES.md**](./05-domain-logic/AI_DECISION_BOUNDARIES.md) — Strict manifesto banning biometric hallucination and ungrounded advice.
 
 ---
