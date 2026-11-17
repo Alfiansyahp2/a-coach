@@ -98,7 +98,7 @@ async function runTests() {
   console.log('\n--- 4. Empirical Activity Response Telemetry ---');
   const respRes = await client.query('SELECT * FROM athlete_training_responses WHERE user_id = $1', [DEFAULT_USER_ID]);
   assert(respRes.rows.length >= 1, 'At least 1 post-activity check-in recorded');
-  const rideResp = respRes.rows.find(res => res.sport_type === 'Ride' && Number(res.distance_km) >= 50) || respRes.rows.find(res => res.sport_type === 'Ride');
+  const rideResp = respRes.rows.find(res => res.sport_type === 'Ride' && Math.abs(Number(res.distance_km) - 56.10) < 0.2) || respRes.rows.find(res => res.sport_type === 'Ride');
   assert(rideResp !== undefined, 'Aerobic ride check-in response exists');
   assert(Number(rideResp.pain_during_activity) === 0, 'Pain during ride was 0');
   assert(Number(rideResp.pain_after_activity) === 0, 'Pain after ride was 0');

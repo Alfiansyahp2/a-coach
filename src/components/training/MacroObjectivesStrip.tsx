@@ -19,16 +19,20 @@ export function MacroObjectivesStrip({ goals = [], plan }: MacroObjectivesStripP
   // Secondary goal
   const secondaryGoal = goals.find((g) => g.id !== primaryGoal?.id) || goals[1];
 
-  const primaryTargetVal = Number(primaryGoal?.target_value || 100);
-  const primaryCurrentVal = Number(primaryGoal?.current_value || 56.1);
-  const primaryPct = Math.min(100, Math.round((primaryCurrentVal / primaryTargetVal) * 100));
+  const rawPrimaryTarget = Number(primaryGoal?.target_value || 100);
+  const primaryTargetVal = rawPrimaryTarget > 500 ? rawPrimaryTarget / 1000 : rawPrimaryTarget;
+  const rawPrimaryCurrent = Number(primaryGoal?.current_value || 0);
+  const primaryCurrentVal = rawPrimaryCurrent > 500 ? rawPrimaryCurrent / 1000 : rawPrimaryCurrent;
+  const primaryPct = primaryTargetVal > 0 ? Math.min(100, Math.round((primaryCurrentVal / primaryTargetVal) * 100)) : 0;
 
   const isPrimaryRide = (primaryGoal?.sport_type || "").toLowerCase().includes("ride") || (primaryGoal?.title || "").toLowerCase().includes("100");
   const isPrimaryRun = (primaryGoal?.sport_type || "").toLowerCase().includes("run") || (primaryGoal?.title || "").toLowerCase().includes("marathon");
 
-  const secondaryTargetVal = Number(secondaryGoal?.target_value || 42.2);
-  const secondaryCurrentVal = Number(secondaryGoal?.current_value || 12.3);
-  const secondaryPct = Math.min(100, Math.round((secondaryCurrentVal / secondaryTargetVal) * 100));
+  const rawSecondaryTarget = Number(secondaryGoal?.target_value || 42.2);
+  const secondaryTargetVal = rawSecondaryTarget > 500 ? rawSecondaryTarget / 1000 : rawSecondaryTarget;
+  const rawSecondaryCurrent = Number(secondaryGoal?.current_value || 0);
+  const secondaryCurrentVal = rawSecondaryCurrent > 500 ? rawSecondaryCurrent / 1000 : rawSecondaryCurrent;
+  const secondaryPct = secondaryTargetVal > 0 ? Math.min(100, Math.round((secondaryCurrentVal / secondaryTargetVal) * 100)) : 0;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 font-mono">
@@ -103,22 +107,22 @@ export function MacroObjectivesStrip({ goals = [], plan }: MacroObjectivesStripP
       </div>
 
       {/* 4. Fasting Routine Compliance */}
-      <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-purple-500/40 space-y-2.5 shadow-xs transition-all">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-            <span className="text-sm">🌙</span>
-            <span>Jadwal Puasa Sunnah</span>
-          </span>
-          <span className="text-purple-600 dark:text-purple-300 font-bold text-xs">100% Selaras</span>
-        </div>
-        <div className="w-full h-2 bg-[var(--color-surface-muted)] rounded-full overflow-hidden border border-[var(--color-border)]">
-          <div className="h-full rounded-full bg-purple-500" style={{ width: "100%" }} />
-        </div>
-        <div className="flex items-center justify-between text-[10.5px] text-[var(--color-text-secondary)]">
-          <span>Puasa: <strong className="text-purple-600 dark:text-purple-300">Senin &amp; Kamis</strong></span>
-          <span>Latihan: <strong className="text-[var(--color-cycling)]">Sel, Rab, Jum, Min</strong></span>
+        <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-[var(--color-fasting)]/40 space-y-2.5 shadow-xs transition-all">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+              <span className="text-sm">🌙</span>
+              <span>Jadwal Puasa Sunnah</span>
+            </span>
+            <span className="text-[var(--color-fasting)] font-bold text-xs">100% Selaras</span>
+          </div>
+          <div className="w-full h-2 bg-[var(--color-surface-muted)] rounded-full overflow-hidden border border-[var(--color-border)]">
+            <div className="h-full rounded-full bg-[var(--color-fasting)]" style={{ width: "100%" }} />
+          </div>
+          <div className="flex items-center justify-between text-[10.5px] text-[var(--color-text-secondary)]">
+            <span>Puasa: <strong className="text-[var(--color-fasting)]">Senin &amp; Kamis</strong></span>
+            <span>Latihan: <strong className="text-[var(--color-cycling)]">Sel, Rab, Jum, Min</strong></span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+      );
 }

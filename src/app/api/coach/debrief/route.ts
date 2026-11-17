@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, connection } from 'next/server';
 import { getActivityById } from '@/lib/db';
 import { computeDebriefViaPython } from '@/lib/api/coachPythonClient';
-
-export const dynamic = 'force-dynamic';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 export async function POST(request: Request) {
+  await connection();
   try {
+    const auth = verifyUserAuthorization(request);
+    if (!auth.authorized) return auth.response!;
+
     const body = await request.json();
     const { activity_id, pain_during = 0, pain_after = 0, swelling = false } = body;
 
@@ -16,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const activity = await getActivityById(activity_id);
+    const activity = await getActivityById(activity_id, auth.userId);
     if (!activity) {
       return NextResponse.json(
         { success: false, error: 'Activity not found' },

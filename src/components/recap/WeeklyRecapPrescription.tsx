@@ -1,17 +1,23 @@
 "use client";
 
 import React from "react";
-import { HeartPulse, Footprints, Bike, CheckCircle2 } from "lucide-react";
-import { WeeklyInjuryRecap, WeeklyClinicalVerdict } from "@/lib/domain/analytics/weeklyRecapTypes";
+import { HeartPulse, Footprints, Bike, CheckCircle2, ShieldCheck, BedDouble } from "lucide-react";
+import {
+  WeeklyInjuryRecap,
+  WeeklyClinicalVerdict,
+  TacticalBridgePrescription,
+} from "@/lib/domain/analytics/weeklyRecapTypes";
 
 interface WeeklyRecapPrescriptionProps {
   injurySummary: WeeklyInjuryRecap;
   clinicalVerdict: WeeklyClinicalVerdict;
+  tacticalBridge?: TacticalBridgePrescription;
 }
 
 export function WeeklyRecapPrescription({
   injurySummary: inj,
   clinicalVerdict: verdict,
+  tacticalBridge: bridge,
 }: WeeklyRecapPrescriptionProps) {
   return (
     <div className="p-4 sm:p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] space-y-4 shadow-xs">
@@ -24,6 +30,28 @@ export function WeeklyRecapPrescription({
           Protokol Klinis
         </span>
       </div>
+
+      {/* Target Preskriptif Cepat */}
+      {bridge && (
+        <div className="p-3 rounded-lg bg-[var(--color-surface-muted)]/70 border border-[var(--color-border)] grid grid-cols-2 gap-2 text-[10.5px]">
+          <div className="space-y-0.5">
+            <span className="text-[9.5px] text-[var(--color-text-muted)] flex items-center gap-1 font-bold uppercase">
+              <ShieldCheck className="w-3 h-3 text-[var(--color-cycling)]" /> Batas Aman
+            </span>
+            <strong className="text-xs font-tabular text-[var(--color-cycling)] block">
+              Maks {bridge.safe_km_quota.total_max_km} km
+            </strong>
+          </div>
+          <div className="space-y-0.5">
+            <span className="text-[9.5px] text-[var(--color-text-muted)] flex items-center gap-1 font-bold uppercase">
+              <BedDouble className="w-3 h-3 text-cyan-400" /> Istirahat
+            </span>
+            <strong className="text-xs font-tabular text-cyan-400 block">
+              {bridge.mandatory_rest_days.count} Hari ({bridge.mandatory_rest_days.recommended_days.join(', ')})
+            </strong>
+          </div>
+        </div>
+      )}
 
       {/* Area Pengawasan Berkelanjutan */}
       <div className="space-y-2">
@@ -92,4 +120,3 @@ export function WeeklyRecapPrescription({
     </div>
   );
 }
-

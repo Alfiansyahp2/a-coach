@@ -6,6 +6,14 @@ import {
   ScheduledWorkout,
   SportType,
 } from '@/types';
+import {
+  TacticalBridgePrescription,
+  BiologicalAdaptationCardData,
+  DeloadCelebration,
+  DualLoadTelemetry,
+} from './weeklyRecapBridgeTypes';
+
+export * from './weeklyRecapBridgeTypes';
 
 export interface WeeklyRecapTimeframe {
   startDate: string; // ISO string (UTC)
@@ -126,11 +134,93 @@ export interface WeeklyClinicalVerdict {
   actionable_recommendations: string[];
 }
 
+export interface WeeklyProMetrics {
+  foster_srpe_load: number;
+  weekly_tss: number;
+  training_monotony: number;
+  training_strain: number;
+  polarization: {
+    low_zone_pct: number;
+    moderate_zone_pct: number;
+    high_zone_pct: number;
+    is_optimal_polarized: boolean;
+    classification: string;
+    verdict: string;
+  };
+  wow_delta: {
+    distance_change_pct: number;
+    tss_change_pct: number;
+    safety_flag: string;
+    interpretation: string;
+  };
+  musculoskeletal: {
+    impact_running_pct: number;
+    non_impact_cycling_pct: number;
+    joint_safety_rating: string;
+    pain_gradient_note: string;
+  };
+  periodization_phase: string;
+  pro_coach_verdict: string;
+  next_week_bridge_advice: string;
+  tactical_bridge?: TacticalBridgePrescription;
+  biological_adaptation?: BiologicalAdaptationCardData;
+  deload_info?: DeloadCelebration;
+  dual_load?: DualLoadTelemetry;
+}
+
+export type RecapScope = '1_WEEK' | '2_WEEKS' | '4_WEEKS';
+
+export interface HistoricalWeekOption {
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  label: string;
+  weeksAgo: number;
+  sessionCount: number;
+  totalDistanceKm: number;
+  totalDurationSeconds: number;
+  isCurrentWeek: boolean;
+  isCompletedWeek: boolean;
+  hasActivities: boolean;
+}
+
+export interface MultiWeekRollupSummary {
+  scope: RecapScope;
+  scopeLabel: string;
+  dateRangeFormatted: string;
+  totalSessions: number;
+  totalDistanceKm: number;
+  averageWeeklyDistanceKm: number;
+  totalDurationSeconds: number;
+  formattedDuration: string;
+  totalElevationMeters: number;
+  totalCalories: number;
+  weeksBreakdown: Array<{
+    weekNumber: number;
+    label: string;
+    startDate: string;
+    endDate: string;
+    sessionsCount: number;
+    distanceKm: number;
+    durationSeconds: number;
+    formattedDuration: string;
+    srpeLoad: number;
+    tss: number;
+  }>;
+  volumeTrendPct: number;
+  consistencyScorePct: number;
+  mesocyclePhase: string;
+  coachSynthesis: string;
+}
+
 export interface WeeklyActivityAndInjuryRecap {
   timeframe: WeeklyRecapTimeframe;
   activity_summary: WeeklyActivityRecap;
   injury_summary: WeeklyInjuryRecap;
   clinical_verdict: WeeklyClinicalVerdict;
+  pro_metrics?: WeeklyProMetrics;
+  availableWeeks?: HistoricalWeekOption[];
+  multiWeekRollup?: MultiWeekRollupSummary;
+  isMondayAutoCompleted?: boolean;
 }
 
 export interface ComputeWeeklyRecapParams {
@@ -140,5 +230,6 @@ export interface ComputeWeeklyRecapParams {
   trainingResponses?: AthleteTrainingResponse[];
   scheduledWorkouts?: ScheduledWorkout[];
   referenceDate?: Date | string;
+  scope?: RecapScope;
+  autoMonday?: boolean;
 }
-

@@ -29,29 +29,14 @@ export function RunningCoachView({
     (a.sport_type || "").toLowerCase().includes("run")
   );
 
-  const totalRunningDistanceMeters = runningActivities.reduce(
-    (acc, a) => acc + (a.distance_meters || 0),
-    0
-  );
-
-  const totalRunningTimeSeconds = runningActivities.reduce(
-    (acc, a) => acc + (a.moving_time_seconds || 0),
-    0
-  );
-
-  const avgRunningSpeedMps =
-    totalRunningTimeSeconds > 0
-      ? totalRunningDistanceMeters / totalRunningTimeSeconds
-      : 0;
-
-  const avgRunningPaceSec =
-    avgRunningSpeedMps > 0 ? 1000 / avgRunningSpeedMps : 0;
+  const totalRunningDistanceMeters = runningActivities.reduce((acc, a) => acc + (a.distance_meters || 0), 0);
+  const totalRunningTimeSeconds = runningActivities.reduce((acc, a) => acc + (a.moving_time_seconds || 0), 0);
+  const avgRunningSpeedMps = totalRunningTimeSeconds > 0 ? totalRunningDistanceMeters / totalRunningTimeSeconds : 0;
+  const avgRunningPaceSec = avgRunningSpeedMps > 0 ? 1000 / avgRunningSpeedMps : 0;
 
   // Running goals
   const marathonGoal = goals.find(
-    (g) =>
-      g.title.toLowerCase().includes("marathon") ||
-      (g.sport_type || "").toLowerCase().includes("run")
+        (g) => g.title.toLowerCase().includes("marathon") || (g.sport_type || "").toLowerCase().includes("run")
   ) || {
     id: "marathon-default",
     title: "Road to Marathon 42.2K",
@@ -153,132 +138,146 @@ export function RunningCoachView({
             </span>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-[var(--color-text-secondary)]">Progres Menuju Marathon:</span>
-              <span className="font-bold text-[var(--color-text-primary)] font-tabular">
-                0.0 km / 42.2 km (0%)
-              </span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] overflow-hidden">
-              <div className="h-full bg-[var(--color-running)] w-0" />
-            </div>
-            <p className="text-[10px] text-[var(--color-text-muted)] leading-relaxed pt-1">
-              Target jarak lari saat ini ditahan pada 0 km sesuai SOP keselamatan sendi. Peningkatan volume lari hanya akan diaktifkan setelah melewati protokol uji toleransi impak (<em>Step 2 Walk/Jog</em>).
-            </p>
-          </div>
+                <div className="space-y-2 pt-1 border-t border-[var(--color-border)]/40">
+                  <div className="flex items-baseline justify-between font-mono">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] block tracking-wider">
+                        Progres Menuju Marathon
+                      </span>
+                      <div className="flex items-baseline gap-1.5 mt-0.5">
+                        <span className="text-xl font-black font-tabular text-[var(--color-alert-amber)]">
+                          0.0
+                        </span>
+                        <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase">km</span>
+                        <span className="text-[11px] text-[var(--color-text-muted)] font-tabular">
+                          / 42.2 km target
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-md bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border border-[var(--color-alert-amber)]/30 font-tabular">
+                      0% (DITAHAN)
+                    </span>
+                  </div>
 
-          <div className="grid grid-cols-2 gap-2 text-center text-xs pt-1">
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9px] text-[var(--color-text-muted)] block">Volume Lari Minggu Ini</span>
-              <span className="font-bold text-amber-500 font-tabular text-sm">0.0 km</span>
-              <span className="text-[8px] text-[var(--color-text-muted)] block">(Terproteksi)</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9px] text-[var(--color-text-muted)] block">Toleransi Nyeri</span>
-              <span className="font-bold text-[var(--color-cycling)] font-tabular text-sm">0/10 Nyeri</span>
-              <span className="text-[8px] text-[var(--color-text-muted)] block">(Saat tidak lari)</span>
-            </div>
-          </div>
-        </div>
+                    <div className="w-full bg-[var(--color-surface-card)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+                      <div className="h-full bg-[var(--color-running)] w-0 rounded-full" />
+                    </div>
+                      <p className="text-[10px] text-[var(--color-text-muted)] leading-relaxed pt-0.5">
+                        Target jarak lari saat ini ditahan pada 0 km sesuai SOP keselamatan sendi. Peningkatan volume lari hanya akan diaktifkan setelah melewati protokol uji toleransi impak (<em>Step 2 Walk/Jog</em>).
+                      </p>
+                  </div>
 
-        {/* Right: 4-Phase Return-to-Run (RTR) Protocol */}
-        <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
-          <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
-            <div className="flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-[var(--color-running)]" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
-                Protokol Bertahap Kembali Berlari (RTR)
-              </h3>
-            </div>
-            <span className="text-[9px] font-bold text-amber-500">Zero Pain Rule</span>
-          </div>
+                  <div className="grid grid-cols-2 gap-2 text-center text-xs pt-1">
+                    <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                      <span className="text-[9px] text-[var(--color-text-muted)] block">Volume Lari Minggu Ini</span>
+                      <span className="font-bold text-[var(--color-alert-amber)] font-tabular text-sm">0.0 km</span>
+                      <span className="text-[8px] text-[var(--color-text-muted)] block">(Terproteksi)</span>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                      <span className="text-[9px] text-[var(--color-text-muted)] block">Toleransi Nyeri</span>
+                      <span className="font-bold text-[var(--color-cycling)] font-tabular text-sm">0/10 Nyeri</span>
+                      <span className="text-[8px] text-[var(--color-text-muted)] block">(Saat tidak lari)</span>
+                    </div>
+                  </div>
+                </div>
 
-          <div className="space-y-2 text-xs">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2.5">
-              <span className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-500 font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
-                1
-              </span>
-              <div className="space-y-0.5">
-                <span className="font-bold text-amber-500 block">
-                  Tahap 1: Mobilitas &amp; Penguatan Beban Nol (AKTIF SEKARANG)
-                </span>
-                <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-                  Latihan pergelangan kaki (<em>ankle alphabet</em>, <em>isometric eversion</em>) dan peregangan paha tanpa benturan. Pertahankan kardiovaskular dengan bersepeda Zone 2.
-                </p>
-              </div>
-            </div>
+                {/* Right: 4-Phase Return-to-Run (RTR) Protocol */}
+                <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
+                  <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-4 h-4 text-[var(--color-running)]" />
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
+                        Protokol Bertahap Kembali Berlari (RTR)
+                      </h3>
+                    </div>
+                    <span className="text-[9px] font-bold text-[var(--color-alert-amber)]">Zero Pain Rule</span>
+                  </div>
 
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-start gap-2.5 opacity-80">
-              <span className="w-5 h-5 rounded-full bg-[var(--color-surface-card)] text-[var(--color-text-muted)] font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-[var(--color-border)]">
-                2
-              </span>
-              <div className="space-y-0.5">
-                <span className="font-bold text-[var(--color-text-primary)] block">
-                  Tahap 2: Walk/Jog Interval (15–20 Menit)
-                </span>
-                <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-                  Rasio 1 mnt jog lambat + 2 mnt jalan santai pada permukaan datar halus / treadmill. Dijalankan hanya jika persetujuan klinis telah diterbitkan.
-                </p>
-              </div>
-            </div>
+                  <div className="space-y-2 text-xs">
+                        <div className="p-2.5 rounded-xl bg-[var(--color-alert-amber)]/10 border border-[var(--color-alert-amber)]/30 flex items-start gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-alert-amber)]/20 text-[var(--color-alert-amber)] font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
+                            1
+                          </span>
+                          <div className="space-y-0.5">
+                              <span className="font-bold text-[var(--color-alert-amber)] block">
+                                Tahap 1: Mobilitas &amp; Penguatan Beban Nol (AKTIF SEKARANG)
+                              </span>
+                              <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                                Latihan pergelangan kaki (<em>ankle alphabet</em>, <em>isometric eversion</em>) dan peregangan paha tanpa benturan. Pertahankan kardiovaskular dengan bersepeda Zone 2.
+                              </p>
+                          </div>
+                        </div>
 
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-start gap-2.5 opacity-70">
-              <span className="w-5 h-5 rounded-full bg-[var(--color-surface-card)] text-[var(--color-text-muted)] font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-[var(--color-border)]">
-                3
-              </span>
-              <div className="space-y-0.5">
-                <span className="font-bold text-[var(--color-text-primary)] block">
-                  Tahap 3: Continuous Easy Jog (&lt;20 mnt, RPE 3)
-                </span>
-                <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-                  Lari berkelanjutan dengan kecepatan santai dan talk test lancar. Evaluasi respon sendi 24 jam setelah sesi (wajib 0 bengkak &amp; nyeri &le; 2/10).
-                </p>
-              </div>
-            </div>
+                        <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-start gap-2.5 opacity-80">
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-surface-card)] text-[var(--color-text-muted)] font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-[var(--color-border)]">
+                            2
+                          </span>
+                          <div className="space-y-0.5">
+                            <span className="font-bold text-[var(--color-text-primary)] block">
+                              Tahap 2: Walk/Jog Interval (15–20 Menit)
+                            </span>
+                            <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                              Rasio 1 mnt jog lambat + 2 mnt jalan santai pada permukaan datar halus / treadmill. Dijalankan hanya jika persetujuan klinis telah diterbitkan.
+                            </p>
+                          </div>
+                        </div>
 
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-start gap-2.5 opacity-60">
-              <span className="w-5 h-5 rounded-full bg-[var(--color-surface-card)] text-[var(--color-text-muted)] font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-[var(--color-border)]">
-                4
-              </span>
-              <div className="space-y-0.5">
-                <span className="font-bold text-[var(--color-text-primary)] block">
-                  Tahap 4: Volume Fondasi Aerobik (Aturan 10%)
-                </span>
-                <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-                  Peningkatan volume maksimal 10% per minggu menuju target lari 5K &rarr; 10K &rarr; Half &rarr; Marathon.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                        <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-start gap-2.5 opacity-70">
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-surface-card)] text-[var(--color-text-muted)] font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-[var(--color-border)]">
+                            3
+                          </span>
+                          <div className="space-y-0.5">
+                            <span className="font-bold text-[var(--color-text-primary)] block">
+                              Tahap 3: Continuous Easy Jog (&lt;20 mnt, RPE 3)
+                            </span>
+                            <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                              Lari berkelanjutan dengan kecepatan santai dan talk test lancar. Evaluasi respon sendi 24 jam setelah sesi (wajib 0 bengkak &amp; nyeri &le; 2/10).
+                            </p>
+                          </div>
+                        </div>
 
-      {/* 3. RUNNING TELEMETRY ARCHIVE */}
-      <CoachRecentSessionsList
-        activities={runningActivities}
-        sportTone="running"
-        title="Arsip Telemetri Sesi Lari Terverifikasi"
-        subtitle={`${runningActivities.length} Sesi Lari Strava Tersimpan di PostgreSQL 16`}
-        speedMetricLabel="Pace"
-        renderSpeedValue={(act) =>
-          act.average_speed_mps > 0
-            ? formatPaceSeconds(1000 / act.average_speed_mps)
-            : "--:-- /km"
-        }
-        headerSummaryNodes={
-          <>
-            <span>
-              Total Jarak: <strong className="text-[var(--color-text-primary)]">{formatDistance(totalRunningDistanceMeters)}</strong>
-            </span>
-            <span>•</span>
-            <span>
-              Laju Rata-rata: <strong className="text-[var(--color-running)]">{formatPaceSeconds(avgRunningPaceSec)}</strong>
-            </span>
-          </>
-        }
-        emptyText="Belum ada aktivitas lari yang tercatat."
-      />
-    </div>
-  );
+                        <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] flex items-start gap-2.5 opacity-60">
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-surface-card)] text-[var(--color-text-muted)] font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5 border border-[var(--color-border)]">
+                            4
+                          </span>
+                          <div className="space-y-0.5">
+                            <span className="font-bold text-[var(--color-text-primary)] block">
+                              Tahap 4: Volume Fondasi Aerobik (Aturan 10%)
+                            </span>
+                            <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                              Peningkatan volume maksimal 10% per minggu menuju target lari 5K &rarr; 10K &rarr; Half &rarr; Marathon.
+                            </p>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. RUNNING TELEMETRY ARCHIVE */}
+                <CoachRecentSessionsList
+                  activities={runningActivities}
+                  sportTone="running"
+                  title="Arsip Telemetri Sesi Lari Terverifikasi"
+                  subtitle={`${runningActivities.length} Sesi Lari Strava Tersimpan di PostgreSQL 16`}
+                  speedMetricLabel="Pace"
+                  renderSpeedValue={(act) =>
+                    act.average_speed_mps > 0
+                      ? formatPaceSeconds(1000 / act.average_speed_mps)
+                      : "--:-- /km"
+                  }
+                  headerSummaryNodes={
+                    <>
+                      <span>
+                        Total Jarak: <strong className="text-[var(--color-text-primary)]">{formatDistance(totalRunningDistanceMeters)}</strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Laju Rata-rata: <strong className="text-[var(--color-running)]">{formatPaceSeconds(avgRunningPaceSec)}</strong>
+                      </span>
+                    </>
+                  }
+                  emptyText="Belum ada aktivitas lari yang tercatat."
+                />
+            </div>
+            );
 }

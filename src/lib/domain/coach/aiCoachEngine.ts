@@ -124,6 +124,7 @@ export function generateTrainingInsights(
         grounded_data: {
           acuteDistanceMeters: acuteDistance,
           prevWeekDistanceMeters: prevWeekDistance,
+          chronicDistanceMeters: chronicDistance,
           increasePercentage: volumeIncreasePct,
         },
         created_at: new Date().toISOString(),
@@ -138,6 +139,7 @@ export function generateTrainingInsights(
         grounded_data: {
           acuteDistanceMeters: acuteDistance,
           prevWeekDistanceMeters: prevWeekDistance,
+          chronicDistanceMeters: chronicDistance,
           increasePercentage: volumeIncreasePct,
         },
         created_at: new Date().toISOString(),
