@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, connection } from 'next/server';
 import { generateCoachTrainingFromDatabase } from '@/lib/domain/coach/coachTrainingGenerator';
 import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 export async function POST(request: Request) {
+  await connection();
   try {
     let requestedUserId: string | undefined = undefined;
     let goalId: string | undefined = undefined;

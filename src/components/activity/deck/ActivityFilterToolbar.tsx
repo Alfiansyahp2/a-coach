@@ -18,7 +18,7 @@ import {
   Activity as ActivityIcon,
 } from "lucide-react";
 import { GroupByOption } from "./activityGroupUtils";
-import { getSportMeta } from "@/lib/sportUtils";
+import { getSportMeta } from "@/lib/domain/sports/sportUtils";
 
 interface ActivityFilterToolbarProps {
   groupBy: GroupByOption;

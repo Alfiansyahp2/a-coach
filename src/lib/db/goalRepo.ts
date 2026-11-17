@@ -4,13 +4,29 @@ import { FitnessGoal, PersonalRecord } from '@/types';
 export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise<FitnessGoal[]> {
   if (pgPool) {
     const res = await pgPool.query(
-      'SELECT * FROM fitness_goals WHERE user_id = $1 ORDER BY is_primary DESC, priority ASC, target_date ASC',
+      `SELECT
+        g.*,
+        COALESCE(
+          CASE
+            WHEN (g.title ILIKE '%100%' OR g.title ILIKE '%century%') THEN
+              (SELECT ROUND(MAX(a.distance_meters) / 1000.0, 1) FROM activities a WHERE a.user_id = g.user_id AND (a.sport_type ILIKE '%ride%' OR a.sport_type ILIKE '%cycl%'))
+            WHEN g.title ILIKE '%marathon%' THEN
+              (SELECT ROUND(MAX(a.distance_meters) / 1000.0, 1) FROM activities a WHERE a.user_id = g.user_id AND a.sport_type ILIKE '%run%')
+            WHEN g.goal_type = 'DISTANCE_MONTHLY' OR g.title ILIKE '%akumulasi%' THEN
+              (SELECT ROUND(SUM(a.distance_meters) / 1000.0, 1) FROM activities a WHERE a.user_id = g.user_id AND a.start_date >= g.start_date)
+            ELSE NULL
+          END,
+          g.current_value
+        ) AS dynamic_current_value
+      FROM fitness_goals g
+      WHERE g.user_id = $1
+      ORDER BY g.is_primary DESC, g.priority ASC, g.target_date ASC`,
       [userId]
     );
     return res.rows.map((row) => ({
       ...row,
       target_value: Number(row.target_value),
-      current_value: Number(row.current_value),
+      current_value: Number(row.dynamic_current_value != null ? row.dynamic_current_value : row.current_value),
       sport_type: row.sport_type || 'All',
       priority: Number(row.priority || 1),
       is_primary: Boolean(row.is_primary ?? (row.priority === 1)),
@@ -20,8 +36,20 @@ export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise
     }));
   }
   const store = ensureLocalStore();
+  const acts = store.activities || [];
   return store.fitness_goals
     .filter((g) => g.user_id === userId)
+    .map((g) => {
+      let dynVal = Number(g.current_value);
+      if (g.title.toLowerCase().includes('100') || g.title.toLowerCase().includes('century')) {
+        const maxM = Math.max(0, ...acts.filter(a => (a.sport_type||'').toLowerCase().includes('ride') || (a.sport_type||'').toLowerCase().includes('cycl')).map(a => Number(a.distance_meters || 0)));
+        if (maxM > 0) dynVal = Math.round((maxM / 1000) * 10) / 10;
+      } else if (g.title.toLowerCase().includes('marathon')) {
+        const maxM = Math.max(0, ...acts.filter(a => (a.sport_type||'').toLowerCase().includes('run')).map(a => Number(a.distance_meters || 0)));
+        if (maxM > 0) dynVal = Math.round((maxM / 1000) * 10) / 10;
+      }
+      return { ...g, current_value: dynVal };
+    })
     .sort((a, b) => {
       const aPri = a.is_primary ? 0 : 1;
       const bPri = b.is_primary ? 0 : 1;
@@ -30,27 +58,7 @@ export async function getFitnessGoals(userId: string = DEFAULT_USER_ID): Promise
 }
 
 export async function getPrimaryFitnessGoal(userId: string = DEFAULT_USER_ID): Promise<FitnessGoal | null> {
-  if (pgPool) {
-    const res = await pgPool.query(
-      'SELECT * FROM fitness_goals WHERE user_id = $1 AND (is_primary = TRUE OR priority = 1) ORDER BY is_primary DESC, priority ASC LIMIT 1',
-      [userId]
-    );
-    if (res.rows.length === 0) return null;
-    const row = res.rows[0];
-    return {
-      ...row,
-      target_value: Number(row.target_value),
-      current_value: Number(row.current_value),
-      sport_type: row.sport_type || 'All',
-      priority: Number(row.priority || 1),
-      is_primary: Boolean(row.is_primary ?? (row.priority === 1)),
-      target_event_name: row.target_event_name || '',
-      start_date: formatDateOnly(row.start_date),
-      target_date: formatDateOnly(row.target_date),
-    };
-  }
-  const store = ensureLocalStore();
-  const goals = store.fitness_goals.filter((g) => g.user_id === userId);
+  const goals = await getFitnessGoals(userId);
   return goals.find((g) => g.is_primary) || goals.find((g) => g.priority === 1) || goals[0] || null;
 }
 

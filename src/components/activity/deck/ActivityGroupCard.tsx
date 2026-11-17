@@ -24,10 +24,10 @@ import {
   speedMpsToPace,
   speedMpsToKmh,
 } from "@/lib/formatters";
-import { EditActivityModal } from "@/components/EditActivityModal";
+import { EditActivityModal } from "@/components/activity/modal/EditActivityModal";
 import { ActivityGroup } from "./activityGroupUtils";
 import { Activity } from "@/types";
-import { getSportMeta } from "@/lib/sportUtils";
+import { getSportMeta } from "@/lib/domain/sports/sportUtils";
 
 interface ActivityGroupCardProps {
   groupKey: string;

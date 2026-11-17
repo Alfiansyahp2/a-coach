@@ -6,7 +6,7 @@ import { ScheduledWorkout, TrainingPlan, FitnessGoal, PersonalRecord, Activity }
 import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapTypes";
 import { DashboardScheduledWorkoutsCard } from "./DashboardScheduledWorkoutsCard";
 import { DashboardMacroGoalsCard } from "./DashboardMacroGoalsCard";
-import { PersonalRecordsDeck } from "@/components/PersonalRecordsDeck";
+import { PersonalRecordsDeck } from "@/components/records/PersonalRecordsDeck";
 import { WeeklyStreakCard } from "./WeeklyStreakCard";
 import { WeeklyRecapCard } from "@/components/analytics/WeeklyRecapCard";
 
@@ -45,10 +45,10 @@ export function DashboardTacticalDeck({
             {activeTab === "workouts"
               ? "Kalender Sesi"
               : activeTab === "goals"
-              ? "Sasaran Utama"
-              : activeTab === "prs"
-              ? "Rekor Terverifikasi"
-              : "Audit Mingguan"}
+                ? "Sasaran Utama"
+                : activeTab === "prs"
+                  ? "Rekor Terverifikasi"
+                  : "Audit Mingguan"}
           </span>
         </div>
 
@@ -56,20 +56,18 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("workouts")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
-              activeTab === "workouts"
-                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
-            }`}
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${activeTab === "workouts"
+              ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
+              }`}
           >
             <Calendar className="w-3.5 h-3.5 text-[var(--color-cycling)] shrink-0" />
             <span className="truncate">Jadwal</span>
             <span
-              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${
-                activeTab === "workouts"
-                  ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold"
-                  : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
-              }`}
+              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${activeTab === "workouts"
+                ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold"
+                : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
+                }`}
             >
               {workouts.length}
             </span>
@@ -78,20 +76,18 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("goals")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
-              activeTab === "goals"
-                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
-            }`}
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${activeTab === "goals"
+              ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
+              }`}
           >
             <Target className="w-3.5 h-3.5 text-[var(--color-endurance)] shrink-0" />
             <span className="truncate">Sasaran</span>
             <span
-              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${
-                activeTab === "goals"
-                  ? "bg-[var(--color-endurance)]/15 text-[var(--color-endurance)] border border-[var(--color-endurance)]/30 font-bold"
-                  : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
-              }`}
+              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${activeTab === "goals"
+                ? "bg-[var(--color-endurance)]/15 text-[var(--color-endurance)] border border-[var(--color-endurance)]/30 font-bold"
+                : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
+                }`}
             >
               {goals.length}
             </span>
@@ -100,20 +96,18 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("prs")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
-              activeTab === "prs"
-                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
-            }`}
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${activeTab === "prs"
+              ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
+              }`}
           >
             <Trophy className="w-3.5 h-3.5 text-[var(--color-running)] shrink-0" />
             <span className="truncate">Rekor</span>
             <span
-              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${
-                activeTab === "prs"
-                  ? "bg-[var(--color-running)]/15 text-[var(--color-running)] border border-[var(--color-running)]/30 font-bold"
-                  : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
-              }`}
+              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${activeTab === "prs"
+                ? "bg-[var(--color-running)]/15 text-[var(--color-running)] border border-[var(--color-running)]/30 font-bold"
+                : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
+                }`}
             >
               {prs.length}
             </span>
@@ -122,20 +116,18 @@ export function DashboardTacticalDeck({
           <button
             type="button"
             onClick={() => setActiveTab("recap")}
-            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${
-              activeTab === "recap"
-                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
-            }`}
+            className={`py-1.5 px-1 rounded-lg transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-semibold cursor-pointer min-w-0 ${activeTab === "recap"
+              ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs font-bold"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/50"
+              }`}
           >
             <ActivityIcon className="w-3.5 h-3.5 text-[var(--color-cycling)] shrink-0" />
             <span className="truncate">Rekap</span>
             <span
-              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${
-                activeTab === "recap"
-                  ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold"
-                  : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
-              }`}
+              className={`text-[9px] px-1.5 py-0.2 rounded-full font-tabular shrink-0 ${activeTab === "recap"
+                ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold"
+                : "bg-[var(--color-surface-card)] text-[var(--color-text-muted)]"
+                }`}
             >
               1M
             </span>

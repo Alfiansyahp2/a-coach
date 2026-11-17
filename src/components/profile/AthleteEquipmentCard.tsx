@@ -168,8 +168,11 @@ export function AthleteEquipmentCard({ initialEquipment }: AthleteEquipmentCardP
           {equipmentList.map((item) => {
             const isRun = item.sport_type?.toLowerCase().includes("run");
             const isRide = item.sport_type?.toLowerCase().includes("ride") || item.sport_type?.toLowerCase().includes("cycl");
-            const accumulatedKm = (Number(item.accumulated_distance_meters || 0) / 1000).toFixed(1);
-            const maxKm = (Number(item.max_recommended_distance_meters || 800000) / 1000).toFixed(0);
+            const accumulatedNum = Number(item.accumulated_distance_meters || 0) / 1000;
+            const maxNum = Number(item.max_recommended_distance_meters || 800000) / 1000;
+            const accumulatedKm = accumulatedNum.toFixed(1);
+            const maxKm = maxNum.toFixed(0);
+            const remainingKm = Math.max(0, maxNum - accumulatedNum).toFixed(1);
             const wearPct = Math.min(
               100,
               Math.round((Number(item.accumulated_distance_meters || 0) / Number(item.max_recommended_distance_meters || 800000)) * 100)
@@ -178,16 +181,16 @@ export function AthleteEquipmentCard({ initialEquipment }: AthleteEquipmentCardP
             return (
               <div
                 key={item.id}
-                className="p-4 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] hover:border-[var(--color-border)]/80 transition-all space-y-3"
+                className={`p-4 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] border-t-2 ${isRun ? "border-t-[var(--color-running)]" : "border-t-[var(--color-cycling)]"
+                  } hover:border-[var(--color-border)]/80 transition-all space-y-3 shadow-2xs`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border shadow-2xs ${
-                        isRun
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border shadow-2xs ${isRun
                           ? "bg-[var(--color-running)]/10 text-[var(--color-running)] border-[var(--color-running)]/30"
                           : "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
-                      }`}
+                        }`}
                     >
                       {isRun ? <Footprints className="w-4 h-4" /> : <Bike className="w-4 h-4" />}
                     </div>
@@ -206,28 +209,50 @@ export function AthleteEquipmentCard({ initialEquipment }: AthleteEquipmentCardP
                   </span>
                 </div>
 
-                {/* Progress Bar & Mileage */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10.5px] font-mono">
-                    <span className="text-[var(--color-text-secondary)] font-tabular font-semibold">
-                      {accumulatedKm} km <span className="text-[var(--color-text-muted)] font-normal">/ {maxKm} km</span>
-                    </span>
-                    <span
-                      className={`font-bold font-tabular text-[10px] ${
-                        wearPct > 80 ? "text-[var(--color-alert-red)]" : "text-[var(--color-cycling)]"
-                      }`}
-                    >
-                      {wearPct}% terpakai
-                    </span>
-                  </div>
+                    {/* Telemetry Readout & Progress Gauge */}
+                    <div className="space-y-2 pt-1 border-t border-[var(--color-border)]/40">
+                      <div className="flex items-baseline justify-between font-mono">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-lg font-black font-tabular text-[var(--color-text-primary)]">
+                            {accumulatedKm}
+                          </span>
+                          <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase">km</span>
+                          <span className="text-[11px] text-[var(--color-text-muted)] font-tabular">
+                            / {maxKm} km
+                          </span>
+                        </div>
+                        <span
+                      className={`text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-md border font-tabular ${wearPct >= 85
+                              ? "bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border-[var(--color-alert-red)]/30"
+                              : wearPct >= 65
+                                ? "bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border-[var(--color-alert-amber)]/30"
+                                : isRun
+                                  ? "bg-[var(--color-running)]/10 text-[var(--color-running)] border-[var(--color-running)]/30"
+                                  : "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
+                            }`}
+                        >
+                          {wearPct}% KAPASITAS
+                        </span>
+                      </div>
 
-                  <div className="w-full bg-[var(--color-surface-card)] h-2 rounded-full overflow-hidden border border-[var(--color-border)]">
+                  <div className="w-full bg-[var(--color-surface-card)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        wearPct > 80 ? "bg-[var(--color-alert-red)]" : isRun ? "bg-[var(--color-running)]" : "bg-[var(--color-cycling)]"
+                        wearPct >= 85
+                          ? "bg-[var(--color-alert-red)]"
+                          : wearPct >= 65
+                          ? "bg-[var(--color-alert-amber)]"
+                          : isRun
+                          ? "bg-[var(--color-running)]"
+                          : "bg-[var(--color-cycling)]"
                       }`}
-                      style={{ width: `${Math.max(2, wearPct)}%` }}
+                      style={{ width: `${Math.max(3, wearPct)}%` }}
                     />
+                  </div>
+
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--color-text-muted)] pt-0.5">
+                    <span>Sisa Kuota: <strong className="text-[var(--color-text-secondary)] font-tabular">{remainingKm} km</strong></span>
+                    <span>{wearPct >= 85 ? "⚠️ Batas Aus Tercapai" : wearPct >= 65 ? "Perlu Pemantauan" : "Kondisi Prima"}</span>
                   </div>
                 </div>
 

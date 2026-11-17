@@ -11,7 +11,7 @@ import {
   PlusCircle,
   ShieldCheck,
 } from "lucide-react";
-import { AnatomicalRegionMeta } from "@/lib/anatomyUtils";
+import { AnatomicalRegionMeta } from "@/lib/anatomy";
 
 interface InjuryDossierDetailPaneProps {
   selectedInjury?: AthleteInjury;

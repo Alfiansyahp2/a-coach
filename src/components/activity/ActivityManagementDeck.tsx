@@ -11,7 +11,7 @@ import { ActivityDeckHeader } from "./deck/ActivityDeckHeader";
 import { ActivityFilterToolbar } from "./deck/ActivityFilterToolbar";
 import { ActivityBatchActionBar } from "./deck/ActivityBatchActionBar";
 import { ActivityGroupCard } from "./deck/ActivityGroupCard";
-import { getDistinctSports, getSportMeta } from "@/lib/sportUtils";
+import { getDistinctSports, getSportMeta } from "@/lib/domain/sports/sportUtils";
 
 interface ActivityManagementDeckProps {
   activities: Activity[];

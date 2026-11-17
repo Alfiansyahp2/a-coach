@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, connection } from "next/server";
 import { updateActivity, getActivityById, deleteActivity } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { verifyUserAuthorization } from "@/lib/auth/authGuard";
@@ -7,6 +7,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  await connection();
   try {
     const auth = verifyUserAuthorization(req);
     if (!auth.authorized) return auth.response!;
@@ -34,6 +35,7 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  await connection();
   try {
     const auth = verifyUserAuthorization(req);
     if (!auth.authorized) return auth.response!;
@@ -102,6 +104,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  await connection();
   try {
     const auth = verifyUserAuthorization(req);
     if (!auth.authorized) return auth.response!;
