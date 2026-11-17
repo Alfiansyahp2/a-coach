@@ -107,22 +107,22 @@ export function MacroObjectivesStrip({ goals = [], plan }: MacroObjectivesStripP
       </div>
 
       {/* 4. Fasting Routine Compliance */}
-      <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-purple-500/40 space-y-2.5 shadow-xs transition-all">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-            <span className="text-sm">🌙</span>
-            <span>Jadwal Puasa Sunnah</span>
-          </span>
-          <span className="text-purple-600 dark:text-purple-300 font-bold text-xs">100% Selaras</span>
-        </div>
-        <div className="w-full h-2 bg-[var(--color-surface-muted)] rounded-full overflow-hidden border border-[var(--color-border)]">
-          <div className="h-full rounded-full bg-purple-500" style={{ width: "100%" }} />
-        </div>
-        <div className="flex items-center justify-between text-[10.5px] text-[var(--color-text-secondary)]">
-          <span>Puasa: <strong className="text-purple-600 dark:text-purple-300">Senin &amp; Kamis</strong></span>
-          <span>Latihan: <strong className="text-[var(--color-cycling)]">Sel, Rab, Jum, Min</strong></span>
+        <div className="p-4 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-[var(--color-fasting)]/40 space-y-2.5 shadow-xs transition-all">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+              <span className="text-sm">🌙</span>
+              <span>Jadwal Puasa Sunnah</span>
+            </span>
+            <span className="text-[var(--color-fasting)] font-bold text-xs">100% Selaras</span>
+          </div>
+          <div className="w-full h-2 bg-[var(--color-surface-muted)] rounded-full overflow-hidden border border-[var(--color-border)]">
+            <div className="h-full rounded-full bg-[var(--color-fasting)]" style={{ width: "100%" }} />
+          </div>
+          <div className="flex items-center justify-between text-[10.5px] text-[var(--color-text-secondary)]">
+            <span>Puasa: <strong className="text-[var(--color-fasting)]">Senin &amp; Kamis</strong></span>
+            <span>Latihan: <strong className="text-[var(--color-cycling)]">Sel, Rab, Jum, Min</strong></span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+      );
 }
