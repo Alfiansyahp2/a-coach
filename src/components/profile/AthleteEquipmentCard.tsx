@@ -235,37 +235,38 @@ export function AthleteEquipmentCard({ initialEquipment }: AthleteEquipmentCardP
                         </span>
                       </div>
 
-                        <div className="w-full bg-[var(--color-surface-card)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
-                          <div
+                  <div className="w-full bg-[var(--color-surface-card)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
                         wearPct >= 85
-                            ? "bg-[var(--color-alert-red)]"
+                          ? "bg-[var(--color-alert-red)]"
                           : wearPct >= 65
-                            ? "bg-[var(--color-alert-amber)]"
-                            : isRun
-                            ? "bg-[var(--color-running)]"
-                            : "bg-[var(--color-cycling)]"
+                          ? "bg-[var(--color-alert-amber)]"
+                          : isRun
+                          ? "bg-[var(--color-running)]"
+                          : "bg-[var(--color-cycling)]"
                       }`}
-                            style={{ width: `${Math.max(3, wearPct)}%` }}
+                      style={{ width: `${Math.max(3, wearPct)}%` }}
                     />
-                          </div>
-
-                          <div className="flex items-center justify-between text-[10px] font-mono text-[var(--color-text-muted)] pt-0.5">
-                            <span>Sisa Kuota: <strong className="text-[var(--color-text-secondary)] font-tabular">{remainingKm} km</strong></span>
-                            <span>{wearPct >= 85 ? "⚠️ Batas Aus Tercapai" : wearPct >= 65 ? "Perlu Pemantauan" : "Kondisi Prima"}</span>
-                          </div>
-                        </div>
-
-                        {item.notes && (
-                          <p className="text-[10px] font-mono text-[var(--color-text-muted)] line-clamp-1 italic">
-                            "{item.notes}"
-                          </p>
-                        )}
-                      </div>
-                      );
-          })}
-                    </div>
-      )}
                   </div>
-                  );
+
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[var(--color-text-muted)] pt-0.5">
+                    <span>Sisa Kuota: <strong className="text-[var(--color-text-secondary)] font-tabular">{remainingKm} km</strong></span>
+                    <span>{wearPct >= 85 ? "⚠️ Batas Aus Tercapai" : wearPct >= 65 ? "Perlu Pemantauan" : "Kondisi Prima"}</span>
+                  </div>
+                </div>
+
+                {item.notes && (
+                  <p className="text-[10px] font-mono text-[var(--color-text-muted)] line-clamp-1 italic">
+                    "{item.notes}"
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }
 

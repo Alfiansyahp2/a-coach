@@ -204,11 +204,10 @@ export function NewInjuryForm({
 
         {formMsg && (
           <div
-            className={`p-2.5 rounded-lg border text-[11px] font-semibold flex items-center gap-2 ${
-              formMsg.type === "success"
-                ? "bg-[var(--color-cycling)]/10 border-[var(--color-cycling)]/30 text-[var(--color-cycling)]"
-                : "bg-[var(--color-alert-red)]/10 border-[var(--color-alert-red)]/30 text-[var(--color-alert-red)]"
-            }`}
+            className={`p-2.5 rounded-lg border text-[11px] font-semibold flex items-center gap-2 ${formMsg.type === "success"
+              ? "bg-[var(--color-cycling)]/10 border-[var(--color-cycling)]/30 text-[var(--color-cycling)]"
+              : "bg-[var(--color-alert-red)]/10 border-[var(--color-alert-red)]/30 text-[var(--color-alert-red)]"
+              }`}
           >
             {formMsg.type === "success" ? (
               <CheckCircle2 className="w-4 h-4 shrink-0" />

@@ -55,22 +55,20 @@ export function ScheduleTrainingHeader({
         <div className="flex items-center p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs">
           <button
             onClick={() => setViewMode("calendar")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${
-              viewMode === "calendar"
-                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            }`}
+            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === "calendar"
+              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
           >
             <Grid className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
             <span>Kalender Grid</span>
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${
-              viewMode === "list"
-                ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            }`}
+            className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-all ${viewMode === "list"
+              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
           >
             <List className="w-3.5 h-3.5 text-[var(--color-running)]" />
             <span>Daftar Sesi</span>
