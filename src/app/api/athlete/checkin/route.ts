@@ -1,6 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, connection } from 'next/server';
 import {
-  DEFAULT_USER_ID,
   upsertAthleteTrainingResponse,
   createAthletePainLog,
   getAuthoritativeHealthContext,
@@ -8,6 +7,7 @@ import {
   logHealthAuditTrail,
 } from '@/lib/db';
 import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngine';
+import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 /**
  * POST /api/athlete/checkin
@@ -15,9 +15,12 @@ import { evaluateTrainingReadiness } from '@/lib/domain/readiness/readinessEngin
  * and triggers a deterministic recalculation of sport-specific training readiness.
  */
 export async function POST(req: NextRequest) {
+  await connection();
   try {
     const body = await req.json();
-    const userId = body.user_id || DEFAULT_USER_ID;
+    const auth = verifyUserAuthorization(req, body.user_id);
+    if (!auth.authorized) return auth.response!;
+    const userId = auth.userId;
 
     if (!body.sport_type || body.distance_km === undefined || body.duration_seconds === undefined) {
       return NextResponse.json(

@@ -108,6 +108,8 @@ export interface LocalStoreSchema {
   athlete_daily_wellness?: AthleteDailyWellness[];
 }
 
+import { createInitialLocalStore } from './defaultStoreSeed';
+
 export function ensureLocalStore(): LocalStoreSchema {
   if (memoryStore) return memoryStore;
   if (!fs.existsSync(DATA_DIR)) {
@@ -115,121 +117,7 @@ export function ensureLocalStore(): LocalStoreSchema {
   }
 
   if (!fs.existsSync(DATA_FILE)) {
-    const defaultUserId = DEFAULT_USER_ID;
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-
-    const getRelDate = (offsetDays: number) => {
-      const d = new Date(now);
-      d.setDate(d.getDate() + offsetDays);
-      return d.toISOString().split('T')[0];
-    };
-
-    const initialStore: LocalStoreSchema = {
-      users: [
-        {
-          id: defaultUserId,
-          email: 'athlete@protraining.internal',
-          name: 'Apex Athlete',
-          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-          weight_kg: 65.0,
-          height_cm: 170.0,
-          resting_heart_rate: 68,
-          max_heart_rate: 188,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ],
-      strava_connections: [],
-      strava_tokens: [],
-      activities: (() => {
-        try {
-          const importedPath = path.join(process.cwd(), 'data', 'imported_activities.json');
-          if (fs.existsSync(importedPath)) {
-            const raw = JSON.parse(fs.readFileSync(importedPath, 'utf8'));
-            return raw.map((a: any, idx: number) => ({
-              ...a,
-              id: a.id || `act-imported-${idx + 1}`,
-              user_id: defaultUserId,
-            }));
-          }
-        } catch {}
-        return [];
-      })(),
-      scheduled_workouts: [],
-      workout_activity_matches: [],
-      fitness_goals: [
-        {
-          id: 'goal-001',
-          user_id: defaultUserId,
-          title: 'Monthly Mileage Target (150 KM)',
-          goal_type: 'DISTANCE_MONTHLY',
-          target_value: 150000,
-          current_value: 84200,
-          start_date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`,
-          target_date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-28`,
-          is_achieved: false,
-          unit: 'km',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        {
-          id: 'goal-002',
-          user_id: defaultUserId,
-          title: 'Consistency: 4 Sessions / Week',
-          goal_type: 'FREQUENCY_WEEKLY',
-          target_value: 4,
-          current_value: 3,
-          start_date: todayStr,
-          target_date: getRelDate(7),
-          is_achieved: false,
-          unit: 'sessions',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ],
-      personal_records: [
-        {
-          id: 'pr-001',
-          user_id: defaultUserId,
-          activity_id: 'act-001',
-          category: '5K',
-          record_value: 1260,
-          record_display: '21:00',
-          achieved_date: `${getRelDate(-15)}T08:00:00Z`,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 'pr-002',
-          user_id: defaultUserId,
-          activity_id: 'act-001',
-          category: '10K',
-          record_value: 2685,
-          record_display: '44:45',
-          achieved_date: `${getRelDate(-30)}T07:30:00Z`,
-          created_at: new Date().toISOString(),
-        },
-        {
-          id: 'pr-003',
-          user_id: defaultUserId,
-          activity_id: 'act-003',
-          category: 'Longest Distance',
-          record_value: 21100,
-          record_display: '21.10 km',
-          achieved_date: `${getRelDate(-45)}T06:00:00Z`,
-          created_at: new Date().toISOString(),
-        },
-      ],
-      sync_logs: [],
-      athlete_profiles: [],
-      athlete_injuries: [],
-      athlete_pain_logs: [],
-      athlete_training_responses: [],
-      athlete_medical_assessments: [],
-      athlete_training_readiness: [],
-      health_audit_trail: [],
-    };
-
+    const initialStore = createInitialLocalStore(DEFAULT_USER_ID);
     fs.writeFileSync(DATA_FILE, JSON.stringify(initialStore, null, 2), 'utf8');
     return initialStore;
   }

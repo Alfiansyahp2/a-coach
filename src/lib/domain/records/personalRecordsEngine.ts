@@ -219,11 +219,9 @@ export function computePersonalRecords(
   const rides40k = rides.filter((r) => Number(r.distance_meters || 0) >= 40000);
   if (rides40k.length > 0) {
     const best40k = rides40k.reduce((best, cur) => {
-      const bestKmh =
-        Number(best.distance_meters) / 1000 / (Number(best.moving_time_seconds) / 3600);
-      const curKmh =
-        Number(cur.distance_meters) / 1000 / (Number(cur.moving_time_seconds) / 3600);
-      return curKmh > bestKmh ? cur : best;
+      const bestDist = Number(best.distance_meters || 0);
+      const curDist = Number(cur.distance_meters || 0);
+      return curDist > bestDist ? cur : best;
     });
     const distKm = Number(best40k.distance_meters) / 1000;
     const durSec = Number(best40k.moving_time_seconds);

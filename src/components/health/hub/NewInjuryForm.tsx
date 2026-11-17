@@ -18,7 +18,7 @@ import {
   AnatomicalZoneKey,
   AnatomicalRegionMeta,
   getAnatomicalRegion,
-} from "@/lib/anatomyUtils";
+} from "@/lib/anatomy";
 import { AnatomicalRegionPicker } from "./injury-form/AnatomicalRegionPicker";
 import { InjuryBiomechanicalBanner } from "./injury-form/InjuryBiomechanicalBanner";
 import { InjuryDetailFields } from "./injury-form/InjuryDetailFields";

@@ -64,6 +64,7 @@ export function CyclingCoachView({
     (max, a) => Math.max(max, a.distance_meters || 0),
     0
   );
+  const maxRideKm = Number((maxRideMeters / 1000).toFixed(1));
 
   // Cycling goal: 100km Century Ride
   const centuryGoal = goals.find(
@@ -74,8 +75,8 @@ export function CyclingCoachView({
   ) || {
     id: "century-default",
     title: "First 100 km Century Ride (MTB)",
-    target_value: 100000,
-    current_value: maxRideMeters,
+    target_value: 100,
+    current_value: maxRideKm,
     is_primary: true,
     priority: 1,
     sport_type: "Ride",
@@ -85,10 +86,12 @@ export function CyclingCoachView({
     start_date: "2026-11-01",
   };
 
-  const centuryProgressPct = Math.min(
-    100,
-    Math.round((maxRideMeters / centuryGoal.target_value) * 100)
-  );
+  const rawTarget = Number(centuryGoal.target_value || 100);
+  const centuryTargetKm = rawTarget > 500 ? rawTarget / 1000 : rawTarget;
+  const centuryProgressPct = centuryTargetKm > 0
+    ? Math.min(100, Math.round((maxRideKm / centuryTargetKm) * 100))
+    : 0;
+  const remainingGapKm = Math.max(0, Number((centuryTargetKm - maxRideKm).toFixed(1)));
 
   return (
     <div className="space-y-6 font-mono">
@@ -106,7 +109,7 @@ export function CyclingCoachView({
             title: "1. Bukti Empiris Toleransi Sendi",
             description: (
               <>
-                Telah tuntas menempuh sesi <strong>56.10 km</strong> dengan evaluasi <strong>0 nyeri</strong> selama latihan, sesudah latihan, dan <strong>tanpa pembengkakan</strong>.
+                Telah tuntas menempuh sesi <strong>{maxRideKm > 0 ? `${maxRideKm.toFixed(1)} km` : "jarak dasar"}</strong> dengan evaluasi <strong>0 nyeri</strong> selama latihan, sesudah latihan, dan <strong>tanpa pembengkakan</strong>.
               </>
             ),
           },
@@ -156,7 +159,7 @@ export function CyclingCoachView({
             <div className="flex items-center justify-between text-xs">
               <span className="text-[var(--color-text-secondary)]">Sesi Terjauh Saat Ini:</span>
               <span className="font-bold text-[var(--color-text-primary)] font-tabular">
-                {(maxRideMeters / 1000).toFixed(1)} km / {(centuryGoal.target_value / 1000).toFixed(0)} km
+                {maxRideKm.toFixed(1)} km / {centuryTargetKm.toFixed(0)} km
               </span>
             </div>
             <div className="w-full h-2.5 rounded-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] overflow-hidden">
@@ -166,7 +169,7 @@ export function CyclingCoachView({
               />
             </div>
             <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-1">
-              <span>Sisa Gap Jarak: {((centuryGoal.target_value - maxRideMeters) / 1000).toFixed(1)} km</span>
+              <span>Sisa Gap Jarak: {remainingGapKm.toFixed(1)} km</span>
               <span>Target Event: {centuryGoal.target_date}</span>
             </div>
           </div>

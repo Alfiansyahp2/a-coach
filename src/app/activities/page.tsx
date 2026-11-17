@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { connection } from "next/server";
 import { getActivities, getUser, getDatabaseStatus, DEFAULT_USER_ID } from "@/lib/db";
-import { ActivityManagementDeck } from "@/components/ActivityManagementDeck";
+import { ActivityManagementDeck } from "@/components/activity/ActivityManagementDeck";
 import { AppShell } from "@/components/layout/AppShell";
 import { RefreshCw } from "lucide-react";
 

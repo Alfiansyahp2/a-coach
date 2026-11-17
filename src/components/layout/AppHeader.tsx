@@ -16,7 +16,7 @@ import {
   Target,
 } from "lucide-react";
 import { useTheme } from "@/components/theme/ThemeProvider";
-import { AddActivityModal } from "@/components/AddActivityModal";
+import { AddActivityModal } from "@/components/activity/modal/AddActivityModal";
 import { EditAthleteProfileModal } from "@/components/health/EditAthleteProfileModal";
 import { NavbarStreakBadge } from "./NavbarStreakBadge";
 import { User } from "@/types";

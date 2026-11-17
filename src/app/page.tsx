@@ -65,10 +65,15 @@ async function DashboardTelemetry() {
           c.category.toLowerCase().includes(p.category.toLowerCase()) ||
           p.category.toLowerCase().includes(c.category.toLowerCase())
       );
+      if (!m) return p;
       return {
         ...p,
-        subtext: p.subtext || m?.subtext,
-        activity_name: p.activity_name || m?.activity_name,
+        record_value: m.record_value,
+        record_display: m.record_display,
+        achieved_date: m.achieved_date,
+        activity_id: m.activity_id,
+        activity_name: m.activity_name || p.activity_name,
+        subtext: m.subtext || p.subtext,
       };
     });
     const newComputed = computedPrs.filter(

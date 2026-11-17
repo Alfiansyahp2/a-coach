@@ -3,7 +3,9 @@
  * Handles Performance Management Chart (PMC Banister CTL/ATL/TSB) and Session Debriefs.
  */
 
-import { Activity, PMCResponse, SessionDebriefResult } from "@/types";
+import { Activity, AthletePainLog, AthleteTrainingResponse, PMCResponse, SessionDebriefResult } from "@/types";
+import { WeeklyProMetrics } from "@/lib/domain/analytics/weeklyRecapTypes";
+import { computeLocalWeeklyProMetrics } from "@/lib/domain/analytics/weeklyRecapProCalculator";
 
 const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || "http://127.0.0.1:8000";
 
@@ -96,6 +98,84 @@ export async function computeDebriefViaPython(
   }
 
   return computeLocalDebriefFallback(activity, painDuring, painAfter, swelling);
+}
+
+/**
+ * Computes Pro Weekly Recap via Python Sports Science Engine with graceful local fallback.
+ */
+export async function computeWeeklyRecapViaPython(
+  activities: Activity[],
+  start: Date,
+  end: Date,
+  painLogs: AthletePainLog[] = [],
+  trainingResponses: AthleteTrainingResponse[] = []
+): Promise<WeeklyProMetrics> {
+  const startMs = start.getTime();
+  const endMs = end.getTime();
+  const prevStartMs = startMs - 7 * 86400000;
+  const prevEndMs = startMs - 1;
+
+  const currentActs = activities.filter((a) => {
+    const t = new Date(a.start_date).getTime();
+    return t >= startMs && t <= endMs;
+  });
+
+  const prevActs = activities.filter((a) => {
+    const t = new Date(a.start_date).getTime();
+    return t >= prevStartMs && t <= prevEndMs;
+  });
+
+  const peakPain = painLogs.length > 0 ? Math.max(...painLogs.map((p) => p.pain_score || 0)) : 0;
+  const hasSwelling = painLogs.some((p) => p.swelling_present);
+
+  try {
+    const mapSession = (a: Activity) => ({
+      id: a.id,
+      start_date: typeof a.start_date === "string" ? a.start_date : new Date(a.start_date).toISOString(),
+      duration_seconds: a.moving_time_seconds || 0,
+      distance_meters: a.distance_meters || 0,
+      avg_hr: a.average_heartrate || null,
+      max_hr: a.max_heartrate || null,
+      avg_power: a.average_watts || null,
+      avg_speed_mps: a.average_speed_mps || null,
+      sport_type: a.sport_type || "Ride",
+    });
+
+    const payload = {
+      current_week_activities: currentActs.map(mapSession),
+      prev_week_activities: prevActs.map(mapSession),
+      profile: { rest_hr: 52, max_hr: 185, ftp: 200 },
+      peak_pain_score: peakPain,
+      has_swelling: hasSwelling,
+    };
+
+    const res = await fetch(`${PYTHON_ENGINE_URL}/calculate/coach/weekly-recap`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(3000),
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const local = computeLocalWeeklyProMetrics(activities, start, end, painLogs, trainingResponses);
+      return {
+        ...local,
+        foster_srpe_load: data.foster_srpe_load,
+        weekly_tss: data.weekly_tss,
+        training_monotony: data.training_monotony,
+        training_strain: data.training_strain,
+        polarization: data.polarization,
+        wow_delta: data.wow_delta,
+        musculoskeletal: data.musculoskeletal,
+      };
+    }
+  } catch (err: any) {
+    console.warn(`[PythonEngine/WeeklyRecap] Offline (${err.message}). Using local math fallback.`);
+  }
+
+  return computeLocalWeeklyProMetrics(activities, start, end, painLogs, trainingResponses);
 }
 
 /**

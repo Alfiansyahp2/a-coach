@@ -7,7 +7,7 @@ import {
   ANATOMICAL_ZONES,
   AnatomicalZoneKey,
   AnatomicalRegionMeta,
-} from "@/lib/anatomyUtils";
+} from "@/lib/anatomy";
 
 interface AnatomicalRegionPickerProps {
   selectedZone: AnatomicalZoneKey | "ALL";

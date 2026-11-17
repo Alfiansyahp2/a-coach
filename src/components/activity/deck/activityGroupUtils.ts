@@ -1,6 +1,6 @@
 import { Activity } from "@/types";
 import { speedMpsToPace, speedMpsToKmh } from "@/lib/formatters";
-import { getSportMeta } from "@/lib/sportUtils";
+import { getSportMeta } from "@/lib/domain/sports/sportUtils";
 
 export type GroupByOption = "sport" | "category" | "month" | "volume";
 

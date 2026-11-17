@@ -9,7 +9,13 @@ import {
   evaluateWeeklyClinicalCorrelation,
 } from './weeklyRecapInjury';
 import { computeLocalWeeklyProMetrics } from './weeklyRecapProCalculator';
+import {
+  shouldDefaultToCompletedWeek,
+  discoverAvailableRecapWeeks,
+  computeMultiWeekRollup,
+} from './multiWeekRecapEngine';
 import { formatDateOnly } from '@/lib/formatters';
+import { getMondayOfWeek, getSundayOfWeek } from '@/lib/shared/dateUtils';
 
 const INDO_MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
@@ -40,16 +46,8 @@ export function getWeekBounds(referenceDate?: Date | string): { start: Date; end
     ref = new Date(referenceDate);
   }
 
-  const day = ref.getDay(); // 0 is Sunday, 1 is Monday
-  const diffToMonday = (day === 0 ? -6 : 1) - day;
-
-  const start = new Date(ref);
-  start.setDate(ref.getDate() + diffToMonday);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
+  const start = getMondayOfWeek(ref);
+  const end = getSundayOfWeek(start);
 
   return { start, end };
 }
@@ -57,7 +55,8 @@ export function getWeekBounds(referenceDate?: Date | string): { start: Date; end
 /**
  * Pure domain orchestrator for weekly activity and injury recap.
  * Computes deterministic volume progression, sport breakdowns,
- * newly acquired and monitored injuries, pain telemetry, and clinical correlations.
+ * newly acquired and monitored injuries, pain telemetry, clinical correlations,
+ * multi-week rollups, and smart Monday 00:00 completed-week defaults.
  */
 export function computeWeeklyActivityAndInjuryRecap(
   params: ComputeWeeklyRecapParams
@@ -69,14 +68,33 @@ export function computeWeeklyActivityAndInjuryRecap(
     trainingResponses = [],
     scheduledWorkouts = [],
     referenceDate,
+    scope = '1_WEEK',
+    autoMonday = true,
   } = params;
 
-  // 1. Tentukan Rentang Waktu Minggu (Senin 00:00:00 - Minggu 23:59:59)
-  const ref = referenceDate || new Date();
+  const now = new Date();
+  const currentWeekBounds = getWeekBounds(now);
+
+  // 1. Intelligent Monday 00:00 Default Rule
+  let isMondayAutoCompleted = false;
+  let targetRef = referenceDate;
+
+  if (!targetRef && autoMonday) {
+    const currentWeekSessions = activities.filter((a) => {
+      const t = new Date(a.start_date).getTime();
+      return t >= currentWeekBounds.start.getTime() && t <= currentWeekBounds.end.getTime();
+    }).length;
+
+    if (shouldDefaultToCompletedWeek(now, currentWeekSessions)) {
+      targetRef = new Date(currentWeekBounds.start.getTime() - 7 * 86400000);
+      isMondayAutoCompleted = true;
+    }
+  }
+
+  const ref = targetRef || now;
   const { start, end } = getWeekBounds(ref);
 
-  const now = new Date();
-  const currentWeekMonday = getWeekBounds(now).start;
+  const currentWeekMonday = currentWeekBounds.start;
   const isCurrentWeek = formatDateOnly(start) === formatDateOnly(currentWeekMonday);
   const weeksAgo = Math.max(
     0,
@@ -126,15 +144,25 @@ export function computeWeeklyActivityAndInjuryRecap(
     trainingResponses
   );
 
+  // 6. Penemuan Riwayat Minggu yang Tersedia (Discovery of Historical Weeks)
+  const availableWeeks = discoverAvailableRecapWeeks(activities, now);
+
+  // 7. Agregasi Multi-Minggu (2-Minggu / Fortnightly atau 4-Minggu / Mesosiklus Bulanan)
+  const multiWeekRollup = computeMultiWeekRollup(activities, ref, scope);
+
   return {
     timeframe,
     activity_summary: activitySummary,
     injury_summary: injurySummary,
     clinical_verdict: clinicalVerdict,
     pro_metrics: proMetrics,
+    availableWeeks,
+    multiWeekRollup,
+    isMondayAutoCompleted,
   };
 }
 
 export * from './weeklyRecapTypes';
 export * from './weeklyRecapActivity';
 export * from './weeklyRecapInjury';
+export * from './multiWeekRecapEngine';

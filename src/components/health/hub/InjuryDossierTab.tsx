@@ -6,7 +6,7 @@ import { Layers, Compass } from "lucide-react";
 import {
   ANATOMICAL_ZONES,
   getAnatomicalRegion,
-} from "@/lib/anatomyUtils";
+} from "@/lib/anatomy";
 import { InjuryDossierDetailPane } from "./InjuryDossierDetailPane";
 
 interface InjuryDossierTabProps {
