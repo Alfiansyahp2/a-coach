@@ -1,4 +1,5 @@
 import { Activity, ScheduledWorkout } from '@/types';
+import { getMondayOfWeek } from './dateUtils';
 
 export interface DashboardSummary {
   totalDistanceThisWeek: number; // meters
@@ -20,11 +21,7 @@ export function computeDashboardSummary(
   const now = new Date();
 
   // Calculate Start of Current Week (Monday)
-  const dayOfWeek = now.getDay(); // 0 is Sunday
-  const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
-  const currentWeekStart = new Date(now);
-  currentWeekStart.setDate(now.getDate() + diffToMonday);
-  currentWeekStart.setHours(0, 0, 0, 0);
+  const currentWeekStart = getMondayOfWeek(now);
 
   // Previous Week Start & End
   const prevWeekStart = new Date(currentWeekStart);

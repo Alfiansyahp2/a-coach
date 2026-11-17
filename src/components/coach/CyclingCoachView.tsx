@@ -155,116 +155,131 @@ export function CyclingCoachView({
             </span>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-[var(--color-text-secondary)]">Sesi Terjauh Saat Ini:</span>
-              <span className="font-bold text-[var(--color-text-primary)] font-tabular">
-                {maxRideKm.toFixed(1)} km / {centuryTargetKm.toFixed(0)} km
-              </span>
-            </div>
-            <div className="w-full h-2.5 rounded-full bg-[var(--color-surface-muted)] border border-[var(--color-border)] overflow-hidden">
-              <div
-                className="h-full bg-[var(--color-cycling)] transition-all duration-500 rounded-full"
-                style={{ width: `${centuryProgressPct}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-1">
-              <span>Sisa Gap Jarak: {remainingGapKm.toFixed(1)} km</span>
-              <span>Target Event: {centuryGoal.target_date}</span>
-            </div>
-          </div>
+                <div className="space-y-2 pt-1 border-t border-[var(--color-border)]/40">
+                  <div className="flex items-baseline justify-between font-mono">
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] block tracking-wider">
+                        Sesi Terjauh Terverifikasi
+                      </span>
+                      <div className="flex items-baseline gap-1.5 mt-0.5">
+                        <span className="text-xl font-black font-tabular text-[var(--color-text-primary)]">
+                          {maxRideKm.toFixed(1)}
+                        </span>
+                        <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase">km</span>
+                        <span className="text-[11px] text-[var(--color-text-muted)] font-tabular">
+                          / {centuryTargetKm.toFixed(0)} km target
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-md bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-tabular">
+                      {centuryProgressPct}% TUNTAS
+                    </span>
+                  </div>
 
-          <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9px] text-[var(--color-text-muted)] block">Siklus Program</span>
-              <span className="font-bold text-[var(--color-cycling)] font-tabular text-xs">Minggu 1</span>
-              <span className="text-[8px] text-[var(--color-text-muted)] block">(Fase Fondasi)</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9px] text-[var(--color-text-muted)] block">Target Minggu 1</span>
-              <span className="font-bold text-[var(--color-text-primary)] font-tabular text-xs">18.0 km</span>
-              <span className="text-[8px] text-[var(--color-cycling)] block font-semibold">Tuntas (26.9 km)</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9px] text-[var(--color-text-muted)] block">Puasa Proteksi</span>
-              <span className="font-bold text-purple-400 font-tabular text-xs">Sen &amp; Kam</span>
-              <span className="text-[8px] text-[var(--color-text-muted)] block">Istirahat Penuh</span>
-            </div>
-          </div>
-        </div>
+                    <div className="w-full bg-[var(--color-surface-card)] h-2 rounded-full overflow-hidden border border-[var(--color-border)] p-0.5">
+                      <div
+                        className="h-full bg-[var(--color-cycling)] transition-all duration-500 rounded-full"
+                        style={{ width: `${Math.max(2, centuryProgressPct)}%` }}
+                      />
+                    </div>
 
-        {/* Right: Zone 2 Pacing & Biomechanics Guideline */}
-        <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
-          <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
-            <div className="flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-[var(--color-cycling)]" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
-                Parameter Latihan Zone 2 Tanpa HRM (MTB)
-              </h3>
-            </div>
-            <span className="text-[9px] font-bold text-[var(--color-cycling)]">SOP Resmi Coach</span>
-          </div>
+                      <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] pt-0.5">
+                        <span>Sisa Gap Jarak: <strong className="text-[var(--color-text-secondary)] font-tabular">{remainingGapKm.toFixed(1)} km</strong></span>
+                        <span>Target Event: {centuryGoal.target_date}</span>
+                      </div>
+                    </div>
 
-          <div className="space-y-2 text-xs">
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1">
-              <span className="font-bold text-[var(--color-cycling)] flex items-center gap-1.5">
-                <span>1. Patokan Intensitas (RPE 3–4 dari 10)</span>
-              </span>
-              <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-                Beban kayuhan terasa relatif ringan dan pernapasan stabil terkendali. Jangan mengejar angka kecepatan di speedometer — fokus pada ketenangan napas dan pembakaran lemak efisien.
-              </p>
-            </div>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1">
+                      <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                        <span className="text-[9px] text-[var(--color-text-muted)] block">Siklus Program</span>
+                        <span className="font-bold text-[var(--color-cycling)] font-tabular text-xs">Minggu 1</span>
+                        <span className="text-[8px] text-[var(--color-text-muted)] block">(Fase Fondasi)</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                        <span className="text-[9px] text-[var(--color-text-muted)] block">Target Minggu 1</span>
+                        <span className="font-bold text-[var(--color-text-primary)] font-tabular text-xs">18.0 km</span>
+                        <span className="text-[8px] text-[var(--color-cycling)] block font-semibold">Tuntas (26.9 km)</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                        <span className="text-[9px] text-[var(--color-text-muted)] block">Puasa Proteksi</span>
+                        <span className="font-bold text-[var(--color-fasting)] font-tabular text-xs">Sen &amp; Kam</span>
+                        <span className="text-[8px] text-[var(--color-text-muted)] block">Istirahat Penuh</span>
+                      </div>
+                    </div>
+                  </div>
 
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1">
-              <span className="font-bold text-[var(--color-cycling)] flex items-center gap-1.5">
-                <span>2. Talk Test Kunci</span>
-              </span>
-              <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-                Anda harus dapat mengobrol dalam kalimat lengkap tanpa terputus. Jika napas mulai berat atau terengah-engah, segera pindahkan gigi ke rasio yang lebih ringan.
-              </p>
-            </div>
+                  {/* Right: Zone 2 Pacing & Biomechanics Guideline */}
+                  <div className="lg:col-span-6 p-5 rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] shadow-xs space-y-3.5">
+                    <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
+                      <div className="flex items-center gap-2">
+                        <Gauge className="w-4 h-4 text-[var(--color-cycling)]" />
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-primary)]">
+                          Parameter Latihan Zone 2 Tanpa HRM (MTB)
+                        </h3>
+                      </div>
+                      <span className="text-[9px] font-bold text-[var(--color-cycling)]">SOP Resmi Coach</span>
+                    </div>
 
-            <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1">
-              <span className="font-bold text-[var(--color-cycling)] flex items-center gap-1.5">
-                <span>3. Teknis Sepeda MTB &amp; Kadens 85+ RPM</span>
-              </span>
-              <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
-                Pilih jalur datar dan pertahankan putaran kaki yang cepat dan ringan (85+ RPM). Hindari tanjakan bertorsi tinggi untuk mencegah kompresi berlebih pada tulang rawan sendi lutut.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1">
+                        <span className="font-bold text-[var(--color-cycling)] flex items-center gap-1.5">
+                          <span>1. Patokan Intensitas (RPE 3–4 dari 10)</span>
+                        </span>
+                        <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                          Beban kayuhan terasa relatif ringan dan pernapasan stabil terkendali. Jangan mengejar angka kecepatan di speedometer — fokus pada ketenangan napas dan pembakaran lemak efisien.
+                        </p>
+                      </div>
 
-      {/* 3. CYCLING TELEMETRY ARCHIVE */}
-      <CoachRecentSessionsList
-        activities={cyclingActivities}
-        sportTone="cycling"
-        title="Arsip Telemetri Sesi Sepeda Terverifikasi"
-        subtitle={`${cyclingActivities.length} Sesi Sepeda Strava Tersimpan di PostgreSQL 16`}
-        speedMetricLabel="Avg Speed"
-        renderSpeedValue={(act) =>
-          act.moving_time_seconds > 0
-            ? `${((act.distance_meters / act.moving_time_seconds) * 3.6).toFixed(1)} km/h`
-            : "0.0 km/h"
-        }
-        headerSummaryNodes={
-          <>
-            <span>
-              Total Jarak: <strong className="text-[var(--color-text-primary)]">{formatDistance(totalCyclingDistanceMeters)}</strong>
-            </span>
-            <span>•</span>
-            <span>
-              Sesi Terjauh: <strong className="text-[var(--color-cycling)]">{(maxRideMeters / 1000).toFixed(1)} km</strong>
-            </span>
-            <span>•</span>
-            <span>
-              Kecepatan Avg: <strong className="text-[var(--color-cycling)]">{avgCyclingSpeedKmh} km/h</strong>
-            </span>
-          </>
-        }
-        emptyText="Belum ada aktivitas sepeda yang tercatat."
-      />
-    </div>
-  );
+                      <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1">
+                        <span className="font-bold text-[var(--color-cycling)] flex items-center gap-1.5">
+                          <span>2. Talk Test Kunci</span>
+                        </span>
+                        <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                          Anda harus dapat mengobrol dalam kalimat lengkap tanpa terputus. Jika napas mulai berat atau terengah-engah, segera pindahkan gigi ke rasio yang lebih ringan.
+                        </p>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-[var(--color-surface-muted)] border border-[var(--color-border)] space-y-1">
+                        <span className="font-bold text-[var(--color-cycling)] flex items-center gap-1.5">
+                          <span>3. Teknis Sepeda MTB &amp; Kadens 85+ RPM</span>
+                        </span>
+                        <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">
+                          Pilih jalur datar dan pertahankan putaran kaki yang cepat dan ringan (85+ RPM). Hindari tanjakan bertorsi tinggi untuk mencegah kompresi berlebih pada tulang rawan sendi lutut.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. CYCLING TELEMETRY ARCHIVE */}
+                <CoachRecentSessionsList
+                  activities={cyclingActivities}
+                  sportTone="cycling"
+                  title="Arsip Telemetri Sesi Sepeda Terverifikasi"
+                  subtitle={`${cyclingActivities.length} Sesi Sepeda Strava Tersimpan di PostgreSQL 16`}
+                  speedMetricLabel="Avg Speed"
+                  renderSpeedValue={(act) =>
+                    act.moving_time_seconds > 0
+                      ? `${((act.distance_meters / act.moving_time_seconds) * 3.6).toFixed(1)} km/h`
+                      : "0.0 km/h"
+                  }
+                  headerSummaryNodes={
+                    <>
+                      <span>
+                        Total Jarak: <strong className="text-[var(--color-text-primary)]">{formatDistance(totalCyclingDistanceMeters)}</strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Sesi Terjauh: <strong className="text-[var(--color-cycling)]">{(maxRideMeters / 1000).toFixed(1)} km</strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Kecepatan Avg: <strong className="text-[var(--color-cycling)]">{avgCyclingSpeedKmh} km/h</strong>
+                      </span>
+                    </>
+                  }
+                  emptyText="Belum ada aktivitas sepeda yang tercatat."
+                />
+            </div>
+            );
 }

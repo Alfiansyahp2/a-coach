@@ -8,6 +8,7 @@ import {
 } from '@/lib/db/healthRepo';
 import { getScheduledWorkouts } from '@/lib/db/trainingRepo';
 import { computeWeeklyActivityAndInjuryRecap } from '@/lib/domain/analytics/weeklyRecapEngine';
+import { computeWeeklyRecapViaPython } from '@/lib/api/coachPythonClient';
 import { verifyUserAuthorization } from '@/lib/auth/authGuard';
 
 export async function GET(req: NextRequest) {
@@ -40,6 +41,19 @@ export async function GET(req: NextRequest) {
       scope: scopeParam,
       autoMonday: autoMondayParam,
     });
+
+    try {
+      const pythonPro = await computeWeeklyRecapViaPython(
+        activities,
+        new Date(recap.timeframe.startDate),
+        new Date(recap.timeframe.endDate),
+        painLogs,
+        trainingResponses
+      );
+      if (pythonPro) {
+        recap.pro_metrics = pythonPro;
+      }
+    } catch {}
 
     return NextResponse.json({
       success: true,

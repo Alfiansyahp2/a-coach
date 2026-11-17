@@ -4,7 +4,7 @@ import React from "react";
 import { ScheduledWorkout, WorkoutActivityMatch, Activity } from "@/types";
 import { X, Gauge, ShieldAlert, CheckCircle2, XCircle, ExternalLink } from "lucide-react";
 import { formatDistance, formatDuration, formatDate, formatDateOnly } from "@/lib/formatters";
-import { AddActivityModal } from "@/components/AddActivityModal";
+import { AddActivityModal } from "@/components/activity/modal/AddActivityModal";
 
 export interface WorkoutDossierModalProps {
   workout: ScheduledWorkout;

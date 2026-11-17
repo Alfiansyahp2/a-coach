@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Sparkles } from "lucide-react";
-import { AnatomicalRegionMeta } from "@/lib/anatomyUtils";
+import { AnatomicalRegionMeta } from "@/lib/anatomy";
 
 interface InjuryBiomechanicalBannerProps {
   activeMeta: AnatomicalRegionMeta;

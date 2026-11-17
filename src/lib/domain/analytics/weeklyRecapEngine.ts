@@ -15,6 +15,7 @@ import {
   computeMultiWeekRollup,
 } from './multiWeekRecapEngine';
 import { formatDateOnly } from '@/lib/formatters';
+import { getMondayOfWeek, getSundayOfWeek } from '@/lib/shared/dateUtils';
 
 const INDO_MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
@@ -45,16 +46,8 @@ export function getWeekBounds(referenceDate?: Date | string): { start: Date; end
     ref = new Date(referenceDate);
   }
 
-  const day = ref.getDay(); // 0 is Sunday, 1 is Monday
-  const diffToMonday = (day === 0 ? -6 : 1) - day;
-
-  const start = new Date(ref);
-  start.setDate(ref.getDate() + diffToMonday);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
+  const start = getMondayOfWeek(ref);
+  const end = getSundayOfWeek(start);
 
   return { start, end };
 }

@@ -1,4 +1,4 @@
-import { Activity, ScheduledWorkout } from '@/types';
+import { Activity } from '@/types';
 import {
   RecapScope,
   MultiWeekRollupSummary,
@@ -185,8 +185,8 @@ export function computeMultiWeekRollup(
     scope === '4_WEEKS'
       ? `Mesosiklus 1 Bulan (${numWeeks} Minggu)`
       : scope === '2_WEEKS'
-      ? `Blok 2-Minggu (${numWeeks} Minggu)`
-      : `Siklus Mingguan`;
+        ? `Blok 2-Minggu (${numWeeks} Minggu)`
+        : `Siklus Mingguan`;
 
   // Mesocycle phase detection
   let mesocyclePhase = 'Volume Base Building';

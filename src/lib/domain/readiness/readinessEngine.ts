@@ -7,10 +7,8 @@ import {
   AthleteTrainingReadiness,
   ReadinessState,
   AthleteStatus,
-  SafetyValidationResult,
-  ScheduledWorkout,
 } from '@/types';
-import { getAnatomicalRegion } from '@/lib/anatomyUtils';
+import { getAnatomicalRegion } from '@/lib/anatomy';
 
 /**
  * Evaluates the authoritative health context to compute a deterministic training readiness state.
