@@ -119,11 +119,10 @@ export function CalendarCommandBar({
           <button
             type="button"
             onClick={() => onSelectFilter("ALL")}
-            className={`px-2.5 py-1 rounded-md transition-all text-[11px] font-semibold cursor-pointer ${
-              filter === "ALL"
-                ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-            }`}
+            className={`px-2.5 py-1 rounded-md transition-all text-[11px] font-semibold cursor-pointer ${filter === "ALL"
+              ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] border border-[var(--color-border)] shadow-xs"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+              }`}
           >
             Semua
           </button>
@@ -131,11 +130,10 @@ export function CalendarCommandBar({
           <button
             type="button"
             onClick={() => onSelectFilter("CYCLING")}
-            className={`px-2.5 py-1 rounded-md transition-all text-[11px] font-semibold flex items-center gap-1 cursor-pointer ${
-              filter === "CYCLING"
-                ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
-            }`}
+            className={`px-2.5 py-1 rounded-md transition-all text-[11px] font-semibold flex items-center gap-1 cursor-pointer ${filter === "CYCLING"
+              ? "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30 font-bold"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
+              }`}
           >
             <Bike className="w-3 h-3" />
             <span>MTB ({cyclingCount})</span>
@@ -144,11 +142,10 @@ export function CalendarCommandBar({
           <button
             type="button"
             onClick={() => onSelectFilter("RUNNING")}
-            className={`px-2.5 py-1 rounded-md transition-all text-[11px] font-semibold flex items-center gap-1 cursor-pointer ${
-              filter === "RUNNING"
-                ? "bg-[var(--color-running)]/15 text-[var(--color-running)] border border-[var(--color-running)]/30 font-bold"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-running)]"
-            }`}
+            className={`px-2.5 py-1 rounded-md transition-all text-[11px] font-semibold flex items-center gap-1 cursor-pointer ${filter === "RUNNING"
+              ? "bg-[var(--color-running)]/15 text-[var(--color-running)] border border-[var(--color-running)]/30 font-bold"
+              : "text-[var(--color-text-secondary)] hover:text-[var(--color-running)]"
+              }`}
           >
             <Footprints className="w-3 h-3" />
             <span>Lari ({runningCount})</span>
@@ -158,11 +155,10 @@ export function CalendarCommandBar({
         {/* Clinical Clearance Pill & Guidelines Toggle */}
         <div className="flex items-center gap-2">
           {readiness && (
-            <div className={`px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[10px] font-bold border ${
-              isRunningOnHold
-                ? "bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border-[var(--color-alert-amber)]/30"
-                : "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
-            }`}>
+            <div className={`px-2.5 py-1 rounded-md flex items-center gap-1.5 text-[10px] font-bold border ${isRunningOnHold
+              ? "bg-[var(--color-alert-amber)]/10 text-[var(--color-alert-amber)] border-[var(--color-alert-amber)]/30"
+              : "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
+              }`}>
               {isRunningOnHold ? <ShieldAlert className="w-3 h-3" /> : <ShieldCheck className="w-3 h-3" />}
               <span>{isRunningOnHold ? "Lari: HOLD (ATFL)" : "Clear: MTB Zone 2"}</span>
             </div>

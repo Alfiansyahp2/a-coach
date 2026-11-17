@@ -107,45 +107,51 @@ export function PrimaryGoalHeroSection({ primaryGoal }: PrimaryGoalHeroSectionPr
         {/* Right: Comparative Breakdown & Progress Meters */}
         <div className="lg:col-span-7 space-y-3.5">
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-[var(--color-text-secondary)]">Rekor Sekali Aktivitas vs Target:</span>
-              <span className="font-tabular font-bold text-[var(--color-cycling)]">
-                {currentNum.toFixed(1)} / {targetNum.toFixed(1)} {unit}
-              </span>
-            </div>
+              <div className="flex items-baseline justify-between font-mono">
+                <span className="text-[11px] text-[var(--color-text-secondary)]">Rekor Sekali Aktivitas vs Target:</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-base font-black font-tabular text-[var(--color-text-primary)]">
+                    {currentNum.toFixed(1)}
+                  </span>
+                  <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase">{unit}</span>
+                  <span className="text-[11px] text-[var(--color-text-muted)] font-tabular">
+                    / {targetNum.toFixed(1)} {unit}
+                  </span>
+                </div>
+              </div>
 
-            <div className="w-full h-2 rounded-full bg-[var(--color-surface-muted)] overflow-hidden border border-[var(--color-border)]">
-              <div
-                className="h-full rounded-full bg-[var(--color-cycling)] transition-all duration-700 ease-out"
-                style={{ width: `${pct}%` }}
-              />
+                <div className="w-full h-2 rounded-full bg-[var(--color-surface-muted)] overflow-hidden border border-[var(--color-border)] p-0.5">
+                  <div
+                    className="h-full rounded-full bg-[var(--color-cycling)] transition-all duration-700 ease-out"
+                    style={{ width: `${Math.max(2, pct)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                <div className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                  <span className="text-[9.5px] uppercase text-[var(--color-text-muted)] block">Tipe Target</span>
+                  <span className="font-bold text-[var(--color-text-primary)] text-[11px] block mt-0.5">Single Peak Effort</span>
+                  <span className="text-[9px] text-[var(--color-text-muted)]">Bukan akumulasi</span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                  <span className="text-[9.5px] uppercase text-[var(--color-text-muted)] block">Jadwal Uji</span>
+                  <span className="font-bold text-[var(--color-cycling)] text-[11px] block mt-0.5">Minggu ke-12</span>
+                  <span className="text-[9px] text-[var(--color-text-muted)]">Puncak periodisasi</span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
+                  <span className="text-[9.5px] uppercase text-[var(--color-text-muted)] block">Proteksi Sendi</span>
+                  <span className="font-bold text-[var(--color-endurance)] text-[11px] block mt-0.5 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>Restorasi Puasa</span>
+                  </span>
+                  <span className="text-[9px] text-[var(--color-text-muted)]">Senin &amp; Kamis 0 km</span>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-            <div className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9.5px] uppercase text-[var(--color-text-muted)] block">Tipe Target</span>
-              <span className="font-bold text-[var(--color-text-primary)] text-[11px] block mt-0.5">Single Peak Effort</span>
-              <span className="text-[9px] text-[var(--color-text-muted)]">Bukan akumulasi</span>
-            </div>
-
-            <div className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9.5px] uppercase text-[var(--color-text-muted)] block">Jadwal Uji</span>
-              <span className="font-bold text-[var(--color-cycling)] text-[11px] block mt-0.5">Minggu ke-12</span>
-              <span className="text-[9px] text-[var(--color-text-muted)]">Puncak periodisasi</span>
-            </div>
-
-            <div className="p-2.5 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)]">
-              <span className="text-[9.5px] uppercase text-[var(--color-text-muted)] block">Proteksi Sendi</span>
-              <span className="font-bold text-[var(--color-endurance)] text-[11px] block mt-0.5 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                <span>Restorasi Puasa</span>
-              </span>
-              <span className="text-[9px] text-[var(--color-text-muted)]">Senin &amp; Kamis 0 km</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+        </section>
+        );
 }

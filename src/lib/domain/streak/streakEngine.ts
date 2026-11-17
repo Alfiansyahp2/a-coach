@@ -227,11 +227,10 @@ export function calculateWeeklyStreak(
 
   if (isFlameBurning) {
     flameStatusTitle = `${heatTier.name} Menyala! (${heatTier.temperatureText}) 🔥`;
-    flameStatusDescription = `Rentetan ${currentStreakWeeks} minggu aktif. ${
-      heatTier.weeksToNextTier
-        ? `${heatTier.weeksToNextTier} minggu lagi menuju tahap ${heatTier.stage + 1}.`
-        : 'Tahap puncak tercapai!'
-    }`;
+    flameStatusDescription = `Rentetan ${currentStreakWeeks} minggu aktif. ${heatTier.weeksToNextTier
+      ? `${heatTier.weeksToNextTier} minggu lagi menuju tahap ${heatTier.stage + 1}.`
+      : 'Tahap puncak tercapai!'
+      }`;
   } else if (isFlameAtRisk) {
     flameStatusTitle = 'Api Mode Siaga ⏳';
     flameStatusDescription = `Sisa ${daysRemainingThisWeek} hari untuk latihan minggu ini agar ${heatTier.name} tidak padam!`;

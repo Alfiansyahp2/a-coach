@@ -124,10 +124,9 @@ export function WeeklyRecapHeroCards({
             <span>Fase &amp; Kesiapan</span>
           </span>
           <span
-            className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${
-              isDeload
-                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                : "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)]"
+            className={`text-[9px] px-1.5 py-0.2 rounded font-bold ${isDeload
+                  ? "bg-[var(--color-cycling)]/20 text-[var(--color-cycling)] border border-[var(--color-cycling)]/40"
+                  : "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)]"
             }`}
           >
             {isDeload ? "DELOAD" : "PROGRESIF"}

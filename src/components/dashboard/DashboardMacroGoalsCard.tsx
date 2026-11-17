@@ -48,8 +48,8 @@ export function DashboardMacroGoalsCard({ goals }: DashboardMacroGoalsCardProps)
   );
   const is100kAchieved = Boolean(
     centuryGoal &&
-      (centuryGoal.is_achieved ||
-        Number(centuryGoal.current_value) >= Number(centuryGoal.target_value))
+    (centuryGoal.is_achieved ||
+      Number(centuryGoal.current_value) >= Number(centuryGoal.target_value))
   );
 
   const firstAchieved = goals.find(
