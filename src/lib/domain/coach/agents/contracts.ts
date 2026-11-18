@@ -36,6 +36,11 @@ export interface ISportCoachAgent<TData = Record<string, unknown>> {
   readonly metadata: SportCoachMetadata;
 
   /**
+   * 0. Determines whether this agent can handle a specific sport code or alias.
+   */
+  canHandle(sportCode: string): boolean;
+
+  /**
    * 1. Validates and parses incoming raw sensor or manual telemetry.
    */
   validateTelemetry(payload: SportTelemetryPayload<TData>): { isValid: boolean; error?: string };

@@ -31,17 +31,26 @@ export class SportCoordinatorRouter {
   }
 
   /**
-   * Retrieves a registered agent by sport code.
+   * Retrieves a registered agent by sport code or supported alias.
    */
   public getAgent(sportCode: string): ISportCoachAgent | undefined {
-    return this.agents.get(sportCode.toUpperCase());
+    const upper = (sportCode || '').toUpperCase();
+    if (this.agents.has(upper)) {
+      return this.agents.get(upper);
+    }
+    for (const agent of this.agents.values()) {
+      if (agent.canHandle(sportCode)) {
+        return agent;
+      }
+    }
+    return undefined;
   }
 
   /**
-   * Checks whether an agent is registered for a given sport code.
+   * Checks whether an agent is registered for a given sport code or alias.
    */
   public hasAgent(sportCode: string): boolean {
-    return this.agents.has(sportCode.toUpperCase());
+    return this.getAgent(sportCode) !== undefined;
   }
 
   /**
