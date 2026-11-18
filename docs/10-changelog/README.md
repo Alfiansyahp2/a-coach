@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 82 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 83 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -109,6 +109,7 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 - **Kesehatan ([`feat/health/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/health/))**: Kesiapan klinis, safety gate, dan indikator beban.
 - **Profil ([`feat/profile/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/profile/))**: Biometrik atlet, zona detak jantung Karvonen, dan data riwayat medis.
 - **Integrasi Strava & Ingesti Multi-Sport ([`feat/strava-activity-ingestion/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/))**:
+  - [`2026-11-18_12-49-00_feat-strength-power-and-hypertrophy-multi-sport-agents-phase-3.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_12-49-00_feat-strength-power-and-hypertrophy-multi-sport-agents-phase-3.md) — Implementasi Phase 3: Klaster Kekuatan & Daya Maksimal (Powerlifting, Weightlifting, Calisthenics, Strongman, Bodybuilding), 1RM Brzycki, dan Sheiko INOL limiter.
   - [`2026-11-18_11-45-00_feat-decoupled-endurance-flagship-agents-and-multi-sport-ingestion.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_11-45-00_feat-decoupled-endurance-flagship-agents-and-multi-sport-ingestion.md) — Implementasi Phase 2: Decoupled endurance flagship agents (Running, Road Cycling, MTB XC), alias matching Strava, dan endpoint multi-sport API.
   - [`2026-11-01_21-15-00_feat-strava-activity-ingestion.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava/activity-ingestion/2026-11-01_21-15-00_feat-strava-activity-ingestion.md) — Pipeline webhook ingesti aktivitas Strava & parsing stream.
 - **Autentikasi Strava ([`feat/strava/oauth-handshake/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava/oauth-handshake/))**: Handshake autentikasi OAuth 2.0 dan enkripsi token AES-256.

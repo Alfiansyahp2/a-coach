@@ -19,8 +19,9 @@
     "test:multi-week-recap": "npx tsx scripts/tests/test_multi_week_recap_system.js",
     "test:coordinator": "npx tsx scripts/tests/test_multi_sport_coordinator.js",
     "test:endurance": "npx tsx scripts/tests/test_endurance_flagship_agents.js",
+    "test:strength": "npx tsx scripts/tests/test_strength_power_agents.js",
     "test:python": ".\\python_engine\\.venv\\Scripts\\python.exe -m pytest python_engine/tests",
-    "test:all": "npm run test:health && npm run test:coach && npm run test:streak && npm run test:bola && npm run test:multi-week-recap && npm run test:coordinator && npm run test:endurance && npm run test:python",
+    "test:all": "npm run test:health && npm run test:coach && npm run test:streak && npm run test:bola && npm run test:multi-week-recap && npm run test:coordinator && npm run test:endurance && npm run test:strength && npm run test:python",
     "db:audit": "node scripts/maintenance/audit_database_schema.cjs"
   },
   "dependencies": {
