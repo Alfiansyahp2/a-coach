@@ -446,3 +446,22 @@ CREATE TABLE IF NOT EXISTS athlete_daily_wellness (
 );
 
 CREATE INDEX IF NOT EXISTS idx_wellness_user_date ON athlete_daily_wellness(user_id, logged_date DESC);
+
+-- =====================================================================
+-- 18. MULTI-SPORT ACTIVITY TELEMETRY & DECOUPLED AI PRESCRIPTIONS
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS sport_activity_telemetry (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sport_code VARCHAR(50) NOT NULL,
+    session_timestamp TIMESTAMPTZ NOT NULL,
+    duration_minutes INTEGER NOT NULL,
+    session_rpe NUMERIC(3, 1) NOT NULL,
+    telemetry_data JSONB NOT NULL DEFAULT '{}'::jsonb,
+    agent_prescription JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_sport_telemetry_user_code ON sport_activity_telemetry(user_id, sport_code, session_timestamp DESC);
+

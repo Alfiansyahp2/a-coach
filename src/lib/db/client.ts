@@ -22,6 +22,7 @@ import {
   AthleteAvailability,
   AthleteEquipment,
   AthleteDailyWellness,
+  SportActivityTelemetry,
 } from '@/types';
 
 // Prevent node-postgres from converting DATE (OID 1082) into JS Date with local timezone shift
@@ -106,6 +107,7 @@ export interface LocalStoreSchema {
   athlete_availability?: AthleteAvailability[];
   athlete_equipment?: AthleteEquipment[];
   athlete_daily_wellness?: AthleteDailyWellness[];
+  sport_activity_telemetry?: SportActivityTelemetry[];
 }
 
 import { createInitialLocalStore } from './defaultStoreSeed';
@@ -144,6 +146,7 @@ export function ensureLocalStore(): LocalStoreSchema {
       athlete_medical_assessments: [],
       athlete_training_readiness: [],
       health_audit_trail: [],
+      sport_activity_telemetry: [],
     };
   }
 }

@@ -1,6 +1,6 @@
 # Master Blueprint & Ekosistem Arsitektur AI Multi-Cabor Olahraga
 
-> **Pusat Spesifikasi Arsitektur, Fisiologi Latihan, Pencegahan Cedera Klinis, dan Tata Kelola AI Multi-Agent untuk 33+ Cabang Olahraga Dunia**
+> **Pusat Spesifikasi Arsitektur, Fisiologi Latihan, Pencegahan Cedera Klinis, Tata Kelola AI Multi-Agent, dan Roadmap Implementasi untuk 33+ Cabang Olahraga Dunia**
 
 - **Status**: **CONFIRMED & AUDITED**
 - **Klasifikasi**: Sports Science, Exercise Physiology, Biomechanics & AI Architecture
@@ -10,7 +10,7 @@
 
 ## 🏛️ Peta Dokumen Ekosistem AI (`docs/11-ai/`)
 
-Ekosistem dokumentasi ini disusun untuk menjawab secara komprehensif audit kemampuan sistem AI Coaching saat ini, memetakan 33 cabang olahraga dunia, merancang arsitektur multi-agent mandiri tanpa kompromi monolitik, menyempurnakannya dengan jurnal sains resmi, dan menyaring rekaan AI agar murni berpedoman pada ilmu pengetahuan:
+Ekosistem dokumentasi ini disusun untuk menjawab secara komprehensif audit kemampuan sistem AI Coaching saat ini, memetakan 33 cabang olahraga dunia, merancang arsitektur multi-agent mandiri tanpa kompromi monolitik, menyempurnakannya dengan jurnal sains resmi, menyaring rekaan AI agar murni berpedoman pada ilmu pengetahuan, serta memecah implementasinya ke dalam roadmap bertahap yang terstruktur:
 
 ```
 docs/11-ai/
@@ -20,7 +20,9 @@ docs/11-ai/
 ├── 03-ARSITEKTUR_DECOUPLED_MULTI_AGENT_AI_COACH.md       <- Spesifikasi teknis arsitektur decoupled agent mandiri per cabor
 ├── 04-ANALISIS_KEKURANGAN_DAN_KELEBIHAN.md               <- Evaluasi trade-off arsitektur terpisah vs monolitik & solusi hybrid
 ├── 05-PENYEMPURNAAN_SAINS_MEDIS_GIZI_DAN_JURNAL.md       <- Landasan ilmiah peer-reviewed (ACSM, NSCA, BJSM, ISSN, FIFA 11+)
-└── 06-AUDIT_VALIDASI_ILMIAH_DAN_FILTER_ANTI_HALUSINASI.md <- Filter epistemologis anti-AI-slop & Grounded Indicator Protocol
+├── 06-AUDIT_VALIDASI_ILMIAH_DAN_FILTER_ANTI_HALUSINASI.md <- Filter epistemologis anti-AI-slop & Grounded Indicator Protocol
+├── 07-ROADMAP_IMPLEMENTASI_BERTAHAP.md                   <- Roadmap implementasi 8 fase terperinci (Gantt chart & exit criteria)
+└── 08-SPESIFIKASI_ARSITEKTUR_CLEAN_VERTICAL_SLICE_CABOR.md <- Spesifikasi arsitektur Clean Vertical Slice mandiri per cabor
 ```
 
 ---
@@ -60,11 +62,18 @@ docs/11-ai/
 - Membedah perbedaan nyata antara **Jawaban Rekaan Generic AI (AI Slop)** vs **Jawaban Berpedoman Sains Olahraga Murni**.
 - Menegakkan **Grounded Indicator Protocol**: Menolak klaim kalori palsu tanpa sensor gas exchange, menandai `UNKNOWN` untuk metrik tanpa uji lab terkalibrasi, dan menolak memberikan diagnosis medis fiktif.
 
----
+### 7. [Roadmap Implementasi Bertahap (8 Fase)](./07-ROADMAP_IMPLEMENTASI_BERTAHAP.md)
+- Menjabarkan peta jalan rekayasa perangkat lunak bertahap untuk merealisasikan arsitektur ini secara aman tanpa regresi (*Zero-Regression Policy*):
+  - **Fase 1**: Fondasi Multi-Agent Infrastructure, Interface `ISportCoachAgent`, dan Shared Science Kernels.
+  - **Fase 2**: Decoupled Endurance Flagship (Refaktor Lari Maraton, Balap Sepeda Jalan Raya, dan MTB XC).
+  - **Fase 3**: Klaster Kekuatan & Daya Maksimal (Powerlifting SBD, Angkat Besi Olimpiade, Kalistenik, Strongman, Binaraga).
+  - **Fase 4**: Klaster Olahraga Beregu & Lapangan Intermiten (Sepak Bola, Bola Basket, Bola Voli, Futsal, Rugbi, Hoki Lapangan).
+  - **Fase 5**: Klaster Bela Diri & Kontak Fisik (Tinju, MMA, BJJ, Pencak Silat, Judo, Muay Thai).
+  - **Fase 6**: Klaster Raket, Presisi, Akuatik & Ekstrem (Renang, Dayung, Triathlon, Bulu Tangkis, Tenis, Panahan, CrossFit, Panjat Tebing, dll. — 13 Cabor).
+  - **Fase 7**: Global Systemic Fatigue Arbiter untuk Atlet Hibrida (Cross-Training Resolver).
+  - **Fase 8**: Antarmuka Pengguna (UI Ingress, Telemetry Widgets, dan 100+ Automated Tests).
 
-## 🚀 Langkah Implementasi Bertahap (Next Steps Roadmap)
-
-1. **Fase 1 (Fondasi Core Agent)**: Mengimplementasikan basis interface `ISportCoachAgent` di `src/lib/domain/coach/agents/`.
-2. **Fase 2 (Klaster Prioritas Atlet)**: Mengaktifkan agen `DistanceRunningCoach` dan `MtbCyclingCoach` dari logika yang sudah ada di repositori ke dalam pola decoupled agent.
-3. **Fase 3 (Ekspansi Klaster Kekuatan & Beregu)**: Mengimplementasikan agen `PowerliftingCoach` (VBT/Tonase) dan `FootballCoach` (ACWR/GPS).
-4. **Fase 4 (Full 33-Cabor Rollout)**: Meluncurkan seluruh 33 agen cabor ke dalam *Multi-Sport Coordinator Router*.
+### 8. [Spesifikasi Arsitektur Clean: Vertical Slice per Cabor](./08-SPESIFIKASI_ARSITEKTUR_CLEAN_VERTICAL_SLICE_CABOR.md)
+- **Desain Folder Mandiri**: Menetapkan **Opsi 3 (Vertical Slice Architecture by Sport)** sebagai standar tata kelola kode sumber untuk 33+ cabor.
+- **Pemisahan Tegas & Anti-Monolith**: Menjamin setiap cabor memiliki direktori uniknya sendiri (`sports/<cabor>/`), melarang impor silang antar-cabor, dan mengisolasi hukum fisika/fisiologi ke `kernels/` (Pure Scientific Math Engines).
+- **Protokol Nol Regresi**: Menjaga keutuhan 184 uji otomatis dan API routes melalui *re-export facade* di `agents/index.ts`.
