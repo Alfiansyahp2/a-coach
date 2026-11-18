@@ -8,3 +8,4 @@ export * from './kernels/fosterSessionRpeKernel';
 export * from './kernels/gabbettAcwrKernel';
 export * from './kernels/issurinBlockPeriodizationKernel';
 export * from './kernels/strengthCalculatorsKernel';
+export * from './kernels/intermittentSportsKernel';
