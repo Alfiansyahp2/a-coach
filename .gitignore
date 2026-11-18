@@ -39,3 +39,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# personal user data, private seeds & imported telemetry
+/scripts/*personal*
+/scripts/personal/
+/data/from_strava/
+/data/from_strava/*
+/data/imported_activities.json
+/data/personal/
+/data/*.png
+/data/*.jpg
+/data/*.jpeg
+
+/.data/

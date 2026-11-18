@@ -1,303 +1,262 @@
 import React, { Suspense } from "react";
+import { connection } from "next/server";
 import {
   getUser,
   getActivities,
   getScheduledWorkouts,
+  getActiveTrainingPlan,
   getFitnessGoals,
+  getPersonalRecords,
   getDatabaseStatus,
+  getAuthoritativeHealthContext,
   DEFAULT_USER_ID,
 } from "@/lib/db";
-import { computeDashboardSummary } from "@/lib/analytics";
-import { generateTrainingInsights } from "@/lib/ai-coach";
-import {
-  formatDistance,
-  formatDuration,
-  formatPaceSeconds,
-  speedMpsToPace,
-  formatDate,
-} from "@/lib/formatters";
-import { StravaConnectCard } from "@/components/StravaConnectCard";
-import {
-  Activity as ActivityIcon,
-  Calendar,
-  Database,
-  Gauge,
-  RefreshCw,
-  ShieldCheck,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
+import { computeDashboardSummary } from "@/lib/shared/analytics";
+import { generateTrainingInsights } from "@/lib/domain/coach/aiCoachEngine";
+import { computePersonalRecords } from "@/lib/domain/records/personalRecordsEngine";
+import { calculateWeeklyStreak } from "@/lib/domain/streak/streakEngine";
+import { formatDuration, formatPaceSeconds } from "@/lib/formatters";
+import { AppShell } from "@/components/layout/AppShell";
+import { StravaConnectCard } from "@/components/strava/StravaConnectCard";
+import { ActivityFeed } from "@/components/activity/ActivityFeed";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { VolumeProgressionChart } from "@/components/charts/VolumeProgressionChart";
+import { AthleteHealthDeck } from "@/components/health/AthleteHealthDeck";
+import { DashboardIntegrityStrip } from "@/components/dashboard/DashboardIntegrityStrip";
+import { DashboardTacticalDeck } from "@/components/dashboard/DashboardTacticalDeck";
+import { DashboardAiInsightsDeck } from "@/components/dashboard/DashboardAiInsightsDeck";
+import { computeWeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapEngine";
+import { Gauge, RefreshCw, Zap } from "lucide-react";
+
+export const metadata = {
+  title: "ENDURANCE PERFORMANCE LAB | Athletic Telemetry Dashboard",
+  description:
+    "Precision endurance sports science instrument panel & athletic coaching telemetry platform",
+};
 
 async function DashboardTelemetry() {
-  const [user, activities, workouts, goals, dbStatus] = await Promise.all([
+  await connection();
+  const [
+    user,
+    activities,
+    workouts,
+    goals,
+    prs,
+    dbStatus,
+    healthContext,
+    activePlan,
+  ] = await Promise.all([
     getUser(DEFAULT_USER_ID),
-    getActivities(DEFAULT_USER_ID, { limit: 5 }),
+    getActivities(DEFAULT_USER_ID),
     getScheduledWorkouts(DEFAULT_USER_ID),
     getFitnessGoals(DEFAULT_USER_ID),
+    getPersonalRecords(DEFAULT_USER_ID),
     getDatabaseStatus(),
+    getAuthoritativeHealthContext(DEFAULT_USER_ID),
+    getActiveTrainingPlan(DEFAULT_USER_ID),
   ]);
 
+  const computedPrs = computePersonalRecords(activities, DEFAULT_USER_ID);
+  const displayPrs = (() => {
+    if (!prs || prs.length === 0) return computedPrs;
+    const dbEnhanced = prs.map((p: any) => {
+      const m = computedPrs.find(
+        (c) =>
+          c.category.toLowerCase().includes(p.category.toLowerCase()) ||
+          p.category.toLowerCase().includes(c.category.toLowerCase())
+      );
+      if (!m) return p;
+      return {
+        ...p,
+        record_value: m.record_value,
+        record_display: m.record_display,
+        achieved_date: m.achieved_date,
+        activity_id: m.activity_id,
+        activity_name: m.activity_name || p.activity_name,
+        subtext: m.subtext || p.subtext,
+      };
+    });
+    const newComputed = computedPrs.filter(
+      (c) =>
+        !dbEnhanced.some(
+          (p: any) =>
+            c.category.toLowerCase().includes(p.category.toLowerCase()) ||
+            p.category.toLowerCase().includes(c.category.toLowerCase())
+        )
+    );
+    return [...dbEnhanced, ...newComputed];
+  })();
+
+  const streak = calculateWeeklyStreak(activities, workouts);
   const summary = computeDashboardSummary(activities, workouts);
-  const insights = generateTrainingInsights(activities, workouts, goals);
+  const insights = generateTrainingInsights(
+    activities,
+    workouts,
+    goals,
+    healthContext
+  );
+
+  const currentVolumeKm = summary.totalDistanceThisWeek / 1000;
+  const targetWeek1Km = 18.0;
+
+  const weeklyRecap = computeWeeklyActivityAndInjuryRecap({
+    activities,
+    injuries: healthContext?.injuries || [],
+    painLogs: healthContext?.recentPainLogs || [],
+    trainingResponses: healthContext?.recentResponses || [],
+    scheduledWorkouts: workouts,
+  });
 
   return (
-    <div className="space-y-8">
-      {/* Precision Navigation Top Telemetry Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#1E2330]">
-        <div className="flex items-center gap-2 sm:gap-4 text-xs font-mono">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#12151D] border border-[#232838] text-[#9BA3AF]">
-            <Database className="w-3.5 h-3.5 text-[#00F0FF]" />
-            <span>Store: {dbStatus.type}</span>
-            <span className={`font-semibold ${dbStatus.connected ? "text-[#10b981]" : "text-[#f43f5e]"}`}>
-              ({dbStatus.connected ? "Online" : "Offline"})
-            </span>
-          </div>
+    <AppShell
+      user={user}
+      dbStatus={dbStatus}
+      healthContext={healthContext}
+      streakWeeks={streak.currentStreakWeeks}
+      activitiesCount={activities.length}
+    >
+      {/* 1. Precision Navigation & Telemetry Integrity Strip */}
+      <DashboardIntegrityStrip
+        dbStatus={dbStatus}
+        user={user}
+        healthContext={healthContext}
+        primaryGoal={goals.find((g) => g.is_primary) || goals[0]}
+        activePlan={activePlan}
+      />
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#12151D] border border-[#232838] text-[#9BA3AF]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#10b981]" />
-            <span>Token Security: AES-256-GCM</span>
-          </div>
-        </div>
+      {/* 2. Athlete Health Profile & Joint Safety Gate */}
+      <section id="health-gate">
+        <AthleteHealthDeck
+          healthContext={healthContext}
+          recentActivities={activities}
+        />
+      </section>
 
-        {user && (
-          <div className="flex items-center gap-2">
-            {user.avatar_url && (
-              <img
-                src={user.avatar_url}
-                alt={user.name}
-                className="w-6 h-6 rounded-full border border-[#232838] object-cover"
-              />
-            )}
-            <span className="text-xs font-medium text-white">
-              {user.name}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Section 1: Strava OAuth 2.0 Handshake Hub */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-[#FC4C02]" />
-            OAuth 2.0 Integration Gateway
+      {/* 3. Hero Telemetry & Volume Progression Deck */}
+      <section className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[var(--color-text-secondary)] flex items-center gap-1.5 font-bold">
+            <Gauge className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
+            <span>Weekly Workload Telemetry &amp; Progression</span>
           </h2>
-          <span className="text-[11px] font-mono text-[#5A6272]">
-            Branch: feat/strava-oauth-handshake
+          <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
+            Siklus Mingguan (Senin – Minggu)
           </span>
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+          {/* Left: 4 Precision Metric Blocks */}
+          <div className="lg:col-span-7 grid grid-cols-2 gap-3">
+            <MetricCard
+              label="Total Volume Minggu Ini"
+              value={currentVolumeKm.toFixed(1)}
+              unit="km"
+              delta={{
+                value:
+                  currentVolumeKm > 0
+                    ? `${summary.weeklyDistanceDeltaPct >= 0 ? "+" : ""}${summary.weeklyDistanceDeltaPct}%`
+                    : "Minggu 1",
+                isPositive: currentVolumeKm > 0 ? summary.weeklyDistanceDeltaPct >= 0 : true,
+                note: currentVolumeKm > 0 ? "vs minggu sebelumnya" : "Siklus baru aktif",
+              }}
+              subtext={
+                currentVolumeKm === 0
+                  ? "🎯 Target Minggu 1: 18.0 km (MTB Zone 2)"
+                  : undefined
+              }
+              targetProgress={{
+                current: currentVolumeKm,
+                target: targetWeek1Km,
+              }}
+              accentColor="endurance"
+            />
+
+            <MetricCard
+              label="Durasi Gerak Aktif"
+              value={formatDuration(summary.totalDurationThisWeek)}
+              subtext={
+                summary.completedActivitiesCount > 0
+                  ? `${summary.completedActivitiesCount} sesi dicatat minggu ini`
+                  : "Target: 45–60 mnt / sesi aerobik"
+              }
+              accentColor="cycling"
+            />
+
+            <MetricCard
+              label="Laju Lari Rata-Rata"
+              value={
+                summary.averagePaceSecondsPerKm > 0
+                  ? formatPaceSeconds(summary.averagePaceSecondsPerKm)
+                  : "--:-- /km"
+              }
+              subtext="Status lari: Ditunda (On Hold sendi)"
+              accentColor="running"
+            />
+
+            <MetricCard
+              label="Tingkat Kepatuhan Jadwal"
+              value={`${summary.consistencyScore}%`}
+              subtext="Kepatuhan preskripsi rencana latihan"
+              accentColor="endurance"
+            />
+          </div>
+
+          {/* Right: Bespoke Native SVG Volume Progression Chart */}
+          <div className="lg:col-span-5">
+            <VolumeProgressionChart
+              activities={activities}
+              initialTimeframe="all"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Operations Deck: Ingested Stream (Left) + Tactical Command Deck (Right) */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div className="lg:col-span-7">
+          <ActivityFeed activities={activities} />
+        </div>
+
+        <div className="lg:col-span-5">
+          <DashboardTacticalDeck
+            workouts={workouts}
+            activePlan={activePlan}
+            goals={goals}
+            prs={displayPrs}
+            activities={activities}
+            initialRecap={weeklyRecap}
+          />
+        </div>
+      </section>
+
+      {/* 5. Strava OAuth Handshake Gateway */}
+      <section id="strava-gateway">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-[11px] uppercase font-mono tracking-wider text-[var(--color-text-secondary)] flex items-center gap-1.5 font-bold">
+            <Zap className="w-3.5 h-3.5 text-[var(--color-strava)]" />
+            <span>OAuth 2.0 Integration Gateway</span>
+          </h2>
+          <span className="text-[10px] font-mono text-[var(--color-text-muted)]">
+            Telemetry Bridge • REST API v3
+          </span>
+        </div>
         <StravaConnectCard />
       </section>
 
-      {/* Section 2: Weekly Telemetry At A Glance */}
-      <section className="space-y-3">
-        <h2 className="text-xs uppercase font-mono tracking-wider text-[#9BA3AF] flex items-center gap-1.5">
-          <Gauge className="w-3.5 h-3.5 text-[#00F0FF]" />
-          Current Week Telemetry (Mon – Sun)
-        </h2>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {/* Distance */}
-          <div className="bg-[#12151D] border border-[#232838] rounded-xl p-4">
-            <span className="text-[11px] uppercase tracking-wider text-[#9BA3AF] font-medium block mb-1">
-              Total Distance
-            </span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-bold font-tabular text-white tracking-tight">
-                {(summary.totalDistanceThisWeek / 1000).toFixed(1)}
-              </span>
-              <span className="text-xs text-[#9BA3AF] font-mono">km</span>
-            </div>
-            <span className="text-[11px] font-mono text-[#10b981] mt-1 inline-block">
-              {summary.weeklyDistanceDeltaPct >= 0 ? `+${summary.weeklyDistanceDeltaPct}%` : `${summary.weeklyDistanceDeltaPct}%`} vs prev week
-            </span>
-          </div>
-
-          {/* Active Duration */}
-          <div className="bg-[#12151D] border border-[#232838] rounded-xl p-4">
-            <span className="text-[11px] uppercase tracking-wider text-[#9BA3AF] font-medium block mb-1">
-              Active Duration
-            </span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-bold font-tabular text-white tracking-tight">
-                {formatDuration(summary.totalDurationThisWeek)}
-              </span>
-            </div>
-            <span className="text-[11px] font-mono text-[#9BA3AF] mt-1 inline-block">
-              {summary.completedActivitiesCount} sessions completed
-            </span>
-          </div>
-
-          {/* Running Pace */}
-          <div className="bg-[#12151D] border border-[#232838] rounded-xl p-4">
-            <span className="text-[11px] uppercase tracking-wider text-[#9BA3AF] font-medium block mb-1">
-              Avg Running Pace
-            </span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-bold font-tabular text-[#D4FF00] tracking-tight">
-                {summary.averagePaceSecondsPerKm > 0 ? formatPaceSeconds(summary.averagePaceSecondsPerKm) : "--:-- /km"}
-              </span>
-            </div>
-            <span className="text-[11px] font-mono text-[#9BA3AF] mt-1 inline-block">
-              Weighted aerobic pace
-            </span>
-          </div>
-
-          {/* Plan Adherence */}
-          <div className="bg-[#12151D] border border-[#232838] rounded-xl p-4">
-            <span className="text-[11px] uppercase tracking-wider text-[#9BA3AF] font-medium block mb-1">
-              Plan Adherence
-            </span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl sm:text-3xl font-bold font-tabular text-[#00F0FF] tracking-tight">
-                {summary.consistencyScore}%
-              </span>
-            </div>
-            <span className="text-[11px] font-mono text-[#9BA3AF] mt-1 inline-block">
-              Prescribed compliance
-            </span>
-          </div>
-        </div>
+      {/* 6. Grounded Coach Analytical Dossier */}
+      <section id="coach-insights">
+        <DashboardAiInsightsDeck insights={insights} />
       </section>
-
-      {/* Section 3: Activities & Workouts */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Ingested Activities */}
-        <div className="bg-[#12151D] border border-[#232838] rounded-xl p-5 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#232838]">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <ActivityIcon className="w-4 h-4 text-[#FC4C02]" />
-              Recent Ingested Activities
-            </h3>
-            <span className="text-xs font-mono text-[#9BA3AF]">
-              {activities.length} Recorded
-            </span>
-          </div>
-
-          {activities.length === 0 ? (
-            <div className="py-8 text-center text-xs text-[#5A6272] font-mono">
-              No activities synced yet. Complete the Strava handshake above to pull activities.
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {activities.map((act) => (
-                <div
-                  key={act.id}
-                  className="p-3 rounded-lg bg-[#161922] border border-[#232838] hover:border-[#384158] transition-colors flex items-center justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] uppercase font-mono px-1.5 py-0.5 rounded font-semibold ${act.sport_type.toLowerCase().includes('run')
-                          ? 'bg-[#D4FF00]/10 text-[#D4FF00]'
-                          : 'bg-[#00F0FF]/10 text-[#00F0FF]'
-                        }`}>
-                        {act.sport_type}
-                      </span>
-                      <h4 className="text-xs font-medium text-white truncate max-w-[200px] sm:max-w-xs">
-                        {act.name}
-                      </h4>
-                    </div>
-                    <p className="text-[11px] text-[#9BA3AF] font-mono">
-                      {formatDate(act.start_date)}
-                    </p>
-                  </div>
-
-                  <div className="text-right font-mono">
-                    <div className="text-xs font-bold font-tabular text-white">
-                      {formatDistance(act.distance_meters)}
-                    </div>
-                    <div className="text-[11px] text-[#9BA3AF] font-tabular">
-                      {speedMpsToPace(act.average_speed_mps)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Upcoming Scheduled Workouts */}
-        <div className="bg-[#12151D] border border-[#232838] rounded-xl p-5 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#232838]">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#00F0FF]" />
-              Scheduled Training Calendar
-            </h3>
-            <span className="text-xs font-mono text-[#9BA3AF]">
-              {workouts.length} Workouts
-            </span>
-          </div>
-
-          {workouts.length === 0 ? (
-            <div className="py-8 text-center text-xs text-[#5A6272] font-mono">
-              No scheduled workouts found.
-            </div>
-          ) : (
-            <div className="space-y-2.5">
-              {workouts.slice(0, 4).map((wo) => (
-                <div
-                  key={wo.id}
-                  className="p-3 rounded-lg bg-[#161922] border border-[#232838] flex items-center justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-[#1A1E28] text-[#9BA3AF] border border-[#2B3245]">
-                        {wo.workout_category}
-                      </span>
-                      <span className={`text-[10px] font-mono uppercase font-semibold ${wo.status === 'COMPLETED' ? 'text-[#10b981]' : 'text-[#FF9500]'
-                        }`}>
-                        {wo.status}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[#9BA3AF] font-mono">
-                      {formatDate(wo.scheduled_date)} • {wo.target_intensity || 'Standard'}
-                    </p>
-                  </div>
-
-                  <div className="text-right font-mono">
-                    <div className="text-xs font-bold font-tabular text-white">
-                      {wo.target_distance_meters ? formatDistance(wo.target_distance_meters) : "-- km"}
-                    </div>
-                    <div className="text-[11px] text-[#9BA3AF] font-tabular">
-                      {wo.target_pace_seconds_per_km ? formatPaceSeconds(wo.target_pace_seconds_per_km) : "--:-- /km"}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Section 4: Grounded AI Coach Insight */}
-      {insights.length > 0 && (
-        <section className="bg-[#12151D] border border-[#232838] rounded-xl p-5 space-y-3">
-          <div className="flex items-center gap-2 text-xs uppercase font-mono tracking-wider text-[#9BA3AF]">
-            <TrendingUp className="w-3.5 h-3.5 text-[#10b981]" />
-            Grounded AI Coach Engine
-          </div>
-
-          <div className="p-4 rounded-lg bg-[#161922] border border-[#232838]">
-            <h4 className="text-sm font-semibold text-white mb-1">
-              {insights[0].title}
-            </h4>
-            <p className="text-xs text-[#9BA3AF] leading-relaxed">
-              {insights[0].description}
-            </p>
-          </div>
-        </section>
-      )}
-    </div>
+    </AppShell>
   );
 }
 
 function TelemetryLoadingSkeleton() {
   return (
-    <div className="py-20 flex flex-col items-center justify-center gap-4 text-[#9BA3AF]">
-      <RefreshCw className="w-6 h-6 animate-spin text-[#FC4C02]" />
-      <span className="text-xs font-mono uppercase tracking-wider">
-        Loading Athletic Telemetry Streams...
+    <div className="min-h-screen bg-[var(--color-canvas)] text-[var(--color-text-muted)] py-24 flex flex-col items-center justify-center gap-3 font-mono">
+      <RefreshCw className="w-5 h-5 animate-spin text-[var(--color-cycling)]" />
+      <span className="text-xs uppercase tracking-wider">
+        Acquiring Precision Athletic Telemetry Streams...
       </span>
     </div>
   );
@@ -305,37 +264,8 @@ function TelemetryLoadingSkeleton() {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#090A0F] text-[#F0F2F5] flex flex-col font-sans selection:bg-[#FC4C02]/30 selection:text-white">
-      {/* Precision Navigation Bar */}
-      <header className="border-b border-[#1E2330] bg-[#0E1118]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-gradient-to-br from-[#FC4C02] to-[#FF9500] flex items-center justify-center font-black text-black text-sm tracking-tighter">
-              AC
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-base tracking-tight text-white">a-coach</span>
-                <span className="text-[10px] font-mono tracking-wider px-1.5 py-0.5 rounded bg-[#161B26] text-[#9BA3AF] border border-[#232A3B]">
-                  PRECISION TELEMETRY
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Dashboard */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-1 w-full">
-        <Suspense fallback={<TelemetryLoadingSkeleton />}>
-          <DashboardTelemetry />
-        </Suspense>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-[#1E2330] py-6 text-center text-xs text-[#5A6272] font-mono">
-        a-coach • Personal Sports Training & Performance Platform • Next.js 16 + PostgreSQL 16
-      </footer>
-    </div>
+    <Suspense fallback={<TelemetryLoadingSkeleton />}>
+      <DashboardTelemetry />
+    </Suspense>
   );
 }

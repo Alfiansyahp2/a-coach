@@ -1,0 +1,190 @@
+import { Pool, types } from 'pg';
+import fs from 'fs';
+import path from 'path';
+import {
+  User,
+  StravaConnection,
+  StravaToken,
+  Activity,
+  TrainingPlan,
+  ScheduledWorkout,
+  WorkoutActivityMatch,
+  FitnessGoal,
+  PersonalRecord,
+  SyncLog,
+  AthleteProfile,
+  AthleteInjury,
+  AthletePainLog,
+  AthleteTrainingResponse,
+  AthleteMedicalAssessment,
+  AthleteTrainingReadiness,
+  HealthAuditTrail,
+  AthleteAvailability,
+  AthleteEquipment,
+  AthleteDailyWellness,
+  SportActivityTelemetry,
+} from '@/types';
+
+// Prevent node-postgres from converting DATE (OID 1082) into JS Date with local timezone shift
+types.setTypeParser(1082, (val: string) => val);
+
+export function formatDateOnly(val: any): string {
+  if (!val) return '';
+  if (val instanceof Date) {
+    const y = val.getFullYear();
+    const m = String(val.getMonth() + 1).padStart(2, '0');
+    const d = String(val.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof val === 'string') {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+    const parsed = new Date(val);
+    if (!isNaN(parsed.getTime())) {
+      const y = parsed.getFullYear();
+      const m = String(parsed.getMonth() + 1).padStart(2, '0');
+      const d = String(parsed.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    return val.split('T')[0];
+  }
+  return String(val);
+}
+
+export const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001';
+
+// Detect whether PostgreSQL is enabled
+// Detect deployment environment vs local development
+const isVercel = Boolean(process.env.VERCEL);
+const isProd = process.env.NODE_ENV === 'production';
+const isCloudDeploy = isVercel || isProd;
+
+// In cloud deployment, only enable PostgreSQL if DATABASE_URL is explicitly set.
+// In local dev, fall back to localhost if available.
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  (isCloudDeploy ? '' : 'postgresql://postgres:admin123@localhost:5432/sport_training');
+let poolInstance: Pool | null = null;
+
+if (databaseUrl && databaseUrl.trim().length > 0) {
+  try {
+    poolInstance = new Pool({
+      connectionString: databaseUrl,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    });
+  } catch (err) {
+    console.warn('Failed to initialize PostgreSQL pool, falling back to local store:', err);
+    poolInstance = null;
+  }
+}
+
+export const pgPool = poolInstance;
+
+// Local File Store for fallback / instant development
+const DATA_DIR = isVercel ? path.join('/tmp', '.data') : path.join(process.cwd(), '.data');
+let memoryStore: LocalStoreSchema | null = null;
+const DATA_FILE = path.join(DATA_DIR, 'store.json');
+
+export interface LocalStoreSchema {
+  users: User[];
+  strava_connections: StravaConnection[];
+  strava_tokens: StravaToken[];
+  activities: Activity[];
+  training_plans?: TrainingPlan[];
+  scheduled_workouts: ScheduledWorkout[];
+  workout_activity_matches: WorkoutActivityMatch[];
+  fitness_goals: FitnessGoal[];
+  personal_records: PersonalRecord[];
+  sync_logs: SyncLog[];
+  athlete_profiles: AthleteProfile[];
+  athlete_injuries: AthleteInjury[];
+  athlete_pain_logs: AthletePainLog[];
+  athlete_training_responses: AthleteTrainingResponse[];
+  athlete_medical_assessments: AthleteMedicalAssessment[];
+  athlete_training_readiness: AthleteTrainingReadiness[];
+  health_audit_trail: HealthAuditTrail[];
+  athlete_availability?: AthleteAvailability[];
+  athlete_equipment?: AthleteEquipment[];
+  athlete_daily_wellness?: AthleteDailyWellness[];
+  sport_activity_telemetry?: SportActivityTelemetry[];
+}
+
+import { createInitialLocalStore } from './defaultStoreSeed';
+
+export function ensureLocalStore(): LocalStoreSchema {
+  if (memoryStore) return memoryStore;
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+
+  if (!fs.existsSync(DATA_FILE)) {
+    const initialStore = createInitialLocalStore(DEFAULT_USER_ID);
+    fs.writeFileSync(DATA_FILE, JSON.stringify(initialStore, null, 2), 'utf8');
+    return initialStore;
+  }
+
+  const content = fs.readFileSync(DATA_FILE, 'utf8');
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    console.error('Error reading local store:', err);
+    return {
+      users: [],
+      strava_connections: [],
+      strava_tokens: [],
+      activities: [],
+      scheduled_workouts: [],
+      workout_activity_matches: [],
+      fitness_goals: [],
+      personal_records: [],
+      sync_logs: [],
+      athlete_profiles: [],
+      athlete_injuries: [],
+      athlete_pain_logs: [],
+      athlete_training_responses: [],
+      athlete_medical_assessments: [],
+      athlete_training_readiness: [],
+      health_audit_trail: [],
+      sport_activity_telemetry: [],
+    };
+  }
+}
+
+export function saveLocalStore(data: LocalStoreSchema) {
+  memoryStore = data;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    // In serverless environments, in-memory store retains state
+  }
+}
+
+
+
+export async function getDatabaseStatus(): Promise<{ type: 'PostgreSQL' | 'Local Store'; connected: boolean; info: string }> {
+  if (pgPool) {
+    try {
+      const res = await pgPool.query('SELECT NOW() as current_time');
+      return {
+        type: 'PostgreSQL',
+        connected: true,
+        info: `Connected to PostgreSQL (${res.rows[0].current_time})`,
+      };
+    } catch (err: any) {
+      return {
+        type: 'PostgreSQL',
+        connected: false,
+        info: `Connection error: ${err.message}`,
+      };
+    }
+  }
+  return {
+    type: 'Local Store',
+    connected: true,
+    info: 'Using file-backed atomic store (.data/store.json). Set DATABASE_URL to connect to PostgreSQL.',
+  };
+}

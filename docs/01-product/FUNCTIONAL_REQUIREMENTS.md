@@ -35,7 +35,7 @@
 ## 5. Analytics & Goals
 * **FR-ANAL-001:** The system shall compute weekly distance totals and percentage delta compared to the previous week.
 * **FR-ANAL-002:** The system shall filter analytics charts across 7 days, 30 days, 90 days, 6 months, and 1 year.
-* **FR-ANAL-003:** The system shall track personal records across standard benchmarks: 1K, 5K, 10K, Half Marathon, Marathon, Longest Distance.
+* **FR-ANAL-003:** The system shall dynamically compute and track multi-sport personal records (PRs) across distinct disciplines: Running (5K, 10K, Longest Run, Best Aerobic Pace, Max Elevation) and Cycling (Longest Ride, Fastest Sustained Speed, Max Elevation Climb, 40K+ Endurance), maintaining verified linkage to source activities.
 * **FR-ANAL-004:** The system shall track fitness goals with real-time percentage progress bars and projected completion dates.
 
 ## 6. Grounded AI Coach

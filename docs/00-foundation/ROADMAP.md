@@ -1,66 +1,76 @@
 # Product & Engineering Roadmap
 
-**Status:** CONFIRMED  
-**Version:** 1.0  
-**Last Updated:** 2026-11-01  
+**Status:** CONFIRMED & SYNCHRONIZED  
+**Version:** 2.0  
+**Last Updated:** 2026-11-03  
 **Owner:** Principal Software Architect & Product Lead  
-**Related Documents:** [PRODUCT_SCOPE.md](./PRODUCT_SCOPE.md), [IMPLEMENTATION_PLAN.md](../08-development/IMPLEMENTATION_PLAN.md)
+**Related Documents:** [PRODUCT_SCOPE.md](./PRODUCT_SCOPE.md), [IMPLEMENTATION_PLAN.md](../08-development/IMPLEMENTATION_PLAN.md), [PRD.md](../01-product/PRD.md)
 
 ---
 
-## Roadmap Overview
+## 1. Roadmap Overview & Execution Timeline
 
 ```mermaid
 gantt
-    title Athletic Platform Engineering Roadmap
+    title Athletic Platform Engineering Roadmap (Status 2026-11-03)
     dateFormat  YYYY-MM-DD
     section Phase 1: Foundation
-    Discovery & Spec Freeze           :done, 2026-11-01, 2026-11-03
-    Database Schema & Types           :active, 2026-11-04, 2026-11-07
-    section Phase 2: Strava Core
-    OAuth 2.0 Handshake & Crypto      :2026-11-08, 2026-11-12
-    Activity Ingestion Engine         :2026-11-13, 2026-11-17
-    section Phase 3: Planner & Compare
-    Weekly Training Calendar          :2026-11-18, 2026-11-23
-    Workout Matching & Deltas         :2026-11-24, 2026-11-28
-    section Phase 4: Analytics
-    Volume, Pace & PR Visualizations  :2026-11-29, 2026-12-05
-    section Phase 5: Intelligence
-    Grounded AI Coach Engine          :2026-12-06, 2026-12-11
-    section Phase 6: Hardening
-    Security, Performance & Launch    :2026-12-12, 2026-12-18
+    Database Schema & Types (PostgreSQL + Local) :done, 2026-11-01, 2026-11-02
+    AES-256-GCM Token Encryption Infrastructure   :done, 2026-11-01, 2026-11-02
+    section Phase 2: Strava Integration
+    OAuth 2.0 Handshake & State CSRF              :done, 2026-11-01, 2026-11-02
+    Incremental Ingestion & Rate Limit Throttle    :done, 2026-11-01, 2026-11-02
+    section Phase 3: Training & Periodization
+    12-Week Zone 2 Periodization Plan Generator   :done, 2026-11-02, 2026-11-02
+    Heuristic Workout Matching & Telemetry Deltas :done, 2026-11-02, 2026-11-02
+    section Phase 4: Athlete Health Intelligence
+    Biomechanical Joint Safety Gate Engine        :done, 2026-11-02, 2026-11-03
+    Anatomical Kinematic Injury Taxonomy          :done, 2026-11-02, 2026-11-03
+    Dedicated Health Dossier & Check-in Hub       :done, 2026-11-02, 2026-11-03
+    section Phase 5: Design & Telemetry UI
+    Endurance Performance Lab Design System       :done, 2026-11-02, 2026-11-03
+    Thermodynamic 6-Stage Flame Streak Engine     :done, 2026-11-02, 2026-11-03
+    Dedicated Activity Registry & In-Line Editor  :done, 2026-11-02, 2026-11-03
+    section Phase 6: Progressive Goals & Hardening
+    Dedicated /goals Route & Milestone Chaining   :done, 2026-11-03, 2026-11-03
+    Image OCR Telemetry Parser                    :done, 2026-11-02, 2026-11-03
+    Turbopack Build & Next.js 16 Optimization     :done, 2026-11-03, 2026-11-03
 ```
 
 ---
 
-## Detailed Milestone Definitions
+## 2. Milestone Execution Status & Verification Checklist
 
 ### Phase 1: Foundation & Data Architecture
-* **Objective:** Establish the TypeScript domain layer, PostgreSQL relational schema, and encryption infrastructure.
-* **Deliverables:** `src/types/index.ts`, `schema.sql`, `src/lib/db.ts`, `src/lib/crypto.ts`.
-* **Exit Criteria:** Database runs locally and passes unit tests with zero schema errors.
+- [x] **Relational Schema (`schema.sql`)**: 16 tables covering users, Strava credentials, activities, plans, matches, goals, PRs, and clinical health logs.
+- [x] **Dual Persistence Engine (`src/lib/db/`)**: Modular repositories supporting direct PostgreSQL connection pool with automated atomic local file store fallback (`.data/store.json`).
+- [x] **Cryptographic Token Vault (`src/lib/crypto.ts`)**: AES-256-GCM encryption with SHA-256 key derivation.
+- [x] **Domain Types (`src/types/index.ts`)**: Strict TypeScript interfaces with zero compile errors (`npx tsc --noEmit`).
 
 ### Phase 2: Strava Integration Engine
-* **Objective:** Complete server-side OAuth 2.0 authorization and activity ingestion.
-* **Deliverables:** `/api/auth/strava/*`, `/api/strava/sync`, rate limit throttler.
-* **Exit Criteria:** Athlete can link their Strava account and ingest activities idempotently without exposing credentials to the client.
+- [x] **OAuth 2.0 Handshake (`/api/auth/strava/*`)**: Server-side code exchange, HTTP-only CSRF state cookie, and deauthorization token revocation.
+- [x] **Incremental Activity Ingestion (`/api/strava/sync`)**: Timestamp-filtered fetching (`after`), idempotent upsert, and rate-limit header monitoring (`X-RateLimit-*`).
+- [x] **Activity Telemetry OCR Parser (`/api/activities/parse-image`)**: Multimodal telemetry extraction from Garmin/Apple/Strava screenshots.
 
-### Phase 3: Training Planner & Workout Comparison
-* **Objective:** Deliver interactive weekly calendar and planned vs actual delta matching.
-* **Deliverables:** 7-day calendar UI, workout creation modal, heuristic matching service.
-* **Exit Criteria:** Scheduled workouts automatically link to corresponding Strava activities with exact distance, duration, and pace variances.
+### Phase 3: Training Periodization & Comparison
+- [x] **12-Week Zone 2 Plan Generator (`coachTrainingGenerator.ts`)**: Structured aerobic volume progression with Talk Test directives.
+- [x] **Interactive Calendar Hub (`/training`)**: 7-day responsive grid with session dossiers and status indicators.
+- [x] **Heuristic Auto-Matching Engine (`matching.ts`)**: Computes exact variances for distance, duration, and pace between scheduled vs actual activities.
 
-### Phase 4: Analytics & Goals Suite
-* **Objective:** Surface multi-sport volume progression, pace trends, and personal record recognition.
-* **Deliverables:** Recharts/SVG visual charts, PR showcase, monthly/weekly goal tracker.
-* **Exit Criteria:** Fast rendering (<100ms) across 7d, 30d, 90d, and 1y filters.
+### Phase 4: Athlete Health Intelligence & Joint Safety Gate
+- [x] **Biomechanical Safety Gate (`readinessEngine.ts`)**: Dynamic load constraints (Running `ON_HOLD` vs Cycling `CONDITIONAL`).
+- [x] **Full-Body Kinematic Anatomy (`anatomyUtils.ts`)**: 4 anatomical zones, 16 distinct joint and ligament structures.
+- [x] **Dedicated Health Dossier Route (`/health`)**: Profile biometrics, longitudinal post-activity pain check-ins, and clinical procedure tracking.
 
-### Phase 5: Grounded AI Coach
-* **Objective:** Provide evidence-based training insights (10% rule, ACWR, recovery suggestions).
-* **Deliverables:** `lib/ai-coach.ts`, insight cards with explicit data citations.
-* **Exit Criteria:** 100% compliance with zero-hallucination policy; zero fabricated metrics.
+### Phase 5: Modern UI & Design System
+- [x] **Endurance Performance Lab Design System (`globals.css`)**: Dual-theme support with Chalk Lab (light `#F3F4EF`) and Graphite Obsidian (dark `#111513`).
+- [x] **Sticky Locked Navigation (`AppSidebar.tsx`)**: Independent internal scroll with zero body leak.
+- [x] **Thermodynamic Heat Spectrum (`streakEngine.ts`)**: 6-stage physical combustion temperature visualization (Red ~800°C to Plasma Violet >2,200°C).
+- [x] **Dedicated Activity Registry Route (`/activities` & `/activities/[id]`)**: Density toggles, search, filters, and in-line telemetry editing (`EditActivityModal`).
 
-### Phase 6: Production Hardening
-* **Objective:** Security audit, performance profiling, and error boundary verification.
-* **Deliverables:** OWASP compliance check, full test suite, documentation audit.
-* **Exit Criteria:** Zero security vulnerabilities, Lighthouse score > 90, sub-200ms API response latency.
+### Phase 6: Progressive Goals & Production Hardening
+- [x] **Dedicated Goals Route (`/goals`)**: Full-screen progressive goal management with sport filters and custom goal creator.
+- [x] **Progressive Milestone Chaining Engine**: Automatic unlocking of Tier 2 & 3 targets (+100km, 150km Gran Fondo, 1,000m D+ climbing, 200km double century) when 100km is reached.
+- [x] **Interactive Simulation Tester**: Real-time simulation toggle for testing target unlocking workflows.
+- [x] **Dashboard Gateway Linking**: Deep linking from `DashboardMacroGoalsCard` to `/goals` with visual milestone completion badges.
+- [x] **Production Build Cleanliness**: 22 routes compiled under Next.js 16 Partial Prerendering with exit code 0.

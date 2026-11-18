@@ -24,6 +24,10 @@ export interface User {
   email: string;
   name: string;
   avatar_url?: string;
+  weight_kg?: number;
+  height_cm?: number;
+  resting_heart_rate?: number;
+  max_heart_rate?: number;
   created_at: string;
   updated_at: string;
 }
@@ -54,7 +58,8 @@ export interface StravaToken {
 export interface Activity {
   id: string;
   user_id: string;
-  strava_activity_id: number;
+  strava_activity_id?: number | null;
+  is_manual?: boolean;
   name: string;
   sport_type: SportType;
   start_date: string; // ISO string
@@ -75,6 +80,19 @@ export interface Activity {
   updated_at: string;
 }
 
+export interface TrainingPlan {
+  id: string;
+  user_id: string;
+  goal_id?: string | null;
+  title: string;
+  description?: string | null;
+  start_date: string; // YYYY-MM-DD
+  end_date: string; // YYYY-MM-DD
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ScheduledWorkout {
   id: string;
   user_id: string;
@@ -87,6 +105,8 @@ export interface ScheduledWorkout {
   target_intensity?: string | null; // 'Zone 2', 'RPE 7/10', 'Threshold'
   description?: string | null;
   status: WorkoutStatus;
+  is_key_session?: boolean;
+  milestone_target_km?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -111,6 +131,10 @@ export interface FitnessGoal {
   user_id: string;
   title: string;
   goal_type: GoalType;
+  sport_type?: string; // 'Ride', 'Run', 'Swim', 'All'
+  priority?: number; // 1 = Primary, 2 = Secondary, 3 = Maintenance
+  is_primary?: boolean; // true = Target Utama governing the training plan
+  target_event_name?: string; // e.g. "Gran Fondo 100K", "10K Trail"
   target_value: number; // e.g., 100000 meters for 100km, or 4 for 4x/week
   current_value: number;
   start_date: string; // YYYY-MM-DD
@@ -121,15 +145,65 @@ export interface FitnessGoal {
   updated_at: string;
 }
 
+export interface AthleteAvailability {
+  id: string;
+  user_id: string;
+  preferred_days: string[]; // ['Tuesday', 'Friday', 'Sunday']
+  preferred_time_of_day: 'MORNING' | 'EVENING' | 'FLEXIBLE' | string;
+  max_session_duration_minutes: number;
+  weekend_duration_minutes: number;
+  fasting_schedule?: { type: string; is_fasting?: boolean } | any;
+  protected_rest_days?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AthleteEquipment {
+  id: string;
+  user_id: string;
+  sport_type: string; // 'Run', 'Ride', 'CrossTraining'
+  name: string;
+  brand?: string;
+  model?: string;
+  accumulated_distance_meters: number;
+  max_recommended_distance_meters: number;
+  gear_type: 'RUNNING_SHOES' | 'MTB' | 'ROAD_BIKE' | 'GRAVEL_BIKE' | string;
+  is_active: boolean;
+  is_retired: boolean;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AthleteDailyWellness {
+  id: string;
+  user_id: string;
+  logged_date: string; // YYYY-MM-DD
+  resting_heart_rate?: number;
+  sleep_duration_hours?: number;
+  sleep_quality_score?: number; // 1-5
+  fatigue_score?: number; // 1-5
+  muscle_soreness_score?: number; // 1-5
+  life_stress_score?: number; // 1-5
+  perceived_readiness: 'OPTIMAL' | 'NORMAL' | 'REDUCED' | 'REST_RECOMMENDED' | string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface PersonalRecord {
   id: string;
   user_id: string;
   activity_id?: string | null;
-  category: '1K' | '5K' | '10K' | 'Half Marathon' | 'Marathon' | 'Longest Distance' | string;
-  record_value: number; // time in seconds or distance in meters
+  sport_type?: 'Run' | 'Ride' | string;
+  category: string;
+  record_value: number; // time in seconds, distance in meters, speed in km/h, or elevation in meters
   record_display: string;
   achieved_date: string;
+  activity_name?: string;
+  subtext?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface TrainingInsight {
@@ -154,3 +228,8 @@ export interface SyncLog {
   started_at: string;
   completed_at: string;
 }
+
+export * from './health';
+export * from './coach';
+export * from './sportTelemetry';
+

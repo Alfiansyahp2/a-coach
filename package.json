@@ -4,18 +4,32 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:python": ".\\python_engine\\.venv\\Scripts\\uvicorn main:app --app-dir python_engine --host 127.0.0.1 --port 8000 --reload",
+    "dev:all": "concurrently -n next,python -c cyan,yellow \"next dev\" \".\\python_engine\\.venv\\Scripts\\uvicorn main:app --app-dir python_engine --host 127.0.0.1 --port 8000 --reload\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed/seed.js",
+    "seed:personal": "node scripts/seed/seed_athlete_health.js",
+    "import:strava": "python scripts/parsers/process_strava_images.py && node scripts/seed/seed_imported_activities.js",
+    "test:health": "node scripts/tests/test_athlete_health_system.js",
+    "test:coach": "node scripts/tests/test_coach_training_system.js",
+    "test:streak": "node scripts/tests/test_weekly_streak_system.js",
+    "test:bola": "npx tsx scripts/tests/test_bola_authorization.js",
+    "test:multi-week-recap": "npx tsx scripts/tests/test_multi_week_recap_system.js",
+    "test:coordinator": "npx tsx scripts/tests/test_multi_sport_coordinator.js",
+    "test:python": ".\\python_engine\\.venv\\Scripts\\python.exe -m pytest python_engine/tests",
+    "test:all": "npm run test:health && npm run test:coach && npm run test:streak && npm run test:bola && npm run test:multi-week-recap && npm run test:coordinator && npm run test:python",
+    "db:audit": "node scripts/maintenance/audit_database_schema.cjs"
   },
   "dependencies": {
     "dotenv": "^18.0.9",
     "lucide-react": "^1.66.0",
-    "next": "16.4.3",
+    "next": "16.4.6",
     "pg": "^8.23.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
@@ -23,8 +37,9 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.5",
     "eslint": "^9",
-    "eslint-config-next": "16.4.3",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,22 +1,145 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), Menlo, Monaco, Consolas, monospace;
+
+  --color-canvas: var(--color-canvas);
+  --color-surface-card: var(--color-surface-card);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-border-hairline: var(--color-border);
+  --color-border-subtle: var(--color-border-subtle);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-endurance: var(--color-endurance);
+  --color-cycling: var(--color-cycling);
+  --color-running: var(--color-running);
+  --color-alert-red: var(--color-alert-red);
+  --color-alert-amber: var(--color-alert-amber);
+  --color-fasting: var(--color-fasting);
+  --color-strava: #fc4c02;
+}
+
 :root {
-  --background: #090a0f;
-  --foreground: #f0f2f5;
-  --surface-card: #12151d;
-  --surface-elevated: #1a1e28;
-  --border-subtle: #232838;
+  /* =========================================================================
+     LIGHT THEME: CHALK LAB (Default Starting Point)
+     Precision sports science instrument aesthetic on tactile chalk surface
+     ========================================================================= */
+  --color-canvas: #F3F4EF;
+  --color-surface-card: #FFFFFF;
+  --color-surface-muted: #E8EAE3;
+  --color-surface-elevated: #FFFFFF;
+  --color-border: #D8DBD0;
+  --color-border-subtle: #E2E5DC;
+
+  --color-text-primary: #171C19;
+  --color-text-secondary: #5C635E;
+  --color-text-muted: #8A928C;
+
+  --color-endurance: #B9DC72;
+  --color-cycling: #4D947B;
+  --color-running: #D98757;
+  --color-alert-red: #D65F58;
+  --color-alert-amber: #E5A442;
+  --color-fasting: #7C3AED;
+
+  /* Open Book Aesthetics - Light Mode (Ivory Field Journal) */
+  --color-book-cover: #E2E5DC;
+  --color-book-cover-border: #C6CCC0;
+  --color-book-page-left: #FAFBF8;
+  --color-book-page-right: #F5F7F0;
+  --color-book-line: rgba(0, 0, 0, 0.05);
+  --color-book-margin: rgba(214, 95, 88, 0.35);
+  --color-book-crease-start: rgba(0, 0, 0, 0.04);
+  --color-book-crease-mid: rgba(0, 0, 0, 0.18);
+}
+
+.dark {
+  /* =========================================================================
+     DARK THEME: GRAPHITE OBSIDIAN
+     Deep graphite environment with calibrated high-contrast athletic accents
+     ========================================================================= */
+  --color-canvas: #111513;
+  --color-surface-card: #171C19;
+  --color-surface-muted: #1F2622;
+  --color-surface-elevated: #232B26;
+  --color-border: #2C3530;
+  --color-border-subtle: #232B26;
+
+  --color-text-primary: #F3F4EF;
+  --color-text-secondary: #A6AFA8;
+  --color-text-muted: #646E67;
+
+  --color-endurance: #C5E87D;
+  --color-cycling: #5FB395;
+  --color-running: #E59A6D;
+  --color-alert-red: #E2726B;
+  --color-alert-amber: #F0B359;
+  --color-fasting: #A78BFA;
+
+  /* Open Book Aesthetics - Dark Mode (Obsidian Leather Journal) */
+  --color-book-cover: #0A0F0C;
+  --color-book-cover-border: #233228;
+  --color-book-page-left: #121814;
+  --color-book-page-right: #141B16;
+  --color-book-line: rgba(95, 179, 149, 0.06);
+  --color-book-margin: rgba(226, 114, 107, 0.35);
+  --color-book-crease-start: rgba(0, 0, 0, 0.5);
+  --color-book-crease-mid: rgba(0, 0, 0, 0.85);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Strict Athletic Tabular Numerals (docs/02-design/TYPOGRAPHY.md) */
+/* Strict Tabular Numerals for Athletic Telemetry */
 .font-tabular {
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
+}
+
+/* Precision Hairline Focus Ring */
+*:focus-visible {
+  outline: 2px solid var(--color-endurance);
+  outline-offset: 1px;
+}
+
+/* Sleek Minimalist Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Universal No-Scrollbar utility (hides native scrollbars across Chrome, Edge, Safari, Firefox) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
