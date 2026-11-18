@@ -54,11 +54,10 @@ export function AnatomicalRegionPicker({
             setSelectedZone("ALL");
             setIsCustomMode(false);
           }}
-          className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${
-            selectedZone === "ALL" && !isCustomMode
-              ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-cycling)] font-bold shadow-xs"
-              : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text-primary)]"
-          }`}
+          className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${selectedZone === "ALL" && !isCustomMode
+            ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-cycling)] font-bold shadow-xs"
+            : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+            }`}
         >
           🌐 Semua Tubuh ({ANATOMICAL_REGIONS.length})
         </button>
@@ -70,11 +69,10 @@ export function AnatomicalRegionPicker({
               setSelectedZone(zone.key);
               setIsCustomMode(false);
             }}
-            className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${
-              selectedZone === zone.key && !isCustomMode
-                ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-cycling)] font-bold shadow-xs"
-                : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text-primary)]"
-            }`}
+            className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${selectedZone === zone.key && !isCustomMode
+              ? "bg-[var(--color-surface-muted)] text-[var(--color-cycling)] border border-[var(--color-cycling)] font-bold shadow-xs"
+              : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-text-primary)]"
+              }`}
           >
             {zone.label}
           </button>
@@ -82,11 +80,10 @@ export function AnatomicalRegionPicker({
         <button
           type="button"
           onClick={() => setIsCustomMode(true)}
-          className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${
-            isCustomMode
-              ? "bg-[var(--color-surface-muted)] text-[var(--color-endurance)] border border-[var(--color-endurance)] font-bold shadow-xs"
-              : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-endurance)]"
-          }`}
+          className={`px-3 py-1 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all ${isCustomMode
+            ? "bg-[var(--color-surface-muted)] text-[var(--color-endurance)] border border-[var(--color-endurance)] font-bold shadow-xs"
+            : "bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:text-[var(--color-endurance)]"
+            }`}
         >
           ✍️ Area Kustom...
         </button>
@@ -101,11 +98,10 @@ export function AnatomicalRegionPicker({
                 key={region.id}
                 type="button"
                 onClick={() => handleSelectRegion(region)}
-                className={`p-2.5 rounded-lg border text-left transition-all flex flex-col justify-between gap-1 group shadow-xs ${
-                  isSelected
-                    ? "bg-[var(--color-surface-card)] border-[var(--color-alert-red)] text-[var(--color-text-primary)] ring-1 ring-[var(--color-alert-red)]"
-                    : "bg-[var(--color-surface-card)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
-                }`}
+                className={`p-2.5 rounded-lg border text-left transition-all flex flex-col justify-between gap-1 group shadow-xs ${isSelected
+                  ? "bg-[var(--color-surface-card)] border-[var(--color-alert-red)] text-[var(--color-text-primary)] ring-1 ring-[var(--color-alert-red)]"
+                  : "bg-[var(--color-surface-card)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:border-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                  }`}
               >
                 <div className="flex items-center justify-between gap-1">
                   <span className={`text-[11px] font-bold truncate ${isSelected ? "text-[var(--color-alert-red)]" : "text-[var(--color-text-primary)]"}`}>
@@ -117,13 +113,12 @@ export function AnatomicalRegionPicker({
                 <div className="flex items-center justify-between text-[9px] text-[var(--color-text-muted)]">
                   <span>{region.zoneLabel}</span>
                   <span
-                    className={`px-1.5 py-0.5 rounded-md font-semibold ${
-                      region.isLowerExtremity
-                        ? "text-[var(--color-alert-red)] bg-[var(--color-alert-red)]/10"
-                        : region.isAxial
+                    className={`px-1.5 py-0.5 rounded-md font-semibold ${region.isLowerExtremity
+                      ? "text-[var(--color-alert-red)] bg-[var(--color-alert-red)]/10"
+                      : region.isAxial
                         ? "text-[var(--color-alert-amber)] bg-[var(--color-alert-amber)]/10"
                         : "text-[var(--color-cycling)] bg-[var(--color-cycling)]/10"
-                    }`}
+                      }`}
                   >
                     {region.isLowerExtremity ? "Hentakan Lari" : region.isAxial ? "Postur Spinal" : "Upper Body"}
                   </span>

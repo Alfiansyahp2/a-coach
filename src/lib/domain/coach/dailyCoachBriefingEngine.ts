@@ -60,9 +60,9 @@ export function generateDailyCoachBriefing(
       },
       fastingAwareness: isFastingDay
         ? {
-            isFastingDay: true,
-            guideline: 'Hari puasa terdeteksi: Sangat tepat untuk autofagi seluler dan istirahat metabolik penuh.',
-          }
+          isFastingDay: true,
+          guideline: 'Hari puasa terdeteksi: Sangat tepat untuk autofagi seluler dan istirahat metabolik penuh.',
+        }
         : undefined,
       pmcSnapshot: { ctl, atl, tsb, zoneName: 'HIGH_RISK_PROTECTION' },
     };
@@ -83,9 +83,9 @@ export function generateDailyCoachBriefing(
       },
       fastingAwareness: isFastingDay
         ? {
-            isFastingDay: true,
-            guideline: 'Hari puasa: Batasi latihan fisik ke mobilitas ringan atau tunda hingga setelah berbuka puasa.',
-          }
+          isFastingDay: true,
+          guideline: 'Hari puasa: Batasi latihan fisik ke mobilitas ringan atau tunda hingga setelah berbuka puasa.',
+        }
         : undefined,
       pmcSnapshot: { ctl, atl, tsb, zoneName: 'HIGH_FATIGUE_OVERREACHING' },
     };
