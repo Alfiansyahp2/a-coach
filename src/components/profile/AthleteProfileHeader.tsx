@@ -13,6 +13,8 @@ import {
   HeartPulse,
   Target,
   Sparkles,
+  Bike,
+  Footprints,
 } from "lucide-react";
 
 interface AthleteProfileHeaderProps {
@@ -33,11 +35,13 @@ export function AthleteProfileHeader({
   const readiness = healthContext?.latestReadiness;
   const isReadinessConditional = readiness?.athlete_status === "ACTIVE_WITH_UNRESOLVED_SYMPTOMS";
   const heatTier = getFlameHeatTier(streakWeeks, streakWeeks > 0);
+  const sports = profile?.preferred_sports || ["Running", "Cycling"];
+  const age = profile?.age || 22;
 
   return (
     <div className="rounded-xl bg-[var(--color-surface-card)] border border-[var(--color-border)] p-5 sm:p-6 shadow-xs relative overflow-hidden">
       {/* Subtle athletic background glow */}
-      <div className="absolute top-0 right-0 w-80 h-40 bg-[var(--color-cycling)]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-48 bg-[var(--color-cycling)]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
         {/* Left: Avatar & Identity Block */}
@@ -64,8 +68,8 @@ export function AthleteProfileHeader({
           </div>
 
           {/* Text Identity */}
-          <div className="space-y-1.5 min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="space-y-2 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl sm:text-2xl font-black font-mono tracking-tight text-[var(--color-text-primary)]">
                 {user.name}
               </h1>
@@ -78,20 +82,30 @@ export function AthleteProfileHeader({
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-xs font-mono text-[var(--color-text-muted)] flex-wrap">
+            <div className="flex items-center gap-2.5 text-xs font-mono text-[var(--color-text-muted)] flex-wrap">
               <span>{user.email}</span>
+              <span>•</span>
+              <span>{age} Tahun</span>
               <span>•</span>
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                <span>Bergabung Sejak Nov 2026</span>
+                <span>Aktif Sejak Nov 2026</span>
               </span>
             </div>
 
-            {/* Season Objective Chip */}
-            <div className="pt-1">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs font-mono text-[var(--color-text-secondary)] max-w-full">
-                <Target className="w-3.5 h-3.5 text-[var(--color-endurance)] shrink-0" />
-                <span className="truncate font-medium">
+            {/* Sport Discipline Badges & Season Objective */}
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border border-[var(--color-cycling)]/25 text-[10px] font-mono font-bold">
+                <Bike className="w-3 h-3" />
+                <span>MTB Zone 2 (Aktif)</span>
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-running)]/10 text-[var(--color-running)] border border-[var(--color-running)]/25 text-[10px] font-mono font-bold">
+                <Footprints className="w-3 h-3" />
+                <span>Lari (Transisi Rehab)</span>
+              </span>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-[10.5px] font-mono text-[var(--color-text-secondary)] max-w-full">
+                <Target className="w-3 h-3 text-[var(--color-endurance)] shrink-0" />
+                <span className="truncate">
                   {profile?.performance_objectives || "Aerobic endurance maintenance with safe multi-sport progression"}
                 </span>
               </div>
@@ -99,13 +113,13 @@ export function AthleteProfileHeader({
           </div>
         </div>
 
-        {/* Right: Quick Highlights & Actions */}
-        <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-[var(--color-border)]">
+        {/* Right: Telemetry Chips & Edit Button */}
+        <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-[var(--color-border)]">
           {/* Status Badges Row */}
           <div className="flex items-center gap-2 flex-wrap font-mono text-xs">
-            {/* Streak Badge with Thermodynamic Flame Heat Spectrum */}
+            {/* Streak Badge with Thermodynamic Flame */}
             <div
-              className="flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold shadow-xs transition-colors border"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold shadow-xs transition-colors border"
               style={{
                 backgroundColor: `${heatTier.colorHex}15`,
                 color: heatTier.colorHex,
@@ -129,7 +143,7 @@ export function AthleteProfileHeader({
             {/* Health Readiness Gate */}
             <Link
               href="/health"
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg font-bold border transition-colors shadow-xs ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold border transition-colors shadow-xs ${
                 isReadinessConditional
                   ? "bg-[var(--color-alert-red)]/10 text-[var(--color-alert-red)] border-[var(--color-alert-red)]/30 hover:bg-[var(--color-alert-red)]/20"
                   : "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30 hover:bg-[var(--color-cycling)]/20"

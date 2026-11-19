@@ -231,4 +231,5 @@ export interface SyncLog {
 
 export * from './health';
 export * from './coach';
+export * from './sportTelemetry';
 
