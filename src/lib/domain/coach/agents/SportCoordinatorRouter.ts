@@ -6,6 +6,12 @@ import {
   SportPrescriptionOutput,
 } from './contracts';
 import { calculateSessionRpeLoad } from '../kernels/fosterSessionRpeKernel';
+import {
+  globalSystemicFatigueArbiter,
+  HybridSessionInput,
+  ArbitrationResult,
+  AthleteHealthContext,
+} from '../GlobalSystemicFatigueArbiter';
 
 export class SportCoordinatorRouter {
   private static instance: SportCoordinatorRouter;
@@ -86,6 +92,45 @@ export class SportCoordinatorRouter {
 
     // Fallback: Grounded Indicator Protocol Safe Universal Handler
     return this.generateFallbackSafePrescription(payload);
+  }
+
+  /**
+   * Harmonizes multi-sport hybrid athlete telemetry via GlobalSystemicFatigueArbiter before/after dispatch.
+   */
+  public async arbitrateAndDispatch(
+    payload: SportTelemetryPayload,
+    recentHistory: HybridSessionInput[] = [],
+    healthContext?: AthleteHealthContext
+  ): Promise<{ localPrescription: SportPrescriptionOutput; arbitration: ArbitrationResult }> {
+    const localPrescription = await this.dispatchTelemetry(payload);
+    const agent = this.getAgent(payload.sportCode);
+    const cluster = agent?.metadata.cluster || 'CYCLIC_ENDURANCE';
+
+    const proposedSession: HybridSessionInput = {
+      sessionId: payload.sessionId,
+      sportCode: payload.sportCode,
+      cluster,
+      durationMinutes: payload.durationMinutes,
+      sessionRpe: payload.sessionRpe,
+      timestamp: payload.timestamp || new Date().toISOString(),
+    };
+
+    const arbitration = globalSystemicFatigueArbiter.arbitrateHybridSchedule(
+      recentHistory,
+      proposedSession,
+      healthContext
+    );
+
+    // If systemic arbitration flags unapproved overload or OTS, interlock local prescription
+    if (!arbitration.isApproved) {
+      localPrescription.safety_circuit_breakers.is_progressive_overload_allowed = false;
+      localPrescription.safety_circuit_breakers.halt_directives.push(...arbitration.scheduleModifications);
+      localPrescription.safety_circuit_breakers.contraindicated_movements.push(
+        ...arbitration.cnsFatigueStatus.contraindicatedModalities
+      );
+    }
+
+    return { localPrescription, arbitration };
   }
 
   /**
