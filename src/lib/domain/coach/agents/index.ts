@@ -14,6 +14,12 @@ import { VolleyballCoachAgent } from './VolleyballCoachAgent';
 import { FutsalCoachAgent } from './FutsalCoachAgent';
 import { RugbyCoachAgent } from './RugbyCoachAgent';
 import { FieldHockeyCoachAgent } from './FieldHockeyCoachAgent';
+import { BoxingCoachAgent } from './BoxingCoachAgent';
+import { MmaCoachAgent } from './MmaCoachAgent';
+import { BjjCoachAgent } from './BjjCoachAgent';
+import { PencakSilatCoachAgent } from './PencakSilatCoachAgent';
+import { JudoCoachAgent } from './JudoCoachAgent';
+import { MuayThaiCoachAgent } from './MuayThaiCoachAgent';
 
 export * from './contracts';
 export * from './SportCoordinatorRouter';
@@ -31,6 +37,12 @@ export * from './VolleyballCoachAgent';
 export * from './FutsalCoachAgent';
 export * from './RugbyCoachAgent';
 export * from './FieldHockeyCoachAgent';
+export * from './BoxingCoachAgent';
+export * from './MmaCoachAgent';
+export * from './BjjCoachAgent';
+export * from './PencakSilatCoachAgent';
+export * from './JudoCoachAgent';
+export * from './MuayThaiCoachAgent';
 
 /**
  * Bootstraps and registers the Phase 2 flagship endurance agents into the router.
@@ -98,7 +110,34 @@ export function registerDefaultTeamSportsAgents(
   }
 }
 
-// Auto-register default endurance, strength, and team sports agents on module load
+/**
+ * Bootstraps and registers the Phase 5 flagship combat & martial arts agents into the router.
+ */
+export function registerDefaultCombatSportsAgents(
+  router: SportCoordinatorRouter = sportCoordinatorRouter
+): void {
+  if (!router.hasAgent('SPORT_BOXING')) {
+    router.registerAgent(new BoxingCoachAgent());
+  }
+  if (!router.hasAgent('SPORT_MMA')) {
+    router.registerAgent(new MmaCoachAgent());
+  }
+  if (!router.hasAgent('SPORT_BJJ')) {
+    router.registerAgent(new BjjCoachAgent());
+  }
+  if (!router.hasAgent('SPORT_PENCAK_SILAT')) {
+    router.registerAgent(new PencakSilatCoachAgent());
+  }
+  if (!router.hasAgent('SPORT_JUDO')) {
+    router.registerAgent(new JudoCoachAgent());
+  }
+  if (!router.hasAgent('SPORT_MUAY_THAI')) {
+    router.registerAgent(new MuayThaiCoachAgent());
+  }
+}
+
+// Auto-register default endurance, strength, team, and combat sports agents on module load
 registerDefaultEnduranceAgents(sportCoordinatorRouter);
 registerDefaultStrengthAgents(sportCoordinatorRouter);
 registerDefaultTeamSportsAgents(sportCoordinatorRouter);
+registerDefaultCombatSportsAgents(sportCoordinatorRouter);
