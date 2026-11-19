@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 87 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 88 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -35,10 +35,12 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 32 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 33 Berkas
 
-Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
+Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & telemetri multi-sport:
 
+- **Ingress Telemetri Multi-Sport & Radar Kapasitas Atlet Hibrida (Phase 8)**:
+  - [`2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md) — Implementasi entri telemetri modular dinamis 33 cabor, *hexagonal capacity radar chart* atlet hibrida, serta *dynamic telemetry badges* pada kartu aktivitas.
 - **Kalender Multi-Model & Command Deck**:
   - [`2026-11-14_07-26-00_feat-minimalist-view-selector-labels-and-number-cleanup.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-14_07-26-00_feat-minimalist-view-selector-labels-and-number-cleanup.md) — Perampingan selektor model kalender & eliminasi badge berlebih.
   - [`2026-11-14_07-22-00_feat-training-calendar-ui-audit-and-quick-wins-refinements.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-14_07-22-00_feat-training-calendar-ui-audit-and-quick-wins-refinements.md) — Audit holistik 4 tindakan penyempurnaan cepat.

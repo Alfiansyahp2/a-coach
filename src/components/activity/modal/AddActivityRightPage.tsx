@@ -4,6 +4,7 @@ import React from "react";
 import { PenLine, ArrowRight } from "lucide-react";
 import { ScheduledWorkout } from "@/types";
 import { ActivityManualFormFields } from "./ActivityManualFormFields";
+import { SportSpecificData } from "./SportSpecificTelemetryFields";
 
 interface AddActivityRightPageProps {
   defaultWorkout?: ScheduledWorkout | null;
@@ -27,6 +28,8 @@ interface AddActivityRightPageProps {
   setDescription: (v: string) => void;
   calculatedSpeedKmh: string;
   calculatedPaceMinKm: string;
+  sportSpecificData?: SportSpecificData;
+  setSportSpecificData?: (v: SportSpecificData) => void;
   isSubmitting: boolean;
   isParsingImage: boolean;
   onNextStep: () => void;
@@ -55,6 +58,8 @@ export function AddActivityRightPage({
   setDescription,
   calculatedSpeedKmh,
   calculatedPaceMinKm,
+  sportSpecificData,
+  setSportSpecificData,
   isSubmitting,
   isParsingImage,
   onNextStep,
@@ -124,6 +129,8 @@ export function AddActivityRightPage({
           setDescription={setDescription}
           calculatedSpeedKmh={calculatedSpeedKmh}
           calculatedPaceMinKm={calculatedPaceMinKm}
+          sportSpecificData={sportSpecificData}
+          setSportSpecificData={setSportSpecificData}
         />
       </div>
 

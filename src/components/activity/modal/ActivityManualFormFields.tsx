@@ -3,6 +3,7 @@
 import React from "react";
 import { Clock, MapPin, Mountain, PenTool } from "lucide-react";
 import { SportTypeSelector } from "./SportTypeSelector";
+import { SportSpecificTelemetryFields, SportSpecificData } from "./SportSpecificTelemetryFields";
 
 interface ActivityManualFormFieldsProps {
   sportType: string;
@@ -25,6 +26,8 @@ interface ActivityManualFormFieldsProps {
   setDescription: (v: string) => void;
   calculatedSpeedKmh: string;
   calculatedPaceMinKm: string;
+  sportSpecificData?: SportSpecificData;
+  setSportSpecificData?: (v: SportSpecificData) => void;
 }
 
 export function ActivityManualFormFields(props: ActivityManualFormFieldsProps) {
@@ -34,6 +37,7 @@ export function ActivityManualFormFields(props: ActivityManualFormFieldsProps) {
     durationMinutes, setDurationMinutes, durationSeconds, setDurationSeconds,
     elevationMeters, setElevationMeters, description, setDescription,
     calculatedSpeedKmh, calculatedPaceMinKm,
+    sportSpecificData, setSportSpecificData,
   } = props;
 
   return (
@@ -49,6 +53,15 @@ export function ActivityManualFormFields(props: ActivityManualFormFieldsProps) {
 
       {/* Modular Sport Type Selector */}
       <SportTypeSelector sportType={sportType} setSportType={setSportType} />
+
+      {/* Dynamic Multi-Sport Specific Telemetry Ingress */}
+      {setSportSpecificData && (
+        <SportSpecificTelemetryFields
+          sportType={sportType}
+          data={sportSpecificData || {}}
+          onChange={setSportSpecificData}
+        />
+      )}
 
       {/* Name and Date */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
