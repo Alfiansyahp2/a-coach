@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AnatomicalRegionMeta } from "@/lib/anatomyUtils";
+import { AnatomicalRegionMeta } from "@/lib/anatomy";
 
 interface InjuryDetailFieldsProps {
   isCustomMode: boolean;

@@ -11,7 +11,7 @@ import {
   Activity as ActivityIcon,
   Layers,
 } from "lucide-react";
-import { AddActivityModal } from "@/components/AddActivityModal";
+import { AddActivityModal } from "@/components/activity/modal/AddActivityModal";
 import { Activity } from "@/types";
 import {
   formatDistance,
@@ -19,7 +19,7 @@ import {
   speedMpsToPace,
   speedMpsToKmh,
 } from "@/lib/formatters";
-import { getSportMeta, getDistinctSports } from "@/lib/sportUtils";
+import { getSportMeta, getDistinctSports } from "@/lib/domain/sports/sportUtils";
 
 interface ActivityDeckHeaderProps {
   activities: Activity[];

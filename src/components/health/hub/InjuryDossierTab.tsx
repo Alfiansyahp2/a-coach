@@ -6,7 +6,7 @@ import { Layers, Compass } from "lucide-react";
 import {
   ANATOMICAL_ZONES,
   getAnatomicalRegion,
-} from "@/lib/anatomyUtils";
+} from "@/lib/anatomy";
 import { InjuryDossierDetailPane } from "./InjuryDossierDetailPane";
 
 interface InjuryDossierTabProps {
@@ -76,11 +76,10 @@ export function InjuryDossierTab({
                         key={inj.id}
                         type="button"
                         onClick={() => setSelectedBodyPart(inj.body_region)}
-                        className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between shadow-xs cursor-pointer ${
-                          isSelected
-                            ? "bg-[var(--color-surface-muted)] border-[var(--color-alert-red)]"
-                            : "bg-[var(--color-surface-muted)]/50 border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-text-secondary)]"
-                        }`}
+                        className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between shadow-xs cursor-pointer ${isSelected
+                          ? "bg-[var(--color-surface-muted)] border-[var(--color-alert-red)]"
+                          : "bg-[var(--color-surface-muted)]/50 border-[var(--color-border)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-text-secondary)]"
+                          }`}
                       >
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--color-text-primary)]">
@@ -110,11 +109,10 @@ export function InjuryDossierTab({
                 key={zone.key}
                 type="button"
                 onClick={() => setSelectedBodyPart(zone.label)}
-                className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                  isSelected
-                    ? "bg-[var(--color-surface-muted)] border-[var(--color-cycling)]"
-                    : "bg-[var(--color-surface-muted)]/30 border-[var(--color-border)]/60 hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-border)] text-[var(--color-text-secondary)]"
-                }`}
+                className={`w-full p-2.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${isSelected
+                  ? "bg-[var(--color-surface-muted)] border-[var(--color-cycling)]"
+                  : "bg-[var(--color-surface-muted)]/30 border-[var(--color-border)]/60 hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-border)] text-[var(--color-text-secondary)]"
+                  }`}
               >
                 <span className="flex items-center gap-2 text-[11px]">
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-cycling)]" />

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AddActivityModal } from "@/components/AddActivityModal";
+import { AddActivityModal } from "@/components/activity/modal/AddActivityModal";
 import { ScheduledWorkout } from "@/types";
 
 interface CalendarDayQuickActionProps {

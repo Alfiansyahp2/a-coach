@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { AuthoritativeAthleteHealthContext } from "@/types";
-import { HeartPulse, ShieldAlert, ArrowRight, Activity, Stethoscope } from "lucide-react";
+import { HeartPulse, ShieldAlert, ArrowRight, Activity, Stethoscope, ShieldCheck } from "lucide-react";
 
 interface KinematicGateSummaryCardProps {
   healthContext: AuthoritativeAthleteHealthContext | null;
@@ -38,7 +38,9 @@ export function KinematicGateSummaryCard({ healthContext }: KinematicGateSummary
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* Status Box */}
-        <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)] space-y-1.5">
+        <div className={`p-3.5 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] border-t-2 ${
+          isConditional ? "border-t-[var(--color-alert-red)]" : "border-t-[var(--color-cycling)]"
+        } space-y-1.5`}>
           <span className="text-[10px] font-mono uppercase font-bold text-[var(--color-text-muted)] block">
             Status Kesiapan Atlet
           </span>
@@ -64,11 +66,11 @@ export function KinematicGateSummaryCard({ healthContext }: KinematicGateSummary
         </div>
 
         {/* Running Guardrail */}
-        <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)] space-y-1.5">
+        <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] border-t-2 border-t-[var(--color-alert-amber)] space-y-1.5">
           <span className="text-[10px] font-mono uppercase font-bold text-[var(--color-text-muted)] block">
             Protokol Lari (Running)
           </span>
-          <span className="text-xs font-mono font-bold text-[var(--color-running)] flex items-center gap-1.5">
+          <span className="text-xs font-mono font-bold text-[var(--color-alert-amber)] flex items-center gap-1.5">
             <ShieldAlert className="w-3.5 h-3.5" />
             <span>KONDISIONAL / DITUNDA</span>
           </span>
@@ -78,7 +80,7 @@ export function KinematicGateSummaryCard({ healthContext }: KinematicGateSummary
         </div>
 
         {/* Cycling Guardrail */}
-        <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)] space-y-1.5">
+        <div className="p-3.5 rounded-xl bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] border-t-2 border-t-[var(--color-cycling)] space-y-1.5">
           <span className="text-[10px] font-mono uppercase font-bold text-[var(--color-text-muted)] block">
             Protokol Sepeda (Cycling)
           </span>
@@ -114,9 +116,10 @@ export function KinematicGateSummaryCard({ healthContext }: KinematicGateSummary
 
           <Link
             href="/health"
-            className="text-[10.5px] text-[var(--color-cycling)] hover:underline font-semibold"
+            className="text-[10.5px] text-[var(--color-cycling)] hover:underline font-semibold flex items-center gap-1"
           >
-            Log Nyeri &amp; Check-In Pasca Sesi →
+            <span>Log Nyeri &amp; Check-In Pasca Sesi</span>
+            <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
       )}

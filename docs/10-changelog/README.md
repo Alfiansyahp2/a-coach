@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 79 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 86 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -21,7 +21,7 @@ docs/10-changelog/
 ├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (9 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
     ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (32 berkas)
-    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (17 berkas)
+    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (19 berkas)
     ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (5 berkas)
     ├── training/                # 🚴 Kalender Latihan & AI Coach Engine (3 berkas)
     ├── health/                  # 🩺 Profil Kesehatan & Kesiapan Klinis (2 berkas)
@@ -54,7 +54,10 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 
 ---
 
-### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 17 Berkas
+### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 19 Berkas
+
+- [`2026-11-18_10-30-00_feat-multi-sport-ai-coordinator-and-shared-science-kernels-phase-1.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-18_10-30-00_feat-multi-sport-ai-coordinator-and-shared-science-kernels-phase-1.md) — Implementasi Phase 1: Koordinator Multi-Sport AI, 3 shared science kernels (Foster sRPE, Gabbett ACWR, Issurin Block Periodization), PostgreSQL Tabel 18 sport_activity_telemetry, dan 13 uji verifikasi otomatis.
+- [`2026-11-16_09-58-00_feat-dynamic-ground-truth-telemetry-and-record-synchronization.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-16_09-58-00_feat-dynamic-ground-truth-telemetry-and-record-synchronization.md) — Dynamic ground-truth telemetry engine, equipment mileage subquery, dan personal record synchronization.
 
 - [`2026-11-14_08-16-00_feat-backend-full-stack-audit-complete-bola-and-sport-persistence.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-14_08-16-00_feat-backend-full-stack-audit-complete-bola-and-sport-persistence.md) — Penyelesaian 100% remediasi audit: BOLA defense, session auth guard kriptografis, & persistensi tabel sport_types.
 - [`2026-11-14_07-55-00_feat-backend-full-stack-audit-remediation-and-p0-p1-validation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-14_07-55-00_feat-backend-full-stack-audit-remediation-and-p0-p1-validation.md) — Remediasi temuan audit P0/P1, integrasi basis data riil, & validasi 97 tes lulus.
@@ -105,7 +108,14 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 
 - **Kesehatan ([`feat/health/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/health/))**: Kesiapan klinis, safety gate, dan indikator beban.
 - **Profil ([`feat/profile/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/profile/))**: Biometrik atlet, zona detak jantung Karvonen, dan data riwayat medis.
-- **Integrasi Strava ([`feat/strava/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava/))**: Handshake autentikasi OAuth 2.0 dan pipeline ingesti aktivitas otomatis.
+- **Integrasi Strava & Ingesti Multi-Sport ([`feat/strava-activity-ingestion/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/))**:
+  - [`2026-11-19_10-00-00_feat-racquet-precision-aquatic-and-functional-sports-phase-6.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-19_10-00-00_feat-racquet-precision-aquatic-and-functional-sports-phase-6.md) — Implementasi Phase 6: Klaster Raket, Presisi, Akuatik & Fungsional (Swimming, Rowing, Triathlon, Badminton, Tennis, Table Tennis, Archery, Shooting, Functional Fitness, Climbing, Gymnastics, Surfing, Skateboarding), SWOLF swimming efficiency, Archery tonnage, ACSM Rhabdomyolysis warning, dan Finger Pulley biomechanics (Melengkapi 33 cabor dunia).
+  - [`2026-11-19_09-15-00_feat-combat-and-martial-arts-multi-sport-agents-phase-5.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-19_09-15-00_feat-combat-and-martial-arts-multi-sport-agents-phase-5.md) — Implementasi Phase 5: Klaster Bela Diri & Kontak (Boxing, MMA, BJJ, Pencak Silat, Judo, Muay Thai), SCAT6 Concussion 14-day lockout, Round Density, dan Weight-Cut Safety.
+  - [`2026-11-18_16-20-00_feat-team-field-and-court-intermittent-multi-sport-agents-phase-4.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_16-20-00_feat-team-field-and-court-intermittent-multi-sport-agents-phase-4.md) — Implementasi Phase 4: Klaster Lapangan & Gelanggang (Football, Basketball, Volleyball, Futsal, Rugby, Field Hockey), Bradley/Buchheit HSR, Catapult PlayerLoad, dan gerbang cedera FIFA 11+ / SCAT6 concussion.
+  - [`2026-11-18_12-49-00_feat-strength-power-and-hypertrophy-multi-sport-agents-phase-3.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_12-49-00_feat-strength-power-and-hypertrophy-multi-sport-agents-phase-3.md) — Implementasi Phase 3: Klaster Kekuatan & Daya Maksimal (Powerlifting, Weightlifting, Calisthenics, Strongman, Bodybuilding), 1RM Brzycki, dan Sheiko INOL limiter.
+  - [`2026-11-18_11-45-00_feat-decoupled-endurance-flagship-agents-and-multi-sport-ingestion.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_11-45-00_feat-decoupled-endurance-flagship-agents-and-multi-sport-ingestion.md) — Implementasi Phase 2: Decoupled endurance flagship agents (Running, Road Cycling, MTB XC), alias matching Strava, dan endpoint multi-sport API.
+  - [`2026-11-01_21-15-00_feat-strava-activity-ingestion.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava/activity-ingestion/2026-11-01_21-15-00_feat-strava-activity-ingestion.md) — Pipeline webhook ingesti aktivitas Strava & parsing stream.
+- **Autentikasi Strava ([`feat/strava/oauth-handshake/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava/oauth-handshake/))**: Handshake autentikasi OAuth 2.0 dan enkripsi token AES-256.
 
 ---
 

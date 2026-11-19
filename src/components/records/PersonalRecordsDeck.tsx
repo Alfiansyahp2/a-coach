@@ -36,7 +36,7 @@ export function PersonalRecordsDeck({ prs, activities = [] }: PersonalRecordsDec
           .reduce((sum, a) => sum + Number(a.distance_meters || 0), 0) / 1000
       );
     }
-    return 65.2;
+    return 65.1;
   }, [activities]);
 
   const rideDistanceKm = useMemo(() => {
@@ -51,7 +51,7 @@ export function PersonalRecordsDeck({ prs, activities = [] }: PersonalRecordsDec
           .reduce((sum, a) => sum + Number(a.distance_meters || 0), 0) / 1000
       );
     }
-    return 623.3;
+    return 750.1;
   }, [activities]);
 
   if (!prs || prs.length === 0) return null;

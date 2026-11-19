@@ -54,28 +54,26 @@ export function CalendarDayCard({
   return (
     <div
       id={`cal-day-${day.dateStr}`}
-      className={`group min-h-[160px] p-2.5 rounded-xl flex flex-col justify-between transition-all duration-150 relative ${
-        day.isToday
+      className={`group min-h-[160px] p-2.5 rounded-xl flex flex-col justify-between transition-all duration-150 relative ${day.isToday
           ? "bg-[var(--color-surface-card)] border-2 border-[var(--color-cycling)] shadow-md ring-2 ring-[var(--color-cycling)]/25 z-10"
           : hasMissedWorkouts && !hasActivities
-          ? "bg-[var(--color-alert-red)]/[0.04] border border-[var(--color-alert-red)]/30 hover:border-[var(--color-alert-red)]/50 shadow-xs"
-          : isFastingDay && !hasActivities && !hasWorkouts
-          ? "bg-purple-500/[0.03] border border-purple-500/20 shadow-xs"
-          : isSaturday && !hasActivities && !hasWorkouts
-          ? "bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)]"
-          : hasWorkouts || hasActivities
-          ? "bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-[var(--color-cycling)]/70 shadow-xs"
-          : "bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] opacity-75"
-      }`}
+            ? "bg-[var(--color-alert-red)]/[0.04] border border-[var(--color-alert-red)]/30 hover:border-[var(--color-alert-red)]/50 shadow-xs"
+            : isFastingDay && !hasActivities && !hasWorkouts
+              ? "bg-purple-500/[0.03] border border-purple-500/20 shadow-xs"
+              : isSaturday && !hasActivities && !hasWorkouts
+                ? "bg-[var(--color-surface-muted)]/50 border border-[var(--color-border)]"
+                : hasWorkouts || hasActivities
+                  ? "bg-[var(--color-surface-card)] border border-[var(--color-border)] hover:border-[var(--color-cycling)]/70 shadow-xs"
+                  : "bg-[var(--color-surface-muted)]/40 border border-[var(--color-border)] opacity-75"
+        }`}
     >
       {/* 1. Day Header */}
       <div className="flex items-center justify-between pb-1.5 border-b border-[var(--color-border)] text-[10px] font-mono">
         <span
-          className={`md:hidden font-bold ${
-            hasMissedWorkouts && !hasActivities
+          className={`md:hidden font-bold ${hasMissedWorkouts && !hasActivities
               ? "text-[var(--color-alert-red)]"
               : "text-[var(--color-text-secondary)]"
-          }`}
+            }`}
         >
           {day.dayName}
         </span>
@@ -88,13 +86,12 @@ export function CalendarDayCard({
           )}
 
           <span
-            className={`font-bold font-tabular text-[11px] ${
-              day.isToday
+            className={`font-bold font-tabular text-[11px] ${day.isToday
                 ? "text-[var(--color-cycling)] font-extrabold"
                 : hasMissedWorkouts && !hasActivities
-                ? "text-[var(--color-alert-red)]"
-                : "text-[var(--color-text-primary)]"
-            }`}
+                  ? "text-[var(--color-alert-red)]"
+                  : "text-[var(--color-text-primary)]"
+              }`}
           >
             {day.dayNumber} {day.monthName}
           </span>
@@ -168,30 +165,29 @@ export function CalendarDayCard({
               <button
                 type="button"
                 onClick={() => onSelectWorkout(workouts[0])}
-                className={`font-semibold hover:underline cursor-pointer ml-auto shrink-0 ${
-                  hasMissedWorkouts
+                className={`font-semibold hover:underline cursor-pointer ml-auto shrink-0 ${hasMissedWorkouts
                     ? "text-[var(--color-alert-red)] hover:opacity-80"
                     : "text-[var(--color-cycling)] hover:opacity-80"
-                }`}
+                  }`}
               >
                 Detail ↗
               </button>
             </>
           ) : isFastingDay ? (
-            <span className="text-purple-600 dark:text-purple-300 font-semibold flex items-center gap-1 ml-auto">
-              <span>🌙</span> Puasa Sunnah
-            </span>
-          ) : isSaturday ? (
-            <span className="text-[var(--color-text-secondary)] font-semibold ml-auto">
-              Slot Buffer
-            </span>
-          ) : (
-            <span className={`ml-auto ${day.isToday ? "text-[var(--color-cycling)] font-semibold" : ""}`}>
-              Istirahat
-            </span>
+              <span className="text-[var(--color-fasting)] font-semibold flex items-center gap-1 ml-auto">
+                <span>🌙</span> Puasa Sunnah
+              </span>
+              ) : isSaturday ? (
+              <span className="text-[var(--color-text-secondary)] font-semibold ml-auto">
+                Slot Buffer
+              </span>
+              ) : (
+              <span className={`ml-auto ${day.isToday ? "text-[var(--color-cycling)] font-semibold" : ""}`}>
+                Istirahat
+              </span>
           )}
-        </div>
+            </div>
       </div>
-    </div>
-  );
+      </div>
+      );
 }

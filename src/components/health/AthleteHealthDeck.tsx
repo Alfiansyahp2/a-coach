@@ -33,6 +33,14 @@ export function AthleteHealthDeck({
   const [activeTab, setActiveTab] = useState<"overview" | "directives" | "risks">("overview");
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const maxRideMeters = Math.max(
+    0,
+    ...recentActivities
+      .filter((a) => (a.sport_type || "").toLowerCase().includes("ride") || (a.sport_type || "").toLowerCase().includes("cycl"))
+      .map((a) => Number(a.distance_meters || 0))
+  );
+  const maxVerifiedRideKm = maxRideMeters > 0 ? Number((maxRideMeters / 1000).toFixed(1)) : 62.4;
+
   if (!healthContext || !healthContext.profile) {
     return null;
   }
@@ -143,7 +151,7 @@ export function AthleteHealthDeck({
             </button>
           </div>
 
-          <AthleteHealthDirectives activeTab={activeTab} />
+          <AthleteHealthDirectives activeTab={activeTab} maxVerifiedRideKm={maxVerifiedRideKm} />
         </div>
       )}
 

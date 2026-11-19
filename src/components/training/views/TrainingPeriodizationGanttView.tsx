@@ -51,7 +51,7 @@ export function TrainingPeriodizationGanttView({
               <span className="text-[8.5px] text-[var(--color-text-muted)]">Minggu 1 – 4 (Target 18–26 km)</span>
             </div>
             <div className="p-2 rounded-lg bg-[var(--color-surface-muted)]/70 border border-[var(--color-border)]">
-              <span className="font-bold text-[10.5px] text-purple-600 dark:text-purple-400 block">FASE 2: VOLUME &amp; DELOAD</span>
+              <span className="font-bold text-[10.5px] text-[var(--color-fasting)] block">FASE 2: VOLUME &amp; DELOAD</span>
               <span className="text-[8.5px] text-[var(--color-text-muted)]">Minggu 5 – 8 (Target 30–36 km • Deload M8)</span>
             </div>
             <div className="p-2 rounded-lg bg-[var(--color-surface-muted)]/70 border border-[var(--color-border)]">
@@ -68,11 +68,10 @@ export function TrainingPeriodizationGanttView({
               return (
                 <div
                   key={week.weekNumber}
-                  className={`p-2.5 rounded-lg border flex items-center gap-3 transition-colors ${
-                    week.isCurrentWeek
+                  className={`p-2.5 rounded-lg border flex items-center gap-3 transition-colors ${week.isCurrentWeek
                       ? "bg-[var(--color-cycling)]/[0.04] border-[var(--color-cycling)]/40 ring-1 ring-[var(--color-cycling)]/20"
                       : "bg-[var(--color-surface-muted)]/30 border-[var(--color-border)]/50"
-                  }`}
+                    }`}
                 >
                   {/* Left Label */}
                   <div className="w-24 shrink-0 text-left">
@@ -84,7 +83,7 @@ export function TrainingPeriodizationGanttView({
                         </span>
                       )}
                       {week.isDeload && (
-                        <span className="text-[7.5px] font-bold px-1 py-0.2 rounded bg-purple-500/20 text-purple-600 dark:text-purple-300">
+                        <span className="text-[7.5px] font-bold px-1 py-0.2 rounded bg-[var(--color-fasting)]/20 text-[var(--color-fasting)]">
                           DELOAD
                         </span>
                       )}
@@ -94,53 +93,52 @@ export function TrainingPeriodizationGanttView({
                     </span>
                   </div>
 
-                  {/* 7 Days Mini Swimlane Blocks */}
-                  <div className="flex-1 grid grid-cols-7 gap-1.5">
-                    {week.days.map((day) => {
-                      const hasWorkouts = day.workouts.length > 0;
-                      const hasActivities = day.activities.length > 0;
-                      const isFasting = day.dayOfWeek === 0 || day.dayOfWeek === 3;
-                      const firstW = day.workouts[0];
-                      const firstA = day.activities[0];
-                      const isCompleted = hasActivities || firstW?.status === "COMPLETED";
+                    {/* 7 Days Mini Swimlane Blocks */}
+                    <div className="flex-1 grid grid-cols-7 gap-1.5">
+                      {week.days.map((day) => {
+                        const hasWorkouts = day.workouts.length > 0;
+                        const hasActivities = day.activities.length > 0;
+                        const isFasting = day.dayOfWeek === 0 || day.dayOfWeek === 3;
+                        const firstW = day.workouts[0];
+                        const firstA = day.activities[0];
+                        const isCompleted = hasActivities || firstW?.status === "COMPLETED";
 
-                      return (
-                        <button
-                          key={day.dateStr}
-                          type="button"
-                          onClick={() => {
-                            if (firstA) onSelectActivity?.(firstA);
-                            else if (firstW) onSelectWorkout(firstW);
-                          }}
-                          className={`p-1 rounded text-center truncate text-[8.5px] transition-all border cursor-pointer ${
-                            isCompleted
-                              ? "bg-[var(--color-cycling)]/20 text-[var(--color-cycling)] border-[var(--color-cycling)]/40 font-bold"
-                              : hasWorkouts
-                              ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:border-[var(--color-cycling)]"
-                              : isFasting
-                              ? "bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/20"
-                              : "bg-[var(--color-surface-muted)]/40 text-[var(--color-text-muted)] border-transparent opacity-60"
+                        return (
+                          <button
+                            key={day.dateStr}
+                            type="button"
+                            onClick={() => {
+                              if (firstA) onSelectActivity?.(firstA);
+                              else if (firstW) onSelectWorkout(firstW);
+                            }}
+                            className={`p-1 rounded text-center truncate text-[8.5px] transition-all border cursor-pointer ${isCompleted
+                                ? "bg-[var(--color-cycling)]/20 text-[var(--color-cycling)] border-[var(--color-cycling)]/40 font-bold"
+                                : hasWorkouts
+                                  ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border-[var(--color-border)] hover:border-[var(--color-cycling)]"
+                                  : isFasting
+                                      ? "bg-[var(--color-fasting)]/15 text-[var(--color-fasting)] border-[var(--color-fasting)]/30"
+                                      : "bg-[var(--color-surface-muted)]/40 text-[var(--color-text-muted)] border-transparent opacity-60"
                           } ${day.isToday ? "ring-1 ring-[var(--color-cycling)]" : ""}`}
-                          title={`${day.dayName}: ${firstA?.name || firstW?.workout_category || (isFasting ? "Puasa Sunnah" : "Rest")}`}
-                        >
-                          <span className="font-tabular font-bold block">{day.dayName.slice(0, 3)} {day.dayNumber}</span>
-                          <span className="text-[7.5px] truncate block opacity-85">
-                            {isCompleted ? "✓ Selesai" : hasWorkouts ? (firstW.target_distance_meters ? formatDistance(firstW.target_distance_meters) : formatDuration(firstW.target_duration_seconds || 0)) : (isFasting ? "Puasa" : "Rest")}
-                          </span>
-                        </button>
-                      );
-                    })}
+                            title={`${day.dayName}: ${firstA?.name || firstW?.workout_category || (isFasting ? "Puasa Sunnah" : "Rest")}`}
+                          >
+                            <span className="font-tabular font-bold block">{day.dayName.slice(0, 3)} {day.dayNumber}</span>
+                            <span className="text-[7.5px] truncate block opacity-85">
+                              {isCompleted ? "✓ Selesai" : hasWorkouts ? (firstW.target_distance_meters ? formatDistance(firstW.target_distance_meters) : formatDuration(firstW.target_duration_seconds || 0)) : (isFasting ? "Puasa" : "Rest")}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
+                  );
             })}
-          </div>
+                </div>
 
-          {/* 3. Banister PMC Curve Stream */}
-          <GanttMiniPMCSparkline weeks={weeks} />
+          {/* 3. Banister PMC Curve Stream */ }
+              <GanttMiniPMCSparkline weeks={weeks} />
+        </div>
         </div>
       </div>
-    </div>
-  );
+      );
 }
 
