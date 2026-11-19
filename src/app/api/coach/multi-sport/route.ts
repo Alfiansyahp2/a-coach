@@ -1,11 +1,12 @@
 import { NextResponse, connection } from 'next/server';
 import { verifyUserAuthorization } from '@/lib/auth/authGuard';
-import { sportCoordinatorRouter, registerDefaultEnduranceAgents } from '@/lib/domain/coach/agents';
+import {
+  sportCoordinatorRouter,
+  globalSystemicFatigueArbiter,
+  HybridSessionInput,
+} from '@/lib/domain/coach';
 import { saveSportActivityTelemetry, getSportActivityTelemetry } from '@/lib/db';
 import { SportTelemetryPayload } from '@/lib/domain/coach/agents/contracts';
-
-// Ensure default flagship agents are registered
-registerDefaultEnduranceAgents();
 
 export async function GET(request: Request) {
   await connection();
@@ -20,6 +21,26 @@ export async function GET(request: Request) {
       return NextResponse.json({
         success: true,
         agents: sportCoordinatorRouter.listAgents(),
+      });
+    }
+
+    if (mode === 'hybrid-arbitration') {
+      const records = await getSportActivityTelemetry(auth.userId);
+      const recentSessions: HybridSessionInput[] = records.map((r: any) => {
+        const agent = sportCoordinatorRouter.getAgent(r.sport_code);
+        return {
+          sessionId: r.id,
+          sportCode: r.sport_code,
+          cluster: agent?.metadata.cluster || 'CYCLIC_ENDURANCE',
+          durationMinutes: r.duration_minutes,
+          sessionRpe: r.session_rpe,
+          timestamp: r.session_timestamp || r.created_at,
+        };
+      });
+      const arbitration = globalSystemicFatigueArbiter.arbitrateHybridSchedule(recentSessions);
+      return NextResponse.json({
+        success: true,
+        arbitration,
       });
     }
 
@@ -72,8 +93,21 @@ export async function POST(request: Request) {
       subjectiveSymptoms,
     };
 
-    // Dispatch to decoupled sport agent
-    const prescription = await sportCoordinatorRouter.dispatchTelemetry(payload);
+    let prescription;
+    let arbitration;
+
+    if (body.arbitrateHybrid) {
+      const result = await sportCoordinatorRouter.arbitrateAndDispatch(
+        payload,
+        body.recentSessions || [],
+        body.healthContext
+      );
+      prescription = result.localPrescription;
+      arbitration = result.arbitration;
+    } else {
+      // Dispatch to decoupled sport agent directly
+      prescription = await sportCoordinatorRouter.dispatchTelemetry(payload);
+    }
 
     // Persist in sport_activity_telemetry table
     const savedRecord = await saveSportActivityTelemetry({
@@ -88,6 +122,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       prescription,
+      arbitration,
       recordId: savedRecord?.id,
     });
   } catch (error: any) {

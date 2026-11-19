@@ -22,6 +22,7 @@ export interface SubmitActivityPayload {
   injurySeverity: 'MILD' | 'MODERATE' | 'SEVERE';
   injuryMechanism: string;
   injuryNotes: string;
+  sportSpecificData?: Record<string, any>;
 }
 
 export interface SubmitActivityResult {
@@ -122,6 +123,31 @@ export async function submitActivityWithCheckinAndInjury(
     if (injuryRes.ok && injuryData.success) {
       createdInjury = injuryData.injury;
     }
+  }
+
+  // 4. Synchronize with multi-sport decoupled coach & hybrid arbiter
+  try {
+    const durationMinutes = Math.max(1, Math.round(params.totalDurationSeconds / 60));
+    await fetch("/api/coach/multi-sport", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        activityId: data.activity.id,
+        sportCode: params.sportType,
+        durationMinutes,
+        sessionRpe: params.rpeScore || 5,
+        sportSpecificMetrics: params.sportSpecificData || {},
+        arbitrateHybrid: true,
+        subjectiveSymptoms: {
+          painLocations: params.hasNewInjury ? [params.injuryRegion] : [],
+          painScoreScale10: Math.max(params.painDuring, params.painAfter, params.painNextDay),
+          jointInstabilityReported: params.instabilityObserved,
+          swellingObserved: params.swellingObserved,
+        },
+      }),
+    });
+  } catch (err) {
+    console.warn("Gagal sinkronisasi telemetri ke agen cabor:", err);
   }
 
   let message = "Catatan sesi berhasil ditulis ke buku jurnal telemetri!";
