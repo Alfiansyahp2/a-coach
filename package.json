@@ -25,8 +25,9 @@
     "test:phase6": "npx tsx scripts/tests/test_phase6_sports_agents.js",
     "test:arbiter": "npx tsx scripts/tests/test_global_fatigue_arbiter.js",
     "test:ui-telemetry": "npx tsx scripts/tests/test_ui_telemetry_ingress.js",
+    "test:dynamic-ui": "npx tsx scripts/tests/test_dynamic_coach_ui_generator.js",
     "test:python": ".\\python_engine\\.venv\\Scripts\\python.exe -m pytest python_engine/tests",
-    "test:all": "npm run test:health && npm run test:coach && npm run test:streak && npm run test:bola && npm run test:multi-week-recap && npm run test:coordinator && npm run test:endurance && npm run test:strength && npm run test:team && npm run test:combat && npm run test:phase6 && npm run test:arbiter && npm run test:ui-telemetry && npm run test:python",
+    "test:all": "npm run test:health && npm run test:coach && npm run test:streak && npm run test:bola && npm run test:multi-week-recap && npm run test:coordinator && npm run test:endurance && npm run test:strength && npm run test:team && npm run test:combat && npm run test:phase6 && npm run test:arbiter && npm run test:ui-telemetry && npm run test:dynamic-ui && npm run test:python",
     "db:audit": "node scripts/maintenance/audit_database_schema.cjs"
   },
   "dependencies": {

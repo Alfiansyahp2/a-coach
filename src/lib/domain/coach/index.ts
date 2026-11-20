@@ -13,4 +13,5 @@ export * from './kernels/racketAndPrecisionKernel';
 export * from './kernels/combatSportsKernel';
 export * from './kernels/concurrentTrainingInterferenceKernel';
 export * from './GlobalSystemicFatigueArbiter';
+export * from './schema/sportCoachUiSchema';
 

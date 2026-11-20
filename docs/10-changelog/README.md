@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 88 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 89 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -35,10 +35,12 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 33 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 34 Berkas
 
 Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & telemetri multi-sport:
 
+- **Kontrol Auto-Generate UI Cabor Coach (Schema-Driven Adaptive UI Control)**:
+  - [`2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md) — Implementasi kontrol UI dinamis berbasis skema deklaratif yang langsung men-generate antarmuka form telemetri dan panel AI coach debrief seketika saat cabor baru ditambahkan.
 - **Ingress Telemetri Multi-Sport & Radar Kapasitas Atlet Hibrida (Phase 8)**:
   - [`2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md) — Implementasi entri telemetri modular dinamis 33 cabor, *hexagonal capacity radar chart* atlet hibrida, serta *dynamic telemetry badges* pada kartu aktivitas.
 - **Kalender Multi-Model & Command Deck**:
