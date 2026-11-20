@@ -25,7 +25,7 @@ async function runTestSuite() {
   const rootDir = process.cwd();
 
   // Load modules
-  const rawAgents = await import(pathToFileURL(path.join(rootDir, 'src/lib/domain/coach/agents/index.ts')).href);
+  const rawAgents = await import(pathToFileURL(path.join(rootDir, 'src/lib/domain/coach/sports/index.ts')).href);
   const agents = rawAgents.default || rawAgents;
   const {
     FootballCoachAgent,

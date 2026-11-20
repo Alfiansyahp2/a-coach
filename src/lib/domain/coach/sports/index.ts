@@ -1,5 +1,6 @@
 // Master Registry & Barrel Export for All 33 Sports Vertical Slices
 import { sportCoordinatorRouter, SportCoordinatorRouter } from '../core/SportCoordinatorRouter';
+export { sportCoordinatorRouter, SportCoordinatorRouter };
 import { DistanceRunningCoachAgent } from './running';
 import { RoadCyclingCoachAgent } from './road-cycling';
 import { MtbXcCoachAgent } from './mtb-xc';

@@ -1,6 +1,6 @@
 import { pgPool, ensureLocalStore, saveLocalStore, DEFAULT_USER_ID, formatDateOnly } from '../client';
 import { Activity, ScheduledWorkout, WorkoutActivityMatch, AthleteTrainingResponse } from '@/types';
-import { upsertAthleteTrainingResponse } from '../healthRepo';
+import { upsertAthleteTrainingResponse } from '../health';
 import { normalizeActivityRow, UpsertActivityResult, CreateManualActivityParams } from './activityTypes';
 import { getActivityById } from './activityQueryRepo';
 import { correlateManualActivityWithWorkout } from './activityWorkoutCorrelator';
