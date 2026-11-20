@@ -3,7 +3,7 @@
 import React from "react";
 import { ScheduledWorkout } from "@/types";
 import { CheckCircle2, XCircle, Zap, Bike, Footprints, ShieldAlert } from "lucide-react";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 
 interface CalendarWorkoutItemProps {
   workout: ScheduledWorkout;

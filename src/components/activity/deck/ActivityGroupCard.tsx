@@ -23,7 +23,7 @@ import {
   formatDate,
   speedMpsToPace,
   speedMpsToKmh,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 import { EditActivityModal } from "@/components/activity/modal/EditActivityModal";
 import { ActivityGroup } from "./activityGroupUtils";
 import { Activity } from "@/types";

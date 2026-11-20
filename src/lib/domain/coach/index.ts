@@ -5,7 +5,6 @@ export * from './coachTrainingGenerator';
 export * from './dailyCoachBriefingEngine';
 export * from './core';
 export * from './sports';
-export * from './agents';
 export * from './kernels/fosterSessionRpeKernel';
 export * from './kernels/gabbettAcwrKernel';
 export * from './kernels/issurinBlockPeriodizationKernel';

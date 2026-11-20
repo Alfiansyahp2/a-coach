@@ -5,7 +5,7 @@ import {
   FitnessGoal,
   AuthoritativeAthleteHealthContext,
 } from '@/types';
-import { formatDistance, formatPaceSeconds } from '@/lib/formatters';
+import { formatDistance, formatPaceSeconds } from '@/lib/shared/formatters';
 import { generateCoachGoalAndStructureInsights } from './coachGoalInsights';
 
 export function generateTrainingInsights(

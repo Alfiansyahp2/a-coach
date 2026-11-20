@@ -11,7 +11,7 @@ import {
   Sparkles,
   Activity,
 } from "lucide-react";
-import { formatDate } from "@/lib/formatters";
+import { formatDate } from "@/lib/shared/formatters";
 import { TrainingInsight } from "@/types";
 
 interface DashboardAiInsightsDeckProps {

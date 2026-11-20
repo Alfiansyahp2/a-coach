@@ -9,7 +9,7 @@ import {
   formatDate,
   speedMpsToPace,
   speedMpsToKmh,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 import {
   Activity as ActivityIcon,
   ChevronRight,

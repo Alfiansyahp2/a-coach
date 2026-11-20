@@ -1,5 +1,5 @@
 import { Activity, ScheduledWorkout } from '@/types';
-import { formatDuration, speedMpsToPace, formatDateOnly } from '@/lib/formatters';
+import { formatDuration, speedMpsToPace, formatDateOnly } from '@/lib/shared/formatters';
 import {
   WeeklyActivityRecap,
   SportRecapBreakdown,

@@ -1,5 +1,5 @@
 import { Activity, ScheduledWorkout } from "@/types";
-import { formatDateOnly } from "@/lib/formatters";
+import { formatDateOnly } from "@/lib/shared/formatters";
 
 export type DaySparkStatus = "COMPLETED" | "MISSED" | "TODAY" | "PLANNED" | "FASTING" | "BUFFER" | "REST";
 

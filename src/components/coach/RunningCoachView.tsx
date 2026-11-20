@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Activity, ScheduledWorkout, FitnessGoal, AuthoritativeAthleteHealthContext, PersonalRecord } from "@/types";
 import { Footprints, ShieldAlert, Calendar, Gauge, ChevronRight, Bike } from "lucide-react";
-import { formatDistance, formatPaceSeconds } from "@/lib/formatters";
+import { formatDistance, formatPaceSeconds } from "@/lib/shared/formatters";
 import { CoachClinicalBanner } from "./CoachClinicalBanner";
 import { CoachRecentSessionsList } from "./CoachRecentSessionsList";
 

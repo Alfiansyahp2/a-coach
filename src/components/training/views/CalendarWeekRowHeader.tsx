@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { formatDuration } from "@/lib/formatters";
+import { formatDuration } from "@/lib/shared/formatters";
 import { CalendarWeek } from "../calendarBuilder";
 import { ChevronDown, ChevronUp, Zap, CheckCircle2 } from "lucide-react";
 
