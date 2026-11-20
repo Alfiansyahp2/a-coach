@@ -3,7 +3,7 @@
 import React from "react";
 import { Activity } from "@/types";
 import { CheckCircle2, Bike, Footprints, Activity as ActivityIcon } from "lucide-react";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 
 interface CalendarActivityItemProps {
   activity: Activity;

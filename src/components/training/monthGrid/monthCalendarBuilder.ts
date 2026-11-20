@@ -1,5 +1,5 @@
 import { Activity, ScheduledWorkout } from "@/types";
-import { formatDateOnly } from "@/lib/formatters";
+import { formatDateOnly } from "@/lib/shared/formatters";
 import { WEEK_CONFIGS, DaySparkStatus } from "../calendarBuilder";
 
 export interface MonthGridDay {

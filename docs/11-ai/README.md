@@ -21,7 +21,8 @@ docs/11-ai/
 ├── 04-ANALISIS_KEKURANGAN_DAN_KELEBIHAN.md               <- Evaluasi trade-off arsitektur terpisah vs monolitik & solusi hybrid
 ├── 05-PENYEMPURNAAN_SAINS_MEDIS_GIZI_DAN_JURNAL.md       <- Landasan ilmiah peer-reviewed (ACSM, NSCA, BJSM, ISSN, FIFA 11+)
 ├── 06-AUDIT_VALIDASI_ILMIAH_DAN_FILTER_ANTI_HALUSINASI.md <- Filter epistemologis anti-AI-slop & Grounded Indicator Protocol
-└── 07-ROADMAP_IMPLEMENTASI_BERTAHAP.md                   <- Roadmap implementasi 8 fase terperinci (Gantt chart & exit criteria)
+├── 07-ROADMAP_IMPLEMENTASI_BERTAHAP.md                   <- Roadmap implementasi 8 fase terperinci (Gantt chart & exit criteria)
+└── 08-SPESIFIKASI_ARSITEKTUR_CLEAN_VERTICAL_SLICE_CABOR.md <- Spesifikasi arsitektur Clean Vertical Slice mandiri per cabor
 ```
 
 ---
@@ -71,3 +72,8 @@ docs/11-ai/
   - **Fase 6**: Klaster Raket, Presisi, Akuatik & Ekstrem (Renang, Dayung, Triathlon, Bulu Tangkis, Tenis, Panahan, CrossFit, Panjat Tebing, dll. — 13 Cabor).
   - **Fase 7**: Global Systemic Fatigue Arbiter untuk Atlet Hibrida (Cross-Training Resolver).
   - **Fase 8**: Antarmuka Pengguna (UI Ingress, Telemetry Widgets, dan 100+ Automated Tests).
+
+### 8. [Spesifikasi Arsitektur Clean: Vertical Slice per Cabor](./08-SPESIFIKASI_ARSITEKTUR_CLEAN_VERTICAL_SLICE_CABOR.md)
+- **Desain Folder Mandiri**: Menetapkan **Opsi 3 (Vertical Slice Architecture by Sport)** sebagai standar tata kelola kode sumber untuk 33+ cabor.
+- **Pemisahan Tegas & Anti-Monolith**: Menjamin setiap cabor memiliki direktori uniknya sendiri (`sports/<cabor>/`), melarang impor silang antar-cabor, dan mengisolasi hukum fisika/fisiologi ke `kernels/` (Pure Scientific Math Engines).
+- **Protokol Nol Regresi**: Menjaga keutuhan 184 uji otomatis dan API routes melalui *re-export facade* di `agents/index.ts`.

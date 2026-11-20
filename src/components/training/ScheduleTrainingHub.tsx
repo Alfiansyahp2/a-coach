@@ -9,7 +9,7 @@ import {
   WorkoutActivityMatch,
   AuthoritativeAthleteHealthContext,
 } from "@/types";
-import { formatDateOnly } from "@/lib/formatters";
+import { formatDateOnly } from "@/lib/shared/formatters";
 import { MacroObjectivesStrip } from "./MacroObjectivesStrip";
 import { Zone2PacingGuidelinePanel } from "./Zone2PacingGuidelinePanel";
 import { WorkoutDossierModal } from "./WorkoutDossierModal";

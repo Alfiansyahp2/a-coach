@@ -4,7 +4,7 @@ import {
   FitnessGoal,
   AuthoritativeAthleteHealthContext,
 } from '@/types';
-import { formatDistance } from '@/lib/formatters';
+import { formatDistance } from '@/lib/shared/formatters';
 
 export function generateCoachGoalAndStructureInsights(
   activities: Activity[],

@@ -14,7 +14,7 @@ import {
   discoverAvailableRecapWeeks,
   computeMultiWeekRollup,
 } from './multiWeekRecapEngine';
-import { formatDateOnly } from '@/lib/formatters';
+import { formatDateOnly } from '@/lib/shared/formatters';
 import { getMondayOfWeek, getSundayOfWeek } from '@/lib/shared/dateUtils';
 
 const INDO_MONTHS = [

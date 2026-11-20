@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import {
   formatDistance,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 import { CoachClinicalBanner } from "./CoachClinicalBanner";
 import { CoachRecentSessionsList } from "./CoachRecentSessionsList";
 

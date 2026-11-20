@@ -2,7 +2,7 @@
 
 import React from "react";
 import { MonthGridWeek } from "./monthCalendarBuilder";
-import { formatDuration } from "@/lib/formatters";
+import { formatDuration } from "@/lib/shared/formatters";
 import { Zap, CheckCircle2 } from "lucide-react";
 
 interface MonthWeekSummaryColumnProps {

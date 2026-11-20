@@ -15,7 +15,7 @@ import {
   Clock,
   MapPin,
 } from "lucide-react";
-import { formatDate, formatDuration } from "@/lib/formatters";
+import { formatDate, formatDuration } from "@/lib/shared/formatters";
 import { PostCheckinPainTelemetry } from "./checkin/PostCheckinPainTelemetry";
 import { PostCheckinSymptomChecklist } from "./checkin/PostCheckinSymptomChecklist";
 import { PostCheckinActivitySelector } from "./checkin/PostCheckinActivitySelector";

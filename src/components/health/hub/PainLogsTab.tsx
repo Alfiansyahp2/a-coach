@@ -3,7 +3,7 @@
 import React from "react";
 import { AthletePainLog } from "@/types";
 import { History, ShieldCheck, AlertCircle } from "lucide-react";
-import { formatDate } from "@/lib/formatters";
+import { formatDate } from "@/lib/shared/formatters";
 
 interface PainLogsTabProps {
   recentPainLogs: AthletePainLog[];

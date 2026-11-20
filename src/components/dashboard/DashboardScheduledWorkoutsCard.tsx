@@ -1,6 +1,6 @@
 import React from "react";
 import { Calendar } from "lucide-react";
-import { formatDistance, formatDuration, formatDate } from "@/lib/formatters";
+import { formatDistance, formatDuration, formatDate } from "@/lib/shared/formatters";
 import { ScheduledWorkout, TrainingPlan } from "@/types";
 
 interface DashboardScheduledWorkoutsCardProps {

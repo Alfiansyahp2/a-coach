@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ScheduledWorkout, Activity } from "@/types";
 import { CalendarWeek } from "../calendarBuilder";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 import { Terminal, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface TrainingMicroHUDViewProps {
