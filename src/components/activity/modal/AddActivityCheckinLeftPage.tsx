@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Activity as ActivityIcon, ShieldAlert, Calendar, MapPin, Clock, Gauge } from "lucide-react";
-import { formatDate } from "@/lib/formatters";
+import { formatDate } from "@/lib/shared/formatters";
 
 interface AddActivityCheckinLeftPageProps {
   sportType: string;

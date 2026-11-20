@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connection } from 'next/server';
-import { getActivities } from '@/lib/db/activityRepo';
+import { getActivities } from '@/lib/db/activity';
 import {
   getAthleteInjuries,
   getAthletePainLogs,
   getAthleteTrainingResponses,
-} from '@/lib/db/healthRepo';
+} from '@/lib/db/health';
 import { getScheduledWorkouts } from '@/lib/db/trainingRepo';
 import { computeWeeklyActivityAndInjuryRecap } from '@/lib/domain/analytics/weeklyRecapEngine';
 import { computeWeeklyRecapViaPython } from '@/lib/api/coachPythonClient';

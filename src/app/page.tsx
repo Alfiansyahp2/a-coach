@@ -15,7 +15,7 @@ import { computeDashboardSummary } from "@/lib/shared/analytics";
 import { generateTrainingInsights } from "@/lib/domain/coach/aiCoachEngine";
 import { computePersonalRecords } from "@/lib/domain/records/personalRecordsEngine";
 import { calculateWeeklyStreak } from "@/lib/domain/streak/streakEngine";
-import { formatDuration, formatPaceSeconds } from "@/lib/formatters";
+import { formatDuration, formatPaceSeconds } from "@/lib/shared/formatters";
 import { AppShell } from "@/components/layout/AppShell";
 import { StravaConnectCard } from "@/components/strava/StravaConnectCard";
 import { ActivityFeed } from "@/components/activity/ActivityFeed";

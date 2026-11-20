@@ -1,6 +1,6 @@
 import { User, AthleteProfile, PhysiologicalMeasurements } from '@/types';
 import { pgPool, ensureLocalStore, saveLocalStore, DEFAULT_USER_ID } from './client';
-import { getAthleteProfile, upsertAthleteProfile, logHealthAuditTrail } from './healthRepo';
+import { getAthleteProfile, upsertAthleteProfile, logHealthAuditTrail } from './health';
 
 export interface UpdateUserProfileParams {
   name?: string;

@@ -10,7 +10,7 @@ import {
   Clock,
   MapPin,
 } from "lucide-react";
-import { formatDate, formatDuration } from "@/lib/formatters";
+import { formatDate, formatDuration } from "@/lib/shared/formatters";
 
 interface PostCheckinActivitySelectorProps {
   sortedActivities: Activity[];

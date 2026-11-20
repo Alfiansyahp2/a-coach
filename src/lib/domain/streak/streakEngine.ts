@@ -6,7 +6,7 @@ import {
   formatLocalDateKey,
   formatMonthDay,
   formatMonthDayYear,
-} from './streakDateUtils';
+} from '@/lib/shared/dateUtils';
 import { FlameHeatTier, getFlameHeatTier } from './flameHeatTiers';
 
 // Re-exports for clean modular access and backwards compatibility

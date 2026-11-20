@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 88 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 98 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -18,9 +18,9 @@ docs/10-changelog/
 ├── CHANGELOG.md                 # 🏛️ Master Foundation v1.0.0 (01 Nov 2026)
 ├── README.md                    # 📑 Katalog & Indeks Utama (Dokumen ini)
 ├── main/                        # 🚀 Rilis Master & Integrasi Makro (3 berkas)
-├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (9 berkas)
+├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (13 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
-    ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (32 berkas)
+    ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (38 berkas)
     ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (19 berkas)
     ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (9 berkas)
     ├── training/                # 🚴 Kalender Latihan & AI Coach Engine (3 berkas)
@@ -35,10 +35,16 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 33 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 38 Berkas
 
 Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & telemetri multi-sport:
 
+- **Mesin Icon Khusus 33 Cabang Olahraga Sistem (Specialized Sport Icons Engine)**:
+  - [`2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md) — Implementasi komponen modular `<SportIcon />` dengan pemetaan icon unik & presisi untuk masing-masing dari 33 cabor dunia (mengeliminasi penggunaan icon sepeda/dumbbell generik pada cabor lain), 8 icon SVG buatan tangan, fallback kluster otomatis, dan test suite verifikasi 42 checks.
+- **Penyelarasan Pemilih Cabor dengan 33 Cabor Resmi Sistem**:
+  - [`2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md) — Penyelarasan penuh pemilih cabor modal dengan 33 cabor terdaftar sistem, tab filter kluster, pencarian live, serta remediasi bug visual duplikasi tanda plus dan teks terpotong.
+- **Kontrol Auto-Generate UI Cabor Coach (Schema-Driven Adaptive UI Control)**:
+  - [`2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md) — Implementasi kontrol UI dinamis berbasis skema deklaratif yang langsung men-generate antarmuka form telemetri dan panel AI coach debrief seketika saat cabor baru ditambahkan.
 - **Ingress Telemetri Multi-Sport & Radar Kapasitas Atlet Hibrida (Phase 8)**:
   - [`2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md) — Implementasi entri telemetri modular dinamis 33 cabor, *hexagonal capacity radar chart* atlet hibrida, serta *dynamic telemetry badges* pada kartu aktivitas.
 - **Kalender Multi-Model & Command Deck**:
@@ -71,8 +77,12 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & t
 
 ---
 
-### C. Dekomposisi Kode & Clean Architecture ([`refactor/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/)) — 9 Berkas
+### C. Dekomposisi Kode & Clean Architecture ([`refactor/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/)) — 13 Berkas
 
+- [`2026-11-20_19-00-00_refactor-facade-elimination-formatters-db-agents.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-20_19-00-00_refactor-facade-elimination-formatters-db-agents.md) — Eliminasi berkas facade redundan `formatters.ts`, `db.ts`, dan direktori `coach/agents/`, pemindahan 47 impor UI/domain ke kanonikal `@/lib/shared/formatters`, serta verifikasi 100% build dan 18 test suite.
+- [`2026-11-20_14-30-00_refactor-legacy-facade-elimination-and-canonical-import-alignment.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-20_14-30-00_refactor-legacy-facade-elimination-and-canonical-import-alignment.md) — Eliminasi berkas *legacy facade/shim* usang (`streakDateUtils.ts`, `activityRepo.ts`, `healthRepo.ts`, serta 35 berkas shim `agents/`), penyelarasan impor kanonikal langsung, dan verifikasi nol regresi pada 18 test suite.
+- [`2026-11-20_14-00-00_refactor-clean-vertical-slice-architecture-by-sport.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-20_14-00-00_refactor-clean-vertical-slice-architecture-by-sport.md) — Implementasi arsitektur Clean Vertical Slice per cabang olahraga: pembagian 33 cabor ke dalam micro-domain folder mandiri (`sports/<cabor>/`), pemisahan inti orkestrator (`core/`), penegakan isolasi *Zero Inter-Sport Coupling*, dan verifikasi otomatis 202 pengujian arsitektur.
+- [`2026-11-16_19-30-00_refactor-clean-architecture-facade-elimination-and-date-unification.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-16_19-30-00_refactor-clean-architecture-facade-elimination-and-date-unification.md) — Eliminasi 15 berkas *backward-compatibility facade* usang di root directory dan unifikasi manipulasi tanggal ISO 8601 UTC+7.
 - [`2026-11-11_06-15-00_refactor-bulk-line-remediation-and-clean-architecture-decomposition.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-11_06-15-00_refactor-bulk-line-remediation-and-clean-architecture-decomposition.md) — Penegakan ketat batas < 300 baris kode per berkas.
 - [`2026-11-07_09-55-00_feat-clean-architecture-decomposition-and-bulk-line-remediation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-07_09-55-00_feat-clean-architecture-decomposition-and-bulk-line-remediation.md) — Pemecahan god-components menjadi atomik sub-komponen.
 - [`2026-11-04_09-30-00_refactor-authoritative-clean-architecture-folder-structure-and-modularization.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-04_09-30-00_refactor-authoritative-clean-architecture-folder-structure-and-modularization.md) — Restrukturisasi arsitektur direktori domain v3.0.

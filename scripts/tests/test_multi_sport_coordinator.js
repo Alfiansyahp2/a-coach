@@ -113,7 +113,7 @@ async function runTests() {
     // 4. Decoupled Sport Coordinator Router & Ingress Dispatcher
     // -----------------------------------------------------------------
     console.log('\n--- 4. SportCoordinatorRouter & Agent Registry Engine ---');
-    const routerPath = path.resolve(__dirname, '../../src/lib/domain/coach/agents/SportCoordinatorRouter.ts');
+    const routerPath = path.resolve(__dirname, '../../src/lib/domain/coach/core/SportCoordinatorRouter.ts');
     const routerRaw = await import(pathToFileURL(routerPath).href);
     const routerModule = routerRaw.default || routerRaw;
     const { sportCoordinatorRouter } = routerModule;

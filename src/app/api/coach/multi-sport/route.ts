@@ -4,9 +4,9 @@ import {
   sportCoordinatorRouter,
   globalSystemicFatigueArbiter,
   HybridSessionInput,
+  SportTelemetryPayload,
 } from '@/lib/domain/coach';
 import { saveSportActivityTelemetry, getSportActivityTelemetry } from '@/lib/db';
-import { SportTelemetryPayload } from '@/lib/domain/coach/agents/contracts';
 
 export async function GET(request: Request) {
   await connection();

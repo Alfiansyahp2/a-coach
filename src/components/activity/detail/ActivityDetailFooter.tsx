@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDate, formatDistance } from "@/lib/formatters";
+import { formatDate, formatDistance } from "@/lib/shared/formatters";
 import { Activity } from "@/types";
 
 interface ActivityDetailFooterProps {
