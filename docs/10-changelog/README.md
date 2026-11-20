@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 84 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 90 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -20,9 +20,9 @@ docs/10-changelog/
 ├── main/                        # 🚀 Rilis Master & Integrasi Makro (3 berkas)
 ├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (9 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
-    ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (32 berkas)
+    ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (38 berkas)
     ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (19 berkas)
-    ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (5 berkas)
+    ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (9 berkas)
     ├── training/                # 🚴 Kalender Latihan & AI Coach Engine (3 berkas)
     ├── health/                  # 🩺 Profil Kesehatan & Kesiapan Klinis (2 berkas)
     ├── profile/                 # 👤 Biometrik Atlet & Riwayat Prosedur Medis (2 berkas)
@@ -35,10 +35,18 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 32 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 38 Berkas
 
-Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
+Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & telemetri multi-sport:
 
+- **Mesin Icon Khusus 33 Cabang Olahraga Sistem (Specialized Sport Icons Engine)**:
+  - [`2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md) — Implementasi komponen modular `<SportIcon />` dengan pemetaan icon unik & presisi untuk masing-masing dari 33 cabor dunia (mengeliminasi penggunaan icon sepeda/dumbbell generik pada cabor lain), 8 icon SVG buatan tangan, fallback kluster otomatis, dan test suite verifikasi 42 checks.
+- **Penyelarasan Pemilih Cabor dengan 33 Cabor Resmi Sistem**:
+  - [`2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md) — Penyelarasan penuh pemilih cabor modal dengan 33 cabor terdaftar sistem, tab filter kluster, pencarian live, serta remediasi bug visual duplikasi tanda plus dan teks terpotong.
+- **Kontrol Auto-Generate UI Cabor Coach (Schema-Driven Adaptive UI Control)**:
+  - [`2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md) — Implementasi kontrol UI dinamis berbasis skema deklaratif yang langsung men-generate antarmuka form telemetri dan panel AI coach debrief seketika saat cabor baru ditambahkan.
+- **Ingress Telemetri Multi-Sport & Radar Kapasitas Atlet Hibrida (Phase 8)**:
+  - [`2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-19_11-30-00_feat-ui-ingress-multi-sport-telemetry-widgets-and-radar-chart-phase-8.md) — Implementasi entri telemetri modular dinamis 33 cabor, *hexagonal capacity radar chart* atlet hibrida, serta *dynamic telemetry badges* pada kartu aktivitas.
 - **Kalender Multi-Model & Command Deck**:
   - [`2026-11-14_07-26-00_feat-minimalist-view-selector-labels-and-number-cleanup.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-14_07-26-00_feat-minimalist-view-selector-labels-and-number-cleanup.md) — Perampingan selektor model kalender & eliminasi badge berlebih.
   - [`2026-11-14_07-22-00_feat-training-calendar-ui-audit-and-quick-wins-refinements.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-14_07-22-00_feat-training-calendar-ui-audit-and-quick-wins-refinements.md) — Audit holistik 4 tindakan penyempurnaan cepat.
@@ -77,7 +85,9 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 
 ---
 
-### D. Rekap Analitik & Rekor Personal ([`feat/personal-record/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/)) — 8 Berkas
+### D. Rekap Analitik & Rekor Personal ([`feat/personal-record/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/)) — 9 Berkas
+
+- [`2026-11-19_10-45-00_feat-global-systemic-fatigue-arbiter-and-hybrid-athlete-integration-phase-7.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/2026-11-19_10-45-00_feat-global-systemic-fatigue-arbiter-and-hybrid-athlete-integration-phase-7.md) — Implementasi Phase 7: Global Systemic Fatigue Arbiter, resolusi interferensi latihan serentak (AMPK vs mTORC1), gerbang deplesi neuromuskular CNS, matriks tubrukan sendi anatomis lintas 33 cabor, dan harmonisasi jadwal atlet hibrida.
 - [`2026-11-16_09-15-00_feat-sports-science-prescriptive-bridge-and-deload-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/2026-11-16_09-15-00_feat-sports-science-prescriptive-bridge-and-deload-engine.md) — Implementasi 5 pilar sains olahraga: Jembatan Preskriptif, Pengenalan Deload Otomatis, Momen Refleksi Senin 00:00, Rapor Adaptasi Biologis, dan Hukum Validitas Ganda.
 
 - [`2026-11-16_02-05-00_feat-recap-selector-ui-refinement-and-pr-sync-remediation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/personal-record/2026-11-16_02-05-00_feat-recap-selector-ui-refinement-and-pr-sync-remediation.md) — Penyempurnaan tampilan selektor siklus, eliminasi native scrollbar, dan sinkronisasi 8 rekor personal ke PostgreSQL.
@@ -109,6 +119,8 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model:
 - **Kesehatan ([`feat/health/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/health/))**: Kesiapan klinis, safety gate, dan indikator beban.
 - **Profil ([`feat/profile/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/profile/))**: Biometrik atlet, zona detak jantung Karvonen, dan data riwayat medis.
 - **Integrasi Strava & Ingesti Multi-Sport ([`feat/strava-activity-ingestion/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/))**:
+  - [`2026-11-19_10-00-00_feat-racquet-precision-aquatic-and-functional-sports-phase-6.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-19_10-00-00_feat-racquet-precision-aquatic-and-functional-sports-phase-6.md) — Implementasi Phase 6: Klaster Raket, Presisi, Akuatik & Fungsional (Swimming, Rowing, Triathlon, Badminton, Tennis, Table Tennis, Archery, Shooting, Functional Fitness, Climbing, Gymnastics, Surfing, Skateboarding), SWOLF swimming efficiency, Archery tonnage, ACSM Rhabdomyolysis warning, dan Finger Pulley biomechanics (Melengkapi 33 cabor dunia).
+  - [`2026-11-19_09-15-00_feat-combat-and-martial-arts-multi-sport-agents-phase-5.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-19_09-15-00_feat-combat-and-martial-arts-multi-sport-agents-phase-5.md) — Implementasi Phase 5: Klaster Bela Diri & Kontak (Boxing, MMA, BJJ, Pencak Silat, Judo, Muay Thai), SCAT6 Concussion 14-day lockout, Round Density, dan Weight-Cut Safety.
   - [`2026-11-18_16-20-00_feat-team-field-and-court-intermittent-multi-sport-agents-phase-4.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_16-20-00_feat-team-field-and-court-intermittent-multi-sport-agents-phase-4.md) — Implementasi Phase 4: Klaster Lapangan & Gelanggang (Football, Basketball, Volleyball, Futsal, Rugby, Field Hockey), Bradley/Buchheit HSR, Catapult PlayerLoad, dan gerbang cedera FIFA 11+ / SCAT6 concussion.
   - [`2026-11-18_12-49-00_feat-strength-power-and-hypertrophy-multi-sport-agents-phase-3.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_12-49-00_feat-strength-power-and-hypertrophy-multi-sport-agents-phase-3.md) — Implementasi Phase 3: Klaster Kekuatan & Daya Maksimal (Powerlifting, Weightlifting, Calisthenics, Strongman, Bodybuilding), 1RM Brzycki, dan Sheiko INOL limiter.
   - [`2026-11-18_11-45-00_feat-decoupled-endurance-flagship-agents-and-multi-sport-ingestion.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/strava-activity-ingestion/2026-11-18_11-45-00_feat-decoupled-endurance-flagship-agents-and-multi-sport-ingestion.md) — Implementasi Phase 2: Decoupled endurance flagship agents (Running, Road Cycling, MTB XC), alias matching Strava, dan endpoint multi-sport API.
