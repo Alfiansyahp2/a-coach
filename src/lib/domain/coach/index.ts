@@ -1,8 +1,10 @@
-// Authoritative Barrel Export for Coach Domain Engines & Decoupled Multi-Sport Agents
+// Authoritative Barrel Export for Coach Domain Engines & Vertical Slices
 export * from './aiCoachEngine';
 export * from './coachGoalInsights';
 export * from './coachTrainingGenerator';
 export * from './dailyCoachBriefingEngine';
+export * from './core';
+export * from './sports';
 export * from './agents';
 export * from './kernels/fosterSessionRpeKernel';
 export * from './kernels/gabbettAcwrKernel';
@@ -14,4 +16,3 @@ export * from './kernels/combatSportsKernel';
 export * from './kernels/concurrentTrainingInterferenceKernel';
 export * from './GlobalSystemicFatigueArbiter';
 export * from './schema/sportCoachUiSchema';
-
