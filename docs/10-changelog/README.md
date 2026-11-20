@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 89 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 90 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -35,10 +35,12 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 34 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 35 Berkas
 
 Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & telemetri multi-sport:
 
+- **Penyelarasan Pemilih Cabor dengan 33 Cabor Resmi Sistem**:
+  - [`2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md) — Penyelarasan penuh pemilih cabor modal dengan 33 cabor terdaftar sistem, tab filter kluster, pencarian live, serta remediasi bug visual duplikasi tanda plus dan teks terpotong.
 - **Kontrol Auto-Generate UI Cabor Coach (Schema-Driven Adaptive UI Control)**:
   - [`2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-00-00_feat-schema-driven-dynamic-sport-coach-ui-generator-control.md) — Implementasi kontrol UI dinamis berbasis skema deklaratif yang langsung men-generate antarmuka form telemetri dan panel AI coach debrief seketika saat cabor baru ditambahkan.
 - **Ingress Telemetri Multi-Sport & Radar Kapasitas Atlet Hibrida (Phase 8)**:
