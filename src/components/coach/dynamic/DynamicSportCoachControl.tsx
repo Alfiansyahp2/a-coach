@@ -9,17 +9,12 @@ import {
 import { DynamicTelemetryForm } from "./DynamicTelemetryForm";
 import { DynamicCoachDebriefCard } from "./DynamicCoachDebriefCard";
 import { SportCluster } from "@/types/sportTelemetry";
+import { SportIcon } from "@/components/sports/SportIcon";
 import {
   Sparkles,
   PlusCircle,
   Search,
   Check,
-  Dumbbell,
-  Bike,
-  Swords,
-  Trophy,
-  Target,
-  Flame,
   ArrowRight,
 } from "lucide-react";
 
@@ -92,18 +87,6 @@ export function DynamicSportCoachControl({
     setIsCreatingNew(false);
     setNewSportName("");
     setNewSportStandard("");
-  };
-
-  const renderClusterIcon = (cluster: SportCluster) => {
-    switch (cluster) {
-      case "STRENGTH_POWER": return <Dumbbell className="w-3.5 h-3.5 text-[var(--color-endurance)]" />;
-      case "CYCLIC_ENDURANCE": return <Bike className="w-3.5 h-3.5 text-[var(--color-cycling)]" />;
-      case "COMBAT_MARTIAL_ARTS": return <Swords className="w-3.5 h-3.5 text-pink-400" />;
-      case "TEAM_FIELD_COURT": return <Trophy className="w-3.5 h-3.5 text-amber-400" />;
-      case "RACQUET_PRECISION": return <Target className="w-3.5 h-3.5 text-purple-400" />;
-      case "FUNCTIONAL_EXTREME": return <Flame className="w-3.5 h-3.5 text-emerald-400" />;
-      default: return <Sparkles className="w-3.5 h-3.5 text-[var(--color-cycling)]" />;
-    }
   };
 
   return (
@@ -206,7 +189,7 @@ export function DynamicSportCoachControl({
                       : "bg-[var(--color-surface-muted)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
                   }`}
                 >
-                  {renderClusterIcon(c.cluster)}
+                  <SportIcon sportCode={c.sportCode} cluster={c.cluster} className="w-3.5 h-3.5" />
                   <span>{c.sportName}</span>
                   {isSelected && <Check className="w-3 h-3 text-[var(--color-cycling)]" />}
                 </button>

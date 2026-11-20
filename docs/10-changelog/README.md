@@ -20,7 +20,7 @@ docs/10-changelog/
 ├── main/                        # 🚀 Rilis Master & Integrasi Makro (3 berkas)
 ├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (9 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
-    ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (32 berkas)
+    ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (38 berkas)
     ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (19 berkas)
     ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (9 berkas)
     ├── training/                # 🚴 Kalender Latihan & AI Coach Engine (3 berkas)
@@ -35,10 +35,12 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 35 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 38 Berkas
 
 Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & telemetri multi-sport:
 
+- **Mesin Icon Khusus 33 Cabang Olahraga Sistem (Specialized Sport Icons Engine)**:
+  - [`2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md) — Implementasi komponen modular `<SportIcon />` dengan pemetaan icon unik & presisi untuk masing-masing dari 33 cabor dunia (mengeliminasi penggunaan icon sepeda/dumbbell generik pada cabor lain), 8 icon SVG buatan tangan, fallback kluster otomatis, dan test suite verifikasi 42 checks.
 - **Penyelarasan Pemilih Cabor dengan 33 Cabor Resmi Sistem**:
   - [`2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-20-00_feat-system-sports-selector-alignment-and-33-cabor-registry.md) — Penyelarasan penuh pemilih cabor modal dengan 33 cabor terdaftar sistem, tab filter kluster, pencarian live, serta remediasi bug visual duplikasi tanda plus dan teks terpotong.
 - **Kontrol Auto-Generate UI Cabor Coach (Schema-Driven Adaptive UI Control)**:

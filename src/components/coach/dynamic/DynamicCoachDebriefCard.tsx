@@ -2,6 +2,7 @@
 
 import React from "react";
 import { SportCoachUiDefinition } from "@/lib/domain/coach/schema/sportCoachUiSchema";
+import { SportIcon } from "@/components/sports/SportIcon";
 import { ShieldCheck, ShieldAlert, Zap, Clock, BookOpen, HeartPulse } from "lucide-react";
 
 interface DynamicCoachDebriefCardProps {
@@ -31,13 +32,18 @@ export function DynamicCoachDebriefCard({
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-card)] p-4 font-mono space-y-3 shadow-xs">
       {/* Header with Coach Identity */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] pb-2.5">
-        <div>
-          <span className="text-[10px] text-[var(--color-cycling)] uppercase font-bold tracking-wider block">
-            AI Coach Specialize Intelligence
-          </span>
-          <h4 className="text-sm font-bold text-[var(--color-text-primary)]">
-            {definition.sportName} AI Coach
-          </h4>
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-muted)] flex items-center justify-center shrink-0 border border-[var(--color-border)]">
+            <SportIcon sportCode={definition.sportCode} cluster={definition.cluster} className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-[10px] text-[var(--color-cycling)] uppercase font-bold tracking-wider block">
+              AI Coach Specialize Intelligence
+            </span>
+            <h4 className="text-sm font-bold text-[var(--color-text-primary)]">
+              {definition.sportName} AI Coach
+            </h4>
+          </div>
         </div>
         <span className="text-[9px] px-2 py-0.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] font-semibold">
           {definition.cluster}
