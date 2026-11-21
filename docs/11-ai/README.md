@@ -22,7 +22,8 @@ docs/11-ai/
 ├── 05-PENYEMPURNAAN_SAINS_MEDIS_GIZI_DAN_JURNAL.md       <- Landasan ilmiah peer-reviewed (ACSM, NSCA, BJSM, ISSN, FIFA 11+)
 ├── 06-AUDIT_VALIDASI_ILMIAH_DAN_FILTER_ANTI_HALUSINASI.md <- Filter epistemologis anti-AI-slop & Grounded Indicator Protocol
 ├── 07-ROADMAP_IMPLEMENTASI_BERTAHAP.md                   <- Roadmap implementasi 8 fase terperinci (Gantt chart & exit criteria)
-└── 08-SPESIFIKASI_ARSITEKTUR_CLEAN_VERTICAL_SLICE_CABOR.md <- Spesifikasi arsitektur Clean Vertical Slice mandiri per cabor
+├── 08-SPESIFIKASI_ARSITEKTUR_CLEAN_VERTICAL_SLICE_CABOR.md <- Spesifikasi arsitektur Clean Vertical Slice mandiri per cabor
+└── 09-SPESIFIKASI_FORMULA_DAN_KALKULASI_MATEMATIS_33_CABOR.md <- Spesifikasi formula deterministik & matematika fisiologis 33 cabor
 ```
 
 ---
@@ -77,3 +78,9 @@ docs/11-ai/
 - **Desain Folder Mandiri**: Menetapkan **Opsi 3 (Vertical Slice Architecture by Sport)** sebagai standar tata kelola kode sumber untuk 33+ cabor.
 - **Pemisahan Tegas & Anti-Monolith**: Menjamin setiap cabor memiliki direktori uniknya sendiri (`sports/<cabor>/`), melarang impor silang antar-cabor, dan mengisolasi hukum fisika/fisiologi ke `kernels/` (Pure Scientific Math Engines).
 - **Protokol Nol Regresi**: Menjaga keutuhan 184 uji otomatis dan API routes melalui *re-export facade* di `agents/index.ts`.
+
+### 9. [Spesifikasi Formula & Kalkulasi Matematis 33 Cabor](./09-SPESIFIKASI_FORMULA_DAN_KALKULASI_MATEMATIS_33_CABOR.md)
+- **Buku Pedoman Formula Deterministik**: Menetapkan rumus sains olahraga teruji matematis KaTeX untuk seluruh 33 cabor dunia lintas 6 klaster (Ketahanan Siklik, Kekuatan/Daya, Bela Diri, Beregu/Lapangan, Raket/Presisi, dan Fungsional/Ekstrem).
+- **Parameter Kinetika & Fisiologis Eksak**: Menjabarkan metrik spesifik seperti Coggan NP/IF/TSS, SWOLF, CSS, Brzycki 1RM, Sheiko INOL, Catapult Tri-Axial PlayerLoad, Bradley HSR, Punch Density, Arrow Draw Weight Volume, dan Finger Pulley A2/A4 Tension.
+- **Arbitrase Atlet Hibrida**: Menetapkan batasan molekuler jeda $\ge 6$ jam AMPK vs mTORC1, gerbang deplesi neuromuskular SSP (CNS drain), dan matriks tabrakan sendi anatomis.
+- **Cetak Biru Porting Python**: Menjadi acuan spesifikasi teknis untuk implementasi modul deterministik baru pada `python_engine/domain/physiology/`.
