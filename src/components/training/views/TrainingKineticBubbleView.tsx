@@ -4,7 +4,7 @@ import React from "react";
 import { ScheduledWorkout, Activity } from "@/types";
 import { CalendarWeek } from "../calendarBuilder";
 import { KineticDayBubble } from "../kinetic/KineticDayBubble";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 import { Bike, Footprints, Moon, CheckCircle2, Zap } from "lucide-react";
 
 interface TrainingKineticBubbleViewProps {

@@ -10,6 +10,7 @@ import { PhysiologicalTelemetryCard } from "./PhysiologicalTelemetryCard";
 import { AthleteEquipmentCard } from "./AthleteEquipmentCard";
 import { KinematicGateSummaryCard } from "./KinematicGateSummaryCard";
 import { EditProfileModal } from "./EditProfileModal";
+import { MultiSportRadarChart } from "@/components/analytics/MultiSportRadarChart";
 
 interface AthleteProfileHubProps {
   initialUser: User;
@@ -95,7 +96,10 @@ export function AthleteProfileHub({
         </div>
       </div>
 
-      {/* 4. Equipment & Gear Locker (Sepatu & Sepeda) */}
+      {/* 4. Multi-Sport Radar Chart: 33 Cabor Hybrid Athlete Capacity */}
+      <MultiSportRadarChart activities={activities} athleteName={user.name} />
+
+      {/* 5. Equipment & Gear Locker (Sepatu & Sepeda) */}
       <AthleteEquipmentCard initialEquipment={initialEquipment} />
 
       {/* 5. Interactive Edit Modal */}

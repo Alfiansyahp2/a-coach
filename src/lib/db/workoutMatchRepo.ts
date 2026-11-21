@@ -1,6 +1,6 @@
 import { pgPool, ensureLocalStore, saveLocalStore, DEFAULT_USER_ID } from './client';
 import { WorkoutActivityMatch } from '@/types';
-import { normalizeActivityRow } from './activityRepo';
+import { normalizeActivityRow } from './activity';
 
 export async function getWorkoutActivityMatches(userId: string = DEFAULT_USER_ID): Promise<WorkoutActivityMatch[]> {
   if (pgPool) {

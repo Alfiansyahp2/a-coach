@@ -15,7 +15,7 @@ import {
   WeeklyActivityAndInjuryRecap,
   RecapScope,
 } from "@/lib/domain/analytics/weeklyRecapTypes";
-import { formatDateOnly } from "@/lib/formatters";
+import { formatDateOnly } from "@/lib/shared/formatters";
 import { WeeklyRecapTimeline } from "./WeeklyRecapTimeline";
 import { WeeklyRecapPrescription } from "./WeeklyRecapPrescription";
 import { WeeklyRecapProMetricsSection } from "@/components/analytics/WeeklyRecapProMetricsSection";

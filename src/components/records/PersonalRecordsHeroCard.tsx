@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { PersonalRecord } from "@/types";
-import { formatDate } from "@/lib/formatters";
+import { formatDate } from "@/lib/shared/formatters";
 import { Calendar, ArrowUpRight } from "lucide-react";
 
 interface PersonalRecordsHeroCardProps {

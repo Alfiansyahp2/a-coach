@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ScheduledWorkout } from "@/types";
 import { submitActivityWithCheckinAndInjury } from "./activitySubmissionHelpers";
+import { SportSpecificData } from "./SportSpecificTelemetryFields";
 
 interface UseAddActivityFormProps {
   defaultSportType?: string;
@@ -48,6 +49,7 @@ export function useAddActivityForm({
   const [durationSeconds, setDurationSeconds] = useState<string>("0");
   const [elevationMeters, setElevationMeters] = useState<string>("35");
   const [description, setDescription] = useState<string>("");
+  const [sportSpecificData, setSportSpecificData] = useState<SportSpecificData>({});
 
   // Post-Activity Check-in (Image 2)
   const [painDuring, setPainDuring] = useState<number>(0);
@@ -141,6 +143,7 @@ export function useAddActivityForm({
         painDuring, painAfter, painNextDay, swellingObserved, instabilityObserved,
         rpeScore, subjectiveNotes, hasNewInjury, injuryRegion, injurySide,
         injurySeverity, injuryMechanism, injuryNotes,
+        sportSpecificData,
       });
       setSuccessMsg(res.message);
       setTimeout(() => {
@@ -166,6 +169,7 @@ export function useAddActivityForm({
     isParsingImage, setIsParsingImage, ocrSuccessMsg, setOcrSuccessMsg, ocrRawText,
     setOcrRawText, isSubmitting, errorMsg, setErrorMsg, successMsg, handleTelemetryExtracted,
     numericDistanceKm, totalDurationSeconds, calculatedSpeedKmh, calculatedPaceMinKm,
+    sportSpecificData, setSportSpecificData,
     handleNextStep, handlePrevStep, handleSubmit,
   };
 }

@@ -4,7 +4,7 @@ import {
   formatCadence,
   formatPower,
   formatCalories,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 import { Flame, Heart, RotateCcw, Zap } from "lucide-react";
 import { Activity } from "@/types";
 

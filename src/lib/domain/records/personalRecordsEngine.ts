@@ -1,5 +1,5 @@
 import { Activity, PersonalRecord } from "@/types";
-import { formatDuration } from "@/lib/formatters";
+import { formatDuration } from "@/lib/shared/formatters";
 
 export function computePersonalRecords(
   activities: Activity[],

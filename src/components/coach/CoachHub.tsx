@@ -16,6 +16,7 @@ import { CyclingCoachView } from "./CyclingCoachView";
 import { CoachDailyBriefingCard } from "./CoachDailyBriefingCard";
 import { PerformanceManagementChart } from "./PerformanceManagementChart";
 import { generateDailyCoachBriefing } from "@/lib/domain/coach/dailyCoachBriefingEngine";
+import { DynamicSportCoachControl } from "./dynamic/DynamicSportCoachControl";
 
 interface CoachHubProps {
   initialMode?: "running" | "cycling";
@@ -103,6 +104,11 @@ export function CoachHub({
           onSwitchToRunning={() => setCurrentMode("running")}
         />
       )}
+
+      {/* 5. Dynamic Multi-Sport Coach Generator Control */}
+      <div className="pt-2">
+        <DynamicSportCoachControl />
+      </div>
     </div>
   );
 }

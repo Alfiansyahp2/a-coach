@@ -18,7 +18,7 @@ import {
   formatDurationHuman,
   speedMpsToPace,
   speedMpsToKmh,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 import { getSportMeta, getDistinctSports } from "@/lib/domain/sports/sportUtils";
 
 interface ActivityDeckHeaderProps {

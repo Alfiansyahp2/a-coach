@@ -23,11 +23,12 @@ import {
   formatDate,
   speedMpsToPace,
   speedMpsToKmh,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 import { EditActivityModal } from "@/components/activity/modal/EditActivityModal";
 import { ActivityGroup } from "./activityGroupUtils";
 import { Activity } from "@/types";
 import { getSportMeta } from "@/lib/domain/sports/sportUtils";
+import { MultiSportTelemetryBadge } from "@/components/activity/MultiSportTelemetryBadge";
 
 interface ActivityGroupCardProps {
   groupKey: string;
@@ -180,23 +181,18 @@ export function ActivityGroupCard({
                   </div>
 
                   <div className="min-w-0 space-y-0.5">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Link
                         href={`/activities/${act.id}`}
                         className="font-bold text-xs text-[var(--color-text-primary)] hover:text-[var(--color-cycling)] transition-colors truncate"
                       >
                         {act.name}
                       </Link>
-                      <span
-                        className="text-[9px] px-1.5 py-0.2 rounded-full border font-semibold shrink-0"
-                        style={{
-                          backgroundColor: `${meta.accentHex}15`,
-                          color: meta.accentHex,
-                          borderColor: `${meta.accentHex}40`,
-                        }}
-                      >
-                        {act.sport_type}
-                      </span>
+                      <MultiSportTelemetryBadge
+                        sportType={act.sport_type}
+                        distanceKm={act.distance_meters / 1000}
+                        durationMinutes={act.moving_time_seconds / 60}
+                      />
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-3 text-[10.5px] text-[var(--color-text-muted)] font-tabular">

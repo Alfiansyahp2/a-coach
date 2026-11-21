@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Activity } from "@/types";
 import { Activity as ActivityIcon } from "lucide-react";
-import { formatDistance, formatDuration, formatDate } from "@/lib/formatters";
+import { formatDistance, formatDuration, formatDate } from "@/lib/shared/formatters";
 
 interface CoachRecentSessionsListProps {
   activities: Activity[];
