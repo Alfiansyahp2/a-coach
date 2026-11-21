@@ -12,6 +12,9 @@ from .models import (
     PolarizationBreakdown,
     WoWDelta,
     MusculoskeletalStrain,
+    StrengthSetInput,
+    StrengthSessionInput,
+    StrengthSessionResponse,
 )
 from .banister_engine import (
     calculate_trimp,
@@ -25,6 +28,16 @@ from .decoupling_engine import (
     calculate_session_debrief,
 )
 from .weekly_recap_calculator import compute_weekly_pro_recap
+from .strength_engine import (
+    calculate_brzycki_1rm,
+    calculate_epley_1rm,
+    calculate_volume_tonnage,
+    calculate_sheiko_inol,
+    calculate_session_inol,
+    evaluate_velocity_loss_cutoff,
+    calculate_calisthenics_torque,
+    evaluate_strength_session,
+)
 
 __all__ = [
     "TRIMPCalculationInput",
@@ -40,6 +53,9 @@ __all__ = [
     "PolarizationBreakdown",
     "WoWDelta",
     "MusculoskeletalStrain",
+    "StrengthSetInput",
+    "StrengthSessionInput",
+    "StrengthSessionResponse",
     "calculate_trimp",
     "calculate_session_load",
     "get_tsb_interpretation",
@@ -48,4 +64,12 @@ __all__ = [
     "evaluate_zone_compliance",
     "calculate_session_debrief",
     "compute_weekly_pro_recap",
+    "calculate_brzycki_1rm",
+    "calculate_epley_1rm",
+    "calculate_volume_tonnage",
+    "calculate_sheiko_inol",
+    "calculate_session_inol",
+    "evaluate_velocity_loss_cutoff",
+    "calculate_calisthenics_torque",
+    "evaluate_strength_session",
 ]

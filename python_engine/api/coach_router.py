@@ -7,6 +7,8 @@ from python_engine.domain.physiology.models import (
     TRIMPCalculationInput,
     WeeklyProRecapPayload,
     WeeklyProRecapResponse,
+    StrengthSessionInput,
+    StrengthSessionResponse,
 )
 from python_engine.domain.physiology.banister_engine import (
     calculate_pmc,
@@ -17,6 +19,9 @@ from python_engine.domain.physiology.decoupling_engine import (
 )
 from python_engine.domain.physiology.weekly_recap_calculator import (
     compute_weekly_pro_recap,
+)
+from python_engine.domain.physiology.strength_engine import (
+    evaluate_strength_session,
 )
 
 router = APIRouter(prefix="/calculate/coach", tags=["Coach & Physiology"])
@@ -63,3 +68,13 @@ def compute_pro_weekly_recap(payload: WeeklyProRecapPayload) -> WeeklyProRecapRe
         peak_pain=payload.peak_pain_score,
         has_swelling=payload.has_swelling,
     )
+
+
+@router.post("/strength/evaluate", response_model=StrengthSessionResponse)
+def compute_strength_session_evaluation(payload: StrengthSessionInput) -> StrengthSessionResponse:
+    """
+    Evaluates Phase 1 Strength, Power & Hypertrophy metrics: Volume Tonnage,
+    Sheiko INOL, 1RM estimates, VBT fatigue, and CNS drain.
+    """
+    return evaluate_strength_session(payload)
+
