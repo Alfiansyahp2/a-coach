@@ -347,12 +347,12 @@ python_engine/domain/physiology/
 ├── banister_engine.py                 # Fisiologi Endurance (TRIMP, EWMA CTL/ATL, PMC) [Eksisting]
 ├── decoupling_engine.py               # Disosiasi Aerobik & Zone Compliance Index [Eksisting]
 ├── weekly_recap_calculator.py         # Foster sRPE, Monotony, Strain, Seiler 80/20 [Eksisting]
-├── strength_engine.py                 # [BARU] 1RM Brzycki, Volume Tonase, Sheiko INOL, RIR
-├── combat_engine.py                   # [BARU] Punch Density, Grappling Strain, Head Impact
-├── team_engine.py                     # [BARU] Catapult PlayerLoad, Bradley HSR, Jump Decay
-├── racquet_precision_engine.py        # [BARU] Smash Accel, Draw Weight Tension, Tremor
-├── functional_extreme_engine.py       # [BARU] Metcon Power, Finger Pulley Tension, Drop GRF
-└── systemic_arbiter.py                # [BARU] AMPK vs mTORC1, CNS Drain, Joint Collisions
+├── strength_engine.py                 # [FASE 1] 1RM Brzycki, Volume Tonase, Sheiko INOL, VBT
+├── combat_engine.py                   # [FASE 2] Punch Density, Grappling Strain, Head Impact Gate
+├── team_engine.py                     # [FASE 3] Catapult PlayerLoad, Bradley HSR, Jump Decay
+├── racquet_precision_engine.py        # [FASE 4] Smash Accel, Draw Weight Tension, Tremor Index
+├── functional_extreme_engine.py       # [FASE 5] Metcon Power, Finger Pulley Tension, Drop GRF
+└── systemic_arbiter.py                # [FASE 6] AMPK vs mTORC1, CNS Drain, Joint Collisions
 ```
 
 ### Pemetaan Endpoint FastAPI (`python_engine/main.py`)
@@ -361,10 +361,101 @@ python_engine/domain/physiology/
 
 ---
 
-## 10. Validasi & Pengujian Matematika
+## 10. Roadmap Implementasi Bertahap (Multi-Phase Rollout Plan)
 
-Setiap modul kalkulasi di atas wajib disertai rangkaian unit test **Pytest** di `python_engine/tests/`:
-1. `test_strength_engine.py`: Verifikasi 1RM Brzycki, perhitungan INOL, dan tonase.
-2. `test_combat_engine.py`: Verifikasi pembagian beban striking vs grappling.
-3. `test_team_engine.py`: Verifikasi formula triaksial PlayerLoad dan zona kecepatan Bradley.
-4. `test_systemic_arbiter.py`: Verifikasi penolakan sesi bertabrakan (AMPK vs mTORC1 dan kelelahan lutut).
+Untuk mentransformasikan seluruh formula matematis di atas ke dalam kode komputasi nyata di `python_engine/` tanpa mengorbankan stabilitas sistem eksisting (*zero regression*), eksekusi dibagi ke dalam **6 Fase Rekayasa Bertahap**:
+
+```mermaid
+gantt
+    title Roadmap Implementasi Python Engine 33 Cabor (Multi-Phase Rollout)
+    dateFormat  YYYY-MM-DD
+    section Fase 1: Kekuatan & Daya
+    strength_engine.py (1RM, Tonase, INOL, VBT)        :active, 2026-11-21, 2026-11-23
+    test_strength.py & Pydantic Models                 :active, 2026-11-21, 2026-11-23
+
+    section Fase 2: Bela Diri & Kontak Fisik
+    combat_engine.py (Punch Density, Grappling)        :2026-11-24, 2026-11-26
+    test_combat.py & SCAT6 Concussion Gate             :2026-11-25, 2026-11-27
+
+    section Fase 3: Beregu & Lapangan
+    team_engine.py (Catapult PlayerLoad, Bradley HSR)  :2026-11-27, 2026-11-29
+    test_team.py & Jump Fatigue CMJ                    :2026-11-28, 2026-11-30
+
+    section Fase 4: Raket & Presisi
+    racquet_precision_engine.py (Tension, Tremor)      :2026-12-01, 2026-12-03
+    test_racquet_precision.py                          :2026-12-02, 2026-12-04
+
+    section Fase 5: Fungsional & Ekstrem
+    functional_extreme_engine.py (Metcon, Pulley)      :2026-12-04, 2026-12-06
+    test_functional_extreme.py                         :2026-12-05, 2026-12-07
+
+    section Fase 6: Arbitrase & API Ingress
+    systemic_arbiter.py (AMPK vs mTORC1, CNS Drain)    :2026-12-08, 2026-12-10
+    FastAPI Router /api/v1/coach/cabor-telemetry       :2026-12-09, 2026-12-11
+```
+
+### Rincian Deliverables Tiap Fase:
+
+#### 🏋️ FASE 1: Mesin Fisiologi Kekuatan, Daya & Hipertrofi
+- **Target Modul**: `python_engine/domain/physiology/strength_engine.py` & `test_strength.py`
+- **Cakupan Cabor**: Powerlifting, Angkat Besi Olimpiade, Kalistenik, Strongman, Binaraga.
+- **Deliverables Rekayasa**:
+  1. `calculate_brzycki_1rm(weight, reps)` & `calculate_epley_1rm(weight, reps)`
+  2. `calculate_volume_tonnage(sets)`
+  3. `calculate_sheiko_inol(reps, pct_1rm)` & `calculate_session_inol(sets, 1rm_map)`
+  4. `evaluate_velocity_loss_cutoff(v_init, v_curr, threshold_pct)`
+  5. `calculate_calisthenics_torque(bodyweight_kg, lever_length_m, angle_deg)`
+  6. `evaluate_strength_fatigue(total_inol, total_tonnage, avg_rpe)`
+
+#### 🥊 FASE 2: Mesin Fisiologi Bela Diri & Kontak Fisik
+- **Target Modul**: `python_engine/domain/physiology/combat_engine.py` & `test_combat.py`
+- **Cakupan Cabor**: Tinju, MMA, BJJ, Pencak Silat, Judo, Muay Thai.
+- **Deliverables Rekayasa**:
+  1. `calculate_punch_density(total_punches, round_minutes)`
+  2. `partition_mma_workload(standup_min, mat_min, rpe_strike, rpe_grapple)`
+  3. `evaluate_concussion_scat6_gate(head_impacts, symptoms)`
+  4. `calculate_throw_kinetic_work(partner_weight_kg, throw_count)`
+  5. `calculate_tibial_impact_index(kick_count, intensity_multiplier)`
+
+#### ⚽ FASE 3: Mesin Fisiologi Beregu & Lapangan Intermiten
+- **Target Modul**: `python_engine/domain/physiology/team_engine.py` & `test_team.py`
+- **Cakupan Cabor**: Sepak Bola, Bola Basket, Bola Voli, Futsal, Rugbi, Hoki Lapangan.
+- **Deliverables Rekayasa**:
+  1. `calculate_catapult_player_load(accel_x, accel_y, accel_z)`
+  2. `partition_bradley_hsr(speed_samples_mps, duration_sec)`
+  3. `evaluate_jump_shock_load(athlete_weight_kg, jump_heights_m, landing_factors)`
+  4. `evaluate_cmj_decay(pre_match_cmj, post_match_cmj)`
+  5. `evaluate_collision_index(high_g_impacts_count)`
+
+#### 🏸 FASE 4: Mesin Fisiologi Raket & Presisi Neuromuskular
+- **Target Modul**: `python_engine/domain/physiology/racquet_precision_engine.py` & `test_racquet_precision.py`
+- **Cakupan Cabor**: Bulu Tangkis, Tenis Lapangan, Tenis Meja, Panahan, Menembak Presisi.
+- **Deliverables Rekayasa**:
+  1. `calculate_archery_draw_volume(draw_weight_lbs, arrow_count)`
+  2. `evaluate_hold_tremor_index(tremor_amplitudes_mm)`
+  3. `calculate_diastolic_sync_rate(shots_diastole, total_shots)`
+  4. `calculate_shoulder_kinetic_load(serve_speeds_kmh, multiplier)`
+
+#### 🧗 FASE 5: Mesin Fisiologi Fungsional & Ekstrem
+- **Target Modul**: `python_engine/domain/physiology/functional_extreme_engine.py` & `test_functional_extreme.py`
+- **Cakupan Cabor**: CrossFit/Hyrox, Panjat Tebing, Senam Artistik, Surfing, Skateboarding.
+- **Deliverables Rekayasa**:
+  1. `calculate_metcon_power_output(work_joules, total_sec, transition_sec)`
+  2. `calculate_finger_pulley_tension(fingertip_force_n, crimp_lever_factor)`
+  3. `evaluate_landing_peak_grf(drop_height_m, athlete_weight_kg, mat_damping)`
+  4. `calculate_surf_paddle_ratio(paddle_min, wave_min)`
+
+#### 🧬 FASE 6: Arbitrase Kelelahan Sistemik & Dispatcher API
+- **Target Modul**: `python_engine/domain/physiology/systemic_arbiter.py`, `python_engine/api/coach_router.py` & `test_systemic_arbiter.py`
+- **Cakupan Cabor**: Seluruh 33 Cabor Dunia & Atlet Hibrida.
+- **Deliverables Rekayasa**:
+  1. `evaluate_ampk_mtorc1_interference(endurance_session, strength_session)`
+  2. `calculate_cns_exhaustion_index(sessions)`
+  3. `detect_joint_biomechanical_collisions(scheduled_sessions)`
+  4. FastAPI Ingress Handler: `POST /api/v1/coach/cabor-telemetry` & `POST /api/v1/coach/hybrid-arbitration`
+
+---
+
+## 11. Validasi & Pengujian Matematika
+
+Setiap modul kalkulasi di atas wajib memenuhi kriteria uji unit **Pytest (100% Pass)** di `python_engine/tests/` dan tidak boleh menghasilkan regresi terhadap Next.js TypeScript test runner (`npm run test:all`).

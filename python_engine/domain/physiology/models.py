@@ -130,3 +130,40 @@ class WeeklyProRecapResponse(BaseModel):
     periodization_phase: str  # BASE_BUILD | PROGRESSIVE_OVERLOAD | PEAK_WEEK | DELOAD_RECOVERY
     pro_coach_verdict: str
     next_week_bridge_advice: str
+
+
+# ==============================================================================
+# PHASE 1: STRENGTH, POWER & HYPERTROPHY MODELS
+# ==============================================================================
+
+class StrengthSetInput(BaseModel):
+    exercise_name: str = Field(..., description="Name of the exercise (e.g. 'Back Squat', 'Bench Press', 'Deadlift')")
+    weight_kg: float = Field(..., ge=0, description="Load in kilograms")
+    reps: int = Field(..., ge=1, le=100, description="Completed valid repetitions")
+    rpe: Optional[float] = Field(default=None, ge=1, le=10, description="Rate of Perceived Exertion (Borg CR10)")
+    rir: Optional[int] = Field(default=None, ge=0, le=10, description="Reps In Reserve")
+    bar_velocity_mps: Optional[float] = Field(default=None, ge=0, description="Mean concentric bar velocity in m/s")
+    is_warmup: bool = Field(default=False, description="Whether this is a warm-up set (excluded from hard set tonnages)")
+
+
+class StrengthSessionInput(BaseModel):
+    session_id: Optional[str] = None
+    sport_code: str = Field(default="SPORT_POWERLIFTING")
+    sets: List[StrengthSetInput] = Field(default_factory=list)
+    known_1rm_map: Dict[str, float] = Field(default_factory=dict, description="Known 1RM per exercise")
+    bodyweight_kg: float = Field(default=70.0, ge=30, le=300)
+    duration_minutes: float = Field(default=60.0, ge=1)
+
+
+class StrengthSessionResponse(BaseModel):
+    total_tonnage_kg: float
+    total_reps: int
+    hard_sets_count: int
+    exercise_inol_map: Dict[str, float]
+    total_session_inol: float
+    estimated_1rm_map: Dict[str, float]
+    fatigue_classification: str  # RECOVERY | OPTIMAL_ACCUMULATION | HIGH_FATIGUE | CRITICAL_OVERREACHING
+    cns_drain_score: float  # 0 to 10 scale
+    recommended_recovery_hours: float
+    coach_verdict: str
+

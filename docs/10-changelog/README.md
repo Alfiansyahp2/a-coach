@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 99 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 100 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -62,8 +62,9 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & t
 
 ---
 
-### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 20 Berkas
+### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 21 Berkas
 
+- [`2026-11-21_19-35-00_feat-phase-1-strength-power-hypertrophy-engine-implementation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-21_19-35-00_feat-phase-1-strength-power-hypertrophy-engine-implementation.md) — Implementasi Fase 1 Mesin Fisiologi Kekuatan, Daya & Hipertrofi (`strength_engine.py`): 1RM Brzycki & Epley, volume tonase kumulatif, Sheiko INOL, VBT velocity loss cut-off, torsi kalistenik, evaluasi pengurasan SSP (CNS drain), dan 8 uji Pytest baru.
 - [`2026-11-21_09-30-00_feat-sports-science-mathematics-and-33-cabor-calculation-specification.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-21_09-30-00_feat-sports-science-mathematics-and-33-cabor-calculation-specification.md) — Spesifikasi formula deterministik & kalkulasi matematis komprehensif untuk seluruh 33 cabor dunia lintas 6 klaster fisiologis serta arbitrase atlet hibrida.
 - [`2026-11-18_10-30-00_feat-multi-sport-ai-coordinator-and-shared-science-kernels-phase-1.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-18_10-30-00_feat-multi-sport-ai-coordinator-and-shared-science-kernels-phase-1.md) — Implementasi Phase 1: Koordinator Multi-Sport AI, 3 shared science kernels (Foster sRPE, Gabbett ACWR, Issurin Block Periodization), PostgreSQL Tabel 18 sport_activity_telemetry, dan 13 uji verifikasi otomatis.
 - [`2026-11-16_09-58-00_feat-dynamic-ground-truth-telemetry-and-record-synchronization.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-16_09-58-00_feat-dynamic-ground-truth-telemetry-and-record-synchronization.md) — Dynamic ground-truth telemetry engine, equipment mileage subquery, dan personal record synchronization.
