@@ -165,3 +165,42 @@ def test_combat_api_endpoint():
     assert data["grappling_load_au"] > 0
     assert data["tibial_stress_score"] > 0
     assert "SPORT_MMA" in data["coach_verdict"]
+
+
+def test_throw_kinetic_work_fallback_weight():
+    # If partner_weight_kg is None or 0, fallback to default (75.0 kg)
+    work_fallback = calculate_throw_kinetic_work(partner_weight_kg=None, throw_count=10, avg_lift_height_m=1.2)
+    work_explicit = calculate_throw_kinetic_work(partner_weight_kg=75.0, throw_count=10, avg_lift_height_m=1.2)
+    assert work_fallback == work_explicit
+    assert 8.8 <= work_fallback <= 8.9
+
+
+def test_scat6_rotational_impacts_trigger():
+    # 6 rotational impacts (hooks/high kicks) trigger concussion gate even if total impacts < 15
+    res = evaluate_concussion_scat6_gate(head_impacts=6, symptoms=[], rotational_impacts=6)
+    assert res["gate_triggered"] is True
+    assert res["action"] == "HIGH_HEAD_IMPACT_SUSPENSION_7_DAYS"
+    assert res["recommended_rest_days"] == 7
+    assert "rotasional" in res["reason"]
+
+
+def test_bjj_gi_vs_nogi_fatigue_multiplier():
+    # Gi training has 1.25x grip multiplier compared to No-Gi
+    work_gi, _ = evaluate_bjj_strain(mat_time_minutes=30.0, avg_rpe=8.0, is_gi=True)
+    work_nogi, _ = evaluate_bjj_strain(mat_time_minutes=30.0, avg_rpe=8.0, is_gi=False)
+    assert work_gi == round(work_nogi * 1.25, 2)
+
+
+def test_evaluate_combat_session_empty_safeguard():
+    session = CombatSessionInput(
+        session_id="session_empty",
+        sport_code="SPORT_BOXING",
+        rounds=[],
+        symptoms_reported=[],
+    )
+    resp = evaluate_combat_session(session)
+    assert resp.total_duration_minutes == 0.0
+    assert resp.total_combat_workload_au == 0.0
+    assert resp.concussion_gate_triggered is False
+    assert "nihil" in resp.coach_verdict.lower()
+
