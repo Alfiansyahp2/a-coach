@@ -11,6 +11,8 @@ from python_engine.domain.physiology.models import (
     StrengthSessionResponse,
     CombatSessionInput,
     CombatSessionResponse,
+    TeamSessionInput,
+    TeamSessionResponse,
 )
 from python_engine.domain.physiology.banister_engine import (
     calculate_pmc,
@@ -27,6 +29,9 @@ from python_engine.domain.physiology.strength_engine import (
 )
 from python_engine.domain.physiology.combat_engine import (
     evaluate_combat_session,
+)
+from python_engine.domain.physiology.team_engine import (
+    evaluate_team_session,
 )
 
 router = APIRouter(prefix="/calculate/coach", tags=["Coach & Physiology"])
@@ -91,5 +96,16 @@ def compute_combat_session_evaluation(payload: CombatSessionInput) -> CombatSess
     Partitioning, SCAT6 Concussion Gate, and Tibial/Cervical Strain.
     """
     return evaluate_combat_session(payload)
+
+
+@router.post("/team/evaluate", response_model=TeamSessionResponse)
+def compute_team_session_evaluation(payload: TeamSessionInput) -> TeamSessionResponse:
+    """
+    Evaluates Phase 3 Intermittent Team, Field & Court Sports metrics:
+    Catapult PlayerLoad, Bradley HSR, Hamstring risk, Jump shock & Patellar warning,
+    CMJ decay, Futsal decel shock, Rugby collisions, and Field Hockey lumbar strain.
+    """
+    return evaluate_team_session(payload)
+
 
 
