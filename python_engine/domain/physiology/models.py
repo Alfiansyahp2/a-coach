@@ -167,3 +167,92 @@ class StrengthSessionResponse(BaseModel):
     recommended_recovery_hours: float
     coach_verdict: str
 
+
+# ==============================================================================
+# PHASE 2: HIGH-INTENSITY COMBAT & MARTIAL ARTS MODELS
+# ==============================================================================
+
+class CombatRoundInput(BaseModel):
+    round_number: int = Field(default=1, ge=1, description="Round sequence number")
+    duration_minutes: float = Field(default=3.0, ge=0.5, le=15.0, description="Round duration in minutes (e.g. 3 min boxing, 5 min MMA)")
+    rpe: float = Field(default=7.0, ge=1.0, le=10.0, description="Round RPE (Borg CR10)")
+    punches_thrown: int = Field(default=0, ge=0, description="Count of punches thrown")
+    kicks_thrown: int = Field(default=0, ge=0, description="Count of roundhouse/low/body kicks")
+    takedowns_attempted: int = Field(default=0, ge=0, description="Count of takedown / throw attempts")
+    mat_time_minutes: float = Field(default=0.0, ge=0, description="Time spent in ground fighting / grappling")
+    head_impacts_count: int = Field(default=0, ge=0, description="Count of hard head blows received during round")
+    inversion_minutes: float = Field(default=0.0, ge=0, description="Time spent inverted (BJJ guard / stacking)")
+
+
+class CombatSessionInput(BaseModel):
+    session_id: Optional[str] = None
+    sport_code: str = Field(default="SPORT_BOXING", description="SPORT_BOXING | SPORT_MMA | SPORT_BJJ | SPORT_PENCAK_SILAT | SPORT_JUDO | SPORT_MUAY_THAI")
+    partner_weight_kg: Optional[float] = Field(default=None, ge=30.0, le=200.0, description="Sparring partner bodyweight in kg")
+    has_headgear: bool = Field(default=False, description="Whether athlete used headgear during sparring")
+    has_shin_guards: bool = Field(default=True, description="Whether shin guards were worn during kicking")
+    rounds: List[CombatRoundInput] = Field(default_factory=list, description="Array of rounds completed")
+    symptoms_reported: List[str] = Field(default_factory=list, description="Symptoms e.g. 'headache', 'dizziness', 'nausea', 'photophobia'")
+
+
+class CombatSessionResponse(BaseModel):
+    total_duration_minutes: float
+    total_combat_workload_au: float
+    punch_density_per_min: float
+    striking_load_au: float
+    grappling_load_au: float
+    concussion_gate_triggered: bool
+    concussion_action: str
+    tibial_stress_score: float
+    cervical_strain_index: float
+    recommended_rest_days: int
+    coach_verdict: str
+
+
+# ==============================================================================
+# PHASE 3: INTERMITTENT TEAM, FIELD & COURT SPORTS MODELS
+# ==============================================================================
+
+class TeamSessionInput(BaseModel):
+    session_id: Optional[str] = None
+    sport_code: str = Field(
+        default="SPORT_FOOTBALL",
+        description="SPORT_FOOTBALL | SPORT_BASKETBALL | SPORT_VOLLEYBALL | SPORT_FUTSAL | SPORT_RUGBY | SPORT_FIELD_HOCKEY"
+    )
+    duration_minutes: float = Field(default=90.0, ge=1.0)
+    athlete_weight_kg: float = Field(default=75.0, ge=30.0, le=200.0)
+    rpe: float = Field(default=7.0, ge=1.0, le=10.0)
+    triaxial_accel_series: List[List[float]] = Field(default_factory=list, description="Tri-axial acceleration [ax, ay, az]")
+    speed_samples_mps: List[float] = Field(default_factory=list, description="Speed time-series in m/s")
+    sample_interval_s: float = Field(default=1.0, ge=0.01, le=10.0)
+    chronic_sprint_distance_m: Optional[float] = Field(default=None, ge=0.0, description="4-week chronic avg sprint m")
+    jump_count: int = Field(default=0, ge=0, description="Total jump count")
+    jump_heights_m: List[float] = Field(default_factory=list, description="Individual jump heights in meters")
+    single_leg_landings_count: int = Field(default=0, ge=0, description="Rapid deceleration single-leg landing count")
+    pre_match_cmj_m: Optional[float] = Field(default=None, ge=0.05, le=1.5, description="Pre-match CMJ height in meters")
+    post_match_cmj_m: Optional[float] = Field(default=None, ge=0.05, le=1.5, description="Post-match CMJ height in meters")
+    high_g_collisions_count: int = Field(default=0, ge=0, description="Collisions > 5g")
+    severe_collisions_count: int = Field(default=0, ge=0, description="Collisions > 8g")
+    repeated_high_intensity_efforts: int = Field(default=0, ge=0, description="RHIE clusters (<21s recovery)")
+    micro_decelerations_count: int = Field(default=0, ge=0, description="Decelerations < -3.0 m/s^2")
+    lumbar_flexion_minutes: float = Field(default=0.0, ge=0.0, description="Trunk flexion < 45 deg duration")
+
+
+class TeamSessionResponse(BaseModel):
+    total_player_load: float
+    player_load_per_minute: float
+    total_distance_meters: float
+    hsr_distance_meters: float
+    sprint_distance_meters: float
+    hamstring_strain_risk: str  # LOW | MODERATE | HIGH
+    jump_shock_load_kj: float
+    patellar_overload_warning: bool
+    cmj_decay_percentage: Optional[float]
+    neuromuscular_fatigue_level: str  # FRESH | MILD | ELEVATED | CRITICAL
+    collision_impact_score: float
+    quad_eccentric_shock_au: float
+    lumbar_strain_index: float
+    recommended_recovery_hours: float
+    coach_verdict: str
+
+
+
