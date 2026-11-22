@@ -13,6 +13,8 @@ from python_engine.domain.physiology.models import (
     CombatSessionResponse,
     TeamSessionInput,
     TeamSessionResponse,
+    RacquetPrecisionSessionInput,
+    RacquetPrecisionSessionResponse,
 )
 from python_engine.domain.physiology.banister_engine import (
     calculate_pmc,
@@ -32,6 +34,9 @@ from python_engine.domain.physiology.combat_engine import (
 )
 from python_engine.domain.physiology.team_engine import (
     evaluate_team_session,
+)
+from python_engine.domain.physiology.racquet_precision_engine import (
+    evaluate_racquet_precision_session,
 )
 
 router = APIRouter(prefix="/calculate/coach", tags=["Coach & Physiology"])
@@ -106,6 +111,19 @@ def compute_team_session_evaluation(payload: TeamSessionInput) -> TeamSessionRes
     CMJ decay, Futsal decel shock, Rugby collisions, and Field Hockey lumbar strain.
     """
     return evaluate_team_session(payload)
+
+
+@router.post("/racquet/evaluate", response_model=RacquetPrecisionSessionResponse)
+def compute_racquet_session_evaluation(
+    payload: RacquetPrecisionSessionInput,
+) -> RacquetPrecisionSessionResponse:
+    """
+    Evaluates Phase 4 Racquet & Precision Sports metrics:
+    Archery draw volume, Anchor hold tremor index, Cardio-somatic diastolic synchronization,
+    Shoulder rotator kinetics, Badminton smash energy, Table Tennis micro-steps, and Postural sway.
+    """
+    return evaluate_racquet_precision_session(payload)
+
 
 
 

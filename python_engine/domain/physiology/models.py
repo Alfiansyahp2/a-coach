@@ -255,4 +255,14 @@ class TeamSessionResponse(BaseModel):
     coach_verdict: str
 
 
+# ==============================================================================
+# PHASE 4: RACQUET & PRECISION SPORTS MODELS (RE-EXPORTED)
+# ==============================================================================
+from .racquet_models import (
+    RacquetPrecisionSessionInput,
+    RacquetPrecisionSessionResponse,
+)
+
+
+
 
