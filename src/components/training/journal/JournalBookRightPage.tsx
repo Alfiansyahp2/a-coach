@@ -3,7 +3,7 @@
 import React from "react";
 import { ScheduledWorkout, Activity } from "@/types";
 import { CalendarDay, CalendarWeek } from "../calendarBuilder";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 import { CheckCircle2, Bike, Footprints, Zap, Sparkles } from "lucide-react";
 
 interface JournalBookRightPageProps {

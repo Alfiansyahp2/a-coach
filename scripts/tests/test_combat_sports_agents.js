@@ -24,7 +24,7 @@ async function runCombatAgentsTests() {
 
   const rootDir = path.resolve(__dirname, '../../');
   const kernelPath = pathToFileURL(path.join(rootDir, 'src/lib/domain/coach/kernels/combatSportsKernel.ts')).href;
-  const agentsPath = pathToFileURL(path.join(rootDir, 'src/lib/domain/coach/agents/index.ts')).href;
+  const agentsPath = pathToFileURL(path.join(rootDir, 'src/lib/domain/coach/sports/index.ts')).href;
 
   const rawKernel = await import(kernelPath);
   const combatKernel = rawKernel.default || rawKernel;

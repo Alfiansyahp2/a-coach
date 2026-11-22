@@ -1,6 +1,6 @@
 import { DEFAULT_USER_ID } from '../client';
 import { Activity, ScheduledWorkout, WorkoutActivityMatch, AthleteTrainingResponse } from '@/types';
-import { upsertAthleteTrainingResponse } from '../healthRepo';
+import { upsertAthleteTrainingResponse } from '../health';
 import { CreateManualActivityParams } from './activityTypes';
 import { upsertActivity } from './activityMutationRepo';
 import { correlateManualActivityWithWorkout } from './activityWorkoutCorrelator';

@@ -1,5 +1,5 @@
 import React from "react";
-import { formatDistance, formatDuration, formatDate, formatDateOnly } from "@/lib/formatters";
+import { formatDistance, formatDuration, formatDate, formatDateOnly } from "@/lib/shared/formatters";
 import { ScheduledWorkout } from "@/types";
 
 interface TrainingWorkoutListViewProps {

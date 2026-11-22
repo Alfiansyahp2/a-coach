@@ -1,5 +1,5 @@
 import React from "react";
-import { formatDistance, formatDuration, formatElevation } from "@/lib/formatters";
+import { formatDistance, formatDuration, formatElevation } from "@/lib/shared/formatters";
 import { Clock, Compass, Gauge, Mountain } from "lucide-react";
 import { Activity } from "@/types";
 

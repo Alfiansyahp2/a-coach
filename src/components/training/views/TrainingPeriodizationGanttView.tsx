@@ -4,7 +4,7 @@ import React from "react";
 import { ScheduledWorkout, Activity } from "@/types";
 import { CalendarWeek } from "../calendarBuilder";
 import { GanttMiniPMCSparkline } from "../gantt/GanttMiniPMCSparkline";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 import { Bike, Footprints, Zap, ShieldCheck } from "lucide-react";
 
 interface TrainingPeriodizationGanttViewProps {

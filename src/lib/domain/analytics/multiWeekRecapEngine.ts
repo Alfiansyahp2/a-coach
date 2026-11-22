@@ -5,7 +5,7 @@ import {
   HistoricalWeekOption,
 } from './weeklyRecapTypes';
 import { getWeekBounds } from './weeklyRecapEngine';
-import { formatDateOnly, formatDuration } from '@/lib/formatters';
+import { formatDateOnly, formatDuration } from '@/lib/shared/formatters';
 
 const INDO_MONTHS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',

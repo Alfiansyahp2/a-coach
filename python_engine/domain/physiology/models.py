@@ -130,3 +130,161 @@ class WeeklyProRecapResponse(BaseModel):
     periodization_phase: str  # BASE_BUILD | PROGRESSIVE_OVERLOAD | PEAK_WEEK | DELOAD_RECOVERY
     pro_coach_verdict: str
     next_week_bridge_advice: str
+
+
+# ==============================================================================
+# PHASE 1: STRENGTH, POWER & HYPERTROPHY MODELS
+# ==============================================================================
+
+class StrengthSetInput(BaseModel):
+    exercise_name: str = Field(..., description="Name of the exercise (e.g. 'Back Squat', 'Bench Press', 'Deadlift')")
+    weight_kg: float = Field(..., ge=0, description="Load in kilograms")
+    reps: int = Field(..., ge=1, le=100, description="Completed valid repetitions")
+    rpe: Optional[float] = Field(default=None, ge=1, le=10, description="Rate of Perceived Exertion (Borg CR10)")
+    rir: Optional[int] = Field(default=None, ge=0, le=10, description="Reps In Reserve")
+    bar_velocity_mps: Optional[float] = Field(default=None, ge=0, description="Mean concentric bar velocity in m/s")
+    is_warmup: bool = Field(default=False, description="Whether this is a warm-up set (excluded from hard set tonnages)")
+
+
+class StrengthSessionInput(BaseModel):
+    session_id: Optional[str] = None
+    sport_code: str = Field(default="SPORT_POWERLIFTING")
+    sets: List[StrengthSetInput] = Field(default_factory=list)
+    known_1rm_map: Dict[str, float] = Field(default_factory=dict, description="Known 1RM per exercise")
+    bodyweight_kg: float = Field(default=70.0, ge=30, le=300)
+    duration_minutes: float = Field(default=60.0, ge=1)
+
+
+class StrengthSessionResponse(BaseModel):
+    total_tonnage_kg: float
+    total_reps: int
+    hard_sets_count: int
+    exercise_inol_map: Dict[str, float]
+    total_session_inol: float
+    estimated_1rm_map: Dict[str, float]
+    fatigue_classification: str  # RECOVERY | OPTIMAL_ACCUMULATION | HIGH_FATIGUE | CRITICAL_OVERREACHING
+    cns_drain_score: float  # 0 to 10 scale
+    recommended_recovery_hours: float
+    coach_verdict: str
+
+
+# ==============================================================================
+# PHASE 2: HIGH-INTENSITY COMBAT & MARTIAL ARTS MODELS
+# ==============================================================================
+
+class CombatRoundInput(BaseModel):
+    round_number: int = Field(default=1, ge=1, description="Round sequence number")
+    duration_minutes: float = Field(default=3.0, ge=0.5, le=15.0, description="Round duration in minutes (e.g. 3 min boxing, 5 min MMA)")
+    rpe: float = Field(default=7.0, ge=1.0, le=10.0, description="Round RPE (Borg CR10)")
+    punches_thrown: int = Field(default=0, ge=0, description="Count of punches thrown")
+    kicks_thrown: int = Field(default=0, ge=0, description="Count of roundhouse/low/body kicks")
+    takedowns_attempted: int = Field(default=0, ge=0, description="Count of takedown / throw attempts")
+    mat_time_minutes: float = Field(default=0.0, ge=0, description="Time spent in ground fighting / grappling")
+    head_impacts_count: int = Field(default=0, ge=0, description="Count of hard head blows received during round")
+    inversion_minutes: float = Field(default=0.0, ge=0, description="Time spent inverted (BJJ guard / stacking)")
+
+
+class CombatSessionInput(BaseModel):
+    session_id: Optional[str] = None
+    sport_code: str = Field(default="SPORT_BOXING", description="SPORT_BOXING | SPORT_MMA | SPORT_BJJ | SPORT_PENCAK_SILAT | SPORT_JUDO | SPORT_MUAY_THAI")
+    partner_weight_kg: Optional[float] = Field(default=None, ge=30.0, le=200.0, description="Sparring partner bodyweight in kg")
+    has_headgear: bool = Field(default=False, description="Whether athlete used headgear during sparring")
+    has_shin_guards: bool = Field(default=True, description="Whether shin guards were worn during kicking")
+    rounds: List[CombatRoundInput] = Field(default_factory=list, description="Array of rounds completed")
+    symptoms_reported: List[str] = Field(default_factory=list, description="Symptoms e.g. 'headache', 'dizziness', 'nausea', 'photophobia'")
+
+
+class CombatSessionResponse(BaseModel):
+    total_duration_minutes: float
+    total_combat_workload_au: float
+    punch_density_per_min: float
+    striking_load_au: float
+    grappling_load_au: float
+    concussion_gate_triggered: bool
+    concussion_action: str
+    tibial_stress_score: float
+    cervical_strain_index: float
+    recommended_rest_days: int
+    coach_verdict: str
+
+
+# ==============================================================================
+# PHASE 3: INTERMITTENT TEAM, FIELD & COURT SPORTS MODELS
+# ==============================================================================
+
+class TeamSessionInput(BaseModel):
+    session_id: Optional[str] = None
+    sport_code: str = Field(
+        default="SPORT_FOOTBALL",
+        description="SPORT_FOOTBALL | SPORT_BASKETBALL | SPORT_VOLLEYBALL | SPORT_FUTSAL | SPORT_RUGBY | SPORT_FIELD_HOCKEY"
+    )
+    duration_minutes: float = Field(default=90.0, ge=0.0)
+    athlete_weight_kg: float = Field(default=75.0, ge=30.0, le=200.0)
+    rpe: float = Field(default=7.0, ge=1.0, le=10.0)
+    triaxial_accel_series: List[List[float]] = Field(default_factory=list, description="Tri-axial acceleration [ax, ay, az]")
+    speed_samples_mps: List[float] = Field(default_factory=list, description="Speed time-series in m/s")
+    sample_interval_s: float = Field(default=1.0, ge=0.01, le=10.0)
+    chronic_sprint_distance_m: Optional[float] = Field(default=None, ge=0.0, description="4-week chronic avg sprint m")
+    jump_count: int = Field(default=0, ge=0, description="Total jump count")
+    jump_heights_m: List[float] = Field(default_factory=list, description="Individual jump heights in meters")
+    single_leg_landings_count: int = Field(default=0, ge=0, description="Rapid deceleration single-leg landing count")
+    pre_match_cmj_m: Optional[float] = Field(default=None, ge=0.05, le=1.5, description="Pre-match CMJ height in meters")
+    post_match_cmj_m: Optional[float] = Field(default=None, ge=0.05, le=1.5, description="Post-match CMJ height in meters")
+    high_g_collisions_count: int = Field(default=0, ge=0, description="Collisions > 5g")
+    severe_collisions_count: int = Field(default=0, ge=0, description="Collisions > 8g")
+    repeated_high_intensity_efforts: int = Field(default=0, ge=0, description="RHIE clusters (<21s recovery)")
+    micro_decelerations_count: int = Field(default=0, ge=0, description="Decelerations < -3.0 m/s^2")
+    lumbar_flexion_minutes: float = Field(default=0.0, ge=0.0, description="Trunk flexion < 45 deg duration")
+
+
+class TeamSessionResponse(BaseModel):
+    total_player_load: float
+    player_load_per_minute: float
+    total_distance_meters: float
+    hsr_distance_meters: float
+    sprint_distance_meters: float
+    hamstring_strain_risk: str  # LOW | MODERATE | HIGH
+    jump_shock_load_kj: float
+    patellar_overload_warning: bool
+    cmj_decay_percentage: Optional[float]
+    neuromuscular_fatigue_level: str  # FRESH | MILD | ELEVATED | CRITICAL
+    collision_impact_score: float
+    quad_eccentric_shock_au: float
+    lumbar_strain_index: float
+    recommended_recovery_hours: float
+    coach_verdict: str
+
+
+# ==============================================================================
+# PHASE 4: RACQUET & PRECISION SPORTS MODELS (RE-EXPORTED)
+# ==============================================================================
+from .racquet_models import (
+    RacquetPrecisionSessionInput,
+    RacquetPrecisionSessionResponse,
+)
+
+# ==============================================================================
+# PHASE 5: FUNCTIONAL FITNESS & EXTREME SPORTS MODELS (RE-EXPORTED)
+# ==============================================================================
+from .extreme_models import (
+    FunctionalExtremeSessionInput,
+    FunctionalExtremeSessionResponse,
+)
+
+# ==============================================================================
+# PHASE 6: SYSTEMIC ARBITER & INGRESS MODELS (RE-EXPORTED)
+# ==============================================================================
+from .arbiter_models import (
+    HybridSessionSummary,
+    JointCollisionAlert,
+    MolecularInterferenceAlert,
+    HybridArbitrationInput,
+    HybridArbitrationResponse,
+    CaborTelemetryIngressInput,
+)
+
+
+
+
+
+
