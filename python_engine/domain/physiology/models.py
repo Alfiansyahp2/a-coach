@@ -271,6 +271,19 @@ from .extreme_models import (
     FunctionalExtremeSessionResponse,
 )
 
+# ==============================================================================
+# PHASE 6: SYSTEMIC ARBITER & INGRESS MODELS (RE-EXPORTED)
+# ==============================================================================
+from .arbiter_models import (
+    HybridSessionSummary,
+    JointCollisionAlert,
+    MolecularInterferenceAlert,
+    HybridArbitrationInput,
+    HybridArbitrationResponse,
+    CaborTelemetryIngressInput,
+)
+
+
 
 
 
