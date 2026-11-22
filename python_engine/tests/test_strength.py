@@ -165,3 +165,55 @@ def test_strength_api_endpoint():
     assert "Deadlift" in data["exercise_inol_map"]
     assert data["total_session_inol"] > 0
     assert "Beban" in data["coach_verdict"] or "Stimulus" in data["coach_verdict"] or "Akumulasi" in data["coach_verdict"] or "Sesi" in data["coach_verdict"]
+
+
+def test_rpe_calibrated_1rm_estimation():
+    # 100 kg for 5 reps @ RPE 10 (RIR 0) -> 112.51 kg
+    brz_10 = calculate_brzycki_1rm(100.0, 5, rpe=10.0)
+    assert 112.0 <= brz_10 <= 113.0
+
+    # 100 kg for 5 reps @ RPE 8.0 (RIR 2 -> effective 7 reps) -> 120.0 kg
+    brz_8 = calculate_brzycki_1rm(100.0, 5, rpe=8.0)
+    assert 119.5 <= brz_8 <= 120.5
+    assert brz_8 > brz_10  # RPE 8 indicates higher reserve capacity
+
+
+def test_calisthenics_progression_levers():
+    # 70kg athlete on 0.8m lever
+    full = calculate_calisthenics_torque(70.0, 0.8, progression="FULL")
+    tuck = calculate_calisthenics_torque(70.0, 0.8, progression="TUCK")
+    straddle = calculate_calisthenics_torque(70.0, 0.8, progression="STRADDLE")
+
+    assert full == 549.36
+    assert tuck == 274.68  # 50% lever
+    assert straddle == 450.48  # 82% lever
+    assert tuck < straddle < full
+
+
+def test_empty_strength_session_safeguard():
+    session = StrengthSessionInput(
+        sport_code="SPORT_POWERLIFTING",
+        sets=[],
+        known_1rm_map={"Squat": 150.0},
+    )
+    res = evaluate_strength_session(session)
+    assert res.total_tonnage_kg == 0.0
+    assert res.cns_drain_score == 0.0
+    assert res.fatigue_classification == "RECOVERY"
+    assert "Tidak ada set beban kerja aktif" in res.coach_verdict
+
+
+def test_heavy_singles_cns_drain_scaling():
+    session = StrengthSessionInput(
+        sport_code="SPORT_POWERLIFTING",
+        known_1rm_map={"Deadlift": 200.0},
+        sets=[
+            StrengthSetInput(exercise_name="Deadlift", weight_kg=190.0, reps=1, rpe=9.5),  # 95% 1RM
+            StrengthSetInput(exercise_name="Deadlift", weight_kg=190.0, reps=1, rpe=9.5),  # 95% 1RM
+            StrengthSetInput(exercise_name="Deadlift", weight_kg=190.0, reps=1, rpe=10.0), # 95% 1RM
+        ],
+    )
+    res = evaluate_strength_session(session)
+    assert res.cns_drain_score > 0
+    assert res.hard_sets_count == 3
+

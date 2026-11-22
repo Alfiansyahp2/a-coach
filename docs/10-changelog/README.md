@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 105 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 106 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -21,7 +21,7 @@ docs/10-changelog/
 ├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (13 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
     ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (38 berkas)
-    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (26 berkas)
+    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (27 berkas)
     ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (9 berkas)
     ├── training/                # 🚴 Kalender Latihan & AI Coach Engine (3 berkas)
     ├── health/                  # 🩺 Profil Kesehatan & Kesiapan Klinis (2 berkas)
@@ -63,8 +63,9 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & t
 ---
 
 
-### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 26 Berkas
+### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 27 Berkas
 
+- [`2026-11-23_01-10-00_refactor-phase-1-strength-rpe-calibration-and-calisthenics-levers.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-23_01-10-00_refactor-phase-1-strength-rpe-calibration-and-calisthenics-levers.md) — Refaktor Fase 1 Mesin Kekuatan (`strength_engine.py`): Kalibrasi 1RM berbasis RPE/RIR (Reactive Training Systems), progresi tuas biomekanika kalistenik (Tuck, Adv Tuck, Straddle, Full), penanganan aman sesi kosong (guard clause), dan pengali kelelahan SSP non-linier Boris Sheiko untuk angkatan berat $\ge 90\%$.
 - [`2026-11-23_00-50-00_feat-phase-6-systemic-fatigue-arbiter-and-multi-sport-ingress.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-23_00-50-00_feat-phase-6-systemic-fatigue-arbiter-and-multi-sport-ingress.md) — Implementasi Fase 6 Arbitrase Kelelahan Sistemik & Multi-Sport Ingress API (`systemic_arbiter.py`): Jendela interferensi molekuler AMPK vs mTORC1 (jeda minimal 6 jam), akumulasi indeks pengurasan SSP global harian (CNS drain), matriks tubrukan biomekanis sendi rentan dengan riwayat cedera klinis, dan dispatcher ingress telemetri universal 33 cabor dunia.
 - [`2026-11-23_00-38-00_feat-phase-5-functional-extreme-sports-physiology-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-23_00-38-00_feat-phase-5-functional-extreme-sports-physiology-engine.md) — Implementasi Fase 5 Mesin Fisiologi Fungsional & Ekstrem (`functional_extreme_engine.py`): daya kerja aktif Metcon & penalti transisi, tegangan katrol tendon jari panjat tebing A2/A4, puncak gaya reaksi tanah pendaratan (GRF), rasio dayung ombak selancar, indeks asimetri dorongan skateboard, kompresi aksial pergelangan tangan senam artistik, dan 10 uji Pytest baru.
 - [`2026-11-23_00-25-00_feat-phase-4-racquet-precision-sports-physiology-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-23_00-25-00_feat-phase-4-racquet-precision-sports-physiology-engine.md) — Implementasi Fase 4 Mesin Fisiologi Raket & Presisi Neuromuskular (`racquet_precision_engine.py`): volume tarikan panahan (lbs/kg), indeks getaran penahanan anchor panahan (tremor index), sinkronisasi kardiomotorik diastolik menembak presisi, beban rotasi bahu servis tenis, kinetika jump smash bulu tangkis, densitas gerak kaki tenis meja, degradasi postural sway, dan 10 uji Pytest baru.
