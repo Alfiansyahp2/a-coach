@@ -20,6 +20,10 @@ from .models import (
     CombatSessionResponse,
     TeamSessionInput,
     TeamSessionResponse,
+    RacquetPrecisionSessionInput,
+    RacquetPrecisionSessionResponse,
+    FunctionalExtremeSessionInput,
+    FunctionalExtremeSessionResponse,
 )
 from .banister_engine import (
     calculate_trimp,
@@ -62,6 +66,25 @@ from .team_engine import (
     evaluate_rugby_collisions,
     evaluate_hockey_lumbar_strain,
     evaluate_team_session,
+)
+from .racquet_precision_engine import (
+    calculate_archery_draw_volume,
+    evaluate_hold_tremor_index,
+    calculate_diastolic_sync_rate,
+    calculate_shoulder_kinetic_load,
+    calculate_badminton_smash_energy,
+    evaluate_table_tennis_density,
+    evaluate_postural_sway_degradation,
+    evaluate_racquet_precision_session,
+)
+from .functional_extreme_engine import (
+    calculate_metcon_power_output,
+    calculate_finger_pulley_tension,
+    evaluate_landing_peak_grf,
+    calculate_surf_paddle_ratio,
+    evaluate_skateboard_asymmetry_load,
+    evaluate_gymnastics_wrist_compression,
+    evaluate_functional_extreme_session,
 )
 
 __all__ = [
@@ -118,4 +141,23 @@ __all__ = [
     "evaluate_rugby_collisions",
     "evaluate_hockey_lumbar_strain",
     "evaluate_team_session",
+    "RacquetPrecisionSessionInput",
+    "RacquetPrecisionSessionResponse",
+    "calculate_archery_draw_volume",
+    "evaluate_hold_tremor_index",
+    "calculate_diastolic_sync_rate",
+    "calculate_shoulder_kinetic_load",
+    "calculate_badminton_smash_energy",
+    "evaluate_table_tennis_density",
+    "evaluate_postural_sway_degradation",
+    "evaluate_racquet_precision_session",
+    "FunctionalExtremeSessionInput",
+    "FunctionalExtremeSessionResponse",
+    "calculate_metcon_power_output",
+    "calculate_finger_pulley_tension",
+    "evaluate_landing_peak_grf",
+    "calculate_surf_paddle_ratio",
+    "evaluate_skateboard_asymmetry_load",
+    "evaluate_gymnastics_wrist_compression",
+    "evaluate_functional_extreme_session",
 ]
