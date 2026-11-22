@@ -163,3 +163,49 @@ def test_team_api_endpoint():
     assert data["patellar_overload_warning"] is True
     assert data["jump_shock_load_kj"] > 0
     assert data["recommended_recovery_hours"] >= 48.0
+
+
+def test_catapult_sampling_rate_scaling():
+    series = [[0.0, 0.0, 0.0], [3.0, 4.0, 0.0], [3.0, 4.0, 10.0]]
+    # At 100 Hz (default baseline): 1.50 AU
+    pl_100 = calculate_catapult_player_load(series, sampling_rate_hz=100.0)
+    assert pl_100 == 1.50
+
+    # At 10 Hz (GPS wearable): scaled by sqrt(100/10) = sqrt(10) ~ 3.1623
+    pl_10 = calculate_catapult_player_load(series, sampling_rate_hz=10.0)
+    assert pl_10 == round(1.50 * (10.0**0.5), 2)  # 4.74 AU
+
+
+def test_hamstring_acute_unconditioned_exposure():
+    # > 300m acute sprint without chronic baseline -> HIGH risk
+    risk, msg = evaluate_hamstring_strain_risk(sprint_distance_m=350.0, chronic_avg_sprint_m=None)
+    assert risk == "HIGH"
+    assert "Paparan sprint akut tinggi" in msg
+
+    # Safe sprint < 150m without chronic baseline -> LOW risk
+    risk_low, msg_low = evaluate_hamstring_strain_risk(sprint_distance_m=120.0, chronic_avg_sprint_m=None)
+    assert risk_low == "LOW"
+
+
+def test_jump_shock_energy_overload():
+    # 50 jumps (<= 60 count) but high drop height generating > 200 kJ shock energy
+    heights = [3.5] * 50
+    res = evaluate_jump_shock_load(athlete_weight_kg=100.0, jump_heights_m=heights, single_leg_count=50)
+    assert res["total_jumps"] == 50
+    assert res["jump_shock_load_kj"] >= 200.0
+    assert res["patellar_warning"] is True
+    assert res["plyometric_lock_hours"] == 48.0
+
+
+def test_team_session_empty_safeguard():
+    session = TeamSessionInput(
+        sport_code="SPORT_FOOTBALL",
+        duration_minutes=0.0,
+        athlete_weight_kg=75.0,
+    )
+    res = evaluate_team_session(session)
+    assert res.total_player_load == 0.0
+    assert res.player_load_per_minute == 0.0
+    assert res.recommended_recovery_hours == 0.0
+    assert "nihil" in res.coach_verdict.lower()
+

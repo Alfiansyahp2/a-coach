@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 108 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 109 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -18,7 +18,7 @@ docs/10-changelog/
 ├── CHANGELOG.md                 # 🏛️ Master Foundation v1.0.0 (01 Nov 2026)
 ├── README.md                    # 📑 Katalog & Indeks Utama (Dokumen ini)
 ├── main/                        # 🚀 Rilis Master & Integrasi Makro (3 berkas)
-├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (15 berkas)
+├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (16 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
     ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (38 berkas)
     ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (27 berkas)
@@ -86,8 +86,9 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & t
 
 ---
 
-### C. Dekomposisi Kode & Clean Architecture ([`refactor/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/)) — 15 Berkas
+### C. Dekomposisi Kode & Clean Architecture ([`refactor/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/)) — 16 Berkas
 
+- [`2026-11-23_01-45-00_refactor-phase-3-and-4-team-catapult-and-racquet-precision.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-23_01-45-00_refactor-phase-3-and-4-team-catapult-and-racquet-precision.md) — Refaktor Fase 3 & 4: Penskalaan frekuensi sampling Catapult PlayerLoad ($100\text{ Hz}$ IMU vs $10\text{ Hz}$ GPS), batas proteksi paparan sprint akut tanpa baseline ($> 300\text{ m}$ Aspetar protocol), kriteria ganda tendinopati patellar ($> 60$ lompatan atau $\ge 200\text{ kJ}$ energi impak), penalti waktu tahan busur panahan ($> 4.5\text{ s}$ per anak panah), gerbang kardiomotorik asinkron kritis (`CRITICAL_ASYNC` $< 50\%$), relaksasi validasi Pydantic durasi $\ge 0.0$, dan safeguard sesi kosong.
 - [`2026-11-23_01-25-00_refactor-phase-2-combat-scat6-rotational-and-partner-fallback.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-23_01-25-00_refactor-phase-2-combat-scat6-rotational-and-partner-fallback.md) — Refaktor Fase 2 Mesin Bela Diri (`combat_engine.py`): Pembobotan akselerasi sudut/rotasional benturan kepala SCAT6 (faktor $1.5\times$ shear stress), trigger otomatis suspensi 7 hari ($\ge 6$ benturan rotasional), fallback bobot badan referensi ($75.0\text{ kg}$) pada lemparan Judo Nage-Waza, pengali kelelahan cengkeraman lengan bawah BJJ Gi ($1.25\times$), dan *guard clause* sesi ronde kosong.
 - [`2026-11-23_01-10-00_refactor-phase-1-strength-rpe-calibration-and-calisthenics-levers.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-23_01-10-00_refactor-phase-1-strength-rpe-calibration-and-calisthenics-levers.md) — Refaktor Fase 1 Mesin Kekuatan (`strength_engine.py`): Kalibrasi 1RM berbasis RPE/RIR (Reactive Training Systems), progresi tuas biomekanika kalistenik (Tuck, Adv Tuck, Straddle, Full), penanganan aman sesi kosong (guard clause), dan pengali kelelahan SSP non-linier Boris Sheiko untuk angkatan berat $\ge 90\%$.
 - [`2026-11-20_19-00-00_refactor-facade-elimination-formatters-db-agents.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/refactor/2026-11-20_19-00-00_refactor-facade-elimination-formatters-db-agents.md) — Eliminasi berkas facade redundan `formatters.ts`, `db.ts`, dan direktori `coach/agents/`, pemindahan 47 impor UI/domain ke kanonikal `@/lib/shared/formatters`, serta verifikasi 100% build dan 18 test suite.

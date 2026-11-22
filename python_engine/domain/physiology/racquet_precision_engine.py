@@ -14,16 +14,23 @@ from python_engine.domain.physiology.racquet_models import (
 LBS_TO_KG = 0.45359237
 
 
-def calculate_archery_draw_volume(draw_weight_lbs: float, arrow_count: int) -> Dict[str, Any]:
-    """Computes total cumulative draw weight volume in lbs and kg."""
+def calculate_archery_draw_volume(
+    draw_weight_lbs: float, arrow_count: int, avg_hold_seconds: float = 3.0
+) -> Dict[str, Any]:
+    """Computes total cumulative draw weight volume in lbs and kg with isometric hold fatigue scaling."""
     vol_lbs = round(max(0.0, float(draw_weight_lbs)) * max(0, int(arrow_count)), 2)
     vol_kg = round(vol_lbs * LBS_TO_KG, 2)
-    overload = vol_lbs > 4500.0
+    hold_penalty = 1.25 if avg_hold_seconds > 4.5 else 1.0
+    effective_vol_lbs = vol_lbs * hold_penalty
+    overload = effective_vol_lbs > 4500.0
+    interp = "Beban tarikan skapula & rotator cuff melebihi batas 4500 lbs!" if overload else "Beban volume tarikan busur optimal."
+    if hold_penalty > 1.0:
+        interp += f" Penalti waktu penahanan isometrik lama ({avg_hold_seconds}s > 4.5s)."
     return {
         "volume_lbs": vol_lbs,
         "volume_kg": vol_kg,
         "overload_alert": overload,
-        "interpretation": "Beban tarikan skapula & rotator cuff melebihi batas 4500 lbs!" if overload else "Beban volume tarikan busur optimal.",
+        "interpretation": interp,
     }
 
 
@@ -61,8 +68,10 @@ def calculate_diastolic_sync_rate(shots_diastole: int, total_shots: int) -> Dict
         cls, msg = "ELITE", f"Sinkronisasi kardiomotorik diastolik kelas dunia ({rate}%)."
     elif rate >= 70.0:
         cls, msg = "PROFICIENT", f"Sinkronisasi kardiomotorik memadai ({rate}%). Ritme simpatis stabil."
-    else:
+    elif rate >= 50.0:
         cls, msg = "DEGRADED", f"Sinkronisasi diastolik terdegradasi ({rate}% < 70%). Arousal simpatis atau takikardia mengganggu presisi."
+    else:
+        cls, msg = "CRITICAL_ASYNC", f"Sinkronisasi kardiomotorik asinkron kritis ({rate}% < 50%). Jitter sistolik merusak bidikan presisi."
 
     return {"sync_rate_pct": rate, "classification": cls, "interpretation": msg}
 
@@ -149,6 +158,23 @@ def evaluate_racquet_precision_session(
     session: RacquetPrecisionSessionInput,
 ) -> RacquetPrecisionSessionResponse:
     """Master evaluator for Racquet & Precision Sports (Phase 4)."""
+    if session.duration_minutes <= 0.0:
+        return RacquetPrecisionSessionResponse(
+            total_duration_minutes=0.0,
+            sport_code=session.sport_code,
+            shoulder_rotator_load_au=0.0,
+            cumulative_draw_volume_lbs=0.0,
+            cumulative_draw_volume_kg=0.0,
+            hold_tremor_index_mm=0.0,
+            tremor_fatigue_level="STABLE",
+            cardio_diastolic_sync_rate_pct=0.0,
+            sync_classification="UNKNOWN",
+            postural_sway_degradation_pct=None,
+            step_density_per_min=0.0,
+            recommended_recovery_hours=0.0,
+            coach_verdict="Tidak ada aktivitas raket/presisi aktif tercatat. Beban neuromuskular nihil.",
+        )
+
     # 1. Archery Draw Volume
     archery_res = calculate_archery_draw_volume(session.draw_weight_lbs, session.arrow_count)
 

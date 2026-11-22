@@ -162,3 +162,33 @@ def test_racquet_api_endpoint():
     assert data["sport_code"] == "SPORT_BADMINTON"
     assert data["shoulder_rotator_load_au"] > 0
     assert data["recommended_recovery_hours"] >= 24.0
+
+
+def test_archery_hold_time_penalty():
+    # 4000 lbs volume (normally safe < 4500) but long hold (5.0s > 4.5s)
+    # Effective volume: 4000 * 1.25 = 5000 lbs -> triggers overload alert!
+    res = calculate_archery_draw_volume(draw_weight_lbs=40.0, arrow_count=100, avg_hold_seconds=5.0)
+    assert res["volume_lbs"] == 4000.0
+    assert res["overload_alert"] is True
+    assert "penalti" in res["interpretation"].lower()
+
+
+def test_shooting_diastolic_critical_async():
+    # 20 of 50 shots in diastole = 40% (< 50% -> CRITICAL_ASYNC)
+    res = calculate_diastolic_sync_rate(shots_diastole=20, total_shots=50)
+    assert res["sync_rate_pct"] == 40.0
+    assert res["classification"] == "CRITICAL_ASYNC"
+    assert "kritis" in res["interpretation"].lower()
+
+
+def test_racquet_precision_session_empty_safeguard():
+    session = RacquetPrecisionSessionInput(
+        sport_code="SPORT_TENNIS",
+        duration_minutes=0.0,
+    )
+    res = evaluate_racquet_precision_session(session)
+    assert res.total_duration_minutes == 0.0
+    assert res.shoulder_rotator_load_au == 0.0
+    assert res.recommended_recovery_hours == 0.0
+    assert "nihil" in res.coach_verdict.lower()
+

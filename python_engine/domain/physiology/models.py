@@ -218,7 +218,7 @@ class TeamSessionInput(BaseModel):
         default="SPORT_FOOTBALL",
         description="SPORT_FOOTBALL | SPORT_BASKETBALL | SPORT_VOLLEYBALL | SPORT_FUTSAL | SPORT_RUGBY | SPORT_FIELD_HOCKEY"
     )
-    duration_minutes: float = Field(default=90.0, ge=1.0)
+    duration_minutes: float = Field(default=90.0, ge=0.0)
     athlete_weight_kg: float = Field(default=75.0, ge=30.0, le=200.0)
     rpe: float = Field(default=7.0, ge=1.0, le=10.0)
     triaxial_accel_series: List[List[float]] = Field(default_factory=list, description="Tri-axial acceleration [ax, ay, az]")

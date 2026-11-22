@@ -13,7 +13,7 @@ class RacquetPrecisionSessionInput(BaseModel):
         default="SPORT_BADMINTON",
         description="SPORT_BADMINTON | SPORT_TENNIS | SPORT_TABLE_TENNIS | SPORT_ARCHERY | SPORT_SHOOTING",
     )
-    duration_minutes: float = Field(default=60.0, ge=1.0)
+    duration_minutes: float = Field(default=60.0, ge=0.0)
     rpe: float = Field(default=6.5, ge=1.0, le=10.0)
 
     # Tennis & Badminton
