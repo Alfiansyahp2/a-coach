@@ -263,6 +263,15 @@ from .racquet_models import (
     RacquetPrecisionSessionResponse,
 )
 
+# ==============================================================================
+# PHASE 5: FUNCTIONAL FITNESS & EXTREME SPORTS MODELS (RE-EXPORTED)
+# ==============================================================================
+from .extreme_models import (
+    FunctionalExtremeSessionInput,
+    FunctionalExtremeSessionResponse,
+)
+
+
 
 
 

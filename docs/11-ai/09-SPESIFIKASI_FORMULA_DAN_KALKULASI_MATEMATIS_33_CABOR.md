@@ -490,15 +490,18 @@ gantt
   7. `evaluate_postural_sway_degradation(early_sway_mm, late_sway_mm)`
   8. `evaluate_racquet_precision_session(session)` & API `POST /calculate/coach/racquet/evaluate`
 
-#### 🧗 FASE 5: Mesin Fisiologi Fungsional & Ekstrem
+#### 🧗 FASE 5: Mesin Fisiologi Fungsional & Ekstrem `[SELESAI / IMPLEMENTED]`
 
-- **Target Modul**: `python_engine/domain/physiology/functional_extreme_engine.py` & `test_functional_extreme.py`
+- **Target Modul**: [`python_engine/domain/physiology/functional_extreme_engine.py`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/python_engine/domain/physiology/functional_extreme_engine.py) & [`test_functional_extreme.py`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/python_engine/tests/test_functional_extreme.py) (10/10 Test Passed)
 - **Cakupan Cabor**: CrossFit/Hyrox, Panjat Tebing, Senam Artistik, Surfing, Skateboarding.
 - **Deliverables Rekayasa**:
   1. `calculate_metcon_power_output(work_joules, total_sec, transition_sec)`
   2. `calculate_finger_pulley_tension(fingertip_force_n, crimp_lever_factor)`
   3. `evaluate_landing_peak_grf(drop_height_m, athlete_weight_kg, mat_damping)`
   4. `calculate_surf_paddle_ratio(paddle_min, wave_min)`
+  5. `evaluate_skateboard_asymmetry_load(push_kicks_count, drops_count, stance)`
+  6. `evaluate_gymnastics_wrist_compression(handstand_seconds, athlete_weight_kg, apparatus)`
+  7. `evaluate_functional_extreme_session(session)` & API `POST /calculate/coach/extreme/evaluate`
 
 #### 🧬 FASE 6: Arbitrase Kelelahan Sistemik & Dispatcher API
 

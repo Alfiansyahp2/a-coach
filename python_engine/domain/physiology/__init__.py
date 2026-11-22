@@ -22,6 +22,8 @@ from .models import (
     TeamSessionResponse,
     RacquetPrecisionSessionInput,
     RacquetPrecisionSessionResponse,
+    FunctionalExtremeSessionInput,
+    FunctionalExtremeSessionResponse,
 )
 from .banister_engine import (
     calculate_trimp,
@@ -74,6 +76,15 @@ from .racquet_precision_engine import (
     evaluate_table_tennis_density,
     evaluate_postural_sway_degradation,
     evaluate_racquet_precision_session,
+)
+from .functional_extreme_engine import (
+    calculate_metcon_power_output,
+    calculate_finger_pulley_tension,
+    evaluate_landing_peak_grf,
+    calculate_surf_paddle_ratio,
+    evaluate_skateboard_asymmetry_load,
+    evaluate_gymnastics_wrist_compression,
+    evaluate_functional_extreme_session,
 )
 
 __all__ = [
@@ -140,4 +151,13 @@ __all__ = [
     "evaluate_table_tennis_density",
     "evaluate_postural_sway_degradation",
     "evaluate_racquet_precision_session",
+    "FunctionalExtremeSessionInput",
+    "FunctionalExtremeSessionResponse",
+    "calculate_metcon_power_output",
+    "calculate_finger_pulley_tension",
+    "evaluate_landing_peak_grf",
+    "calculate_surf_paddle_ratio",
+    "evaluate_skateboard_asymmetry_load",
+    "evaluate_gymnastics_wrist_compression",
+    "evaluate_functional_extreme_session",
 ]
