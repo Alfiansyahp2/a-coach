@@ -13,7 +13,7 @@ class FunctionalExtremeSessionInput(BaseModel):
         default="SPORT_FUNCTIONAL_FITNESS",
         description="SPORT_FUNCTIONAL_FITNESS | SPORT_CLIMBING | SPORT_GYMNASTICS | SPORT_SURFING | SPORT_SKATEBOARDING",
     )
-    duration_minutes: float = Field(default=60.0, ge=1.0)
+    duration_minutes: float = Field(default=60.0, ge=0.0)
     athlete_weight_kg: float = Field(default=70.0, ge=30.0, le=200.0)
     rpe: float = Field(default=7.5, ge=1.0, le=10.0)
 

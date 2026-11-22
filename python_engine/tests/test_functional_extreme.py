@@ -133,3 +133,28 @@ def test_extreme_api_endpoint():
     assert data["sport_code"] == "SPORT_SURFING"
     assert data["paddle_to_wave_ratio"] == 19.0
     assert data["recommended_recovery_hours"] >= 36.0
+
+
+def test_finger_pulley_tension_bodyweight_fallback():
+    # When fingertip force is 0, estimate from athlete weight 70kg (40% BW * g = ~274.58N tip force)
+    res = calculate_finger_pulley_tension(
+        fingertip_force_n=0.0,
+        crimp_lever_factor=3.5,
+        crimp_count=20,
+        athlete_weight_kg=70.0,
+    )
+    assert res["pulley_peak_tension_n"] > 500.0  # 274.58 * 3.5 = ~961.0N -> HIGH risk
+    assert res["risk_level"] == "HIGH"
+
+
+def test_functional_extreme_session_empty_safeguard():
+    session = FunctionalExtremeSessionInput(
+        sport_code="SPORT_CLIMBING",
+        duration_minutes=0.0,
+    )
+    res = evaluate_functional_extreme_session(session)
+    assert res.total_duration_minutes == 0.0
+    assert res.finger_pulley_peak_tension_n == 0.0
+    assert res.recommended_recovery_hours == 0.0
+    assert "nihil" in res.coach_verdict.lower()
+

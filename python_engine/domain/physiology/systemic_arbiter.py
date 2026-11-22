@@ -23,11 +23,11 @@ CNS_COEFFICIENTS: Dict[str, float] = {
 }
 
 JOINT_TAXONOMY: Dict[str, List[str]] = {
-    "KNEE": ["SPORT_FOOTBALL", "SPORT_FUTSAL", "SPORT_BASKETBALL", "SPORT_VOLLEYBALL", "SPORT_RUNNING", "SPORT_POWERLIFTING"],
-    "SHOULDER": ["SPORT_SWIMMING", "SPORT_TENNIS", "SPORT_BADMINTON", "SPORT_ARCHERY", "SPORT_BOXING", "SPORT_WEIGHTLIFTING", "SPORT_GYMNASTICS"],
-    "LUMBAR": ["SPORT_POWERLIFTING", "SPORT_ROWING", "SPORT_CYCLING", "SPORT_FIELD_HOCKEY"],
-    "ANKLE": ["SPORT_RUNNING", "SPORT_BASKETBALL", "SPORT_SKATEBOARDING", "SPORT_BADMINTON"],
-    "WRIST": ["SPORT_CLIMBING", "SPORT_GYMNASTICS"],
+    "KNEE": ["SPORT_FOOTBALL", "SPORT_FUTSAL", "SPORT_BASKETBALL", "SPORT_VOLLEYBALL", "SPORT_RUNNING", "SPORT_POWERLIFTING", "SPORT_WEIGHTLIFTING", "SPORT_SKATEBOARDING"],
+    "SHOULDER": ["SPORT_SWIMMING", "SPORT_TENNIS", "SPORT_BADMINTON", "SPORT_ARCHERY", "SPORT_BOXING", "SPORT_WEIGHTLIFTING", "SPORT_GYMNASTICS", "SPORT_SURFING"],
+    "LUMBAR": ["SPORT_POWERLIFTING", "SPORT_ROWING", "SPORT_CYCLING", "SPORT_FIELD_HOCKEY", "SPORT_JUDO", "SPORT_BJJ"],
+    "ANKLE": ["SPORT_RUNNING", "SPORT_BASKETBALL", "SPORT_SKATEBOARDING", "SPORT_BADMINTON", "SPORT_FOOTBALL", "SPORT_VOLLEYBALL"],
+    "WRIST": ["SPORT_CLIMBING", "SPORT_GYMNASTICS", "SPORT_TABLE_TENNIS"],
 }
 
 
@@ -108,6 +108,22 @@ def detect_joint_biomechanical_collisions(
 
 def arbitrate_hybrid_athlete_schedule(request: HybridArbitrationInput) -> HybridArbitrationResponse:
     """Master Arbiter: Evaluates molecular interference, CNS drain, and joint collisions."""
+    if not request.sessions_today:
+        return HybridArbitrationResponse(
+            total_cns_drain_score=0.0,
+            cns_status="OPTIMAL",
+            molecular_interference=MolecularInterferenceAlert(
+                detected=False, buffer_hours=24.0, endurance_sport="NONE",
+                strength_sport="NONE", severity="NONE",
+                mechanism="Tidak ada sesi latihan bersamaan hari ini.",
+                recommendation="Jadwal bebas interferensi molekuler.",
+            ),
+            joint_collisions=[],
+            cleared_for_explosive_training=True,
+            recommended_rest_hours=0.0,
+            coach_verdict="Tidak ada sesi latihan terdaftar hari ini. Status sistemik optimal.",
+        )
+
     cns_res = calculate_cns_exhaustion_index(request.sessions_today)
     mol_res = evaluate_ampk_mtorc1_interference(request.sessions_today, request.buffer_hours_between_endurance_and_strength)
     joint_alerts = detect_joint_biomechanical_collisions(request.sessions_today, request.known_injury_joints)

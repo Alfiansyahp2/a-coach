@@ -148,3 +148,26 @@ def test_dispatch_cabor_telemetry_and_api():
     })
     assert resp_arb.status_code == 200
     assert resp_arb.json()["cns_status"] == "OPTIMAL"
+
+
+def test_joint_collisions_expanded_taxonomy():
+    # Weightlifting and Football both load KNEE in expanded taxonomy
+    sessions = [
+        HybridSessionSummary(sport_code="SPORT_WEIGHTLIFTING", duration_minutes=60),
+        HybridSessionSummary(sport_code="SPORT_FOOTBALL", duration_minutes=90),
+    ]
+    alerts = detect_joint_biomechanical_collisions(sessions)
+    knee_alert = next((a for a in alerts if a.joint == "KNEE"), None)
+    assert knee_alert is not None
+    assert knee_alert.severity in ("MODERATE", "HIGH")
+
+
+def test_arbitrate_hybrid_empty_schedule_safeguard():
+    req = HybridArbitrationInput(sessions_today=[])
+    res = arbitrate_hybrid_athlete_schedule(req)
+    assert res.total_cns_drain_score == 0.0
+    assert res.cns_status == "OPTIMAL"
+    assert res.cleared_for_explosive_training is True
+    assert res.recommended_rest_hours == 0.0
+    assert "optimal" in res.coach_verdict.lower()
+

@@ -12,7 +12,7 @@ class HybridSessionSummary(BaseModel):
     session_id: Optional[str] = None
     sport_code: str = Field(description="Sport code among 33 sports")
     start_time_iso: Optional[str] = None
-    duration_minutes: float = Field(default=60.0, ge=1.0)
+    duration_minutes: float = Field(default=60.0, ge=0.0)
     intensity_rpe: float = Field(default=7.0, ge=1.0, le=10.0)
     explosiveness_rpe: float = Field(default=5.0, ge=1.0, le=10.0, description="Explosive effort intensity")
     modality_type: str = Field(
