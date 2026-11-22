@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 100 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 101 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -21,7 +21,7 @@ docs/10-changelog/
 ├── refactor/                    # 🛡️ Dekomposisi Berkas & Clean Architecture (13 berkas)
 └── feat/                        # ⚡ Modul Fitur Berdasarkan Domain:
     ├── ui/                      # 🎨 Antarmuka, Obsidian Telemetry, & Kalender (38 berkas)
-    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (19 berkas)
+    ├── backend/                 # ⚙️ Python Sports Science Engine, DB, & API (22 berkas)
     ├── personal-record/         # 🏆 Personal Records & Analisis Rekap Pro (9 berkas)
     ├── training/                # 🚴 Kalender Latihan & AI Coach Engine (3 berkas)
     ├── health/                  # 🩺 Profil Kesehatan & Kesiapan Klinis (2 berkas)
@@ -62,8 +62,9 @@ Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & t
 
 ---
 
-### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 21 Berkas
+### B. Backend & Mesin Komputasi Sains Olahraga ([`feat/backend/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/)) — 22 Berkas
 
+- [`2026-11-22_07-15-00_feat-phase-2-combat-sports-physiology-engine-implementation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-22_07-15-00_feat-phase-2-combat-sports-physiology-engine-implementation.md) — Implementasi Fase 2 Mesin Fisiologi Bela Diri & Kontak Fisik (`combat_engine.py`): punch density, partisi beban MMA (standup vs matras), gerbang gegar otak SCAT6, kerja lemparan Judo Nage-Waza (kJ), indeks impak tulang kering Muay Thai, regangan isometrik BJJ, dan 10 uji Pytest baru.
 - [`2026-11-21_19-35-00_feat-phase-1-strength-power-hypertrophy-engine-implementation.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-21_19-35-00_feat-phase-1-strength-power-hypertrophy-engine-implementation.md) — Implementasi Fase 1 Mesin Fisiologi Kekuatan, Daya & Hipertrofi (`strength_engine.py`): 1RM Brzycki & Epley, volume tonase kumulatif, Sheiko INOL, VBT velocity loss cut-off, torsi kalistenik, evaluasi pengurasan SSP (CNS drain), dan 8 uji Pytest baru.
 - [`2026-11-21_09-30-00_feat-sports-science-mathematics-and-33-cabor-calculation-specification.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-21_09-30-00_feat-sports-science-mathematics-and-33-cabor-calculation-specification.md) — Spesifikasi formula deterministik & kalkulasi matematis komprehensif untuk seluruh 33 cabor dunia lintas 6 klaster fisiologis serta arbitrase atlet hibrida.
 - [`2026-11-18_10-30-00_feat-multi-sport-ai-coordinator-and-shared-science-kernels-phase-1.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/backend/2026-11-18_10-30-00_feat-multi-sport-ai-coordinator-and-shared-science-kernels-phase-1.md) — Implementasi Phase 1: Koordinator Multi-Sport AI, 3 shared science kernels (Foster sRPE, Gabbett ACWR, Issurin Block Periodization), PostgreSQL Tabel 18 sport_activity_telemetry, dan 13 uji verifikasi otomatis.

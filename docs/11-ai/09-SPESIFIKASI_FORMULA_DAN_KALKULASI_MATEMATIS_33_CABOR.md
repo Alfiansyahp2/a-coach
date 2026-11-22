@@ -396,8 +396,8 @@ gantt
 
 ### Rincian Deliverables Tiap Fase:
 
-#### 🏋️ FASE 1: Mesin Fisiologi Kekuatan, Daya & Hipertrofi
-- **Target Modul**: `python_engine/domain/physiology/strength_engine.py` & `test_strength.py`
+#### 🏋️ FASE 1: Mesin Fisiologi Kekuatan, Daya & Hipertrofi `[SELESAI / IMPLEMENTED]`
+- **Target Modul**: [`python_engine/domain/physiology/strength_engine.py`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/python_engine/domain/physiology/strength_engine.py) & [`test_strength.py`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/python_engine/tests/test_strength.py) (8/8 Test Passed)
 - **Cakupan Cabor**: Powerlifting, Angkat Besi Olimpiade, Kalistenik, Strongman, Binaraga.
 - **Deliverables Rekayasa**:
   1. `calculate_brzycki_1rm(weight, reps)` & `calculate_epley_1rm(weight, reps)`
@@ -407,8 +407,8 @@ gantt
   5. `calculate_calisthenics_torque(bodyweight_kg, lever_length_m, angle_deg)`
   6. `evaluate_strength_fatigue(total_inol, total_tonnage, avg_rpe)`
 
-#### 🥊 FASE 2: Mesin Fisiologi Bela Diri & Kontak Fisik
-- **Target Modul**: `python_engine/domain/physiology/combat_engine.py` & `test_combat.py`
+#### 🥊 FASE 2: Mesin Fisiologi Bela Diri & Kontak Fisik `[SELESAI / IMPLEMENTED]`
+- **Target Modul**: [`python_engine/domain/physiology/combat_engine.py`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/python_engine/domain/physiology/combat_engine.py) & [`test_combat.py`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/python_engine/tests/test_combat.py) (10/10 Test Passed)
 - **Cakupan Cabor**: Tinju, MMA, BJJ, Pencak Silat, Judo, Muay Thai.
 - **Deliverables Rekayasa**:
   1. `calculate_punch_density(total_punches, round_minutes)`
@@ -416,6 +416,8 @@ gantt
   3. `evaluate_concussion_scat6_gate(head_impacts, symptoms)`
   4. `calculate_throw_kinetic_work(partner_weight_kg, throw_count)`
   5. `calculate_tibial_impact_index(kick_count, intensity_multiplier)`
+  6. `evaluate_bjj_strain(mat_time_minutes, avg_rpe, inversion_minutes)`
+  7. `evaluate_combat_session(session)` & API `POST /calculate/coach/combat/evaluate`
 
 #### ⚽ FASE 3: Mesin Fisiologi Beregu & Lapangan Intermiten
 - **Target Modul**: `python_engine/domain/physiology/team_engine.py` & `test_team.py`

@@ -15,6 +15,9 @@ from .models import (
     StrengthSetInput,
     StrengthSessionInput,
     StrengthSessionResponse,
+    CombatRoundInput,
+    CombatSessionInput,
+    CombatSessionResponse,
 )
 from .banister_engine import (
     calculate_trimp,
@@ -38,6 +41,15 @@ from .strength_engine import (
     calculate_calisthenics_torque,
     evaluate_strength_session,
 )
+from .combat_engine import (
+    calculate_punch_density,
+    partition_mma_workload,
+    evaluate_concussion_scat6_gate,
+    calculate_throw_kinetic_work,
+    calculate_tibial_impact_index,
+    evaluate_bjj_strain,
+    evaluate_combat_session,
+)
 
 __all__ = [
     "TRIMPCalculationInput",
@@ -56,6 +68,9 @@ __all__ = [
     "StrengthSetInput",
     "StrengthSessionInput",
     "StrengthSessionResponse",
+    "CombatRoundInput",
+    "CombatSessionInput",
+    "CombatSessionResponse",
     "calculate_trimp",
     "calculate_session_load",
     "get_tsb_interpretation",
@@ -72,4 +87,11 @@ __all__ = [
     "evaluate_velocity_loss_cutoff",
     "calculate_calisthenics_torque",
     "evaluate_strength_session",
+    "calculate_punch_density",
+    "partition_mma_workload",
+    "evaluate_concussion_scat6_gate",
+    "calculate_throw_kinetic_work",
+    "calculate_tibial_impact_index",
+    "evaluate_bjj_strain",
+    "evaluate_combat_session",
 ]

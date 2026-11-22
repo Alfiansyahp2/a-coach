@@ -9,6 +9,8 @@ from python_engine.domain.physiology.models import (
     WeeklyProRecapResponse,
     StrengthSessionInput,
     StrengthSessionResponse,
+    CombatSessionInput,
+    CombatSessionResponse,
 )
 from python_engine.domain.physiology.banister_engine import (
     calculate_pmc,
@@ -22,6 +24,9 @@ from python_engine.domain.physiology.weekly_recap_calculator import (
 )
 from python_engine.domain.physiology.strength_engine import (
     evaluate_strength_session,
+)
+from python_engine.domain.physiology.combat_engine import (
+    evaluate_combat_session,
 )
 
 router = APIRouter(prefix="/calculate/coach", tags=["Coach & Physiology"])
@@ -77,4 +82,14 @@ def compute_strength_session_evaluation(payload: StrengthSessionInput) -> Streng
     Sheiko INOL, 1RM estimates, VBT fatigue, and CNS drain.
     """
     return evaluate_strength_session(payload)
+
+
+@router.post("/combat/evaluate", response_model=CombatSessionResponse)
+def compute_combat_session_evaluation(payload: CombatSessionInput) -> CombatSessionResponse:
+    """
+    Evaluates Phase 2 Combat Sports metrics: Punch Density, MMA Striking vs Grappling
+    Partitioning, SCAT6 Concussion Gate, and Tibial/Cervical Strain.
+    """
+    return evaluate_combat_session(payload)
+
 
