@@ -21,10 +21,7 @@ RED_FLAG_CONCUSSION_SYMPTOMS = {
 
 
 def calculate_punch_density(total_punches: int, round_minutes: float) -> float:
-    """
-    Computes punch density per minute.
-    Formula: Punch Density = Total Punches / Round Minutes
-    """
+    """Computes punch density per minute = Total Punches / Round Minutes."""
     if round_minutes <= 0.0 or total_punches <= 0:
         return 0.0
     return round(total_punches / round_minutes, 2)
@@ -36,14 +33,7 @@ def partition_mma_workload(
     rpe_strike: float = 7.0,
     rpe_grapple: float = 8.0,
 ) -> Tuple[float, float, float]:
-    """
-    Partitions MMA workload into standing striking vs ground grappling.
-    Grappling carries a 1.35x metabolic multiplier due to isometric contractions.
-    Formula:
-      Striking Load = standup_minutes * rpe_strike * 1.0
-      Grappling Load = mat_minutes * rpe_grapple * 1.35
-      Total = Striking Load + Grappling Load
-    """
+    """Partitions MMA workload with a 1.35x metabolic multiplier for ground grappling."""
     standup_min = max(0.0, standup_minutes)
     mat_min = max(0.0, mat_minutes)
 
@@ -58,10 +48,11 @@ def evaluate_concussion_scat6_gate(
     head_impacts: int,
     symptoms: List[str],
     has_headgear: bool = False,
+    rotational_impacts: int = 0,
 ) -> Dict[str, Any]:
     """
-    Evaluates traumatic brain injury / concussion risk using SCAT6 Return-to-Play criteria.
-    Red flag symptoms or >=15 hard head impacts trigger mandatory contact suspension.
+    Evaluates traumatic brain injury risk using SCAT6 criteria.
+    Rotational/angular impacts carry 1.5x higher midbrain shear weighting.
     """
     reported_lower = {s.lower().strip().replace(" ", "_") for s in symptoms if s}
     matched_red_flags = reported_lower.intersection(RED_FLAG_CONCUSSION_SYMPTOMS)
@@ -75,17 +66,17 @@ def evaluate_concussion_scat6_gate(
             "reason": f"Gejala neurologis terdeteksi ({', '.join(sorted(matched_red_flags))}). Wajib evaluasi medis dan larangan kontak fisik {rest_days} hari.",
         }
 
-    # Head impact volume thresholds
-    effective_impacts = head_impacts * (0.85 if has_headgear else 1.0)
+    linear_impacts = max(0, head_impacts - rotational_impacts)
+    effective_impacts = (linear_impacts * 1.0 + rotational_impacts * 1.5) * (0.85 if has_headgear else 1.0)
 
-    if effective_impacts >= 15:
+    if effective_impacts >= 15.0 or rotational_impacts >= 6:
         return {
             "gate_triggered": True,
             "action": "HIGH_HEAD_IMPACT_SUSPENSION_7_DAYS",
             "recommended_rest_days": 7,
-            "reason": f"Volume benturan kepala tinggi ({head_impacts} benturan). Wajib protokol istirahat kontak 7 hari untuk pemulihan mikrotrauma aksonal.",
+            "reason": f"Volume benturan kepala tinggi ({head_impacts} benturan, {rotational_impacts} rotasional). Wajib protokol istirahat kontak 7 hari untuk pemulihan mikrotrauma aksonal.",
         }
-    elif effective_impacts >= 8:
+    elif effective_impacts >= 8.0:
         return {
             "gate_triggered": False,
             "action": "MONITOR_POST_SPARRING_SYMPTOMS",
@@ -102,20 +93,24 @@ def evaluate_concussion_scat6_gate(
 
 
 def calculate_throw_kinetic_work(
-    partner_weight_kg: float,
-    throw_count: int,
+    partner_weight_kg: Optional[float] = None,
+    throw_count: int = 0,
     avg_lift_height_m: float = 1.2,
+    fallback_weight_kg: float = 75.0,
 ) -> float:
-    """
-    Computes kinetic work output for Judo/Sambo throws (Nage-Waza).
-    Formula: W = m * g * h * count / 1000 [kJ]
-    """
-    if partner_weight_kg <= 0 or throw_count <= 0:
+    """Computes kinetic work output for Judo/Sambo throws (Nage-Waza) in kJ."""
+    if throw_count <= 0:
         return 0.0
 
-    work_joules = partner_weight_kg * 9.81 * avg_lift_height_m * throw_count
-    work_kj = work_joules / 1000.0
-    return round(work_kj, 2)
+    if partner_weight_kg is None:
+        p_weight = fallback_weight_kg
+    elif partner_weight_kg <= 0:
+        return 0.0
+    else:
+        p_weight = partner_weight_kg
+
+    work_joules = p_weight * 9.81 * avg_lift_height_m * throw_count
+    return round(work_joules / 1000.0, 2)
 
 
 def calculate_tibial_impact_index(
@@ -123,10 +118,7 @@ def calculate_tibial_impact_index(
     has_shin_guards: bool = True,
     intensity_multiplier: float = 1.0,
 ) -> float:
-    """
-    Computes cumulative tibial bone stress for Muay Thai / Kickboxing / Pencak Silat.
-    Shin guards provide ~55% force attenuation (damping factor 0.45).
-    """
+    """Computes tibial bone stress. Shin guards provide ~55% force attenuation."""
     if kick_count <= 0:
         return 0.0
 
@@ -139,42 +131,52 @@ def evaluate_bjj_strain(
     mat_time_minutes: float,
     avg_rpe: float,
     inversion_minutes: float = 0.0,
+    is_gi: bool = False,
 ) -> Tuple[float, float]:
     """
     Computes BJJ grappling isometric workload and cervical/lumbar spine strain index.
-    Inversion / stacking carries high cervical risk.
+    Gi training carries 1.25x higher isometric forearm/grip flexor fatigue.
     """
     mat_min = max(0.0, mat_time_minutes)
     rpe = max(1.0, avg_rpe)
     inv_min = max(0.0, inversion_minutes)
 
-    workload = mat_min * rpe * 1.35
+    grip_factor = 1.25 if is_gi else 1.0
+    workload = mat_min * rpe * 1.35 * grip_factor
     cervical_strain = (inv_min * 2.5) + (mat_min * 0.2)
 
     return round(workload, 2), round(cervical_strain, 2)
 
 
 def evaluate_combat_session(session: CombatSessionInput) -> CombatSessionResponse:
-    """
-    Full Phase 2 Physiological Combat Sports Evaluator.
-    Computes Punch Density, MMA Partitioning, SCAT6 Concussion Gate, Tibial Load & Cervical Strain.
-    """
-    total_duration = sum(r.duration_minutes for r in session.rounds)
-    if total_duration <= 0.0:
-        total_duration = 1.0
+    """Full Phase 2 Physiological Combat Sports Evaluator with safeguards and Judo throw work."""
+    active_rounds = [r for r in session.rounds if r.duration_minutes > 0]
+    if not active_rounds:
+        return CombatSessionResponse(
+            total_duration_minutes=0.0,
+            total_combat_workload_au=0.0,
+            punch_density_per_min=0.0,
+            striking_load_au=0.0,
+            grappling_load_au=0.0,
+            concussion_gate_triggered=False,
+            concussion_action="CLEAR_ROUTINE_MONITORING",
+            tibial_stress_score=0.0,
+            cervical_strain_index=0.0,
+            recommended_rest_days=1,
+            coach_verdict="Tidak ada ronde pertarungan aktif yang tercatat. Beban kontak fisik nihil.",
+        )
 
-    total_punches = sum(r.punches_thrown for r in session.rounds)
-    total_kicks = sum(r.kicks_thrown for r in session.rounds)
-    total_head_impacts = sum(r.head_impacts_count for r in session.rounds)
-    total_mat_time = sum(r.mat_time_minutes for r in session.rounds)
-    total_inversion = sum(r.inversion_minutes for r in session.rounds)
+    total_duration = sum(r.duration_minutes for r in active_rounds)
+    total_punches = sum(r.punches_thrown for r in active_rounds)
+    total_kicks = sum(r.kicks_thrown for r in active_rounds)
+    total_head_impacts = sum(r.head_impacts_count for r in active_rounds)
+    total_mat_time = sum(r.mat_time_minutes for r in active_rounds)
+    total_inversion = sum(r.inversion_minutes for r in active_rounds)
+    total_takedowns = sum(r.takedowns_attempted for r in active_rounds)
 
-    # Compute punch density
     punch_density = calculate_punch_density(total_punches, total_duration)
-
-    # Workload partitioning
     standup_time = max(0.0, total_duration - total_mat_time)
-    avg_rpe = sum(r.rpe * r.duration_minutes for r in session.rounds) / total_duration if total_duration > 0 else 7.0
+    avg_rpe = sum(r.rpe * r.duration_minutes for r in active_rounds) / total_duration
 
     strike_load, grapple_load, total_workload = partition_mma_workload(
         standup_minutes=standup_time,
@@ -183,14 +185,12 @@ def evaluate_combat_session(session: CombatSessionInput) -> CombatSessionRespons
         rpe_grapple=avg_rpe,
     )
 
-    # Concussion Gate evaluation
     concussion_result = evaluate_concussion_scat6_gate(
         head_impacts=total_head_impacts,
         symptoms=session.symptoms_reported,
         has_headgear=session.has_headgear,
     )
 
-    # Tibial stress
     intensity_mult = avg_rpe / 7.0
     tibial_stress = calculate_tibial_impact_index(
         kick_count=total_kicks,
@@ -198,26 +198,32 @@ def evaluate_combat_session(session: CombatSessionInput) -> CombatSessionRespons
         intensity_multiplier=intensity_mult,
     )
 
-    # Cervical strain for grappling sports
     _, cervical_strain = evaluate_bjj_strain(
         mat_time_minutes=total_mat_time,
         avg_rpe=avg_rpe,
         inversion_minutes=total_inversion,
+        is_gi=True,
     )
 
-    # Prescriptive Rest Days
+    # Judo Nage-Waza Throw Workload
+    throw_work_kj = 0.0
+    if total_takedowns > 0:
+        p_weight = session.partner_weight_kg if (session.partner_weight_kg and session.partner_weight_kg > 0) else 75.0
+        throw_work_kj = calculate_throw_kinetic_work(p_weight, total_takedowns)
+
     rest_days = concussion_result["recommended_rest_days"]
     if total_workload > 600.0 and rest_days < 2:
         rest_days = 2
     if tibial_stress > 80.0 and rest_days < 3:
         rest_days = 3
 
-    # Coach verdict formulation
     verdict = (
         f"Sesi {session.sport_code}: Beban Total {total_workload:.0f} AU "
         f"(Striking {strike_load:.0f} AU, Grappling {grapple_load:.0f} AU). "
-        f"{concussion_result['reason']}"
     )
+    if throw_work_kj > 0:
+        verdict += f"Kerja Lemparan {throw_work_kj:.1f} kJ ({total_takedowns} bantingan). "
+    verdict += f"{concussion_result['reason']}"
 
     return CombatSessionResponse(
         total_duration_minutes=round(total_duration, 1),

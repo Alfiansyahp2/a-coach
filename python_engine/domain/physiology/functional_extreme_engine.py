@@ -32,16 +32,23 @@ def calculate_metcon_power_output(
 
 
 def calculate_finger_pulley_tension(
-    fingertip_force_n: float, crimp_lever_factor: float = 3.5, crimp_count: int = 0
+    fingertip_force_n: float,
+    crimp_lever_factor: float = 3.5,
+    crimp_count: int = 0,
+    athlete_weight_kg: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     Computes A2/A4 flexor tendon pulley tension: F_pulley = F_fingertip * Lever_factor.
     Closed crimp multiplies fingertip reaction force by 3.0 - 4.0x.
+    If sensor force is unlisted but crimps are performed, estimates force from body weight.
     """
     f_tip = max(0.0, float(fingertip_force_n))
+    c_count = max(0, int(crimp_count))
+    if f_tip == 0.0 and c_count > 0 and athlete_weight_kg is not None and athlete_weight_kg > 0:
+        f_tip = round(athlete_weight_kg * G_ACCEL * 0.40, 2)
+
     lever = max(1.0, float(crimp_lever_factor))
     f_pulley = round(f_tip * lever, 2)
-    c_count = max(0, int(crimp_count))
 
     if f_pulley >= 400.0 or (c_count >= 40 and f_pulley >= 300.0):
         risk = "HIGH"
@@ -154,6 +161,22 @@ def evaluate_functional_extreme_session(
     session: FunctionalExtremeSessionInput,
 ) -> FunctionalExtremeSessionResponse:
     """Master evaluator for Functional Fitness & Extreme Sports (Phase 5)."""
+    if session.duration_minutes <= 0.0:
+        return FunctionalExtremeSessionResponse(
+            total_duration_minutes=0.0,
+            sport_code=session.sport_code,
+            metcon_mean_power_watts=0.0,
+            transition_penalty_pct=0.0,
+            finger_pulley_peak_tension_n=0.0,
+            pulley_rupture_risk_level="LOW",
+            peak_ground_reaction_force_bw=0.0,
+            paddle_to_wave_ratio=0.0,
+            asymmetry_strain_index=0.0,
+            wrist_axial_compressive_load_au=0.0,
+            recommended_recovery_hours=0.0,
+            coach_verdict="Tidak ada aktivitas fungsional/ekstrem aktif tercatat. Beban fisik nihil.",
+        )
+
     # 1. Metcon Power Output
     est_work = session.total_work_joules
     if est_work <= 0.0 and session.sport_code == "SPORT_FUNCTIONAL_FITNESS":
@@ -164,7 +187,10 @@ def evaluate_functional_extreme_session(
 
     # 2. Climbing Tendon Pulley Tension & Bouldering GRF
     crimp_res = calculate_finger_pulley_tension(
-        session.fingertip_peak_force_n, session.crimp_lever_factor, session.crimp_grip_count
+        session.fingertip_peak_force_n,
+        session.crimp_lever_factor,
+        session.crimp_grip_count,
+        athlete_weight_kg=session.athlete_weight_kg,
     )
     bouldering_grf = evaluate_landing_peak_grf(session.avg_drop_height_m, session.athlete_weight_kg)
 

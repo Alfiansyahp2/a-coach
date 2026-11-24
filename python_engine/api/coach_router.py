@@ -17,6 +17,9 @@ from python_engine.domain.physiology.models import (
     RacquetPrecisionSessionResponse,
     FunctionalExtremeSessionInput,
     FunctionalExtremeSessionResponse,
+    HybridArbitrationInput,
+    HybridArbitrationResponse,
+    CaborTelemetryIngressInput,
 )
 from python_engine.domain.physiology.banister_engine import (
     calculate_pmc,
@@ -42,6 +45,10 @@ from python_engine.domain.physiology.racquet_precision_engine import (
 )
 from python_engine.domain.physiology.functional_extreme_engine import (
     evaluate_functional_extreme_session,
+)
+from python_engine.domain.physiology.systemic_arbiter import (
+    arbitrate_hybrid_athlete_schedule,
+    dispatch_cabor_telemetry,
 )
 
 router = APIRouter(prefix="/calculate/coach", tags=["Coach & Physiology"])
@@ -141,6 +148,28 @@ def compute_extreme_session_evaluation(
     Skateboard asymmetry strain index, and Gymnastics wrist axial compression.
     """
     return evaluate_functional_extreme_session(payload)
+
+
+@router.post("/hybrid-arbitration", response_model=HybridArbitrationResponse)
+def compute_hybrid_schedule_arbitration(
+    payload: HybridArbitrationInput,
+) -> HybridArbitrationResponse:
+    """
+    Evaluates Phase 6 Hybrid Athlete Schedule Arbitration:
+    AMPK vs mTORC1 molecular interference, cumulative daily CNS exhaustion index,
+    and vulnerable joint biomechanical collisions.
+    """
+    return arbitrate_hybrid_athlete_schedule(payload)
+
+
+@router.post("/cabor-telemetry")
+def compute_universal_cabor_telemetry(payload: CaborTelemetryIngressInput):
+    """
+    Universal Ingress Dispatcher for all 33 sports:
+    Routes incoming telemetry to its specialized physiological engine based on sport_code.
+    """
+    return dispatch_cabor_telemetry(payload)
+
 
 
 

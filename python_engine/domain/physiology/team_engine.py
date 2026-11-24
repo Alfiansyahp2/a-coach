@@ -9,16 +9,25 @@ from typing import List, Dict, Any, Optional, Tuple
 from python_engine.domain.physiology.models import TeamSessionInput, TeamSessionResponse
 
 
-def calculate_catapult_player_load(accel_series: List[List[float]]) -> float:
-    """Computes Catapult Tri-Axial PlayerLoad (AU)."""
+def calculate_catapult_player_load(
+    accel_series: List[List[float]],
+    sampling_rate_hz: float = 100.0,
+) -> float:
+    """
+    Computes Catapult Tri-Axial PlayerLoad (AU).
+    If wearable accelerometer samples at a lower rate (e.g. 10 Hz GPS),
+    sampling rate scaling preserves comparable cumulative impulse.
+    """
     if not accel_series or len(accel_series) < 2:
         return 0.0
+
+    rate_factor = math.sqrt(100.0 / max(1.0, sampling_rate_hz)) if sampling_rate_hz != 100.0 else 1.0
 
     total_load = 0.0
     for t in range(1, len(accel_series)):
         prev, curr = accel_series[t - 1], accel_series[t]
         dx, dy, dz = curr[0] - prev[0], curr[1] - prev[1], curr[2] - prev[2]
-        total_load += math.sqrt((dy**2 + dx**2 + dz**2) / 100.0)
+        total_load += math.sqrt((dy**2 + dx**2 + dz**2) / 100.0) * rate_factor
 
     return round(total_load, 2)
 
@@ -84,9 +93,9 @@ def evaluate_hamstring_strain_risk(
             return ("MODERATE", "Volume sprint tinggi, pastikan pendinginan rantai posterior memadai.")
         return ("LOW", "Volume sprint dalam rentang adaptif toleransi hamstring.")
 
-    if sprint_distance_m > 500.0:
-        return ("HIGH", "Volume sprint absolut ekstrem (>500m) tanpa data baseline 4 pekan.")
-    if sprint_distance_m > 250.0:
+    if sprint_distance_m > 300.0:
+        return ("HIGH", "Paparan sprint akut tinggi (>300m) tanpa fondasi kronis 4 pekan. Risiko cedera eksentrik tinggi.")
+    if sprint_distance_m > 150.0:
         return ("MODERATE", "Volume sprint moderat.")
     return ("LOW", "Volume sprint rendah dan aman.")
 
@@ -97,7 +106,7 @@ def evaluate_jump_shock_load(
     single_leg_count: int = 0,
     default_jump_count: int = 0,
 ) -> Dict[str, Any]:
-    """Computes landing shock energy (kJ) and flags patellar warning if total jumps > 60."""
+    """Computes landing shock energy (kJ) and flags patellar warning if total jumps > 60 or > 1500 kJ."""
     g = 9.80665
     heights = jump_heights_m or []
     total_jumps = len(heights) if heights else max(0, default_jump_count)
@@ -119,7 +128,7 @@ def evaluate_jump_shock_load(
         total_joules += bilateral * (athlete_weight_kg * g * 0.40 * 1.0)
         total_joules += unilateral * (athlete_weight_kg * g * 0.40 * 1.8)
 
-    patellar_warn = total_jumps > 60
+    patellar_warn = total_jumps > 60 or (total_joules >= 200000.0)
     return {
         "total_jumps": total_jumps,
         "jump_shock_load_kj": round(total_joules / 1000.0, 2),
@@ -181,6 +190,25 @@ def evaluate_hockey_lumbar_strain(flexion_min: float, duration_min: float) -> Di
 
 def evaluate_team_session(session: TeamSessionInput) -> TeamSessionResponse:
     """Master evaluator for Team, Field & Court Sports (Phase 3)."""
+    if session.duration_minutes <= 0.0:
+        return TeamSessionResponse(
+            total_player_load=0.0,
+            player_load_per_minute=0.0,
+            total_distance_meters=0.0,
+            hsr_distance_meters=0.0,
+            sprint_distance_meters=0.0,
+            hamstring_strain_risk="LOW",
+            jump_shock_load_kj=0.0,
+            patellar_overload_warning=False,
+            cmj_decay_percentage=None,
+            neuromuscular_fatigue_level="FRESH",
+            collision_impact_score=0.0,
+            quad_eccentric_shock_au=0.0,
+            lumbar_strain_index=0.0,
+            recommended_recovery_hours=0.0,
+            coach_verdict="Tidak ada aktivitas beregu aktif tercatat. Beban fisik nihil.",
+        )
+
     # 1. PlayerLoad
     if session.triaxial_accel_series and len(session.triaxial_accel_series) >= 2:
         total_pl = calculate_catapult_player_load(session.triaxial_accel_series)
