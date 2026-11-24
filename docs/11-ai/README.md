@@ -23,7 +23,8 @@ docs/11-ai/
 ├── 06-AUDIT_VALIDASI_ILMIAH_DAN_FILTER_ANTI_HALUSINASI.md <- Filter epistemologis anti-AI-slop & Grounded Indicator Protocol
 ├── 07-ROADMAP_IMPLEMENTASI_BERTAHAP.md                   <- Roadmap implementasi 8 fase terperinci (Gantt chart & exit criteria)
 ├── 08-SPESIFIKASI_ARSITEKTUR_CLEAN_VERTICAL_SLICE_CABOR.md <- Spesifikasi arsitektur Clean Vertical Slice mandiri per cabor
-└── 09-SPESIFIKASI_FORMULA_DAN_KALKULASI_MATEMATIS_33_CABOR.md <- Spesifikasi formula deterministik & matematika fisiologis 33 cabor
+├── 09-SPESIFIKASI_FORMULA_DAN_KALKULASI_MATEMATIS_33_CABOR.md <- Spesifikasi formula deterministik & matematika fisiologis 33 cabor
+└── 10-SPESIFIKASI_UX_SELEKSI_CABOR_DINAMIS_DAN_TELEMETRI_INSTAN.md <- Spesifikasi UX seleksi dinamis & telemetri instan 33 cabor (Dynamic Repertoire)
 ```
 
 ---
@@ -84,3 +85,10 @@ docs/11-ai/
 - **Parameter Kinetika & Fisiologis Eksak**: Menjabarkan metrik spesifik seperti Coggan NP/IF/TSS, SWOLF, CSS, Brzycki 1RM, Sheiko INOL, Catapult Tri-Axial PlayerLoad, Bradley HSR, Punch Density, Arrow Draw Weight Volume, dan Finger Pulley A2/A4 Tension.
 - **Arbitrase Atlet Hibrida**: Menetapkan batasan molekuler jeda $\ge 6$ jam AMPK vs mTORC1, gerbang deplesi neuromuskular SSP (CNS drain), dan matriks tabrakan sendi anatomis.
 - **Cetak Biru Porting Python**: Menjadi acuan spesifikasi teknis untuk implementasi modul deterministik baru pada `python_engine/domain/physiology/`.
+
+### 10. [Spesifikasi UX Seleksi Cabor Dinamis & Telemetri Instan](./10-SPESIFIKASI_UX_SELEKSI_CABOR_DINAMIS_DAN_TELEMETRI_INSTAN.md)
+- **Mengatasi Paradoks 2 Cabor vs 33 Formula**: Menjaga antarmuka tetap bersih (*zero visual clutter*) untuk atlet yang saat ini aktif di 2 cabor (Lari & Sepeda), tanpa membebani feed dengan 31 tab kosong.
+- **Dynamic Athlete Repertoire**: Filter feed dan ringkasan dashboard beradaptasi secara dinamis hanya menampilkan cabor dengan data riil, disertai tombol pencarian cabor baru `[ + Tambah Cabor ]`.
+- **Sport Vault & Status Formula Siap**: Menampilkan katalog 33 cabor lintas 6 klaster di mana setiap cabor memuat badge `🟢 Formula Siap Pakai` serta pratinjau kalkulasi otomatis yang siap diproses oleh Python Engine.
+- **Zero-Friction Ingress**: Atlet hanya memasukkan 2–3 data fisik mentah esensial (misal: beban dan reps), sementara mesin Python backend secara instan mengeksekusi perhitungan 1RM, Tonase, dan Sheiko INOL dengan *live preview teaser* langsung pada modal input.
+- **Polymorphic Detail View**: Mengadaptasi halaman detail aktivitas secara otomatis sesuai klaster fisiologis cabor (menyembunyikan peta GPS kosong dan menggantinya dengan kartu telemetri spesifik domain cabor).
