@@ -10,6 +10,8 @@ import {
   Activity,
   UserCircle,
   ClipboardCheck,
+  Layers,
+  PlusCircle,
 } from "lucide-react";
 
 export interface NavSection {
@@ -22,6 +24,7 @@ export interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   getBadge?: (ctx: SidebarDynamicContext) => { text: string; color: "amber" | "green" | "muted" | "brand" } | null;
+  isVaultTrigger?: boolean;
 }
 
 export interface SidebarDynamicContext {
@@ -57,6 +60,13 @@ export const navSections: NavSection[] = [
           color: "muted",
         }),
       },
+      {
+        name: "Direktori 33 Cabor",
+        href: "#sport-vault",
+        icon: Layers,
+        getBadge: () => ({ text: "33", color: "brand" }),
+        isVaultTrigger: true,
+      },
     ],
   },
   {
@@ -88,6 +98,13 @@ export const navSections: NavSection[] = [
         href: "/goals",
         icon: Target,
         getBadge: (ctx) => ({ text: String(ctx.goalsCount || 4), color: "muted" }),
+      },
+      {
+        name: "+ Aktifkan Coach",
+        href: "#sport-vault",
+        icon: PlusCircle,
+        getBadge: () => ({ text: "VAULT", color: "green" }),
+        isVaultTrigger: true,
       },
     ],
   },

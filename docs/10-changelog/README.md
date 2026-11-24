@@ -2,7 +2,7 @@
 
 **Status:** CONFIRMED & AUDITED  
 **Repository:** `project_strava` (Personal Sports Training & Performance Platform)  
-**Total Changelog Records:** 110 Berkas Dokumentasi Aktif  
+**Total Changelog Records:** 111 Berkas Dokumentasi Aktif  
 **Owner:** Principal UI/UX Architect & Lead Telemetry Engineer  
 
 ---
@@ -35,10 +35,12 @@ docs/10-changelog/
 
 ## 2. Katalog Domain & Riwayat Iterasi
 
-### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 38 Berkas
+### A. Antarmuka Atletik & Desain Sistem ([`feat/ui/`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/)) — 39 Berkas
 
 Mencatat evolusi visual antarmuka dari fase awal hingga kalender multi-model & telemetri multi-sport:
 
+- **Dynamic Athlete Repertoire, Sport Vault Modal 33 Cabor, & Integrasi Sidebar Navigation**:
+  - [`2026-11-24_13-40-00_feat-dynamic-athlete-repertoire-sport-vault-modal-and-sidebar-integration.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-24_13-40-00_feat-dynamic-athlete-repertoire-sport-vault-modal-and-sidebar-integration.md) — Implementasi arsitektur UX *Dynamic Athlete Repertoire* untuk atlet yang saat ini aktif di 2 cabor (Lari & Sepeda) tanpa polusi 31 tab kosong di feed. Memperkenalkan modal katalog `SportVaultModal` dengan status `🟢 Formula Siap` untuk 33 cabor dunia, filter adaptif feed dengan tombol `[ + Cabor (33) ]`, serta integrasi navigasi `Direktori 33 Cabor [33]` dan `+ Aktifkan Coach [VAULT]` di sidebar tanpa reload halaman.
 - **Mesin Icon Khusus 33 Cabang Olahraga Sistem (Specialized Sport Icons Engine)**:
   - [`2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md`](file:///c:/Users/MyBook%20Hype%20AMD/OneDrive/Documents/kerja/_code/project_strava/docs/10-changelog/feat/ui/2026-11-20_13-35-00_feat-specialized-sport-icons-for-33-cabor-and-reusable-icon-engine.md) — Implementasi komponen modular `<SportIcon />` dengan pemetaan icon unik & presisi untuk masing-masing dari 33 cabor dunia (mengeliminasi penggunaan icon sepeda/dumbbell generik pada cabor lain), 8 icon SVG buatan tangan, fallback kluster otomatis, dan test suite verifikasi 42 checks.
 - **Penyelarasan Pemilih Cabor dengan 33 Cabor Resmi Sistem**:
