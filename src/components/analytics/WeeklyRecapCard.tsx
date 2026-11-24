@@ -12,7 +12,7 @@ import {
   HeartPulse,
 } from "lucide-react";
 import { WeeklyActivityAndInjuryRecap } from "@/lib/domain/analytics/weeklyRecapTypes";
-import { formatDateOnly } from "@/lib/formatters";
+import { formatDateOnly } from "@/lib/shared/formatters";
 import { WeeklyRecapDetailModal } from "./WeeklyRecapDetailModal";
 import { WeeklyRecapWorkloadSection } from "./WeeklyRecapWorkloadSection";
 

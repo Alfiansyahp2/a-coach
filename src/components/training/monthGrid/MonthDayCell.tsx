@@ -3,7 +3,7 @@
 import React from "react";
 import { ScheduledWorkout, Activity } from "@/types";
 import { MonthGridDay } from "./monthCalendarBuilder";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 import { CheckCircle2, Bike, Footprints, ShieldAlert, XCircle, Moon, Zap } from "lucide-react";
 import { CalendarDayQuickAction } from "../cards/CalendarDayQuickAction";
 

@@ -12,7 +12,7 @@ import {
   speedMpsToPace,
   speedMpsToKmh,
   estimateHeartRateZones,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
 import { ActivityDetailHeader } from "@/components/activity/detail/ActivityDetailHeader";
 import { ActivityDetailHero } from "@/components/activity/detail/ActivityDetailHero";
 import { ActivityGpsTrackMap } from "@/components/activity/detail/ActivityGpsTrackMap";

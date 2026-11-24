@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { User } from "@/types";
 import { navSections, SidebarDynamicContext } from "./sidebar/navConfig";
+import { SportVaultModal } from "@/components/sports/SportVaultModal";
 
 export interface AppSidebarProps {
   user?: User | null;
@@ -22,6 +23,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [activitiesCount, setActivitiesCount] = useState<number>(initialActivitiesCount || 37);
   const [stravaConnected, setStravaConnected] = useState<boolean>(true);
   const [goalsCount, setGoalsCount] = useState<number>(4);
@@ -160,11 +162,18 @@ export function AppSidebar({
                 const Icon = item.icon;
                 const badge = item.getBadge ? item.getBadge(dynamicContext) : null;
 
+                const isVault = Boolean(item.isVaultTrigger);
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all group relative ${
+                    onClick={(e) => {
+                      if (isVault) {
+                        e.preventDefault();
+                        setIsVaultOpen(true);
+                      }
+                    }}
+                    className={`flex items-center gap-3 px-2.5 py-2 rounded-lg text-xs font-medium transition-all group relative cursor-pointer ${
                       isActive
                         ? "bg-[var(--color-surface-muted)] text-[var(--color-text-primary)] font-semibold shadow-xs"
                         : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-muted)]/60"
@@ -224,6 +233,15 @@ export function AppSidebar({
           </div>
         )}
       </div>
+
+      <SportVaultModal
+        isOpen={isVaultOpen}
+        onClose={() => setIsVaultOpen(false)}
+        onSelectSport={(_sport) => {
+          setIsVaultOpen(false);
+          window.location.href = "/activities";
+        }}
+      />
     </aside>
   );
 }

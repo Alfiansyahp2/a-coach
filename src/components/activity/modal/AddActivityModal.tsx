@@ -146,6 +146,8 @@ export function AddActivityModal({
                   setDescription={form.setDescription}
                   calculatedSpeedKmh={form.calculatedSpeedKmh}
                   calculatedPaceMinKm={form.calculatedPaceMinKm}
+                  sportSpecificData={form.sportSpecificData}
+                  setSportSpecificData={form.setSportSpecificData}
                   isSubmitting={form.isSubmitting}
                   isParsingImage={form.isParsingImage}
                   onNextStep={form.handleNextStep}

@@ -9,16 +9,21 @@ import {
   formatDate,
   speedMpsToPace,
   speedMpsToKmh,
-} from "@/lib/formatters";
+} from "@/lib/shared/formatters";
+import {
+  extractActiveSports,
+  ActiveSportSummary,
+} from "@/lib/domain/sports/sportRepertoireService";
+import { findSystemSport } from "@/lib/domain/sports/systemSportsRegistry";
+import { SportIcon } from "@/components/sports/SportIcon";
+import { SportVaultModal } from "@/components/sports/SportVaultModal";
 import {
   Activity as ActivityIcon,
   ChevronRight,
   Heart,
-  Navigation,
   Search,
-  Bike,
-  Footprints,
   Mountain,
+  Plus,
 } from "lucide-react";
 
 interface ActivityFeedProps {
@@ -26,40 +31,32 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
-  const [selectedSport, setSelectedSport] = useState<"All" | "Run" | "Ride">("All");
+  const [selectedSport, setSelectedSport] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [displayCount, setDisplayCount] = useState(8);
+  const [isVaultOpen, setIsVaultOpen] = useState(false);
 
-  const runsCount = useMemo(
-    () => activities.filter((a) => a.sport_type.toLowerCase().includes("run")).length,
-    [activities]
-  );
-  const ridesCount = useMemo(
-    () =>
-      activities.filter(
-        (a) =>
-          a.sport_type.toLowerCase().includes("ride") ||
-          a.sport_type.toLowerCase().includes("cycl")
-      ).length,
-    [activities]
-  );
+  const activeSports = useMemo(() => extractActiveSports(activities), [activities]);
 
   const filteredActivities = useMemo(() => {
     return activities.filter((act) => {
-      const matchesSport =
-        selectedSport === "All"
-          ? true
-          : selectedSport === "Run"
-          ? act.sport_type.toLowerCase().includes("run")
-          : act.sport_type.toLowerCase().includes("ride") ||
-            act.sport_type.toLowerCase().includes("cycl");
+      let matchesSport = true;
+      if (selectedSport !== "All") {
+        const matched = findSystemSport(act.sport_type);
+        if (matched) {
+          matchesSport =
+            matched.code === selectedSport ||
+            matched.aliases.some((a) => a.toLowerCase() === selectedSport.toLowerCase());
+        } else {
+          matchesSport = act.sport_type.toLowerCase().includes(selectedSport.toLowerCase());
+        }
+      }
 
       const matchesSearch =
         searchQuery.trim() === ""
           ? true
           : act.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             act.sport_type.toLowerCase().includes(searchQuery.toLowerCase());
-
       return matchesSport && matchesSearch;
     });
   }, [activities, selectedSport, searchQuery]);
@@ -80,15 +77,15 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
             </h3>
           </div>
           <p className="text-[11px] text-[var(--color-text-secondary)] font-mono pt-1">
-            Synchronized Strava Telemetry • {activities.length} Sesi Terdaftar
+            Dynamic Athlete Repertoire • {activities.length} Sesi Terdaftar
           </p>
         </div>
 
-        {/* Sport Type Segmented Controls */}
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] self-start sm:self-auto text-xs font-mono">
+        {/* Dynamic Sport Segmented Controls */}
+        <div className="flex flex-wrap items-center gap-1 p-1 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] self-start sm:self-auto text-xs font-mono">
           <button
             onClick={() => setSelectedSport("All")}
-            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+            className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
               selectedSport === "All"
                 ? "bg-[var(--color-surface-card)] text-[var(--color-text-primary)] font-bold shadow-xs border border-[var(--color-border)]"
                 : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
@@ -96,27 +93,33 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
           >
             Semua ({activities.length})
           </button>
+
+          {activeSports.map((sport: ActiveSportSummary) => {
+            const isSelected = selectedSport === sport.code;
+            return (
+              <button
+                key={sport.code}
+                onClick={() => setSelectedSport(sport.code)}
+                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isSelected
+                    ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] font-bold shadow-xs border border-[var(--color-border)]"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                }`}
+              >
+                <SportIcon sportCode={sport.code} cluster={sport.cluster} className="w-3.5 h-3.5" />
+                <span>{sport.shortLabel} ({sport.count})</span>
+              </button>
+            );
+          })}
+
           <button
-            onClick={() => setSelectedSport("Run")}
-            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
-              selectedSport === "Run"
-                ? "bg-[var(--color-surface-card)] text-[var(--color-running)] font-bold shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-running)]"
-            }`}
+            type="button"
+            onClick={() => setIsVaultOpen(true)}
+            className="px-2 py-1 rounded-md text-xs font-bold text-[var(--color-cycling)] hover:bg-[var(--color-cycling)]/15 border border-dashed border-[var(--color-cycling)]/40 flex items-center gap-1 transition-all cursor-pointer"
+            title="Buka Sport Vault (33 Cabor Dunia)"
           >
-            <Footprints className="w-3.5 h-3.5 text-[var(--color-running)]" />
-            <span>Run ({runsCount})</span>
-          </button>
-          <button
-            onClick={() => setSelectedSport("Ride")}
-            className={`px-3 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1.5 ${
-              selectedSport === "Ride"
-                ? "bg-[var(--color-surface-card)] text-[var(--color-cycling)] font-bold shadow-xs border border-[var(--color-border)]"
-                : "text-[var(--color-text-secondary)] hover:text-[var(--color-cycling)]"
-            }`}
-          >
-            <Bike className="w-3.5 h-3.5 text-[var(--color-cycling)]" />
-            <span>Ride ({ridesCount})</span>
+            <Plus className="w-3 h-3" />
+            <span>Cabor (33)</span>
           </button>
         </div>
       </div>
@@ -128,13 +131,13 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Cari aktivitas (misal: Zone 2, Recovery, Century, Tempo)..."
+          placeholder="Cari aktivitas (misal: Zone 2, Recovery, Century, Tempo, Squat)..."
           className="w-full pl-10 pr-12 py-2 rounded-lg bg-[var(--color-surface-muted)] border border-[var(--color-border)] text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-text-secondary)] transition-all font-mono"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] uppercase font-mono px-2 py-0.5 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)]"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] uppercase font-mono px-2 py-0.5 rounded-md bg-[var(--color-surface-card)] border border-[var(--color-border)] cursor-pointer"
           >
             Clear
           </button>
@@ -143,16 +146,22 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
 
       {/* Activity Cards List */}
       {visibleActivities.length === 0 ? (
-        <div className="py-8 text-center text-xs text-[var(--color-text-muted)] font-mono border border-dashed border-[var(--color-border)] rounded-xl bg-[var(--color-surface-muted)]/30">
-          Tidak ada aktivitas yang sesuai dengan kata kunci pencarian.
+        <div className="py-8 text-center text-xs text-[var(--color-text-muted)] font-mono border border-dashed border-[var(--color-border)] rounded-xl bg-[var(--color-surface-muted)]/30 space-y-1">
+          <p>Tidak ada aktivitas yang sesuai dengan filter atau kata kunci.</p>
+          {selectedSport !== "All" && (
+            <button
+              onClick={() => setSelectedSport("All")}
+              className="text-[var(--color-cycling)] hover:underline cursor-pointer font-bold text-[11px]"
+            >
+              Reset filter ke Semua Sesi
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
           {visibleActivities.map((act) => {
+            const matched = findSystemSport(act.sport_type);
             const isRun = act.sport_type.toLowerCase().includes("run");
-            const isRide =
-              act.sport_type.toLowerCase().includes("ride") ||
-              act.sport_type.toLowerCase().includes("cycl");
             const velocity = isRun
               ? speedMpsToPace(act.average_speed_mps)
               : speedMpsToKmh(act.average_speed_mps);
@@ -167,34 +176,18 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                 <div className="flex items-center gap-3 min-w-0">
                   {act.raw_summary_polyline ? (
                     <div className="w-11 h-11 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] flex items-center justify-center p-1 shrink-0 overflow-hidden group-hover:border-[var(--color-text-secondary)] transition-colors">
-                      <img
-                        src={act.raw_summary_polyline}
-                        alt="GPS Track Route"
-                        className="w-full h-full object-contain filter brightness-110 group-hover:scale-105 transition-transform duration-200"
-                      />
+                      <img src={act.raw_summary_polyline} alt="GPS Track" className="w-full h-full object-contain filter brightness-110 group-hover:scale-105 transition-transform duration-200" />
                     </div>
                   ) : (
                     <div className="w-11 h-11 rounded-lg bg-[var(--color-surface-card)] border border-[var(--color-border)] flex items-center justify-center shrink-0 text-[var(--color-text-muted)] group-hover:text-[var(--color-text-primary)] transition-colors">
-                      {isRide ? (
-                        <Bike className="w-5 h-5 text-[var(--color-cycling)]" />
-                      ) : isRun ? (
-                        <Footprints className="w-5 h-5 text-[var(--color-running)]" />
-                      ) : (
-                        <Navigation className="w-5 h-5" />
-                      )}
+                      <SportIcon sportCode={matched?.code || act.sport_type} cluster={matched?.cluster} className="w-5 h-5 text-[var(--color-cycling)]" />
                     </div>
                   )}
 
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`text-[9.5px] uppercase font-mono px-2 py-0.5 rounded-md font-bold tracking-wider border ${
-                          isRun
-                            ? "bg-[var(--color-running)]/10 text-[var(--color-running)] border-[var(--color-running)]/30"
-                            : "bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30"
-                        }`}
-                      >
-                        {act.sport_type}
+                      <span className="text-[9.5px] uppercase font-mono px-2 py-0.5 rounded-md font-bold tracking-wider border bg-[var(--color-cycling)]/10 text-[var(--color-cycling)] border-[var(--color-cycling)]/30">
+                        {matched?.shortLabel || act.sport_type}
                       </span>
                       <h4 className="text-xs font-semibold text-[var(--color-text-primary)] group-hover:underline truncate">
                         {act.name}
@@ -233,14 +226,10 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                 <div className="flex items-center gap-3.5 shrink-0 font-mono">
                   <div className="text-right">
                     <div className="text-sm font-bold font-tabular text-[var(--color-text-primary)] tracking-tight">
-                      {formatDistance(act.distance_meters)}
+                      {act.distance_meters > 0 ? formatDistance(act.distance_meters) : "Non-Distance"}
                     </div>
-                    <div
-                      className={`text-[11px] font-semibold font-tabular ${
-                        isRun ? "text-[var(--color-running)]" : "text-[var(--color-cycling)]"
-                      }`}
-                    >
-                      {velocity}
+                    <div className="text-[11px] font-semibold font-tabular text-[var(--color-cycling)]">
+                      {act.distance_meters > 0 ? velocity : `${Math.round(act.moving_time_seconds / 60)} mnt`}
                     </div>
                   </div>
 
@@ -270,20 +259,28 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
           {displayCount < filteredActivities.length ? (
             <button
               onClick={() => setDisplayCount(filteredActivities.length)}
-              className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] transition-all text-xs font-mono shadow-xs"
+              className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-muted)] hover:bg-[var(--color-surface-card)] text-[var(--color-text-primary)] border border-[var(--color-border)] transition-all text-xs font-mono shadow-xs cursor-pointer"
             >
               Lihat Semua ({filteredActivities.length})
             </button>
           ) : (
             <button
               onClick={() => setDisplayCount(8)}
-              className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] transition-all text-xs font-mono shadow-xs"
+              className="px-3.5 py-1.5 rounded-lg bg-[var(--color-surface-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] border border-[var(--color-border)] transition-all text-xs font-mono shadow-xs cursor-pointer"
             >
               Kecilkan ke 8 Sesi
             </button>
           )}
         </div>
       )}
+
+      {/* Sport Vault Modal Component */}
+      <SportVaultModal
+        isOpen={isVaultOpen}
+        onClose={() => setIsVaultOpen(false)}
+        activeSportCodes={activeSports.map((s) => s.code)}
+        onSelectSport={(item) => setSelectedSport(item.code)}
+      />
     </div>
   );
 }

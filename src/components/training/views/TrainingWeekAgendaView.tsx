@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { ScheduledWorkout, Activity, AuthoritativeAthleteHealthContext } from "@/types";
 import { CalendarWeek } from "../calendarBuilder";
-import { formatDistance, formatDuration } from "@/lib/formatters";
+import { formatDistance, formatDuration } from "@/lib/shared/formatters";
 import { CalendarDayQuickAction } from "../cards/CalendarDayQuickAction";
 import {
   ChevronLeft,

@@ -7,6 +7,7 @@ import {
   FolderKanban,
 } from "lucide-react";
 import { Activity } from "@/types";
+import { MultiSportTelemetryBadge } from "@/components/activity/MultiSportTelemetryBadge";
 
 interface ActivityDetailHeaderProps {
   activity: Activity;
@@ -44,15 +45,11 @@ export function ActivityDetailHeader({
           <div className="h-4 w-px bg-[var(--color-border)]" />
 
           <div className="flex items-center gap-2">
-            <span
-              className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded-full font-bold ${
-                isRun
-                  ? "bg-[var(--color-running)]/15 text-[var(--color-running)] border border-[var(--color-running)]/30"
-                  : "bg-[var(--color-cycling)]/15 text-[var(--color-cycling)] border border-[var(--color-cycling)]/30"
-              }`}
-            >
-              {activity.sport_type}
-            </span>
+            <MultiSportTelemetryBadge
+              sportType={activity.sport_type}
+              distanceKm={activity.distance_meters / 1000}
+              durationMinutes={activity.moving_time_seconds / 60}
+            />
             <span className="text-xs font-mono text-[var(--color-text-muted)] font-tabular">
               #{activity.strava_activity_id}
             </span>

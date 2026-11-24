@@ -11,7 +11,7 @@ import {
   getDatabaseStatus,
   getActivities,
 } from "@/lib/db";
-import { formatDateOnly } from "@/lib/formatters";
+import { formatDateOnly } from "@/lib/shared/formatters";
 import { ScheduleTrainingHub } from "@/components/training/ScheduleTrainingHub";
 import { AppShell } from "@/components/layout/AppShell";
 import { RefreshCw } from "lucide-react";
